@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261013T201430Z-5164",
-    "started_at": "2026-10-13T20:14:30Z",
+    "run_id": "20261013T204147Z-ed6d",
+    "started_at": "2026-10-13T20:41:47Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-13T20:15:22Z",
+    "finished_at": "2026-10-13T20:44:08Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "4f88868d3c14a198723b9d6ad7e62a8d2d2bfd8e",
-    "at": "2026-10-13T20:14:30Z"
+    "target_ref": "80adf039b422d4c7d4824a545b5e98a5bb034eb8",
+    "at": "2026-10-13T20:41:47Z"
   },
   "last_reported": {
-    "run_id": "20261013T201430Z-5164",
+    "run_id": "20261013T204147Z-ed6d",
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
     "source_blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0",
-    "target_ref": "4f88868d3c14a198723b9d6ad7e62a8d2d2bfd8e",
-    "logical_key": "78b2e68a7948046f",
+    "target_ref": "80adf039b422d4c7d4824a545b5e98a5bb034eb8",
+    "logical_key": "495b140494d69de7",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-13T20:15:22Z",
-    "report": "daily/2026-10-14/20261013T201430Z-5164.md",
-    "artifact_sha256": "34b5a819e713e5b5d47ee5cc1e4ce559602566d324fb2f5c10530362b49a42b3",
+    "completed_at": "2026-10-13T20:44:08Z",
+    "report": "daily/2026-10-14/20261013T204147Z-ed6d.md",
+    "artifact_sha256": "d50f1fc83c3e5f95492c59e0fb1707f37c4b10dc4c2db21b0804051a3ddd404e",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -50,6 +50,10 @@
       "TGT-TYPES"
     ],
     "tests": [
+      "Tests\\Feature\\Access\\ChannelScopeTest::test_directory_holds_the_eight_legacy_channels_in_order",
+      "Tests\\Feature\\Access\\ChannelScopeTest::test_every_role_channel_exists_and_unknown_channels_are_rejected",
+      "Tests\\Feature\\Access\\ChannelScopeTest::test_filter_follows_legacy_get_channel_filter",
+      "Tests\\Feature\\Access\\ChannelScopeTest::test_queries_return_only_the_channels_a_user_may_see",
       "Tests\\Feature\\Access\\PageAccessTest::test_director_menu_has_21_pages_and_no_techcards",
       "Tests\\Feature\\Access\\PageAccessTest::test_guest_cannot_open_any_page",
       "Tests\\Feature\\Access\\PageAccessTest::test_inactive_user_loses_access_immediately",
@@ -101,6 +105,15 @@
       "Tests\\Feature\\Catalog\\ProductTest::test_page_lists_active_products_with_rights",
       "Tests\\Feature\\Catalog\\ProductTest::test_roles_without_catalog_cannot_read_or_write",
       "Tests\\Feature\\Catalog\\ProductTest::test_validation_messages_repeat_legacy_texts",
+      "Tests\\Feature\\Customers\\CustomerTest::test_channel_bound_account_sees_and_changes_only_its_channel",
+      "Tests\\Feature\\Customers\\CustomerTest::test_created_customer_gets_office_channel_author_and_audit",
+      "Tests\\Feature\\Customers\\CustomerTest::test_head_of_salons_must_add_a_customer_from_a_salon",
+      "Tests\\Feature\\Customers\\CustomerTest::test_legal_form_in_the_name_is_recognised_next_to_cyrillic_letters",
+      "Tests\\Feature\\Customers\\CustomerTest::test_roles_without_the_page_cannot_read_or_write",
+      "Tests\\Feature\\Customers\\CustomerTest::test_second_editor_gets_a_conflict_instead_of_overwriting",
+      "Tests\\Feature\\Customers\\CustomerTest::test_tab_lists_office_customers_once_per_name_in_database_order",
+      "Tests\\Feature\\Customers\\CustomerTest::test_update_changes_exactly_the_chosen_customer_even_with_the_same_name",
+      "Tests\\Feature\\Customers\\CustomerTest::test_validation_messages_repeat_legacy_texts",
       "Tests\\Feature\\ExampleTest::test_guest_is_redirected_to_login",
       "Tests\\Feature\\ExampleTest::test_health_endpoint_is_up",
       "Tests\\Feature\\ExampleTest::test_logout_ends_session",
@@ -121,6 +134,9 @@
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_top_level_category_and_zero_sort_order",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_update_keeps_code_and_level_and_records_changes",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_validation_messages_repeat_legacy_texts",
+      "Tests\\Feature\\Legacy\\CustomerImportTest::test_import_is_idempotent",
+      "Tests\\Feature\\Legacy\\CustomerImportTest::test_imports_every_row_keeping_fields_channels_and_dates",
+      "Tests\\Feature\\Legacy\\CustomerImportTest::test_rows_the_new_schema_cannot_keep_change_nothing",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_invalid_legacy_data_changes_nothing",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_only_migrated_modules_can_be_imported",
@@ -143,15 +159,15 @@
   },
   "last_verified": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "4f88868d3c14a198723b9d6ad7e62a8d2d2bfd8e",
+    "target_ref": "80adf039b422d4c7d4824a545b5e98a5bb034eb8",
     "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-13T20:15:22Z",
-    "run_id": "20261013T201430Z-5164"
+    "completed_at": "2026-10-13T20:44:08Z",
+    "run_id": "20261013T204147Z-ed6d"
   },
   "changelog": {
-    "entries": 10,
-    "last_header": "## 2026-10-14 · 20261013T201430Z-5164",
-    "sha256": "e76b1d24c8910c55efebbaf30c14c1250eded235ff8ad903b9af3de1df0d3e28"
+    "entries": 11,
+    "last_header": "## 2026-10-14 · 20261013T204147Z-ed6d",
+    "sha256": "07daf0109affb8e0b1d9faa73272923420a4369c9e5aae3c22b86a571426e494"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
