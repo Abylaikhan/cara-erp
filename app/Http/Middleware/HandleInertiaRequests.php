@@ -54,7 +54,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'nav' => fn () => $request->user() ? Erp::navigation($request->user()) : [],
             'page' => fn () => $this->currentPage($request),
-            'flash' => fn () => ['alert' => $request->session()->get('alert'), 'toast' => $request->session()->get('toast')],
+            'flash' => fn () => ['alert' => $request->session()->get('alert'), 'toast' => $request->session()->get('toast'), 'result' => $request->session()->get('result')],
         ];
     }
 }

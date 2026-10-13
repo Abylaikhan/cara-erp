@@ -1,5 +1,5 @@
-"""Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» (with their
-modals), dark and light themes, 1440×900.
+"""Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
+the dealers tab (and their modals), dark and light themes, 1440×900.
 
 Legacy runs from the accepted snapshot in .local-audit/blobs with every network request blocked except Google Fonts —
 it never reaches the legacy backend. Both sides get the same synthetic directory (DatabaseSeeder).
@@ -70,10 +70,16 @@ with sync_playwright() as p:
             page.screenshot(path=str(OUT / f'target-catalog-modal-{theme}.png'))
         page.goto(TARGET + '/customers', wait_until='networkidle'); page.wait_for_timeout(500)
         page.screenshot(path=str(OUT / f'target-customers-{theme}.png'))
-        persons = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['persons']
+        props = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        persons, dealers = props['persons'], props['dealers']
         if persons:
             page.locator('#persons-tbody tr').first.locator('button').dispatch_event('click'); page.wait_for_timeout(300)
             page.screenshot(path=str(OUT / f'target-customers-modal-{theme}.png'))
+            page.locator('#personModal .modal-close').click(); page.wait_for_timeout(200)
+        page.locator('#cust-tab-dealers').click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-dealers-{theme}.png'))
+        page.locator('#cust-dealers button', has_text='+ Подробно').click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-dealer-modal-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -133,8 +139,19 @@ with sync_playwright() as p:
         if persons:
             page.evaluate("openPersonModal(1)"); page.wait_for_timeout(300)  # a number: the row onclick passes a string and fails (ADR-0006)
             page.screenshot(path=str(OUT / f'legacy-customers-modal-{theme}.png'))
+        # Dealers: legacy keeps them in dealersData; it gets the target's list. Orders and turnover are 0 there (no orders
+        # loaded) and «—» in the target (ADR-0002, item 17).
+        page.evaluate("""(dealers) => {
+            closeModal('personModal');
+            dealersData = dealers.map((d, i) => ({id: i + 1, name: d.name, region: d.region || '—', channel: d.code, orders: 0, turnover: 0, status: 'Активен'}));
+            showCustTab('dealers', document.getElementById('cust-tab-dealers'));
+        }""", dealers)
+        page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-dealers-{theme}.png'))
+        page.evaluate("showModal('addDealerModal')"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-dealer-modal-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

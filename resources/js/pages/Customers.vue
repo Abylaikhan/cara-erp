@@ -1,11 +1,14 @@
 <script setup lang="ts">
 // M08 «Покупатели» — legacy page-customers (L3640–3826), tab «Контрагенты»: renderPersons (L18856), openPersonModal (L18925),
 // savePerson (L18950), showCustTab (L19061), personModal (L8417). Same markup and texts; the list, the customer's channel
-// and saving are decided by the server. Other tabs are migrated in later parts (docs/adr/0006-customers-and-channels.md).
+// and saving are decided by the server. Tab «Дилеры» — DealersTab; «Салоны» and «Сверки» are migrated in later parts
+// (docs/adr/0006-customers-and-channels.md).
 import { router } from '@inertiajs/vue3';
 import { computed, reactive, ref } from 'vue';
+import DealersTab from '@/components/customers/DealersTab.vue';
 import ErpModal from '@/components/ErpModal.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
+import type { Dealer } from '@/types';
 
 interface Person {
     id: number;
@@ -18,7 +21,7 @@ interface Person {
     lock_version: number;
 }
 
-const props = defineProps<{ persons: Person[] }>();
+const props = defineProps<{ persons: Person[]; dealers: Dealer[] }>();
 
 type Tab = 'persons' | 'dealers' | 'salons' | 'reconcile-counterparties';
 const tab = ref<Tab>('persons');
@@ -179,7 +182,9 @@ function savePerson(): void {
                 </div>
             </div>
 
-            <div v-for="t in tabs.filter((x) => x.id !== 'persons')" v-show="tab === t.id" :id="'cust-' + t.id" :key="t.id" class="cust-tab">
+            <DealersTab :dealers="props.dealers" :active="tab === 'dealers'" />
+
+            <div v-for="t in tabs.filter((x) => x.id === 'salons' || x.id === 'reconcile-counterparties')" v-show="tab === t.id" :id="'cust-' + t.id" :key="t.id" class="cust-tab">
                 <div class="card">
                     <div style="font-size: 13px; color: var(--text3); line-height: 1.6">
                         Вкладка ещё не перенесена в новую систему. Перенос идёт по плану в трекере; данные этой вкладки здесь пока не

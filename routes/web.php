@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DealerController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
@@ -40,6 +41,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
         Route::put('/{customer}', 'update')->whereNumber('customer')->name('update');
+    });
+    // M08 «Покупатели» — tab «Дилеры»: a dealer is a sales channel of the group «dealer»
+    Route::middleware('page:customers')->prefix('customers/dealers')->name('customers.dealers.')->controller(DealerController::class)->group(function () {
+        Route::post('/', 'store')->name('store');
+        Route::post('/import', 'import')->name('import');
+        Route::put('/{code}', 'update')->where('code', '[a-z][a-z0-9_]*')->name('update');
+        Route::delete('/{code}', 'destroy')->where('code', '[a-z][a-z0-9_]*')->name('destroy');
     });
 
     // Pages that are not migrated yet — the menu stays 1:1, the page says so honestly.

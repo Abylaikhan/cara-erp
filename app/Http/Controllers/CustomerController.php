@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Customers\CustomerRequest;
 use App\Models\Customer;
+use App\Models\SalesChannel;
 use App\Services\CustomerService;
 use App\Support\ChannelScope;
 use Illuminate\Http\RedirectResponse;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** M08 «Покупатели» — legacy page-customers (L3640), tab «Контрагенты»: loadCustomersFromDB/renderPersons/openPersonModal/savePerson. */
+/** M08 «Покупатели» — legacy page-customers (L3640): tab «Контрагенты» (loadCustomersFromDB/renderPersons/openPersonModal/savePerson), dealers list. */
 class CustomerController extends Controller
 {
     public function __construct(private readonly CustomerService $service) {}
@@ -36,6 +37,15 @@ class CustomerController extends Controller
                 'source' => $c->salesChannel->name,
                 'lock_version' => $c->lock_version,
             ])->values(),
+            // Legacy dealersData: added dealers on top (unshift), then the five of the code in their order.
+            'dealers' => ChannelScope::apply(SalesChannel::query()->dealers(), $request->user(), 'code')
+                ->orderByDesc('created_at')->orderBy('sort_order')->get()
+                ->map(fn (SalesChannel $d) => [
+                    'code' => $d->code,
+                    'name' => $d->name,
+                    'region' => $d->region,
+                    'lock_version' => $d->lock_version,
+                ])->values(),
         ]);
     }
 
