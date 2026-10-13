@@ -1,12 +1,15 @@
 <script setup lang="ts">
 // M06 «Поставщики» — legacy page-suppliers (L3238–3342) and supplierCardModal (L3345–3450): renderSupplierKPIs,
 // renderSupplierList, renderSupCategories, renderSupRating, renderSupHistory, showSupTab, openSupplierCard, saveSupplierCard,
-// deleteSupplier (L18347–18780). Same markup, texts and calculations; saving and the duplicate check are done by the server.
-// Tools that work on payments and ESF wait for those modules (docs/adr/0007-suppliers.md).
-import { router } from '@inertiajs/vue3';
-import { computed, reactive, ref } from 'vue';
+// deleteSupplier (L18347–18780), importSuppliersCSV (L17729), openMergeSuppliersModal/renderMergeGroups/mergeSupplierGroup
+// (L18007–18105). Same markup, texts and calculations; saving, the duplicate check, the CSV plan and merging are done by the
+// server. Tools that work on payments and ESF wait for those modules (docs/adr/0007-suppliers.md).
+import { router, usePage } from '@inertiajs/vue3';
+import { computed, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
+import { findSupplierDuplicateGroups, pickBestCanonicalId, type DuplicateGroup } from '@/lib/supplierDuplicates';
+import type { SharedProps } from '@/types';
 
 interface Supplier {
     id: number;
@@ -228,13 +231,64 @@ function deleteSupplier(): void {
     });
 }
 
+// ── 📥 Импорт CSV (importSuppliersCSV): the server answers with the legacy alert or confirmation; «OK» applies the plan ──
+const page = usePage<SharedProps>();
+const fileInput = ref<HTMLInputElement | null>(null);
+let pendingFile: File | null = null;
+const resetFile = () => {
+    pendingFile = null;
+    if (fileInput.value) fileInput.value.value = '';
+};
+function sendCsv(apply: boolean): void {
+    if (!pendingFile) return;
+    router.post('/suppliers/import', { file: pendingFile, apply: apply ? 1 : 0 }, { forceFormData: true, preserveScroll: true, preserveState: true });
+}
+function importSuppliersCSV(e: Event): void {
+    pendingFile = (e.target as HTMLInputElement).files?.[0] ?? null;
+    sendCsv(false);
+}
+watch(
+    () => page.props.flash.dialog,
+    (d) => {
+        if (!d) return;
+        if (d.type === 'confirm' && window.confirm(d.text)) return sendCsv(true);
+        if (d.type === 'alert') window.alert(d.text);
+        resetFile();
+    },
+);
+
+// ── 🔗 Объединить (findSupplierDuplicateGroups / mergeSupplierGroup); «Это разные поставщики» lasts until reload, as in legacy ──
+const mergeOpen = ref(false);
+const dismissed = ref(new Set<string>());
+const chosen = reactive<Record<string, number>>({});
+const groups = computed<DuplicateGroup<Supplier>[]>(() => (mergeOpen.value ? findSupplierDuplicateGroups(props.suppliers, dismissed.value) : []));
+const canonicalOf = (g: DuplicateGroup<Supplier>) => chosen[g.key] ?? pickBestCanonicalId(g.suppliers);
+const extra = (s: Supplier) => [s.category, s.contact, s.phone, s.email].filter(Boolean).join(' · ') || 'нет доп. данных';
+function dismissMergeGroup(g: DuplicateGroup<Supplier>): void {
+    dismissed.value = new Set([...dismissed.value, g.key]);
+}
+function mergeSupplierGroup(g: DuplicateGroup<Supplier>): void {
+    const canonId = canonicalOf(g);
+    const canonical = g.suppliers.find((s) => s.id === canonId);
+    const dupes = g.suppliers.filter((s) => s.id !== canonId);
+    if (!canonical || !dupes.length) return;
+    if (!window.confirm(`Объединить ${dupes.length} запис${dupes.length === 1 ? 'ь' : 'и'} в «${canonical.name}»?\nОстальные записи будут удалены.`)) return;
+    router.post(
+        '/suppliers/merge',
+        { supplier_id: canonical.id, merged_ids: dupes.map((d) => d.id) },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            onError: (errors: Record<string, string>) => window.alert('Ошибка при объединении: ' + (Object.values(errors)[0] ?? '')),
+        },
+    );
+}
+
 // ── Tools that need modules not migrated yet ──
 const later = (text: string) => () => window.alert(text);
-const importCsv = later('Импорт CSV появится в следующей части переноса раздела «Поставщики».');
 const importEsf = later('Импорт из ЭСФ появится после переноса раздела «Входящие ЭСФ».');
 const orphans = later('Поиск осиротевших названий появится после переноса раздела «Деньги»: он сверяет поставщиков с денежными операциями.');
 const spellings = later('Разночтения написаний появятся после переноса раздела «Деньги»: они ищутся в денежных операциях.');
-const merge = later('Объединение поставщиков появится в следующей части переноса раздела «Поставщики».');
 const legalForms = later('Сокращение юрформ появится после переноса разделов «Деньги» и «Входящие ЭСФ»: оно меняет и их записи.');
 </script>
 
@@ -247,11 +301,12 @@ const legalForms = later('Сокращение юрформ появится п�
                     <div class="section-sub">База контрагентов-поставщиков</div>
                 </div>
                 <div style="display: flex; gap: 8px">
-                    <button class="btn btn-ghost btn-sm" @click="importCsv">📥 Импорт CSV</button>
+                    <input id="supplier-file" ref="fileInput" type="file" accept=".csv" style="display: none" @change="importSuppliersCSV" />
+                    <button class="btn btn-ghost btn-sm" @click="fileInput?.click()">📥 Импорт CSV</button>
                     <button class="btn btn-ghost btn-sm" @click="importEsf">📄 Импорт из ЭСФ</button>
                     <button class="btn btn-ghost btn-sm" @click="orphans">🕵️ Осиротевшие в операциях</button>
                     <button class="btn btn-ghost btn-sm" @click="spellings">🔤 Разночтения написаний</button>
-                    <button class="btn btn-ghost btn-sm" @click="merge">🔗 Объединить</button>
+                    <button class="btn btn-ghost btn-sm" @click="mergeOpen = true">🔗 Объединить</button>
                     <button class="btn btn-ghost btn-sm" @click="legalForms">🇰🇿 Сократить юрформы</button>
                     <button class="btn btn-primary btn-sm" @click="openSupplierCard(null)">+ Добавить</button>
                 </div>
@@ -430,6 +485,44 @@ const legalForms = later('Сокращение юрформ появится п�
                 </table>
             </div>
         </div>
+
+        <!-- MODAL: Объединение дублей поставщиков -->
+        <ErpModal id="mergeSuppliersModal" :open="mergeOpen" max-width="640px" :modal-style="{ maxHeight: '85vh', overflowY: 'auto' }" @close="mergeOpen = false">
+            <div class="modal-header">
+                <span class="modal-title">🔗 Объединение поставщиков</span>
+                <button class="modal-close" @click="mergeOpen = false">✕</button>
+            </div>
+            <div style="font-size: 12px; color: var(--text3); margin-bottom: 12px">
+                Автоматически найдены поставщики с одинаковым БИН или похожим названием. Выберите основную запись в каждой группе — остальные будут
+                удалены, а их данные (БИН, контакты, оборот) перенесены в основную.
+            </div>
+            <div id="merge-groups-body">
+                <div v-if="!groups.length" style="padding: 24px; text-align: center; color: var(--text3)">✅ Явных дублей не найдено</div>
+                <div v-for="(g, gi) in groups" :key="g.key" class="card" style="margin-bottom: 14px; padding: 14px" :data-merge-group="g.key">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px">
+                        <div style="font-size: 12px; color: var(--accent); font-weight: 600">{{ g.reasons.join(' · ') || 'Похожие записи' }}</div>
+                        <button class="btn btn-ghost btn-sm" style="font-size: 11px" @click="dismissMergeGroup(g)">Это разные поставщики</button>
+                    </div>
+                    <label
+                        v-for="s in g.suppliers"
+                        :key="s.id"
+                        style="display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--border); cursor: pointer"
+                    >
+                        <input type="radio" :name="'merge-canon-' + gi" :value="s.id" :checked="s.id === canonicalOf(g)" style="width: auto; margin-top: 3px" @change="chosen[g.key] = s.id" />
+                        <span style="flex: 1">
+                            <div style="font-weight: 600; font-size: 13px">
+                                {{ s.name }}{{ ' ' }}<span v-if="s.bin" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3)">БИН {{ s.bin }}</span
+                                ><span v-else style="color: var(--red); font-size: 11px">без БИН</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text3)">{{ extra(s) }}</div>
+                        </span>
+                    </label>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 10px">
+                        <button class="btn btn-primary btn-sm" @click="mergeSupplierGroup(g)">🔗 Объединить в выбранного</button>
+                    </div>
+                </div>
+            </div>
+        </ErpModal>
 
         <!-- MODAL: Карточка поставщика -->
         <ErpModal id="supplierCardModal" :open="card.open" max-width="580px" :modal-style="{ maxHeight: '90vh', overflowY: 'auto' }" @close="closeCard">

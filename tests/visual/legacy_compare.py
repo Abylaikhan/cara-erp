@@ -92,6 +92,8 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-suppliers-categories-{theme}.png'))
         page.locator('#page-suppliers .tab').nth(2).click(); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-suppliers-rating-{theme}.png'))
+        page.locator('#page-suppliers button', has_text='🔗 Объединить').click(); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-supplier-merge-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -184,8 +186,10 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-suppliers-categories-{theme}.png'))
         page.evaluate("showSupTab('rating', document.querySelectorAll('#page-suppliers .tab')[2])"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-suppliers-rating-{theme}.png'))
+        page.evaluate("openMergeSuppliersModal()"); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'legacy-supplier-merge-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

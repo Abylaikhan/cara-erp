@@ -115,4 +115,8 @@ return [
     'expense_category_references' => [
         ['table' => 'suppliers', 'column' => 'expense_category_id'], // M06: the expense item of the supplier card
     ],
+
+    // Tables/columns that reference suppliers by id. «Объединить» moves all of them to the kept supplier in one transaction.
+    // Modules add their references here when they are migrated (money operations, ESF, purchases).
+    'supplier_references' => [],
 ];

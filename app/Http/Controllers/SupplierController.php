@@ -71,6 +71,34 @@ class SupplierController extends Controller
         return back();
     }
 
+    /** Legacy «Объединить» (mergeSupplierGroup). */
+    public function merge(Request $request): RedirectResponse
+    {
+        Gate::authorize('create', Supplier::class);
+        $data = $request->validate([
+            'supplier_id' => ['required', 'integer'],
+            'merged_ids' => ['required', 'array', 'min:1', 'max:100'],
+            'merged_ids.*' => ['integer', 'distinct'],
+        ]);
+        $this->service->merge((int) $data['supplier_id'], $data['merged_ids'], $request->user());
+
+        return back();
+    }
+
+    /** Legacy «📥 Импорт CSV» (importSuppliersCSV): the answer is the legacy alert or confirmation text. */
+    public function import(Request $request): RedirectResponse
+    {
+        Gate::authorize('create', Supplier::class);
+        $file = $request->file('file');
+        $dialog = match (true) {
+            $file === null || ! $file->isValid() => ['type' => 'alert', 'text' => 'Файл не получен — выберите CSV ещё раз.'],
+            $file->getSize() > 2 * 1024 * 1024 => ['type' => 'alert', 'text' => 'Файл больше 2 МБ — разделите его на части.'],
+            default => $this->service->importCsv((string) file_get_contents($file->getRealPath()), $request->boolean('apply'), $request->user()),
+        };
+
+        return back()->with('dialog', $dialog);
+    }
+
     /**
      * Categories and articles of «Статьи расходов» for the card (legacy populateSupCardExpCat/updateSupCardExpSubcat), in the
      * directory order; an item deleted there but still linked to a supplier stays selectable, marked as deleted.

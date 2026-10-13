@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('page:suppliers')->prefix('suppliers')->name('suppliers.')->controller(SupplierController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
+        Route::post('/merge', 'merge')->name('merge');
+        Route::post('/import', 'import')->name('import');
         Route::put('/{supplier}', 'update')->whereNumber('supplier')->name('update');
         Route::delete('/{supplier}', 'destroy')->whereNumber('supplier')->name('destroy');
     });

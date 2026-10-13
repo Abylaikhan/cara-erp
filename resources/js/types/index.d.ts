@@ -23,7 +23,12 @@ export interface SharedProps {
     auth: { user: SidebarUser | null };
     nav: NavSection[];
     page: { id: string; title: string; module: string } | null;
-    flash: { alert: string | null; toast: string | null; result: { text: string; color: 'green' | 'red' } | null };
+    flash: {
+        alert: string | null;
+        toast: string | null;
+        result: { text: string; color: 'green' | 'red' } | null;
+        dialog: { type: 'alert' | 'confirm'; text: string } | null;
+    };
 }
 
 /** Dealer of the «Покупатели» page: a sales channel of the group «dealer». */
