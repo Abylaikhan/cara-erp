@@ -1,0 +1,542 @@
+{
+  "schema": "promtech.audit-findings/1",
+  "findings": [
+    {
+      "id": "AF-15a0c004",
+      "check_id": "TGT-TESTS",
+      "locator": "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_development_connection",
+      "title": "Падает тест Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_development_connection",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-TESTS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-TESTS PASS"
+      }
+    },
+    {
+      "id": "AF-2f94c51d",
+      "check_id": "TGT-TESTS",
+      "locator": "Tests\\Feature\\ExampleTest::test_logout_ends_session",
+      "title": "Падает тест Tests\\Feature\\ExampleTest::test_logout_ends_session",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-TESTS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-TESTS PASS"
+      }
+    },
+    {
+      "id": "AF-56a9cf73",
+      "check_id": "TGT-TESTS",
+      "locator": "Tests\\Feature\\ExampleTest::test_guest_is_redirected_to_login",
+      "title": "Падает тест Tests\\Feature\\ExampleTest::test_guest_is_redirected_to_login",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T184825Z-4d37",
+          "event": "REPRODUCED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-TESTS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184825Z-4d37",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:48:25Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-TESTS PASS"
+      }
+    },
+    {
+      "id": "AF-6ecaf046",
+      "check_id": "TGT-MIGRATE",
+      "locator": "TGT-MIGRATE",
+      "title": "Миграции и синтетический seed на чистой PostgreSQL: exit code 1",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T184825Z-4d37",
+          "event": "PASSED_ON_SAME_REF",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-MIGRATE PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-MIGRATE PASS"
+      }
+    },
+    {
+      "id": "AF-7a155eca",
+      "check_id": "TGT-HTTP",
+      "locator": "TGT-HTTP",
+      "title": "HTTP smoke: /up и /login через nginx: exit code 1",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T184825Z-4d37",
+          "event": "PASSED_ON_SAME_REF",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-HTTP PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-HTTP PASS"
+      }
+    },
+    {
+      "id": "AF-7aaab7fc",
+      "check_id": "TGT-TESTS",
+      "locator": "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_test_connection_pointing_to_dev_database",
+      "title": "Падает тест Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_test_connection_pointing_to_dev_database",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-TESTS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-TESTS PASS"
+      }
+    },
+    {
+      "id": "AF-7dd2cc0f",
+      "check_id": "TGT-TESTS",
+      "locator": "Tests\\Unit\\TestDatabaseGuardTest::test_guard_accepts_isolated_test_database",
+      "title": "Падает тест Tests\\Unit\\TestDatabaseGuardTest::test_guard_accepts_isolated_test_database",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-TESTS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-TESTS PASS"
+      }
+    },
+    {
+      "id": "AF-8c93beb2",
+      "check_id": "TGT-TESTS",
+      "locator": "Tests\\Feature\\ExampleTest::test_user_can_log_in_and_see_system_status",
+      "title": "Падает тест Tests\\Feature\\ExampleTest::test_user_can_log_in_and_see_system_status",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-TESTS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-TESTS PASS"
+      }
+    },
+    {
+      "id": "AF-996f091f",
+      "check_id": "TGT-DB",
+      "locator": "TGT-DB",
+      "title": "Подключение именно к PostgreSQL (dev и test): exit code 1",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T184825Z-4d37",
+          "event": "PASSED_ON_SAME_REF",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-DB PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-DB PASS"
+      }
+    },
+    {
+      "id": "AF-9cb6577e",
+      "check_id": "TGT-TESTS",
+      "locator": "Tests\\Feature\\ExampleTest::test_wrong_password_is_rejected",
+      "title": "Падает тест Tests\\Feature\\ExampleTest::test_wrong_password_is_rejected",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-TESTS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-TESTS PASS"
+      }
+    },
+    {
+      "id": "AF-d8badd69",
+      "check_id": "TGT-TESTS",
+      "locator": "Tests\\Feature\\ExampleTest::test_tests_run_on_isolated_postgresql",
+      "title": "Падает тест Tests\\Feature\\ExampleTest::test_tests_run_on_isolated_postgresql",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-TESTS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-TESTS PASS"
+      }
+    },
+    {
+      "id": "AF-df5a6e0d",
+      "check_id": "TGT-TESTS",
+      "locator": "Tests\\Feature\\ExampleTest::test_health_endpoint_is_up",
+      "title": "Падает тест Tests\\Feature\\ExampleTest::test_health_endpoint_is_up",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T184622Z-374a",
+          "event": "OPENED",
+          "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T185144Z-65a1",
+          "event": "CLOSED",
+          "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-TESTS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T184622Z-374a",
+        "target_ref": "2d6f2829778dd42ee76090ad48491e525f03c68d",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T18:46:22Z"
+      },
+      "closed": {
+        "run_id": "20261013T185144Z-65a1",
+        "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-TESTS PASS"
+      }
+    }
+  ]
+}

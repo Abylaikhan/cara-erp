@@ -1,0 +1,81 @@
+{
+  "schema": "promtech.audit-state/1",
+  "last_attempt": {
+    "run_id": "20261013T185242Z-d4d6",
+    "started_at": "2026-10-13T18:52:42Z",
+    "status": "COMPLETED",
+    "stage": "done",
+    "finished_at": "2026-10-13T18:53:37Z",
+    "exit_code": 0
+  },
+  "last_observed": {
+    "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+    "target_ref": "5dc1504fddbbae985918915324b20705c6a920f1",
+    "at": "2026-10-13T18:52:42Z"
+  },
+  "last_reported": {
+    "run_id": "20261013T185242Z-d4d6",
+    "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+    "source_blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0",
+    "target_ref": "5dc1504fddbbae985918915324b20705c6a920f1",
+    "logical_key": "f00842517fb68dfc",
+    "local_date": "2026-10-13",
+    "completed_at": "2026-10-13T18:53:37Z",
+    "report": "daily/2026-10-13/20261013T185242Z-d4d6.md",
+    "artifact_sha256": "3757bd95c3fd98cefc0f513292e4538697ab5021df2749337270437919c0e108",
+    "check_ids": [
+      "HAR-COVERAGE",
+      "HAR-JOURNAL",
+      "HAR-SECRETS",
+      "SRC-ACCEPTED",
+      "SRC-CASE",
+      "SRC-DIFF",
+      "SRC-FETCH",
+      "SRC-HISTORY",
+      "SRC-INVENTORY",
+      "SRC-PATH",
+      "SRC-PIN",
+      "SRC-SYNTAX",
+      "SRC-WATCHED",
+      "TASKS-READ",
+      "TASKS-WRITE",
+      "TGT-BUILD",
+      "TGT-DB",
+      "TGT-DEPS",
+      "TGT-HTTP",
+      "TGT-MIGRATE",
+      "TGT-PINT",
+      "TGT-REF",
+      "TGT-TESTS",
+      "TGT-TYPES"
+    ],
+    "tests": [
+      "Tests\\Feature\\ExampleTest::test_guest_is_redirected_to_login",
+      "Tests\\Feature\\ExampleTest::test_health_endpoint_is_up",
+      "Tests\\Feature\\ExampleTest::test_logout_ends_session",
+      "Tests\\Feature\\ExampleTest::test_tests_run_on_isolated_postgresql",
+      "Tests\\Feature\\ExampleTest::test_user_can_log_in_and_see_system_status",
+      "Tests\\Feature\\ExampleTest::test_wrong_password_is_rejected",
+      "Tests\\Unit\\TestDatabaseGuardTest::test_guard_accepts_isolated_test_database",
+      "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_development_connection",
+      "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_test_connection_pointing_to_dev_database"
+    ]
+  },
+  "last_verified": {
+    "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+    "target_ref": "5dc1504fddbbae985918915324b20705c6a920f1",
+    "required_suite_version": "suite-1+1f7357",
+    "completed_at": "2026-10-13T18:53:37Z",
+    "run_id": "20261013T185242Z-d4d6"
+  },
+  "changelog": {
+    "entries": 5,
+    "last_header": "## 2026-10-13 · 20261013T185242Z-d4d6",
+    "sha256": "10847ba93125fe3e02c5b81c205cf81256cf9ab4cdd95d1c754da40e669c6b4f"
+  },
+  "accepted_source_ref": {
+    "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+    "sha256": "e1715f8e4e2d243f6638cfbbb9005ad9e3409885c3776184b6a383d8d2586b9b",
+    "basis": "ТЗ harness 1.1 от 13.10.2026; меняется только отдельным решением"
+  }
+}
