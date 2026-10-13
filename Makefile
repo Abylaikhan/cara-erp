@@ -1,0 +1,45 @@
+# PromTech ERP — local environment commands. Only Docker (Compose v2) is required on the host.
+SHELL := /bin/bash
+export HOST_UID := $(shell id -u)
+export HOST_GID := $(shell id -g)
+
+.DEFAULT_GOAL := help
+.PHONY: help setup up down restart doctor check test build ps logs shell psql
+
+help: ## Show available commands
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
+
+setup: ## First install / safe re-run: build, deps from lock files, .env, APP_KEY, migrate, seed, start
+	@scripts/setup.sh
+
+up: ## Start all services (data is preserved)
+	@scripts/up.sh
+
+down: ## Stop all services (database volumes are preserved)
+	@scripts/down.sh
+
+restart: down up ## Restart all services
+
+doctor: ## Diagnose versions, services, ports, PostgreSQL and HTTP (no secrets)
+	@scripts/doctor.sh
+
+check: ## Code style, types, build and backend tests on PostgreSQL
+	@scripts/check.sh
+
+test: ## Backend tests on the isolated test database
+	@docker compose run --rm app php artisan test
+
+build: ## Production frontend build
+	@docker compose run --rm --no-deps node npm run build
+
+ps: ## Service status
+	@docker compose ps
+
+logs: ## Follow logs (S=service to filter)
+	@docker compose logs -f --tail=100 $(S)
+
+shell: ## Shell in the PHP container
+	@docker compose exec app bash
+
+psql: ## psql to the development database
+	@docker compose exec db sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'

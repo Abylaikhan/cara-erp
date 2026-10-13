@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+!.env.example
+node_modules
+vendor
+public/build
+public/hot
+storage/logs/*
+storage/framework/*
+.local-audit
+backups

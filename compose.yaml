@@ -1,0 +1,105 @@
+# PromTech ERP — local development environment.
+# Use the Makefile (make setup / up / down / doctor); it exports HOST_UID/HOST_GID.
+# Values come from .env (created by `make setup`). Ports are bound to loopback only.
+name: promtech-erp
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: docker/php/Dockerfile
+    args:
+      UID: ${HOST_UID:-1000}
+      GID: ${HOST_GID:-1000}
+  image: promtech-erp-app:local
+  volumes:
+    - .:/var/www/html
+    - composer-cache:/home/app/.composer/cache
+  environment:
+    DB_HOST: db
+    DB_PORT: "5432"
+    DB_TEST_HOST: db-test
+    DB_TEST_PORT: "5432"
+
+services:
+  app:
+    <<: *app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: nginx:1.28.3-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:80"
+    volumes:
+      - ./public:/var/www/html/public:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      app:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/up || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+  node:
+    image: node:24.21.0-bookworm-slim
+    init: true
+    restart: unless-stopped
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    working_dir: /var/www/html
+    command: ["node_modules/.bin/vite", "--host", "0.0.0.0", "--port", "5173", "--strictPort"]
+    environment:
+      HOME: /tmp
+      npm_config_cache: /tmp/npm-cache
+      VITE_PORT: ${VITE_PORT:-5173}
+      VITE_USE_POLLING: ${VITE_USE_POLLING:-false}
+    ports:
+      - "127.0.0.1:${VITE_PORT:-5173}:5173"
+    volumes:
+      - .:/var/www/html
+
+  db:
+    image: postgres:17.11-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:?run make setup}
+      POSTGRES_USER: ${DB_USERNAME:?run make setup}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?run make setup}
+    ports:
+      - "127.0.0.1:${DB_FORWARD_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  # Isolated database for automated tests: separate role, database, password and volume.
+  db-test:
+    image: postgres:17.11-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_TEST_DATABASE:?run make setup}
+      POSTGRES_USER: ${DB_TEST_USERNAME:?run make setup}
+      POSTGRES_PASSWORD: ${DB_TEST_PASSWORD:?run make setup}
+    volumes:
+      - pgdata-test:/var/lib/postgresql/data
+      - ./docker/postgres-test:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+volumes:
+  pgdata:
+  pgdata-test:
+  composer-cache:

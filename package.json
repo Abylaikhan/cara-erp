@@ -1,0 +1,30 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "name": "promtech-erp",
+    "private": true,
+    "type": "module",
+    "engines": {
+        "node": ">=24 <25"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "typecheck": "vue-tsc --noEmit"
+    },
+    "dependencies": {
+        "@inertiajs/vue3": "3.9.1",
+        "@primeuix/themes": "2.0.3",
+        "primeicons": "7.0.0",
+        "primevue": "4.5.5",
+        "vue": "3.5.44"
+    },
+    "devDependencies": {
+        "@inertiajs/vite": "3.9.1",
+        "@types/node": "24.10.1",
+        "@vitejs/plugin-vue": "6.0.10",
+        "laravel-vite-plugin": "3.2.0",
+        "typescript": "5.9.3",
+        "vite": "8.3.4",
+        "vue-tsc": "3.3.13"
+    }
+}
