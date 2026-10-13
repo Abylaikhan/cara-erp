@@ -76,7 +76,9 @@
 
 ## Не сделано / ограничения
 
-- Расписание (GitHub Actions 07:17 Asia/Almaty), CI, отчётная ветка `audit-reports` — не настроены.
+- CI: `.github/workflows/ci.yml` — на каждый push в main и pull request: `make setup` на чистой машине, `make check`, HTTP smoke,
+  самопроверки harness; отчёт тестов — артефакт на 90 дней. Расписание аудита (07:17 Asia/Almaty) и отчётная ветка `audit-reports`
+  не настроены: нужны секреты (ключ Sheets) и право записи для workflow — ждут решения заказчика.
 - AI-разбор: адаптер готов, выключен до ключа Anthropic API и бюджета.
 - Google Sheets: чтение по API-ключу; запись — через браузер (анонимное редактирование по ссылке) с проверкой чтением через API;
   service account не выдан.
