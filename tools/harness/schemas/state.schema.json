@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "promtech.audit-state/1",
+    "title": "Указатели состояния аудита (ТЗ RUN-04)",
+    "type": "object",
+    "required": ["schema", "accepted_source_ref", "last_attempt"],
+    "properties": {
+        "schema": {"enum": ["promtech.audit-state/1"]},
+        "accepted_source_ref": {"type": "object", "required": ["commit", "sha256"]},
+        "last_attempt": {"type": ["object", "null"], "required": ["run_id", "started_at", "status"]},
+        "last_observed": {"type": ["object", "null"]},
+        "last_reported": {"type": ["object", "null"]},
+        "last_verified": {"type": ["object", "null"]},
+        "changelog": {"type": ["object", "null"]}
+    }
+}

@@ -27,3 +27,5 @@ Homestead.yaml
 Thumbs.db
 /.local-audit
 /backups
+/tools/harness/node/node_modules
+__pycache__/

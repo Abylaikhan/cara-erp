@@ -16,9 +16,14 @@ make setup    # первый запуск и безопасный повтор: 
 make up       # запустить (данные БД сохраняются)
 make down     # остановить (тома БД сохраняются)
 make doctor   # версии, сервисы, порты, подключение PostgreSQL dev/test, HTTP — без вывода секретов
-make check    # pint, vue-tsc, vite build, PHPUnit на изолированной PostgreSQL
+make check    # pint, vue-tsc, vite build, PHPUnit на изолированной PostgreSQL, проверка подключения к PostgreSQL
+make audit-daily        # ежедневный аудит: legacy + целевой код, отчёт в docs/daily/, журнал docs/DAILY-CHANGELOG.md
+make harness-selftest   # самопроверки harness (сценарии H-xx)
 make help     # все команды (test, build, logs, shell, psql, ps)
 ```
+
+Устройство аудита — [`tools/harness/README.md`](tools/harness/README.md). Для `make audit-daily` и `make harness-selftest`
+дополнительно нужен `python3` ≥ 3.9 (на macOS он есть вместе с git).
 
 Повторный `make setup` не перезаписывает `.env` и `APP_KEY` и не удаляет данные. Удаление томов (`docker compose down -v`) в команды не входит.
 
@@ -50,4 +55,4 @@ PHPUnit использует только подключение `pgsql_test`. �
 
 ## Ещё не реализовано
 
-`queue`, `browser-tests` (Playwright), `make test-e2e`, `make test-visual`, `make db-backup`, `make db-restore-check`, `make audit-daily`, `make audit-replay`, `make harness-selftest`, `make tasks-pull/sync/check`, роли и права, модули ERP, CI. Порядок — в [`docs/agent-state.md`](docs/agent-state.md).
+`queue`, `browser-tests` (Playwright), `make test-e2e`, `make test-visual`, `make db-backup`, `make db-restore-check`, `make audit-replay`, `make tasks-pull/sync/check`, запись в Google Sheets, роли и права, модули ERP, CI и расписание. Порядок — в [`docs/agent-state.md`](docs/agent-state.md).

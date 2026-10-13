@@ -10,7 +10,7 @@ x-app: &app
     args:
       UID: ${HOST_UID:-1000}
       GID: ${HOST_GID:-1000}
-  image: promtech-erp-app:local
+  image: ${APP_IMAGE:-promtech-erp-app:local}
   volumes:
     - .:/var/www/html
     - composer-cache:/home/app/.composer/cache

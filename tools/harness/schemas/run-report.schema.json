@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "promtech.audit-run/1",
+    "title": "Отчёт одного запуска аудита",
+    "type": "object",
+    "required": ["schema", "run_id", "mode", "started_at", "finished_at", "local_date", "timezone", "logical_key", "harness",
+                 "source", "target", "checks", "summary", "execution_status", "product_status", "source_status",
+                 "findings", "task_sync_status", "ai_review", "not_checked", "exit_code", "publication"],
+    "properties": {
+        "schema": {"enum": ["promtech.audit-run/1"]},
+        "run_id": {"type": "string"},
+        "mode": {"enum": ["daily", "manual", "selftest"]},
+        "started_at": {"type": "string"},
+        "finished_at": {"type": "string"},
+        "duration_s": {"type": "number"},
+        "local_date": {"type": "string"},
+        "timezone": {"type": "string"},
+        "logical_key": {"type": "string"},
+        "repeat_of": {"type": ["string", "null"]},
+        "harness": {"type": "object", "required": ["version", "suite_version", "config_hash"]},
+        "source": {"type": "object", "required": ["repository", "path", "observed_head", "status"]},
+        "target": {"type": "object", "required": ["ref_requested", "head"]},
+        "checks": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["id", "title", "required", "stage", "status"],
+                "properties": {
+                    "required": {"type": "boolean"},
+                    "status": {"enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN", "NOT_APPLICABLE"]}
+                }
+            }
+        },
+        "summary": {"type": "object", "required": ["PASS", "FAIL", "BLOCKED", "NOT_RUN", "NOT_APPLICABLE"]},
+        "execution_status": {"enum": ["COMPLETE", "PARTIAL", "BLOCKED"]},
+        "product_status": {"enum": ["PASS", "FAIL", "UNKNOWN"]},
+        "source_status": {"enum": ["INITIAL_BASELINE", "UNCHANGED", "CHANGED", "HISTORY_DIVERGED", "BLOCKED"]},
+        "findings": {"type": "object", "required": ["new", "repeated", "closed", "needs_review", "open_total"]},
+        "task_sync_status": {"type": "object", "required": ["read", "write", "pending_events", "delivered", "conflicts"]},
+        "ai_review": {"type": "object", "required": ["status"]},
+        "not_checked": {"type": "array", "items": {"type": "string"}},
+        "exit_code": {"type": "integer"},
+        "publication": {"type": "object", "required": ["status"]}
+    }
+}

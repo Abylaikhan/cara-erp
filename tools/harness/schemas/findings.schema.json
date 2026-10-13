@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "promtech.audit-findings/1",
+    "title": "Реестр находок аудита со стабильными ID",
+    "type": "object",
+    "required": ["schema", "findings"],
+    "properties": {
+        "schema": {"enum": ["promtech.audit-findings/1"]},
+        "findings": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["id", "check_id", "title", "category", "severity", "status", "first_seen", "last_seen", "history"],
+                "properties": {
+                    "status": {"enum": ["OPEN", "CLOSED", "NEEDS_REVIEW"]},
+                    "category": {"enum": ["CODE", "ISOLATED", "E2E", "DB", "RISK", "BUSINESS_DECISION"]},
+                    "history": {"type": "array", "items": {"type": "object", "required": ["run_id", "event"]}}
+                }
+            }
+        }
+    }
+}

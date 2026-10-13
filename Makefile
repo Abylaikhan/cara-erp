@@ -4,7 +4,7 @@ export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down restart doctor check test build ps logs shell psql
+.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest
 
 help: ## Show available commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
@@ -23,8 +23,14 @@ restart: down up ## Restart all services
 doctor: ## Diagnose versions, services, ports, PostgreSQL and HTTP (no secrets)
 	@scripts/doctor.sh
 
-check: ## Code style, types, build and backend tests on PostgreSQL
+check: ## Code style, types, build, backend tests on PostgreSQL, DB connection check
 	@scripts/check.sh
+
+audit-daily: ## Daily audit: pin legacy + target refs, diff, checks, MD/JSON report (exit != 0 on failures)
+	@python3 tools/harness/run.py daily $(if $(TARGET_REF),--target-ref $(TARGET_REF),)
+
+harness-selftest: ## Self-tests of the audit harness (H-xx scenarios on local fixtures)
+	@python3 tools/harness/selftest.py
 
 test: ## Backend tests on the isolated test database
 	@docker compose run --rm app php artisan test

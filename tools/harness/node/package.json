@@ -1,0 +1,15 @@
+{
+    "name": "promtech-harness-node",
+    "private": true,
+    "type": "module",
+    "description": "Isolated helpers of the PromTech audit harness: static analysis of the legacy HTML and the Claude review adapter.",
+    "engines": {
+        "node": ">=24 <25"
+    },
+    "dependencies": {
+        "@anthropic-ai/sdk": "0.133.0",
+        "acorn": "8.19.0",
+        "acorn-walk": "8.3.5",
+        "parse5": "8.0.1"
+    }
+}
