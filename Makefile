@@ -4,7 +4,7 @@ export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest
+.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest visual-compare
 
 help: ## Show available commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
@@ -31,6 +31,9 @@ audit-daily: ## Daily audit: pin legacy + target refs, diff, checks, MD/JSON rep
 
 harness-selftest: ## Self-tests of the audit harness (H-xx scenarios on local fixtures)
 	@python3 tools/harness/selftest.py
+
+visual-compare: ## Screenshots legacy vs target (login, M14) and % of differing pixels; needs host playwright + Chrome
+	@python3 tests/visual/legacy_compare.py
 
 test: ## Backend tests on the isolated test database
 	@docker compose run --rm app php artisan test

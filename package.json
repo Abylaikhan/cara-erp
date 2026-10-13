@@ -12,9 +12,9 @@
         "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
+        "@fontsource/ibm-plex-mono": "5.3.0",
+        "@fontsource/ibm-plex-sans": "5.3.0",
         "@inertiajs/vue3": "3.9.1",
-        "@primeuix/themes": "2.0.3",
-        "primeicons": "7.0.0",
         "primevue": "4.5.5",
         "vue": "3.5.44"
     },

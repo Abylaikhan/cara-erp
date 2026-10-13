@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Erp;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -33,15 +34,27 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
+    /** @return array{id: string, title: string, module: string}|null */
+    private function currentPage(Request $request): ?array
+    {
+        $id = $request->attributes->get('erp_page');
+        $meta = $id ? (Erp::pages()[$id] ?? null) : null;
+
+        return $meta ? ['id' => $id, 'title' => $meta['title'], 'module' => $meta['module']] : null;
+    }
+
     public function share(Request $request): array
     {
         return [
             ...parent::share($request),
             'appName' => config('app.name'),
-            // Only the fields the UI needs; never pass the full model to the client.
+            // Only what the shell renders; never the model itself (no password, login or e-mail in props).
             'auth' => [
-                'user' => $request->user()?->only('id', 'name', 'email'),
+                'user' => $request->user()?->sidebarCard(),
             ],
+            'nav' => fn () => $request->user() ? Erp::navigation($request->user()) : [],
+            'page' => fn () => $this->currentPage($request),
+            'flash' => fn () => ['alert' => $request->session()->get('alert')],
         ];
     }
 }

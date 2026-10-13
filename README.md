@@ -3,7 +3,9 @@
 Laravel 13 + Inertia 3 + Vue 3 (TypeScript) + PrimeVue 4 + PostgreSQL 17, локально полностью в Docker Compose.
 ТЗ и аналитика (пакет PromTech-ERP-Harness 1.1) хранятся вне репозитория, локально в папке `docs/` рядом с `application/`: `HARNESS-DEVELOPMENT-SPEC.md`, `TECHNICAL-SPEC.md`.
 
-**Состояние:** каркас окружения. Модули ERP ещё не перенесены.
+**Состояние:** оболочка 1:1 (меню, шапка, обе темы), вход и серверные права по ролям, раздел M14 «Статьи расходов».
+Остальные разделы ещё не перенесены — их страницы честно об этом сообщают. Решения и отклонения — `docs/adr/`,
+трассировка требований — `docs/coverage/requirements.csv`.
 
 ## Требования
 
@@ -19,6 +21,7 @@ make doctor   # версии, сервисы, порты, подключение
 make check    # pint, vue-tsc, vite build, PHPUnit на изолированной PostgreSQL, проверка подключения к PostgreSQL
 make audit-daily        # ежедневный аудит: legacy + целевой код, отчёт в docs/daily/, журнал docs/DAILY-CHANGELOG.md
 make harness-selftest   # самопроверки harness (сценарии H-xx)
+make visual-compare     # скриншоты legacy ↔ новая версия и % отличий (нужны python3-playwright и Chrome на хосте)
 make help     # все команды (test, build, logs, shell, psql, ps)
 ```
 
@@ -35,7 +38,8 @@ make help     # все команды (test, build, logs, shell, psql, ps)
 | Vite dev server (HMR) | http://localhost:5173 | `VITE_PORT` |
 | PostgreSQL dev с хоста | 127.0.0.1:5433 | `DB_FORWARD_PORT` |
 
-Вход: синтетический администратор, `DEV_ADMIN_EMAIL` / `DEV_ADMIN_PASSWORD` из `.env` (пароль генерируется при первом `make setup`).
+Вход: синтетические пользователи всех 15 ролей legacy, логин = ключ роли (`director`, `manager`, `storekeeper`, `accountant`,
+`salon_armada`, `dealer_astana`, …), пароль — `DEV_ADMIN_PASSWORD` из `.env` (генерируется при первом `make setup`).
 
 ## Сервисы
 

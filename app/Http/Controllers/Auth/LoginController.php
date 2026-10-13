@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\Erp;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,8 +13,14 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * Login screen of legacy (L1871) with server-side checks. Messages repeat legacy doLogin (L1695).
+ * Unlike legacy, credentials are never sent to the browser (AUTH-01).
+ */
 class LoginController extends Controller
 {
+    private const MAX_ATTEMPTS = 5;
+
     public function create(): Response
     {
         return Inertia::render('Auth/Login');
@@ -21,30 +28,39 @@ class LoginController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-        ]);
-
-        $throttleKey = Str::transliterate(Str::lower($credentials['email']).'|'.$request->ip());
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+        $login = Str::lower(trim((string) $request->input('login')));
+        $password = (string) $request->input('password');
+        if ($login === '' || $password === '') {
+            throw ValidationException::withMessages(['login' => 'Введите логин и пароль']);
+        }
+        $key = 'login|'.$login.'|'.$request->ip();
+        if (RateLimiter::tooManyAttempts($key, self::MAX_ATTEMPTS)) {
             throw ValidationException::withMessages([
-                'email' => 'Слишком много попыток входа. Повторите через '.RateLimiter::availableIn($throttleKey).' с.',
+                'login' => 'Слишком много попыток входа. Повторите через '.RateLimiter::availableIn($key).' с.',
             ]);
         }
-
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            RateLimiter::hit($throttleKey);
-
-            throw ValidationException::withMessages([
-                'email' => 'Неверный email или пароль.',
-            ]);
+        if (! Auth::attempt(['login' => $login, 'password' => $password, 'is_active' => true])) {
+            RateLimiter::hit($key, 60);
+            throw ValidationException::withMessages(['login' => 'Неверный логин или пароль']);
         }
-
-        RateLimiter::clear($throttleKey);
+        RateLimiter::clear($key);
         $request->session()->regenerate();
+        $first = Erp::firstPage($request->user());
 
-        return redirect()->intended('/');
+        return redirect($first !== null ? '/'.$first : '/');
+    }
+
+    /** PIN sign-in opens the employee cabinet (legacy checkLoginPin). Employees (M17) are not migrated yet. */
+    public function pin(Request $request): RedirectResponse
+    {
+        $key = 'login-pin|'.$request->ip();
+        if (RateLimiter::tooManyAttempts($key, self::MAX_ATTEMPTS)) {
+            throw ValidationException::withMessages([
+                'pin' => 'Слишком много попыток. Повторите через '.RateLimiter::availableIn($key).' с.',
+            ]);
+        }
+        RateLimiter::hit($key, 60);
+        throw ValidationException::withMessages(['pin' => 'Вход по PIN появится после переноса раздела «Сотрудники»']);
     }
 
     public function destroy(Request $request): RedirectResponse

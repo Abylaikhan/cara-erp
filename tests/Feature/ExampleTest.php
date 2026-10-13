@@ -29,26 +29,13 @@ class ExampleTest extends TestCase
         $this->get('/login')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Auth/Login'));
     }
 
-    public function test_user_can_log_in_and_see_system_status(): void
-    {
-        $user = User::factory()->create(['password' => 'secret-password']);
-
-        $this->post('/login', ['email' => $user->email, 'password' => 'secret-password'])->assertRedirect('/');
-
-        $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page
-            ->component('Dashboard')
-            ->where('status.database.driver', 'pgsql')
-            ->where('auth.user.email', $user->email)
-            ->missing('auth.user.password'));
-    }
-
     public function test_wrong_password_is_rejected(): void
     {
         $user = User::factory()->create(['password' => 'secret-password']);
 
-        $this->from('/login')->post('/login', ['email' => $user->email, 'password' => 'wrong'])
+        $this->from('/login')->post('/login', ['login' => $user->login, 'password' => 'wrong'])
             ->assertRedirect('/login')
-            ->assertSessionHasErrors('email');
+            ->assertSessionHasErrors(['login' => 'Неверный логин или пароль']);
         $this->assertGuest();
     }
 

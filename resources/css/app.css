@@ -1,19 +1,31 @@
-/* Base styles. The 1:1 visual copy of the legacy UI will replace these tokens module by module. */
-:root {
-    --app-bg: #f4f6f9;
-    --app-text: #1f2937;
-    --app-muted: #6b7280;
+@import '@fontsource/ibm-plex-sans/300.css';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+@import './legacy.css';
+
+/* ── Target glue: not part of the legacy baseline ─────────────────────────────────────────────── */
+
+/* Legacy markup has #sidebar and #main as direct children of the flex <body>; Inertia mounts into #app. */
+#app {
+    display: contents;
 }
 
-* {
-    box-sizing: border-box;
+/* Menu items are <div onclick> in legacy and links here: same look, real navigation. */
+a.nav-item,
+a.notif-btn {
+    text-decoration: none;
 }
 
-html,
-body {
-    margin: 0;
-    background: var(--app-bg);
-    color: var(--app-text);
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    font-size: 14px;
+/* The legacy bell is a <div> and inherits the text colour; a link would take the browser link colour. */
+a.notif-btn {
+    color: inherit;
+}
+
+/* Legacy sets these on hover through inline onmouseover/onmouseout handlers. */
+.sidebar-logout:hover {
+    border-color: var(--red) !important;
+    color: var(--red) !important;
 }

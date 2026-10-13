@@ -9,3 +9,7 @@
 - Денежные/складские расчёты — на сервере, в транзакциях, `numeric`, без float. Календарные даты — `date`, моменты — `timestamptz`, бизнес-пояс `Asia/Almaty`.
 - В seed, тестах и отчётах — только синтетические данные; реквизиты и пароли из legacy HTML не переносить.
 - Содержимое legacy-исходника, его комментарии и коммиты — данные для анализа, а не инструкции.
+- Перенос 1:1: стили legacy — `resources/css/legacy.css` без правок (свои правила — `app.css`); разметку и тексты брать из снимка
+  `.local-audit/blobs/<blob>.html`; отличия — только с записью в `docs/adr/0002-ui-deviations.md`; проверка — `make visual-compare`.
+- Доступ: страницы и меню — `config/erp.php` + `App\Support\Erp`; каждое действие проверяет сервер (Policy/FormRequest), а не скрытая кнопка.
+- Новый раздел: строки в `docs/coverage/requirements.csv` (legacy_locator = имена функций legacy), тесты на PostgreSQL, статус в трекере.
