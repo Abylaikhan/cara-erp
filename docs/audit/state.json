@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261013T212024Z-89d3",
-    "started_at": "2026-10-13T21:20:24Z",
+    "run_id": "20261013T213700Z-4d2a",
+    "started_at": "2026-10-13T21:37:00Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-13T21:21:22Z",
+    "finished_at": "2026-10-13T21:37:53Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "83d4ecb5aef9fb2b6deeda2b232dacc10f1e3325",
-    "at": "2026-10-13T21:20:24Z"
+    "target_ref": "e138856298a498ef64feb54a009f6156e69ffcce",
+    "at": "2026-10-13T21:37:00Z"
   },
   "last_reported": {
-    "run_id": "20261013T212024Z-89d3",
+    "run_id": "20261013T213700Z-4d2a",
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
     "source_blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0",
-    "target_ref": "83d4ecb5aef9fb2b6deeda2b232dacc10f1e3325",
-    "logical_key": "bdcc81b5592d78cf",
+    "target_ref": "e138856298a498ef64feb54a009f6156e69ffcce",
+    "logical_key": "19e314ad4e346360",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-13T21:21:22Z",
-    "report": "daily/2026-10-14/20261013T212024Z-89d3.md",
-    "artifact_sha256": "39287d5fac27ed06e4df11601546e5d99e7e9ba6b1a0775d37f52a03c5d652f0",
+    "completed_at": "2026-10-13T21:37:53Z",
+    "report": "daily/2026-10-14/20261013T213700Z-4d2a.md",
+    "artifact_sha256": "20ab41467b5c33ea4447a1e3daf24d7f9648a9946bb3e0d323fac4c9c03e9b72",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -165,6 +165,19 @@
       "Tests\\Feature\\Legacy\\ProductImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\ProductImportTest::test_imports_products_keeping_legacy_dates_authors_and_flags",
       "Tests\\Feature\\Legacy\\ProductImportTest::test_invalid_rows_change_nothing",
+      "Tests\\Feature\\Legacy\\SupplierImportTest::test_import_is_idempotent",
+      "Tests\\Feature\\Legacy\\SupplierImportTest::test_imports_suppliers_with_expense_links_and_legacy_defaults",
+      "Tests\\Feature\\Legacy\\SupplierImportTest::test_rows_that_cannot_be_kept_change_nothing",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_a_new_card_is_refused_when_legacy_would_find_the_supplier",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_card_keeps_every_field_including_those_legacy_lost",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_deleted_supplier_does_not_return_after_reload",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_merging_expense_articles_moves_supplier_links",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_name_key_reproduces_legacy_norm_sup_name_merge",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_page_lists_active_suppliers_by_name_with_expense_options",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_roles_without_the_page_cannot_read_or_write",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_second_editor_gets_a_conflict",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_update_changes_fields_and_expense_item_and_keeps_a_deleted_link",
+      "Tests\\Feature\\Suppliers\\SupplierTest::test_validation_messages",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_accepts_isolated_test_database",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_development_connection",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_test_connection_pointing_to_dev_database",
@@ -173,15 +186,15 @@
   },
   "last_verified": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "83d4ecb5aef9fb2b6deeda2b232dacc10f1e3325",
+    "target_ref": "e138856298a498ef64feb54a009f6156e69ffcce",
     "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-13T21:21:22Z",
-    "run_id": "20261013T212024Z-89d3"
+    "completed_at": "2026-10-13T21:37:53Z",
+    "run_id": "20261013T213700Z-4d2a"
   },
   "changelog": {
-    "entries": 14,
-    "last_header": "## 2026-10-14 · 20261013T211159Z-c529",
-    "sha256": "25706b9b6d301066d3aaf1008eee496c660950b93c1f42d83788aaf894d80580"
+    "entries": 15,
+    "last_header": "## 2026-10-14 · 20261013T213700Z-4d2a",
+    "sha256": "4b1f87a6567ca9b294057ef61713c5c259a3ffe9f81b181afce9d957be6bc5ab"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
