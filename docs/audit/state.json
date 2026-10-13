@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261013T193345Z-c555",
-    "started_at": "2026-10-13T19:33:45Z",
+    "run_id": "20261013T195333Z-36db",
+    "started_at": "2026-10-13T19:53:33Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-13T19:34:42Z",
+    "finished_at": "2026-10-13T19:54:47Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "afec3082f98a588c9f093f4d80e429ed190033b5",
-    "at": "2026-10-13T19:33:45Z"
+    "target_ref": "8784d8d7eda5ab0449e2718f4c835665e9667542",
+    "at": "2026-10-13T19:53:33Z"
   },
   "last_reported": {
-    "run_id": "20261013T193345Z-c555",
+    "run_id": "20261013T195333Z-36db",
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
     "source_blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0",
-    "target_ref": "afec3082f98a588c9f093f4d80e429ed190033b5",
-    "logical_key": "f3b2c6f9bb1c02fe",
+    "target_ref": "8784d8d7eda5ab0449e2718f4c835665e9667542",
+    "logical_key": "c6cec5aba6413d10",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-13T19:34:42Z",
-    "report": "daily/2026-10-14/20261013T193345Z-c555.md",
-    "artifact_sha256": "92e174e7e102be75934ec4dc71bf15fbec68101dea97681091a63ba7726f9eff",
+    "completed_at": "2026-10-13T19:54:47Z",
+    "report": "daily/2026-10-14/20261013T195333Z-36db.md",
+    "artifact_sha256": "f713cdaf0be856d5df85896a9e06fee36fe428bbac969180abbe9c1fb173e5ef",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -112,6 +112,17 @@
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_top_level_category_and_zero_sort_order",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_update_keeps_code_and_level_and_records_changes",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_validation_messages_repeat_legacy_texts",
+      "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_import_is_idempotent",
+      "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_invalid_legacy_data_changes_nothing",
+      "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_only_migrated_modules_can_be_imported",
+      "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_real_directory_replaces_the_synthetic_one",
+      "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_seeder_keeps_the_imported_directory",
+      "Tests\\Feature\\Legacy\\LegacyCopyTest::test_client_refuses_injected_table_names",
+      "Tests\\Feature\\Legacy\\LegacyCopyTest::test_client_rejects_foreign_urls_and_odd_table_names",
+      "Tests\\Feature\\Legacy\\LegacyCopyTest::test_credentials_are_not_copied",
+      "Tests\\Feature\\Legacy\\LegacyCopyTest::test_load_verifies_count_and_content_and_is_idempotent",
+      "Tests\\Feature\\Legacy\\LegacyCopyTest::test_rows_changing_during_read_are_reread_then_flagged",
+      "Tests\\Feature\\Legacy\\LegacyCopyTest::test_snapshot_reads_everything_with_get_only",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_accepts_isolated_test_database",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_development_connection",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_test_connection_pointing_to_dev_database",
@@ -120,15 +131,15 @@
   },
   "last_verified": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "afec3082f98a588c9f093f4d80e429ed190033b5",
+    "target_ref": "8784d8d7eda5ab0449e2718f4c835665e9667542",
     "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-13T19:34:42Z",
-    "run_id": "20261013T193345Z-c555"
+    "completed_at": "2026-10-13T19:54:47Z",
+    "run_id": "20261013T195333Z-36db"
   },
   "changelog": {
-    "entries": 8,
-    "last_header": "## 2026-10-14 · 20261013T193345Z-c555",
-    "sha256": "aa03b8d451218373d5c8b181ede26c5946b89314886aba281de1caaf2c09f372"
+    "entries": 9,
+    "last_header": "## 2026-10-14 · 20261013T195333Z-36db",
+    "sha256": "396f903326e56ec0f900ba140291e38bd7567a5636218098c86e62e3f16f2c70"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
