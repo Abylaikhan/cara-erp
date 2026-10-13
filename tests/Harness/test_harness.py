@@ -53,6 +53,10 @@ case "${1:-}" in
       done < tests.txt
       echo '</testsuite></testsuites>'; } > "$out"
     exit $fail ;;
+  net)
+    n=$(cat .net-attempts 2>/dev/null || echo 0); echo $((n+1)) > .net-attempts
+    if [ -f net-recovers.txt ] && [ "$n" -ge 1 ]; then echo ok; exit 0; fi
+    echo "failed to solve: DeadlineExceeded: context deadline exceeded" >&2; exit 1 ;;
   *) echo "unknown check step: ${1:-}" >&2; exit 64 ;;
 esac
 """
@@ -275,6 +279,26 @@ class HarnessScenarios(HarnessCase):
         r = self.report()
         self.assertEqual(r['findings']['closed'], [ids['Fake::test_a']])
         self.assertEqual(r['findings']['repeated'], [ids['Fake::test_b']])
+
+    def test_network_failure_is_blocked_not_a_product_defect(self):
+        self.cfg['target']['steps'].append({'id': 'TGT-NET', 'step': 'net', 'title': 'Needs network', 'required': True})
+        self.write_config()
+        self.assertEqual(self.audit(), 2)
+        r = self.report()
+        net = self.check(r, 'TGT-NET')
+        self.assertEqual(net['status'], 'BLOCKED')
+        self.assertTrue(net['details']['retried'])
+        self.assertNotEqual(r['product_status'], 'FAIL')
+        self.assertEqual(r['findings']['new'], [], 'an environment failure is not a product finding')
+
+    def test_transient_network_failure_passes_after_retry(self):
+        self.commit_target({'net-recovers.txt': 'yes\n'}, 'network recovers on retry')
+        self.cfg['target']['steps'].append({'id': 'TGT-NET', 'step': 'net', 'title': 'Needs network', 'required': True})
+        self.write_config()
+        self.assertEqual(self.audit(), 0)
+        net = self.check(self.report(), 'TGT-NET')
+        self.assertEqual(net['status'], 'PASS')
+        self.assertTrue(net['details']['retried'])
 
     def test_h11_concurrent_run_gets_already_running(self):
         work = self.root / '.local-audit'

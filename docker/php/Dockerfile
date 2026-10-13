@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # PHP-FPM + Composer image for PromTech ERP (Laravel 13).
 # Base images are pinned to exact versions; update them deliberately and record the change in docs/adr.
 FROM composer:2.10.3 AS composer

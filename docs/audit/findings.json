@@ -2,6 +2,37 @@
   "schema": "promtech.audit-findings/1",
   "findings": [
     {
+      "id": "AF-c72ca42a",
+      "check_id": "TGT-DEPS",
+      "locator": "TGT-DEPS",
+      "title": "Установка зависимостей из composer.lock и package-lock.json: exit code 1",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T192649Z-5ce2",
+        "target_ref": "1665f7ada78d1057985bd3f6c8817cb01c113ac0",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T19:26:49Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T192649Z-5ce2",
+          "event": "OPENED",
+          "target_ref": "1665f7ada78d1057985bd3f6c8817cb01c113ac0",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        }
+      ],
+      "status": "OPEN",
+      "last_seen": {
+        "run_id": "20261013T192649Z-5ce2",
+        "target_ref": "1665f7ada78d1057985bd3f6c8817cb01c113ac0",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T19:26:49Z"
+      },
+      "closed": null
+    },
+    {
       "id": "AF-15a0c004",
       "check_id": "TGT-TESTS",
       "locator": "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_development_connection",

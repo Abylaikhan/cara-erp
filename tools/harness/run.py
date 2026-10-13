@@ -44,6 +44,12 @@ from target import TargetError, TargetRunner, parse_junit  # noqa: E402
 
 SUITE_BASE = 'suite-1'
 
+# Environment failures (registry/network), not product defects: such a step is retried once, then BLOCKED.
+NETWORK_FAILURE = re.compile(
+    r'DeadlineExceeded|context deadline exceeded|Could not resolve host|Temporary failure in name resolution|'
+    r'EAI_AGAIN|ETIMEDOUT|ECONNRESET|ECONNREFUSED|TLS handshake timeout|i/o timeout|network is unreachable|'
+    r'Connection timed out|curl error 28|failed to fetch anonymous token|toomanyrequests', re.I)
+
 
 @contextlib.contextmanager
 def timed(check: Check) -> Iterator[Check]:
@@ -374,13 +380,23 @@ class Audit:
                 c.set('BLOCKED', 'зависимости не установлены (TGT-DEPS)')
                 continue
             res = runner.run_step(path, spec['step'], timeout, junit=spec.get('junit'))
+            output = res.output()
+            network = not res.ok and not res.timed_out and res.exit_code != 64 and bool(NETWORK_FAILURE.search(output))
+            if network:  # one retry: registries and package mirrors fail transiently
+                retry = runner.run_step(path, spec['step'], timeout, junit=spec.get('junit'))
+                output += '\n[harness] network failure detected, retrying once\n' + retry.output()
+                res = retry
+                network = not res.ok and not res.timed_out and bool(NETWORK_FAILURE.search(retry.output()))
+                c.details['retried'] = True
             c.command = f"scripts/check.sh {spec['step']}"
             c.duration_s, c.exit_code = res.duration_s, res.exit_code
-            c.evidence.append(self.save_log(f"target-{spec['step']}", res.output()))
+            c.evidence.append(self.save_log(f"target-{spec['step']}", output))
             if res.exit_code == 64:
                 c.set('BLOCKED', 'шаг не поддерживается этой версией целевого кода')
             elif res.timed_out:
                 c.set('BLOCKED', f'превышен таймаут {timeout} с')
+            elif network:
+                c.set('BLOCKED', 'сеть или реестр пакетов/образов недоступны (повтор не помог) — это сбой среды, не продукта')
             elif res.ok:
                 c.set('PASS')
             else:
