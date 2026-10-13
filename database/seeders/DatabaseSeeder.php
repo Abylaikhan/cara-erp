@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
 use App\Models\ExpenseCategory;
 use App\Models\Product;
 use App\Models\User;
@@ -59,6 +60,24 @@ class DatabaseSeeder extends Seeder
         }
     }
 
+    /** Synthetic customers of several channels; skipped once real customers were imported or exist. */
+    private function seedCustomers(): void
+    {
+        if (Customer::query()->exists() || DB::table('legacy_id_map')->where('target_table', 'customers')->exists()) {
+            return;
+        }
+        $items = [
+            ['ТОО «Демо Мебель»', Customer::LEGAL, 'office', '000000000001', '+7 700 000 0001'],
+            ['ИП Демо', Customer::LEGAL, 'office', null, '+7 700 000 0002'],
+            ['Демо Покупатель', Customer::INDIVIDUAL, 'office', null, null],
+            ['Демо Клиент Армада', 'client', 'salon_armada', null, '+7 700 000 0003'],
+            ['Демо Клиент Назарбаева', 'client', 'salon_nazarbayeva', null, '+7 700 000 0004'],
+        ];
+        foreach ($items as [$name, $type, $channel, $inn, $phone]) {
+            (new Customer(['name' => $name, 'type' => $type, 'inn' => $inn, 'phone' => $phone]))->forceFill(['channel' => $channel])->save();
+        }
+    }
+
     public function run(): void
     {
         if (app()->environment('production')) {
@@ -81,6 +100,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->seedProducts();
+        $this->seedCustomers();
 
         // Real directory imported from the legacy snapshot (legacy:import) replaces the synthetic one.
         if (DB::table('legacy_id_map')->where('target_table', 'expense_categories')->exists()) {

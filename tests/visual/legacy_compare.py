@@ -1,4 +1,5 @@
-"""Visual comparison legacy ↔ target (ТЗ UI-03): login screen and M14 «Статьи расходов», dark and light themes, 1440×900.
+"""Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» (with their
+modals), dark and light themes, 1440×900.
 
 Legacy runs from the accepted snapshot in .local-audit/blobs with every network request blocked except Google Fonts —
 it never reaches the legacy backend. Both sides get the same synthetic directory (DatabaseSeeder).
@@ -67,6 +68,12 @@ with sync_playwright() as p:
         if product_id is not None:
             page.locator('#catalog-tbody tr').first.locator('button').first.dispatch_event('click'); page.wait_for_timeout(300)
             page.screenshot(path=str(OUT / f'target-catalog-modal-{theme}.png'))
+        page.goto(TARGET + '/customers', wait_until='networkidle'); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-customers-{theme}.png'))
+        persons = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['persons']
+        if persons:
+            page.locator('#persons-tbody tr').first.locator('button').dispatch_event('click'); page.wait_for_timeout(300)
+            page.screenshot(path=str(OUT / f'target-customers-modal-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -111,8 +118,23 @@ with sync_playwright() as p:
         if product_id is not None:
             page.evaluate(f"openProductModal('{product_id}')"); page.wait_for_timeout(300)
             page.screenshot(path=str(OUT / f'legacy-catalog-modal-{theme}.png'))
+        # Legacy gets the same persons (all of the office channel). The type is passed as the target classifies it: the
+        # legal-form fix is a documented deviation (docs/adr/0002-ui-deviations.md, item 13), not a layout difference.
+        page.evaluate("""(persons) => {
+            closeModal('productModal');
+            personsData = persons.map((p, i) => ({id: i + 1, sbId: String(p.id), name: p.name, type: p.is_legal ? 'Юр. лицо' : 'Физ. лицо',
+                idNum: p.inn || '', phone: p.phone || '', email: '', address: '', source: 'office', comment: ''}));
+            _cacheLoaded.customers = true;
+            showPage('customers', document.querySelector(".nav-item[onclick*=\\"showPage('customers'\\"]"));
+            renderPersons();
+        }""", persons)
+        page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'legacy-customers-{theme}.png'))
+        if persons:
+            page.evaluate("openPersonModal(1)"); page.wait_for_timeout(300)  # a number: the row onclick passes a string and fails (ADR-0006)
+            page.screenshot(path=str(OUT / f'legacy-customers-modal-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))
