@@ -357,6 +357,8 @@ class Audit:
                 tgt['changed_files'] = runner.changed_files(tgt['base_ref'], head)
                 path, wlog = runner.worktree(head)
                 self.redactor.add(runner.secrets)
+                if (path / 'compose.yaml').is_file():
+                    wlog += runner.reset_databases(path)
             tref.set('PASS', details={'head': head, 'worktree': path.relative_to(self.root).as_posix()})
             tref.evidence.append(self.save_log('target-worktree', '\n'.join(r.output() for r in wlog)))
         except TargetError as exc:
@@ -596,6 +598,34 @@ class Audit:
         return report['exit_code']
 
 
+def close_findings(root: Path, ids: List[str], reason: str, evidence: str) -> int:
+    """Recorded human/agent decision; the evidence run must exist and the finding history is kept."""
+    cfg = load_config(local=False)
+    reg_path, log = root / cfg['paths']['findings'], root / cfg['paths']['changelog']
+    if not list((root / cfg['paths']['reports']).rglob(f'{evidence}.json')):
+        print(f'нет отчёта {evidence}: решение должно ссылаться на существующий запуск', file=sys.stderr)
+        return 2
+    registry = read_json(reg_path) or {'findings': []}
+    known = {f['id']: f for f in registry['findings']}
+    missing = [i for i in ids if i not in known]
+    if missing:
+        print('неизвестные находки: ' + ', '.join(missing), file=sys.stderr)
+        return 2
+    actor = subprocess.run(['git', '-C', str(root), 'config', 'user.name'], stdout=subprocess.PIPE).stdout.decode().strip() or 'unknown'
+    at = iso(now_utc())
+    for i in ids:
+        f = known[i]
+        f['status'] = 'CLOSED'
+        f['closed'] = {'run_id': evidence, 'manual': True, 'reason': reason, 'by': actor, 'at': at}
+        f['history'].append({'run_id': evidence, 'event': 'MANUAL_CLOSE', 'reason': reason, 'by': actor, 'at': at})
+    write_json(reg_path, registry)
+    text = log.read_text(encoding='utf-8') if log.is_file() else publish.CHANGELOG_HEADER
+    atomic_write(log, text.rstrip('\n') + f"\n- Решение по находкам ({at}, {actor}): закрыты вручную {', '.join(f'`{i}`' for i in ids)}; "
+                 f"причина: {publish.data_text(reason, 300)}; доказательство — запуск `{evidence}`.\n")
+    print(f'закрыто: {len(ids)}')
+    return 0
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest='cmd', required=True)
@@ -607,7 +637,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     daily.add_argument('--root', type=Path, default=REPO_ROOT)
     status = sub.add_parser('status', help='print state pointers')
     status.add_argument('--root', type=Path, default=REPO_ROOT)
+    close = sub.add_parser('close-findings', help='manual decision: close findings with a reason and evidence run')
+    close.add_argument('ids', nargs='+')
+    close.add_argument('--reason', required=True)
+    close.add_argument('--evidence', required=True, help='run_id whose results justify the decision')
+    close.add_argument('--root', type=Path, default=REPO_ROOT)
     args = ap.parse_args(argv)
+    if args.cmd == 'close-findings':
+        return close_findings(args.root.resolve(), args.ids, args.reason, args.evidence)
     if args.cmd == 'status':
         cfg = load_config(local=False)
         print(Path(args.root / cfg['paths']['state']).read_text(encoding='utf-8') if (args.root / cfg['paths']['state']).is_file() else 'нет состояния')

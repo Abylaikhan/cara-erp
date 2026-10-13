@@ -9,7 +9,11 @@
         "repository": "https://github.com/Cara-ERP/promtech-erp",
         "branch": "main",
         "path": "index.html",
-        "watched_paths": ["Index.html", "indexx.html", "indrx.html"],
+        "watched_paths": [
+            "Index.html",
+            "indexx.html",
+            "indrx.html"
+        ],
         "accepted_ref": {
             "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
             "sha256": "e1715f8e4e2d243f6638cfbbb9005ad9e3409885c3776184b6a383d8d2586b9b",
@@ -22,23 +26,87 @@
         "compose_project": "promtech-audit",
         "image": "promtech-erp-app:audit",
         "steps": [
-            {"id": "TGT-DEPS", "step": "deps", "title": "Установка зависимостей из composer.lock и package-lock.json", "required": true},
-            {"id": "TGT-PINT", "step": "pint", "title": "Стиль PHP (pint --test)", "required": true},
-            {"id": "TGT-TYPES", "step": "types", "title": "Типы TypeScript/Vue (vue-tsc)", "required": true},
-            {"id": "TGT-BUILD", "step": "build", "title": "Production-сборка (vite build)", "required": true},
-            {"id": "TGT-TESTS", "step": "tests", "title": "Backend-тесты на изолированной PostgreSQL", "required": true, "junit": "storage/logs/junit.xml"},
-            {"id": "TGT-MIGRATE", "step": "migrate", "title": "Миграции и синтетический seed на чистой PostgreSQL", "required": true},
-            {"id": "TGT-DB", "step": "dbcheck", "title": "Подключение именно к PostgreSQL (dev и test)", "required": true},
-            {"id": "TGT-HTTP", "step": "http", "title": "HTTP smoke: /up и /login через nginx", "required": true}
+            {
+                "id": "TGT-DEPS",
+                "step": "deps",
+                "title": "Установка зависимостей из composer.lock и package-lock.json",
+                "required": true
+            },
+            {
+                "id": "TGT-PINT",
+                "step": "pint",
+                "title": "Стиль PHP (pint --test)",
+                "required": true
+            },
+            {
+                "id": "TGT-TYPES",
+                "step": "types",
+                "title": "Типы TypeScript/Vue (vue-tsc)",
+                "required": true
+            },
+            {
+                "id": "TGT-BUILD",
+                "step": "build",
+                "title": "Production-сборка (vite build)",
+                "required": true
+            },
+            {
+                "id": "TGT-TESTS",
+                "step": "tests",
+                "title": "Backend-тесты на изолированной PostgreSQL",
+                "required": true,
+                "junit": "storage/logs/junit.xml"
+            },
+            {
+                "id": "TGT-MIGRATE",
+                "step": "migrate",
+                "title": "Миграции и синтетический seed на чистой PostgreSQL",
+                "required": true
+            },
+            {
+                "id": "TGT-DB",
+                "step": "dbcheck",
+                "title": "Подключение именно к PostgreSQL (dev и test)",
+                "required": true
+            },
+            {
+                "id": "TGT-HTTP",
+                "step": "http",
+                "title": "HTTP smoke: /up и /login через nginx",
+                "required": true
+            }
         ],
         "planned_checks": [
-            {"id": "TGT-PHPSTAN", "title": "Статанализ PHP (PHPStan/Larastan)"},
-            {"id": "TGT-LINT", "title": "Frontend lint"},
-            {"id": "TGT-VITEST", "title": "Frontend unit-тесты (Vitest)"},
-            {"id": "TGT-E2E", "title": "Сквозные сценарии Playwright"},
-            {"id": "TGT-VISUAL", "title": "Визуальное сравнение с эталоном legacy"},
-            {"id": "TGT-BACKUP", "title": "Backup → restore-check в отдельную БД"}
-        ]
+            {
+                "id": "TGT-PHPSTAN",
+                "title": "Статанализ PHP (PHPStan/Larastan)"
+            },
+            {
+                "id": "TGT-LINT",
+                "title": "Frontend lint"
+            },
+            {
+                "id": "TGT-VITEST",
+                "title": "Frontend unit-тесты (Vitest)"
+            },
+            {
+                "id": "TGT-E2E",
+                "title": "Сквозные сценарии Playwright"
+            },
+            {
+                "id": "TGT-VISUAL",
+                "title": "Визуальное сравнение с эталоном legacy"
+            },
+            {
+                "id": "TGT-BACKUP",
+                "title": "Backup → restore-check в отдельную БД"
+            }
+        ],
+        "ephemeral_volumes": [
+            "pgdata",
+            "pgdata-test"
+        ],
+        "dev_compose_project": "promtech-erp"
     },
     "paths": {
         "work": ".local-audit",

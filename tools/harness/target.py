@@ -30,8 +30,8 @@ class TargetRunner:
         self.work = work
         self.project = cfg['target']['compose_project']
         self.image = cfg['target']['image']
-        if 'audit' not in self.project:
-            raise TargetError('compose project for audits must contain "audit" to stay apart from dev')
+        if 'audit' not in self.project or self.project == cfg['target'].get('dev_compose_project'):
+            raise TargetError('compose project for audits must contain "audit" and differ from the dev project')
         self.secrets: List[str] = []
 
     def git(self, *args: str, cwd: Optional[Path] = None) -> CmdResult:
@@ -119,6 +119,13 @@ class TargetRunner:
             env['JUNIT'] = junit
             (path / junit).unlink(missing_ok=True)
         return run_cmd(['bash', 'scripts/check.sh', step], cwd=path, env=env, timeout=timeout)
+
+    def reset_databases(self, path: Path) -> List[CmdResult]:
+        """Fresh PostgreSQL for every audit: drop only this audit project's database volumes (never dev)."""
+        log = [self.teardown(path)]
+        for name in self.cfg['target'].get('ephemeral_volumes', []):
+            log.append(run_cmd(['docker', 'volume', 'rm', '-f', f'{self.project}_{name}'], timeout=120))
+        return log
 
     def teardown(self, path: Path) -> CmdResult:
         return run_cmd(['docker', 'compose', 'down', '--remove-orphans'], cwd=path, env=self.env(), timeout=300)
