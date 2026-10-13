@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261013T210229Z-5f83",
-    "started_at": "2026-10-13T21:02:29Z",
+    "run_id": "20261013T210458Z-816f",
+    "started_at": "2026-10-13T21:04:58Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-13T21:04:40Z",
+    "finished_at": "2026-10-13T21:07:08Z",
     "exit_code": 2
   },
   "last_observed": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "b6db9cece4c3ca047c6871f1a5e047d9fe90182d",
-    "at": "2026-10-13T21:02:29Z"
+    "target_ref": "b3bf86f601c927c549d0d172990709565589a12a",
+    "at": "2026-10-13T21:04:58Z"
   },
   "last_reported": {
-    "run_id": "20261013T210229Z-5f83",
+    "run_id": "20261013T210458Z-816f",
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
     "source_blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0",
-    "target_ref": "b6db9cece4c3ca047c6871f1a5e047d9fe90182d",
-    "logical_key": "75220408b7a01dec",
+    "target_ref": "b3bf86f601c927c549d0d172990709565589a12a",
+    "logical_key": "7b9055ea9d3892a6",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-13T21:04:40Z",
-    "report": "daily/2026-10-14/20261013T210229Z-5f83.md",
-    "artifact_sha256": "a481790ed8d67ce5f1c38ec89d2b66698d61fbd54519b863703a45cccd1f1ee8",
+    "completed_at": "2026-10-13T21:07:08Z",
+    "report": "daily/2026-10-14/20261013T210458Z-816f.md",
+    "artifact_sha256": "7c79718121045ab8dca4fe1e0af003409a489afe351edc28a3da097dba6ac910",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -165,9 +165,9 @@
     "run_id": "20261013T204147Z-ed6d"
   },
   "changelog": {
-    "entries": 12,
-    "last_header": "## 2026-10-14 · 20261013T210229Z-5f83",
-    "sha256": "a920f791092cda7f432dcf30ad458ee9ffee0d26aeb8e31ecaa2b314bca31451"
+    "entries": 13,
+    "last_header": "## 2026-10-14 · 20261013T210458Z-816f",
+    "sha256": "c37e940f59b1635fbc1873d1c9c82d9372967e98b7182cfb6cdd872a89a99fbf"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
