@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261013T195333Z-36db",
-    "started_at": "2026-10-13T19:53:33Z",
+    "run_id": "20261013T201430Z-5164",
+    "started_at": "2026-10-13T20:14:30Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-13T19:54:47Z",
+    "finished_at": "2026-10-13T20:15:22Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "8784d8d7eda5ab0449e2718f4c835665e9667542",
-    "at": "2026-10-13T19:53:33Z"
+    "target_ref": "4f88868d3c14a198723b9d6ad7e62a8d2d2bfd8e",
+    "at": "2026-10-13T20:14:30Z"
   },
   "last_reported": {
-    "run_id": "20261013T195333Z-36db",
+    "run_id": "20261013T201430Z-5164",
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
     "source_blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0",
-    "target_ref": "8784d8d7eda5ab0449e2718f4c835665e9667542",
-    "logical_key": "c6cec5aba6413d10",
+    "target_ref": "4f88868d3c14a198723b9d6ad7e62a8d2d2bfd8e",
+    "logical_key": "78b2e68a7948046f",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-13T19:54:47Z",
-    "report": "daily/2026-10-14/20261013T195333Z-36db.md",
-    "artifact_sha256": "f713cdaf0be856d5df85896a9e06fee36fe428bbac969180abbe9c1fb173e5ef",
+    "completed_at": "2026-10-13T20:15:22Z",
+    "report": "daily/2026-10-14/20261013T201430Z-5164.md",
+    "artifact_sha256": "34b5a819e713e5b5d47ee5cc1e4ce559602566d324fb2f5c10530362b49a42b3",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -92,6 +92,15 @@
       "Tests\\Feature\\Auth\\LoginTest::test_login_page_never_contains_credentials",
       "Tests\\Feature\\Auth\\LoginTest::test_pin_sign_in_is_not_available_until_employees_are_migrated",
       "Tests\\Feature\\Auth\\LoginTest::test_repeated_failures_are_throttled",
+      "Tests\\Feature\\Catalog\\ProductTest::test_author_edits_own_product_others_only_mark_it_for_deletion",
+      "Tests\\Feature\\Catalog\\ProductTest::test_concurrent_edit_is_rejected",
+      "Tests\\Feature\\Catalog\\ProductTest::test_created_product_keeps_exact_prices_and_author_after_reload",
+      "Tests\\Feature\\Catalog\\ProductTest::test_director_edits_any_product_and_product_without_author_is_editable",
+      "Tests\\Feature\\Catalog\\ProductTest::test_only_director_or_accountant_deletes_and_deleted_product_does_not_return",
+      "Tests\\Feature\\Catalog\\ProductTest::test_order_follows_legacy_database_not_byte_order",
+      "Tests\\Feature\\Catalog\\ProductTest::test_page_lists_active_products_with_rights",
+      "Tests\\Feature\\Catalog\\ProductTest::test_roles_without_catalog_cannot_read_or_write",
+      "Tests\\Feature\\Catalog\\ProductTest::test_validation_messages_repeat_legacy_texts",
       "Tests\\Feature\\ExampleTest::test_guest_is_redirected_to_login",
       "Tests\\Feature\\ExampleTest::test_health_endpoint_is_up",
       "Tests\\Feature\\ExampleTest::test_logout_ends_session",
@@ -123,6 +132,9 @@
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_load_verifies_count_and_content_and_is_idempotent",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_rows_changing_during_read_are_reread_then_flagged",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_snapshot_reads_everything_with_get_only",
+      "Tests\\Feature\\Legacy\\ProductImportTest::test_import_is_idempotent",
+      "Tests\\Feature\\Legacy\\ProductImportTest::test_imports_products_keeping_legacy_dates_authors_and_flags",
+      "Tests\\Feature\\Legacy\\ProductImportTest::test_invalid_rows_change_nothing",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_accepts_isolated_test_database",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_development_connection",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_test_connection_pointing_to_dev_database",
@@ -131,15 +143,15 @@
   },
   "last_verified": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "8784d8d7eda5ab0449e2718f4c835665e9667542",
+    "target_ref": "4f88868d3c14a198723b9d6ad7e62a8d2d2bfd8e",
     "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-13T19:54:47Z",
-    "run_id": "20261013T195333Z-36db"
+    "completed_at": "2026-10-13T20:15:22Z",
+    "run_id": "20261013T201430Z-5164"
   },
   "changelog": {
-    "entries": 9,
-    "last_header": "## 2026-10-14 · 20261013T195333Z-36db",
-    "sha256": "396f903326e56ec0f900ba140291e38bd7567a5636218098c86e62e3f16f2c70"
+    "entries": 10,
+    "last_header": "## 2026-10-14 · 20261013T201430Z-5164",
+    "sha256": "e76b1d24c8910c55efebbaf30c14c1250eded235ff8ad903b9af3de1df0d3e28"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
