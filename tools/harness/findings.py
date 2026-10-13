@@ -21,10 +21,10 @@ def candidates(checks: List[Check], junit: Optional[Dict[str, Any]]) -> List[Dic
     for c in checks:
         if c.status != 'FAIL' or not c.required:
             continue
-        if c.id == 'TGT-TESTS' and junit and any(x['status'] in ('failed', 'error') for x in junit['cases']):
+        if junit and c.details.get('tests') is not None and any(x['status'] in ('failed', 'error') for x in junit['cases']):
             for case in junit['cases']:
                 if case['status'] in ('failed', 'error'):
-                    out.append(_make(c, case['id'], f'Падает тест {case["id"]}', 'high'))
+                    out.append(dict(_make(c, case['id'], f'Падает тест {case["id"]}', 'high'), test_case=True))
         elif c.id == 'SRC-SYNTAX':
             for s in c.details.get('failed_scripts', []) or [{}]:
                 out.append(_make(c, f"script#{s.get('index')}", f"Синтаксическая ошибка в inline-скрипте #{s.get('index')} (строка {s.get('line')})", 'high'))
@@ -71,13 +71,14 @@ def update(registry: Dict[str, Any], found: List[Dict[str, Any]], checks: List[C
         if f['id'] in seen_now or f['status'] == 'CLOSED':
             continue
         c = by_check.get(f['check_id'])
-        if c is None or c.status != 'PASS':
-            continue  # no evidence this run: stays as is
+        test_level = junit is not None and f.get('test_case', f['check_id'] == 'TGT-TESTS' and f['locator'] != f['check_id'])
+        if c is None or (c.status != 'PASS' and not (test_level and c.status == 'FAIL')):
+            continue  # no evidence this run: stays as is (a test-level finding is judged by its own test case)
         if f.get('close_policy') == 'manual':
             result['needs_review'].append(f['id'])
             continue
         ref_key = 'target_ref' if c.stage == 'target' else 'source_ref'
-        if f['check_id'] == 'TGT-TESTS' and junit:
+        if test_level:
             if f['locator'] not in all_cases:
                 f['status'] = 'NEEDS_REVIEW'
                 f['history'].append({'run_id': run['run_id'], 'event': 'TEST_REMOVED', 'target_ref': run['target_ref']})

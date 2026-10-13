@@ -266,6 +266,16 @@ class HarnessScenarios(HarnessCase):
         self.assertEqual(f['first_seen']['target_ref'], defect)
         self.assertEqual(f['closed']['target_ref'], fix)
 
+    def test_fixed_test_closes_while_another_still_fails(self):
+        self.commit_target({'tests.txt': 'test_a:fail\ntest_b:fail\n'}, 'two failures')
+        self.audit()
+        ids = {i['title'].split()[-1]: i['id'] for i in self.report()['findings']['items']}
+        self.commit_target({'tests.txt': 'test_a:pass\ntest_b:fail\n'}, 'fix test_a only')
+        self.assertEqual(self.audit(), 1)
+        r = self.report()
+        self.assertEqual(r['findings']['closed'], [ids['Fake::test_a']])
+        self.assertEqual(r['findings']['repeated'], [ids['Fake::test_b']])
+
     def test_h11_concurrent_run_gets_already_running(self):
         work = self.root / '.local-audit'
         work.mkdir()
