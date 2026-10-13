@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Legacy shell: sidebar (L2006–2143) and topbar (L2147–2158).
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { SharedProps } from '@/types';
 
 const page = usePage<SharedProps>();
@@ -10,6 +10,20 @@ const current = computed(() => page.props.page?.id ?? null);
 const title = computed(() => page.props.page?.title ?? page.props.appName);
 const canMrp = computed(() => page.props.nav.some((s) => s.items.some((i) => i.id === 'mrp')));
 const isLight = ref(typeof document !== 'undefined' && document.body.classList.contains('light-theme'));
+
+// Legacy toast (saveProduct L1121): green box bottom-right for 3 seconds.
+const toast = ref<string | null>(null);
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
+watch(
+    () => page.props.flash.toast,
+    (message) => {
+        if (!message) return;
+        toast.value = message;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => (toast.value = null), 3000);
+    },
+    { immediate: true },
+);
 
 function toggleTheme(): void {
     const light = document.body.classList.toggle('light-theme');
@@ -93,5 +107,11 @@ function logout(): void {
         <div id="content">
             <slot />
         </div>
+    </div>
+    <div
+        v-if="toast"
+        style="position: fixed; bottom: 20px; right: 20px; background: var(--green); color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; z-index: 9999"
+    >
+        {{ toast }}
     </div>
 </template>

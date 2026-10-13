@@ -3,7 +3,8 @@
 Laravel 13 + Inertia 3 + Vue 3 (TypeScript) + PrimeVue 4 + PostgreSQL 17, локально полностью в Docker Compose.
 ТЗ и аналитика (пакет PromTech-ERP-Harness 1.1) хранятся вне репозитория, локально в папке `docs/` рядом с `application/`: `HARNESS-DEVELOPMENT-SPEC.md`, `TECHNICAL-SPEC.md`.
 
-**Состояние:** оболочка 1:1 (меню, шапка, обе темы), вход и серверные права по ролям, раздел M14 «Статьи расходов».
+**Состояние:** оболочка 1:1 (меню, шапка, обе темы), вход и серверные права по ролям, разделы M14 «Статьи расходов» и M07 «Каталог»
+(с реальными данными из копии legacy).
 Остальные разделы ещё не перенесены — их страницы честно об этом сообщают. Решения и отклонения — `docs/adr/`,
 трассировка требований — `docs/coverage/requirements.csv`.
 
@@ -29,7 +30,7 @@ make help     # все команды (test, build, logs, shell, psql, ps)
 
 ```sh
 make legacy-copy                              # копия всех 38 таблиц Supabase (только GET) и загрузка в схему legacy со сверкой
-make legacy-import ENTITY=expense_categories  # перенос таблицы в перенесённый раздел (сейчас — M14)
+make legacy-import ENTITY=products            # перенос таблицы в перенесённый раздел (сейчас: expense_categories, products)
 ```
 
 Нужны `LEGACY_SUPABASE_URL` и `LEGACY_SUPABASE_ANON_KEY` в `.env`. Снимок с персональными данными хранится только локально

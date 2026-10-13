@@ -12,6 +12,7 @@
 - Перенос 1:1: стили legacy — `resources/css/legacy.css` без правок (свои правила — `app.css`); разметку и тексты брать из снимка
   `.local-audit/blobs/<blob>.html`; отличия — только с записью в `docs/adr/0002-ui-deviations.md`; проверка — `make visual-compare`.
 - Доступ: страницы и меню — `config/erp.php` + `App\Support\Erp`; каждое действие проверяет сервер (Policy/FormRequest), а не скрытая кнопка.
-- Новый раздел: строки в `docs/coverage/requirements.csv` (legacy_locator = имена функций legacy), тесты на PostgreSQL, статус в трекере.
-- Legacy Supabase — строго только чтение: никаких запросов кроме `legacy:snapshot` (GET). Снимки и реальные данные — только в
+- Новый раздел: строки в `docs/coverage/requirements.csv` (legacy_locator = имена функций legacy), тесты на PostgreSQL, статус в трекере;
+  импортёр `legacy:import <таблица>` с построчной SQL-сверкой; текстовые столбцы для сортировки — `COLLATE "en-US-x-icu"` (как в Supabase).
+- Legacy Supabase — строго только чтение: только GET через `App\Legacy\SupabaseReadOnlyClient` (`legacy:snapshot`, сверки). Снимки и реальные данные — только в
   `.local-audit/` и локальной БД; не выводить строки реальных данных в чат, логи, отчёты, тесты и коммиты.

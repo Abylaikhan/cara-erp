@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\ExpenseCategory;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +43,22 @@ class DatabaseSeeder extends Seeder
         ]],
     ];
 
+    /** A few synthetic products for a fresh environment; skipped once real products were imported or exist. */
+    private function seedProducts(): void
+    {
+        if (Product::query()->exists() || DB::table('legacy_id_map')->where('target_table', 'products')->exists()) {
+            return;
+        }
+        $items = [
+            ['Стул «Демо 1»', 'Стул', 45000, 38000], ['Стул «Демо 2»', 'Стул', 52000, 44000],
+            ['Стол «Демо»', 'Стол', 180000, 150000], ['Кровать «Демо»', 'Кровать', 320000, 270000],
+            ['Диван «Демо»', 'Мягкая мебель', 410000, 0], ['Шкаф «Демо»', 'Корпусная мебель', 0, 0],
+        ];
+        foreach ($items as [$name, $category, $retail, $wholesale]) {
+            Product::query()->create(['name' => $name, 'category' => $category, 'price_retail' => $retail, 'price_wholesale' => $wholesale, 'unit' => 'шт']);
+        }
+    }
+
     public function run(): void
     {
         if (app()->environment('production')) {
@@ -62,6 +79,8 @@ class DatabaseSeeder extends Seeder
                 'password' => $hash,
             ]);
         }
+
+        $this->seedProducts();
 
         // Real directory imported from the legacy snapshot (legacy:import) replaces the synthetic one.
         if (DB::table('legacy_id_map')->where('target_table', 'expense_categories')->exists()) {

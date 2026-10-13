@@ -23,5 +23,5 @@ export interface SharedProps {
     auth: { user: SidebarUser | null };
     nav: NavSection[];
     page: { id: string; title: string; module: string } | null;
-    flash: { alert: string | null };
+    flash: { alert: string | null; toast: string | null };
 }

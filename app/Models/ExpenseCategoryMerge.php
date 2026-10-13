@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPreciseTimestamps;
 use Illuminate\Database\Eloquent\Model;
 
 class ExpenseCategoryMerge extends Model
 {
+    use HasPreciseTimestamps;
+
     public $timestamps = false;
 
     protected $fillable = ['from_id', 'to_id', 'user_id', 'references_before', 'references_after'];

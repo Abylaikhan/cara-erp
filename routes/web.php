@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProductController;
 use App\Support\Erp;
 use Illuminate\Support\Facades\Route;
 
@@ -25,8 +26,16 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{category}', 'destroy')->whereNumber('category')->name('destroy');
     });
 
+    // M07 «Каталог»
+    Route::middleware('page:catalog')->prefix('catalog')->name('catalog.')->controller(ProductController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('/{product}', 'update')->whereNumber('product')->name('update');
+        Route::delete('/{product}', 'destroy')->whereNumber('product')->name('destroy');
+    });
+
     // Pages that are not migrated yet — the menu stays 1:1, the page says so honestly.
-    $migrated = ['expense_cats'];
+    $migrated = ['expense_cats', 'catalog'];
     Route::get('/{page}', [PageController::class, 'notMigrated'])
         ->whereIn('page', array_values(array_diff(array_keys(Erp::pages()), $migrated)))
         ->middleware('page')->name('page');

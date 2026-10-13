@@ -60,6 +60,13 @@ with sync_playwright() as p:
         first = sorted((c for c in cats if c['parent_code']), key=lambda c: (c['sort_order'], c['code']))[0]['code']
         page.locator('#ec-table-wrap').get_by_text(first, exact=True).locator('xpath=ancestor::tr').locator('button').dispatch_event('click')  # no scroll: legacy opens it in place; page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-m14-modal-{theme}.png'))
+        page.goto(TARGET + '/catalog', wait_until='networkidle'); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-catalog-{theme}.png'))
+        products = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['products']
+        product_id = products[0]['id'] if products else None
+        if product_id is not None:
+            page.locator('#catalog-tbody tr').first.locator('button').first.dispatch_event('click'); page.wait_for_timeout(300)
+            page.screenshot(path=str(OUT / f'target-catalog-modal-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -90,8 +97,22 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-m14-{theme}.png'))
         page.evaluate(f"openExpCatModal('{first}', null, false)"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-m14-modal-{theme}.png'))
+        page.evaluate("""(products) => {
+            window._currentUser = 'director';
+            catalogData = products.map(p => ({...p, active: true}));
+            catalogLoaded = true;
+            const sel = document.getElementById('catalog-cat-filter');
+            sel.innerHTML = '<option value="">Все категории</option>' + [...new Set(catalogData.map(p => p.category))].sort().map(c => `<option value="${c}">${c}</option>`).join('');
+            showPage('catalog', document.querySelector(".nav-item[onclick*=\\"showPage('catalog'\\"]"));
+            renderCatalog();
+        }""", products)
+        page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'legacy-catalog-{theme}.png'))
+        if product_id is not None:
+            page.evaluate(f"openProductModal('{product_id}')"); page.wait_for_timeout(300)
+            page.screenshot(path=str(OUT / f'legacy-catalog-modal-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))
