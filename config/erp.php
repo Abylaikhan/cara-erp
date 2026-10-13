@@ -111,6 +111,8 @@ return [
     ],
 
     // Tables/columns that reference expense categories by id. Merge rewrites all of them in one transaction (QA-062).
-    // Modules add their references here when they are migrated (money operations, suppliers, advance reports, ESF).
-    'expense_category_references' => [],
+    // Modules add their references here when they are migrated (money operations, advance reports, ESF).
+    'expense_category_references' => [
+        ['table' => 'suppliers', 'column' => 'expense_category_id'], // M06: the expense item of the supplier card
+    ],
 ];

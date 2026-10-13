@@ -1,5 +1,5 @@
 """Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
-the dealers tab (and their modals), dark and light themes, 1440×900.
+the dealers tab, M06 «Поставщики» (and their modals), dark and light themes, 1440×900.
 
 Legacy runs from the accepted snapshot in .local-audit/blobs with every network request blocked except Google Fonts —
 it never reaches the legacy backend. Both sides get the same synthetic directory (DatabaseSeeder).
@@ -80,6 +80,18 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-dealers-{theme}.png'))
         page.locator('#cust-dealers button', has_text='+ Подробно').click(); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-dealer-modal-{theme}.png'))
+        page.goto(TARGET + '/suppliers', wait_until='networkidle'); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-suppliers-{theme}.png'))
+        suppliers = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['suppliers']
+        plain = next((i for i, x in enumerate(suppliers) if not x['expense_category_id']), None)  # the card without an expense item
+        if plain is not None:
+            page.locator('#sup-list-tbody tr').nth(plain).dispatch_event('click'); page.wait_for_timeout(300)
+            page.screenshot(path=str(OUT / f'target-supplier-card-{theme}.png'))
+            page.locator('#supplierCardModal .modal-close').click(); page.wait_for_timeout(200)
+        page.locator('#page-suppliers .tab').nth(1).click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-suppliers-categories-{theme}.png'))
+        page.locator('#page-suppliers .tab').nth(2).click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-suppliers-rating-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -150,8 +162,30 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-dealers-{theme}.png'))
         page.evaluate("showModal('addDealerModal')"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-dealer-modal-{theme}.png'))
+        # Suppliers: legacy suppliersData gets the target's list. Its card loads the supplier's ESF from the (blocked) legacy
+        # backend; the target shows that ESF come with the «Входящие ЭСФ» module (ADR-0002, item 20).
+        page.evaluate("""(suppliers) => {
+            closeModal('addDealerModal');
+            suppliersData = suppliers.map(s => ({id: String(s.id), name: s.name, category: s.category || '', contact: s.contact || '', phone: s.phone || '',
+                email: s.email || '', inn: '', bin: s.bin || '', comment: s.comment || '', status: s.status, leadtime: s.lead_time_days || 0,
+                turnover: s.turnover || 0, defect: s.defect_pct || 0, addr: s.address || '', expense_category: '', expense_subcategory: '',
+                expense_source: s.expense_source}));
+            _cacheLoaded.suppliers = true; _expenseCats = []; _expenseCatsLoaded = true;
+            showPage('suppliers', document.querySelector(".nav-item[onclick*=\\"showPage('suppliers'\\"]"));
+            renderSupplierList();
+        }""", suppliers)
+        page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'legacy-suppliers-{theme}.png'))
+        if plain is not None:
+            page.evaluate(f"openSupplierCard('{suppliers[plain]['id']}')"); page.wait_for_timeout(500)
+            page.screenshot(path=str(OUT / f'legacy-supplier-card-{theme}.png'))
+            page.evaluate("closeModal('supplierCardModal')")
+        page.evaluate("showSupTab('categories', document.querySelectorAll('#page-suppliers .tab')[1])"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-suppliers-categories-{theme}.png'))
+        page.evaluate("showSupTab('rating', document.querySelectorAll('#page-suppliers .tab')[2])"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-suppliers-rating-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

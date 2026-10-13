@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Customer;
 use App\Models\ExpenseCategory;
 use App\Models\Product;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -78,6 +79,24 @@ class DatabaseSeeder extends Seeder
         }
     }
 
+    /** Synthetic suppliers; skipped once real suppliers were imported or exist. Runs after the expense directory. */
+    private function seedSuppliers(): void
+    {
+        if (Supplier::query()->exists() || DB::table('legacy_id_map')->where('target_table', 'suppliers')->exists()) {
+            return;
+        }
+        $rent = ExpenseCategory::query()->where('code', 'gen_rent')->value('id');
+        $items = [
+            ['name' => 'ТОО «Демо Плита»', 'category' => 'ЛДСП', 'bin' => '000000000011', 'lead_time_days' => 5, 'turnover' => 2500000],
+            ['name' => 'ТОО «Демо Ткани»', 'category' => 'Ткань', 'status' => 'pause', 'defect_pct' => 1.5],
+            ['name' => 'ИП Демо Фурнитура', 'category' => 'Фурнитура', 'contact' => 'Демо Контакт', 'phone' => '+7 700 000 0011'],
+            ['name' => 'ТОО «Демо Аренда»', 'expense_category_id' => $rent],
+        ];
+        foreach ($items as $item) {
+            Supplier::query()->create($item);
+        }
+    }
+
     public function run(): void
     {
         if (app()->environment('production')) {
@@ -104,6 +123,8 @@ class DatabaseSeeder extends Seeder
 
         // Real directory imported from the legacy snapshot (legacy:import) replaces the synthetic one.
         if (DB::table('legacy_id_map')->where('target_table', 'expense_categories')->exists()) {
+            $this->seedSuppliers();
+
             return;
         }
         foreach (self::CATEGORIES as $top) {
@@ -116,5 +137,6 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+        $this->seedSuppliers();
     }
 }
