@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\ExpenseCategory;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use RuntimeException;
 
@@ -62,6 +63,10 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // Real directory imported from the legacy snapshot (legacy:import) replaces the synthetic one.
+        if (DB::table('legacy_id_map')->where('target_table', 'expense_categories')->exists()) {
+            return;
+        }
         foreach (self::CATEGORIES as $top) {
             $parent = ExpenseCategory::query()->firstOrCreate(['code' => $top['code']],
                 ['name' => $top['name'], 'sort_order' => $top['sort_order']]);

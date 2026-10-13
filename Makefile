@@ -4,7 +4,7 @@ export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest visual-compare
+.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest visual-compare legacy-copy legacy-import
 
 help: ## Show available commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
@@ -34,6 +34,13 @@ harness-selftest: ## Self-tests of the audit harness (H-xx scenarios on local fi
 
 visual-compare: ## Screenshots legacy vs target (login, M14) and % of differing pixels; needs host playwright + Chrome
 	@python3 tests/visual/legacy_compare.py
+
+legacy-copy: ## Read-only copy of the legacy Supabase (GET only) → .local-audit/supabase → local schema `legacy`, verified
+	@docker compose run --rm app php artisan legacy:snapshot
+	@docker compose run --rm app php artisan legacy:load
+
+legacy-import: ## Move a legacy table into a migrated module, e.g. make legacy-import ENTITY=expense_categories
+	@docker compose run --rm app php artisan legacy:import $(ENTITY)
 
 test: ## Backend tests on the isolated test database
 	@docker compose run --rm app php artisan test

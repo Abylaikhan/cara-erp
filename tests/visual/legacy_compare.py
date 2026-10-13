@@ -21,18 +21,11 @@ LEGACY = BLOB.as_uri()
 ENV = (ROOT / '.env').read_text()
 TARGET = 'http://localhost:' + (re.search(r'^APP_PORT=(\d+)', ENV, re.M) or [None, '8080'])[1]
 DEV_PASSWORD = re.search(r'^DEV_ADMIN_PASSWORD=(.*)$', ENV, re.M).group(1).strip()
-CATS = [  # identical synthetic data in both versions (same as DatabaseSeeder)
-    dict(code='general', name='Общие расходы', parent_code=None, is_fixed=False, sort_order=10),
-    dict(code='gen_electricity', name='Электроэнергия', parent_code='general', is_fixed=True, sort_order=10),
-    dict(code='gen_rent', name='Аренда помещений', parent_code='general', is_fixed=True, sort_order=20),
-    dict(code='gen_internet', name='Связь и интернет', parent_code='general', is_fixed=True, sort_order=30),
-    dict(code='production', name='Производство', parent_code=None, is_fixed=False, sort_order=20),
-    dict(code='prod_materials', name='Материалы', parent_code='production', is_fixed=False, sort_order=10),
-    dict(code='prod_tools', name='Инструмент и оснастка', parent_code='production', is_fixed=False, sort_order=20),
-    dict(code='sales_marketing', name='Продажи и маркетинг', parent_code=None, is_fixed=False, sort_order=30),
-    dict(code='mkt_ads', name='Реклама', parent_code='sales_marketing', is_fixed=False, sort_order=10),
-    dict(code='mkt_delivery', name='Доставка клиентам', parent_code='sales_marketing', is_fixed=False, sort_order=20),
-]
+# Both sides must show the same rows: the legacy page receives exactly the directory the target renders.
+def target_categories(page):
+    data = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")
+    return [dict(code=c['code'], name=c['name'], parent_code=c['parent_code'], is_fixed=c['is_fixed'], sort_order=c['sort_order'])
+            for c in data['props']['categories']]
 
 def guard(route):
     url = route.request.url
@@ -54,6 +47,20 @@ results = {}
 with sync_playwright() as p:
     browser = p.chromium.launch(channel='chrome', headless=True)
     for theme in ('dark', 'light'):
+        # ---------------- target
+        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        page = ctx.new_page()
+        page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
+        page.goto(TARGET + '/login', wait_until='networkidle'); page.evaluate("document.fonts.ready"); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-login-{theme}.png'))
+        page.fill('#login-username', 'director'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
+        page.wait_for_url('**/dashboard'); page.goto(TARGET + '/expense_cats', wait_until='networkidle'); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-m14-{theme}.png'))
+        cats = target_categories(page)
+        first = sorted((c for c in cats if c['parent_code']), key=lambda c: (c['sort_order'], c['code']))[0]['code']
+        page.locator('#ec-table-wrap').get_by_text(first, exact=True).locator('xpath=ancestor::tr').locator('button').dispatch_event('click')  # no scroll: legacy opens it in place; page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-m14-modal-{theme}.png'))
+        ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
         ctx.route('**/*', guard)
@@ -78,23 +85,11 @@ with sync_playwright() as p:
             showPage('expense_cats', document.querySelector(".nav-item[onclick*=\\"showPage('expense_cats'\\"]"));
             document.getElementById('topbar-title').textContent = 'Статьи расходов';
             renderExpCats();
-        }""", CATS)
+        }""", cats)
         page.wait_for_timeout(500)
         page.screenshot(path=str(OUT / f'legacy-m14-{theme}.png'))
-        page.evaluate("openExpCatModal('gen_rent', null, false)"); page.wait_for_timeout(300)
+        page.evaluate(f"openExpCatModal('{first}', null, false)"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-m14-modal-{theme}.png'))
-        ctx.close()
-        # ---------------- target
-        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
-        page = ctx.new_page()
-        page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
-        page.goto(TARGET + '/login', wait_until='networkidle'); page.evaluate("document.fonts.ready"); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-login-{theme}.png'))
-        page.fill('#login-username', 'director'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
-        page.wait_for_url('**/dashboard'); page.goto(TARGET + '/expense_cats', wait_until='networkidle'); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-m14-{theme}.png'))
-        page.locator('#ec-table-wrap tr', has_text='gen_rent').locator('button').click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-m14-modal-{theme}.png'))
         ctx.close()
         for shot in ('login', 'm14', 'm14-modal'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')

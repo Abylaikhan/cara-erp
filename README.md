@@ -25,6 +25,16 @@ make visual-compare     # скриншоты legacy ↔ новая версия 
 make help     # все команды (test, build, logs, shell, psql, ps)
 ```
 
+## Данные legacy (только чтение)
+
+```sh
+make legacy-copy                              # копия всех 38 таблиц Supabase (только GET) и загрузка в схему legacy со сверкой
+make legacy-import ENTITY=expense_categories  # перенос таблицы в перенесённый раздел (сейчас — M14)
+```
+
+Нужны `LEGACY_SUPABASE_URL` и `LEGACY_SUPABASE_ANON_KEY` в `.env`. Снимок с персональными данными хранится только локально
+в `.local-audit/supabase/` (вне Git); пароли и PIN не копируются. Подробности — [`docs/adr/0004-legacy-data-copy.md`](docs/adr/0004-legacy-data-copy.md).
+
 Устройство аудита — [`tools/harness/README.md`](tools/harness/README.md). Для `make audit-daily` и `make harness-selftest`
 дополнительно нужен `python3` ≥ 3.9 (на macOS он есть вместе с git).
 

@@ -13,3 +13,5 @@
   `.local-audit/blobs/<blob>.html`; отличия — только с записью в `docs/adr/0002-ui-deviations.md`; проверка — `make visual-compare`.
 - Доступ: страницы и меню — `config/erp.php` + `App\Support\Erp`; каждое действие проверяет сервер (Policy/FormRequest), а не скрытая кнопка.
 - Новый раздел: строки в `docs/coverage/requirements.csv` (legacy_locator = имена функций legacy), тесты на PostgreSQL, статус в трекере.
+- Legacy Supabase — строго только чтение: никаких запросов кроме `legacy:snapshot` (GET). Снимки и реальные данные — только в
+  `.local-audit/` и локальной БД; не выводить строки реальных данных в чат, логи, отчёты, тесты и коммиты.
