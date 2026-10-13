@@ -614,7 +614,7 @@ class Audit:
         return report['exit_code']
 
 
-def close_findings(root: Path, ids: List[str], reason: str, evidence: str) -> int:
+def close_findings(root: Path, ids: List[str], reason: str, evidence: str, actor: str) -> int:
     """Recorded human/agent decision; the evidence run must exist and the finding history is kept."""
     cfg = load_config(local=False)
     reg_path, log = root / cfg['paths']['findings'], root / cfg['paths']['changelog']
@@ -627,7 +627,6 @@ def close_findings(root: Path, ids: List[str], reason: str, evidence: str) -> in
     if missing:
         print('неизвестные находки: ' + ', '.join(missing), file=sys.stderr)
         return 2
-    actor = subprocess.run(['git', '-C', str(root), 'config', 'user.name'], stdout=subprocess.PIPE).stdout.decode().strip() or 'unknown'
     at = iso(now_utc())
     for i in ids:
         f = known[i]
@@ -642,13 +641,12 @@ def close_findings(root: Path, ids: List[str], reason: str, evidence: str) -> in
     return 0
 
 
-def add_note(root: Path, text: str, run_id: str) -> int:
+def add_note(root: Path, text: str, run_id: str, actor: str) -> int:
     cfg = load_config(local=False)
     if not list((root / cfg['paths']['reports']).rglob(f'{run_id}.json')):
         print(f'нет отчёта {run_id}', file=sys.stderr)
         return 2
     log = root / cfg['paths']['changelog']
-    actor = subprocess.run(['git', '-C', str(root), 'config', 'user.name'], stdout=subprocess.PIPE).stdout.decode().strip() or 'unknown'
     body = log.read_text(encoding='utf-8') if log.is_file() else publish.CHANGELOG_HEADER
     atomic_write(log, body.rstrip('\n') + f"\n- Примечание ({iso(now_utc())}, {actor}) к запуску `{run_id}`: {publish.data_text(text, 600)}\n")
     return 0
@@ -669,16 +667,18 @@ def main(argv: Optional[List[str]] = None) -> int:
     close.add_argument('ids', nargs='+')
     close.add_argument('--reason', required=True)
     close.add_argument('--evidence', required=True, help='run_id whose results justify the decision')
+    close.add_argument('--by', required=True, help='who decides, e.g. "Claude Code (агент)" or a person')
     close.add_argument('--root', type=Path, default=REPO_ROOT)
     note = sub.add_parser('note', help='append an annotation to the journal (e.g. explain a harness-caused result)')
     note.add_argument('text')
     note.add_argument('--run', required=True, help='run_id the note refers to')
+    note.add_argument('--by', required=True, help='author of the note')
     note.add_argument('--root', type=Path, default=REPO_ROOT)
     args = ap.parse_args(argv)
     if args.cmd == 'note':
-        return add_note(args.root.resolve(), args.text, args.run)
+        return add_note(args.root.resolve(), args.text, args.run, args.by)
     if args.cmd == 'close-findings':
-        return close_findings(args.root.resolve(), args.ids, args.reason, args.evidence)
+        return close_findings(args.root.resolve(), args.ids, args.reason, args.evidence, args.by)
     if args.cmd == 'status':
         cfg = load_config(local=False)
         print(Path(args.root / cfg['paths']['state']).read_text(encoding='utf-8') if (args.root / cfg['paths']['state']).is_file() else 'нет состояния')

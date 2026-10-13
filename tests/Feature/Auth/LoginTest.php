@@ -64,6 +64,16 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_after_logout_the_server_refuses_changes(): void
+    {
+        $user = User::factory()->role('director')->create();
+        $this->actingAs($user)->post('/logout')->assertRedirect('/login');
+
+        $this->post('/expense_cats', ['name' => 'X', 'code' => 'after_logout', 'is_top' => true])->assertRedirect('/login');
+        $this->get('/expense_cats')->assertRedirect('/login');
+        $this->assertDatabaseMissing('expense_categories', ['code' => 'after_logout']);
+    }
+
     public function test_login_page_never_contains_credentials(): void
     {
         $user = User::factory()->create(['password' => 'secret-password']);

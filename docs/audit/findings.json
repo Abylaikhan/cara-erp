@@ -2,35 +2,48 @@
   "schema": "promtech.audit-findings/1",
   "findings": [
     {
-      "id": "AF-c72ca42a",
-      "check_id": "TGT-DEPS",
-      "locator": "TGT-DEPS",
-      "title": "Установка зависимостей из composer.lock и package-lock.json: exit code 1",
-      "category": "CODE",
-      "severity": "high",
-      "close_policy": "recheck",
+      "id": "AF-50d71c0a",
+      "check_id": "HAR-COVERAGE",
+      "locator": "Tests\\Feature\\ExampleTest::test_user_can_log_in_and_see_system_status",
+      "title": "Сокращение покрытия: Tests\\Feature\\ExampleTest::test_user_can_log_in_and_see_system_status",
+      "category": "RISK",
+      "severity": "medium",
+      "close_policy": "manual",
       "first_seen": {
-        "run_id": "20261013T192649Z-5ce2",
-        "target_ref": "1665f7ada78d1057985bd3f6c8817cb01c113ac0",
+        "run_id": "20261013T192858Z-c0e6",
+        "target_ref": "0fae634820442f02b56292f0f509bda30aabac69",
         "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-        "at": "2026-10-13T19:26:49Z"
+        "at": "2026-10-13T19:28:58Z"
       },
       "history": [
         {
-          "run_id": "20261013T192649Z-5ce2",
+          "run_id": "20261013T192858Z-c0e6",
           "event": "OPENED",
-          "target_ref": "1665f7ada78d1057985bd3f6c8817cb01c113ac0",
+          "target_ref": "0fae634820442f02b56292f0f509bda30aabac69",
           "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T192858Z-c0e6",
+          "event": "MANUAL_CLOSE",
+          "reason": "Тест удалён вместе со страницей состояния системы (заменена оболочкой legacy). Его проверки перенесены: вход и переход на первую страницу роли — LoginTest::test_login_is_trimmed_and_case_insensitive_like_legacy и ::test_first_page_follows_role_template; отсутствие пароля в props — PageAccessTest::test_shared_props_carry_no_credentials. Набор вырос с 9 до 65 тестов.",
+          "by": "Claude Code (агент)",
+          "at": "2026-10-13T19:31:52Z"
         }
       ],
-      "status": "OPEN",
+      "status": "CLOSED",
       "last_seen": {
-        "run_id": "20261013T192649Z-5ce2",
-        "target_ref": "1665f7ada78d1057985bd3f6c8817cb01c113ac0",
+        "run_id": "20261013T192858Z-c0e6",
+        "target_ref": "0fae634820442f02b56292f0f509bda30aabac69",
         "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-        "at": "2026-10-13T19:26:49Z"
+        "at": "2026-10-13T19:28:58Z"
       },
-      "closed": null
+      "closed": {
+        "run_id": "20261013T192858Z-c0e6",
+        "manual": true,
+        "reason": "Тест удалён вместе со страницей состояния системы (заменена оболочкой legacy). Его проверки перенесены: вход и переход на первую страницу роли — LoginTest::test_login_is_trimmed_and_case_insensitive_like_legacy и ::test_first_page_follows_role_template; отсутствие пароля в props — PageAccessTest::test_shared_props_carry_no_credentials. Набор вырос с 9 до 65 тестов.",
+        "by": "Claude Code (агент)",
+        "at": "2026-10-13T19:31:52Z"
+      }
     },
     {
       "id": "AF-15a0c004",
@@ -481,6 +494,49 @@
         "target_ref": "eb9a16d9c933a5cc07eafcba921ce0a43281626f",
         "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
         "evidence": "TGT-TESTS PASS"
+      }
+    },
+    {
+      "id": "AF-c72ca42a",
+      "check_id": "TGT-DEPS",
+      "locator": "TGT-DEPS",
+      "title": "Установка зависимостей из composer.lock и package-lock.json: exit code 1",
+      "category": "CODE",
+      "severity": "high",
+      "close_policy": "recheck",
+      "first_seen": {
+        "run_id": "20261013T192649Z-5ce2",
+        "target_ref": "1665f7ada78d1057985bd3f6c8817cb01c113ac0",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T19:26:49Z"
+      },
+      "history": [
+        {
+          "run_id": "20261013T192649Z-5ce2",
+          "event": "OPENED",
+          "target_ref": "1665f7ada78d1057985bd3f6c8817cb01c113ac0",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33"
+        },
+        {
+          "run_id": "20261013T192858Z-c0e6",
+          "event": "CLOSED",
+          "target_ref": "0fae634820442f02b56292f0f509bda30aabac69",
+          "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+          "evidence": "TGT-DEPS PASS"
+        }
+      ],
+      "status": "CLOSED",
+      "last_seen": {
+        "run_id": "20261013T192649Z-5ce2",
+        "target_ref": "1665f7ada78d1057985bd3f6c8817cb01c113ac0",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "at": "2026-10-13T19:26:49Z"
+      },
+      "closed": {
+        "run_id": "20261013T192858Z-c0e6",
+        "target_ref": "0fae634820442f02b56292f0f509bda30aabac69",
+        "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+        "evidence": "TGT-DEPS PASS"
       }
     },
     {
