@@ -4,6 +4,7 @@ namespace Tests\Feature\Customers;
 
 use App\Models\AuditEvent;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\SalesChannel;
 use App\Models\User;
 use App\Services\DealerService;
@@ -97,11 +98,14 @@ class DealerTest extends TestCase
     {
         $withCustomer = $this->dealer('Дилер С Покупателем');
         (new Customer(['name' => 'Покупатель дилера', 'type' => 'client']))->forceFill(['channel' => $withCustomer->code])->save();
+        $withOrder = $this->dealer('Дилер С Заказом');
+        (new Order(['num' => 'МО-1', 'channel' => $withOrder->code, 'status' => 'queue', 'payment_pct' => 0]))->save();
         $unused = $this->dealer('Дилер Ошибочный');
 
         $this->actingAs($this->manager)->from('/customers');
         $this->delete('/customers/dealers/dealer_astana')->assertSessionHasErrors(['dealer' => DealerService::IN_USE]);
         $this->delete("/customers/dealers/{$withCustomer->code}")->assertSessionHasErrors(['dealer' => DealerService::IN_USE]);
+        $this->delete("/customers/dealers/{$withOrder->code}")->assertSessionHasErrors(['dealer' => DealerService::IN_USE]);
         $this->delete("/customers/dealers/{$unused->code}")->assertSessionHasNoErrors();
 
         $this->assertFalse($unused->fresh()->active);
@@ -132,5 +136,21 @@ class DealerTest extends TestCase
         $this->from('/customers')->put('/customers/dealers/dealer_aktau', ['name' => 'Чужой', 'lock_version' => 1])
             ->assertSessionHasErrors(['dealer' => DealerService::NOT_FOUND]);
         $this->assertSame(8, SalesChannel::count());
+    }
+
+    public function test_dealer_orders_are_given_for_the_counts_of_the_tab(): void
+    {
+        foreach ([['МО-1', 'dealer_astana', '2026-10-05', '1000', 50], ['МО-2', 'dealer_astana', null, '300', 100], ['МО-3', 'office', '2026-10-05', '700', 0]] as [$num, $channel, $date, $price, $pct]) {
+            $order = new Order(['num' => $num, 'channel' => $channel, 'customer' => 'Демо', 'status' => 'queue', 'payment_pct' => $pct, 'due_date' => $date]);
+            $order->save();
+            $order->items()->create(['line_no' => 0, 'name' => 'Демо', 'qty' => '2', 'price' => $price, 'progress' => 0, 'status' => 'queue', 'attrs' => []]);
+        }
+
+        $this->actingAs($this->manager)->get('/customers')->assertInertia(fn (Assert $page) => $page
+            ->where('dealerOrders', fn ($orders) => collect($orders)->sortBy('total')->values()->all() === [
+                ['channel' => 'dealer_astana', 'date' => null, 'total' => 600, 'payment' => 100],
+                ['channel' => 'dealer_astana', 'date' => '2026-10-05', 'total' => 2000, 'payment' => 50],
+            ])
+            ->has('today'));
     }
 }

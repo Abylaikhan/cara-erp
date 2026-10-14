@@ -2,14 +2,41 @@
 // Tab «Дилеры» of «Покупатели» — legacy cust-dealers (L3718–3744), renderDealersTab (L19376) and the patched renderDealers
 // (L38569, it replaces L19590), startEditCell (L28406), addDealerRow/deleteDealer (L19613), addDealerModal/saveDealer
 // (L8441, L19773), downloadDealerTemplate/importDealersCSV/parseGenericCSV (L19815–19897). Same markup and texts; every
-// change is saved by the server — legacy lost them on reload (QA-042). Orders, turnover and prepayment come from orders
-// (M09): «—» until then. «Статус» shows the order status filter, which the page does not have, so it is always «Все».
+// change is saved by the server — legacy lost them on reload (QA-042). Orders, turnover and prepayment are counted from the
+// dealer's orders for the chosen period (legacy recalcAllCustomerTurnover/orderInPeriod/weightedPrepaymentPct, L38347–38420):
+// the orders of the dealer's channel, the period by today (legacy compared with a fixed 15.06.2026 and the year 2026).
+// «Статус» shows the order status filter, which the page does not have, so it is always «Все».
 import { router, usePage } from '@inertiajs/vue3';
-import { nextTick, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
-import type { Dealer, SharedProps } from '@/types';
+import type { Dealer, DealerOrder, SharedProps } from '@/types';
 
-const props = defineProps<{ dealers: Dealer[]; active: boolean }>();
+const props = defineProps<{ dealers: Dealer[]; orders: DealerOrder[]; period: string; today: string; active: boolean }>();
+
+// Legacy orderInPeriod: by the order's «Срок»; an order without one counts in every period.
+function inPeriod(o: DealerOrder): boolean {
+    if (props.period === 'all' || !o.date) return true;
+    const [y, m] = o.date.split('-').map(Number);
+    const [ty, tm] = props.today.split('-').map(Number);
+    if (props.period === 'year') return y === ty;
+    if (props.period === 'quarter') return y === ty && Math.floor((m - 1) / 3) === Math.floor((tm - 1) / 3);
+    if (props.period === 'month') return y === ty && m === tm;
+    return true;
+}
+const stats = computed(() => {
+    const map: Record<string, { orders: number; turnover: number; prepay: number }> = {};
+    props.dealers.forEach((d) => {
+        const matched = props.orders.filter((o) => o.channel === d.code && inPeriod(o));
+        const turnover = matched.reduce((s, o) => s + o.total, 0);
+        // Legacy weightedPrepaymentPct: the paid share weighted by the order totals.
+        const weighted = matched.reduce((s, o) => s + (o.payment || 0) * o.total, 0);
+        map[d.code] = { orders: matched.length, turnover, prepay: turnover > 0 ? Math.round(weighted / turnover) : 0 };
+    });
+    return map;
+});
+const totals = computed(() => Object.values(stats.value).reduce((t, s) => ({ orders: t.orders + s.orders, turnover: t.turnover + s.turnover }), { orders: 0, turnover: 0 }));
+const fmtCurrency = (n: number) => '₸' + Math.round(Number.isNaN(n) ? 0 : n).toLocaleString('ru');
+const prepayColor = (pct: number) => (pct >= 100 ? 'var(--green)' : pct > 0 ? 'var(--amber)' : 'var(--red)');
 
 const page = usePage<SharedProps>();
 const options = { preserveScroll: true, preserveState: true };
@@ -172,11 +199,11 @@ watch(
             </div>
             <div class="kpi" style="flex: 1">
                 <div class="kpi-label">Заказов от дилеров (год)</div>
-                <div id="dealer-orders" class="kpi-value" style="font-size: 20px">—</div>
+                <div id="dealer-orders" class="kpi-value" style="font-size: 20px">{{ totals.orders }}</div>
             </div>
             <div class="kpi" style="flex: 1">
                 <div class="kpi-label">Оборот (год)</div>
-                <div id="dealer-turnover" class="kpi-value" style="font-size: 20px">—</div>
+                <div id="dealer-turnover" class="kpi-value" style="font-size: 20px">{{ '₸' + (totals.turnover / 1000000).toFixed(1) + 'М' }}</div>
             </div>
         </div>
         <div class="card">
@@ -210,9 +237,9 @@ watch(
                                 <template v-else>{{ d.region ?? '—' }}</template>
                             </span>
                         </td>
-                        <td style="font-family: monospace; color: var(--text3)">—</td>
-                        <td style="font-family: monospace">—</td>
-                        <td style="font-family: monospace; color: var(--red)">—</td>
+                        <td style="font-family: monospace; color: var(--text3)">{{ stats[d.code]?.orders ?? 0 }}</td>
+                        <td style="font-family: monospace">{{ fmtCurrency(stats[d.code]?.turnover ?? 0) }}</td>
+                        <td style="font-family: monospace" :style="{ color: prepayColor(stats[d.code]?.prepay ?? 0) }">{{ stats[d.code]?.orders ? stats[d.code].prepay + '%' : '—' }}</td>
                         <td><span style="color: var(--text3); font-size: 12px">Все</span></td>
                         <td><button class="row-delete-btn" @click="deleteDealer(d)">✕</button></td>
                     </tr>

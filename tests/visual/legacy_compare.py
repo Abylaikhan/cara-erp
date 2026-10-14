@@ -75,6 +75,15 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-customers-{theme}.png'))
         props = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         persons, dealers = props['persons'], props['dealers']
+        # Dealer counts as the target makes them for «Текущий год» (DealersTab: orders of the channel; an order without
+        # «Срок» counts in every period; prepayment weighted by the totals).
+        year = props['today'][:4]
+        dealer_stats = {}
+        for d in dealers:
+            matched = [o for o in props['dealerOrders'] if o['channel'] == d['code'] and (not o['date'] or o['date'][:4] == year)]
+            turnover = sum(o['total'] for o in matched)
+            weighted = sum((o['payment'] or 0) * o['total'] for o in matched)
+            dealer_stats[d['code']] = {'orders': len(matched), 'turnover': turnover, 'prepay': round(weighted / turnover + 1e-9) if turnover > 0 else 0}
         if persons:
             page.locator('#persons-tbody tr').first.locator('button').dispatch_event('click'); page.wait_for_timeout(300)
             page.screenshot(path=str(OUT / f'target-customers-modal-{theme}.png'))
@@ -229,10 +238,13 @@ with sync_playwright() as p:
             page.screenshot(path=str(OUT / f'legacy-catalog-modal-{theme}.png'))
         # Legacy gets the same persons (all of the office channel). The type is passed as the target classifies it: the
         # legal-form fix is a documented deviation (docs/adr/0002-ui-deviations.md, item 13), not a layout difference.
+        # Their office orders are given as orders of that customer: the count and the turnover the target shows.
         page.evaluate("""(persons) => {
             closeModal('productModal');
             personsData = persons.map((p, i) => ({id: i + 1, sbId: String(p.id), name: p.name, type: p.is_legal ? 'Юр. лицо' : 'Физ. лицо',
                 idNum: p.inn || '', phone: p.phone || '', email: '', address: '', source: 'office', comment: ''}));
+            ordersData = persons.flatMap(p => Array.from({length: p.orders}, (_, k) => ({num: p.name + k, channel: 'office', customer: p.name, status: 'done', payment: 100,
+                createdDate: '', date: '', items: [{qty: 1, price: k === 0 ? p.turnover : 0, progress: 0}]})));
             _cacheLoaded.customers = true;
             showPage('customers', document.querySelector(".nav-item[onclick*=\\"showPage('customers'\\"]"));
             renderPersons();
@@ -242,13 +254,14 @@ with sync_playwright() as p:
         if persons:
             page.evaluate("openPersonModal(1)"); page.wait_for_timeout(300)  # a number: the row onclick passes a string and fails (ADR-0006)
             page.screenshot(path=str(OUT / f'legacy-customers-modal-{theme}.png'))
-        # Dealers: legacy keeps them in dealersData; it gets the target's list. Orders and turnover are 0 there (no orders
-        # loaded) and «—» in the target (ADR-0002, item 17).
-        page.evaluate("""(dealers) => {
+        # Dealers: legacy keeps them in dealersData; it gets the target's list with the counts of «Текущий год» (legacy
+        # recalculates them only when the period or the orders change, ADR-0002, item 17).
+        page.evaluate("""([dealers, stats]) => {
             closeModal('personModal');
-            dealersData = dealers.map((d, i) => ({id: i + 1, name: d.name, region: d.region || '—', channel: d.code, orders: 0, turnover: 0, status: 'Активен'}));
+            dealersData = dealers.map((d, i) => ({id: i + 1, name: d.name, region: d.region || '—', channel: d.code, orders: 0, turnover: 0, status: 'Активен',
+                _orders: stats[d.code].orders, _turnover: stats[d.code].turnover, _prepayPct: stats[d.code].prepay}));
             showCustTab('dealers', document.getElementById('cust-tab-dealers'));
-        }""", dealers)
+        }""", [dealers, dealer_stats])
         page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-dealers-{theme}.png'))
         page.evaluate("showModal('addDealerModal')"); page.wait_for_timeout(300)

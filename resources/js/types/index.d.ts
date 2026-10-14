@@ -40,6 +40,14 @@ export interface Dealer {
     lock_version: number;
 }
 
+/** An order of a dealer channel as the dealers tab counts it (legacy recalcAllCustomerTurnover). */
+export interface DealerOrder {
+    channel: string;
+    date: string | null;
+    total: number;
+    payment: number;
+}
+
 /** Preview of an ESF XML import (EsfImportService::preview). */
 export interface EsfPreview {
     token: string;

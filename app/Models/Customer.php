@@ -69,14 +69,14 @@ class Customer extends Model
     }
 
     /**
-     * «Контрагенты» tab: direct customers of the office — added with the office channel, or (legacy) named in an office
-     * order. Orders are not migrated yet (M09); in the legacy data every customer named in an office order already has
-     * the office channel, so the list is the same.
+     * «Контрагенты» tab (legacy renderPersons): direct customers of the office — added with the office channel, or named
+     * as the customer of an office order.
      *
      * @param  Builder<self>  $query
      */
     public function scopeOfficeDirect(Builder $query): void
     {
-        $query->where('channel', SalesChannel::OFFICE);
+        $query->where(fn (Builder $q) => $q->where('channel', SalesChannel::OFFICE)
+            ->orWhereIn('name', Order::query()->select('customer')->where('channel', SalesChannel::OFFICE)->whereNotNull('customer')));
     }
 }

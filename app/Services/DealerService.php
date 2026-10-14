@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\SalesChannel;
 use App\Models\User;
 use App\Support\Audit;
@@ -22,7 +23,7 @@ class DealerService
 
     public const NOT_FOUND = 'Дилер не найден — обновите страницу.';
 
-    public const IN_USE = 'Дилера нельзя удалить: к нему привязаны роль, учётные записи или покупатели.';
+    public const IN_USE = 'Дилера нельзя удалить: к нему привязаны роль, учётные записи, покупатели или заказы.';
 
     private const FIELDS = ['name', 'region'];
 
@@ -69,7 +70,8 @@ class DealerService
             $dealer = $this->lockedDealer($code, $by);
             $inUse = collect(config('erp.roles'))->contains(fn (array $role) => ($role['channel'] ?? null) === $code)
                 || User::query()->where('channel', $code)->exists()
-                || Customer::query()->where('channel', $code)->exists();
+                || Customer::query()->where('channel', $code)->exists()
+                || Order::query()->where('channel', $code)->exists();
             if ($inUse) {
                 throw ValidationException::withMessages(['dealer' => self::IN_USE]);
             }

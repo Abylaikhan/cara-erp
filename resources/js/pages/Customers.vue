@@ -8,7 +8,7 @@ import { computed, reactive, ref } from 'vue';
 import DealersTab from '@/components/customers/DealersTab.vue';
 import ErpModal from '@/components/ErpModal.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
-import type { Dealer } from '@/types';
+import type { Dealer, DealerOrder } from '@/types';
 
 interface Person {
     id: number;
@@ -18,10 +18,13 @@ interface Person {
     inn: string | null;
     phone: string | null;
     source: string;
+    turnover: number;
+    orders: number;
     lock_version: number;
 }
 
-const props = defineProps<{ persons: Person[]; dealers: Dealer[] }>();
+const props = defineProps<{ persons: Person[]; dealers: Dealer[]; dealerOrders: DealerOrder[]; today: string }>();
+const fmt = (n: number) => '₸' + Math.round(n).toLocaleString('ru-RU');
 
 type Tab = 'persons' | 'dealers' | 'salons' | 'reconcile-counterparties';
 const tab = ref<Tab>('persons');
@@ -172,9 +175,8 @@ function savePerson(): void {
                                 </td>
                                 <td style="font-family: monospace; font-size: 12px">{{ p.inn || '—' }}</td>
                                 <td style="font-family: monospace; font-size: 12px">{{ p.phone || '—' }}</td>
-                                <!-- Turnover and order count come from office orders: shown after the orders are migrated (M09). -->
-                                <td style="text-align: right; font-family: monospace; color: var(--green); font-size: 12px">—</td>
-                                <td style="text-align: right; font-size: 12px">—</td>
+                                <td style="text-align: right; font-family: monospace; color: var(--green); font-size: 12px">{{ p.turnover > 0 ? fmt(p.turnover) : '—' }}</td>
+                                <td style="text-align: right; font-size: 12px">{{ p.orders || '—' }}</td>
                                 <td><button class="btn btn-ghost btn-sm" style="font-size: 11px" @click="openPersonModal(p)">✏️</button></td>
                             </tr>
                         </tbody>
@@ -182,7 +184,7 @@ function savePerson(): void {
                 </div>
             </div>
 
-            <DealersTab :dealers="props.dealers" :active="tab === 'dealers'" />
+            <DealersTab :dealers="props.dealers" :orders="props.dealerOrders" :period="period" :today="props.today" :active="tab === 'dealers'" />
 
             <div v-for="t in tabs.filter((x) => x.id === 'salons' || x.id === 'reconcile-counterparties')" v-show="tab === t.id" :id="'cust-' + t.id" :key="t.id" class="cust-tab">
                 <div class="card">

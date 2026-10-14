@@ -3,10 +3,12 @@
 namespace Tests\Feature\Customers;
 
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\User;
 use App\Services\CustomerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Inertia\Testing\AssertableInertia;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -150,5 +152,26 @@ class CustomerTest extends TestCase
         }
         $this->assertTrue((new Customer(['name' => 'Без формы', 'type' => 'company']))->isLegal());
         $this->assertFalse((new Customer(['name' => 'Без формы', 'type' => 'client']))->isLegal());
+    }
+
+    public function test_persons_include_customers_of_office_orders_with_their_turnover(): void
+    {
+        $director = User::factory()->role('director')->create();
+        $own = new Customer(['name' => 'ТОО «Демо Офис»', 'type' => 'Юр. лицо']);
+        $own->forceFill(['channel' => 'office'])->save();
+        $named = new Customer(['name' => 'Демо Салонный', 'type' => 'Физ. лицо']);
+        $named->forceFill(['channel' => 'salon_armada'])->save();
+        $other = new Customer(['name' => 'Демо Другой', 'type' => 'Физ. лицо']);
+        $other->forceFill(['channel' => 'salon_armada'])->save();
+        foreach ([['МО-1', 'office', 'Демо Салонный', '1000'], ['МО-2', 'office', 'Демо Салонный', '500.50'], ['МО-3', 'salon_armada', 'Демо Другой', '700']] as [$num, $channel, $customer, $price]) {
+            $order = new Order(['num' => $num, 'channel' => $channel, 'customer' => $customer, 'status' => 'done', 'payment_pct' => 100]);
+            $order->save();
+            $order->items()->create(['line_no' => 0, 'name' => 'Демо', 'qty' => '1', 'price' => $price, 'progress' => 0, 'status' => 'done', 'attrs' => []]);
+        }
+
+        // Legacy renderPersons: office customers and the names of office orders; turnover of those office orders.
+        $this->actingAs($director)->get('/customers')->assertInertia(fn (AssertableInertia $page) => $page
+            ->where('persons', fn ($persons) => collect($persons)->map(fn ($p) => [$p['name'], $p['orders'], $p['turnover']])->all()
+                === [['Демо Салонный', 2, 1500.5], ['ТОО «Демо Офис»', 0, 0]]));
     }
 }
