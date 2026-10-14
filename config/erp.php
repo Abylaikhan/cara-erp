@@ -120,6 +120,7 @@ return [
     // Modules add their references here when they are migrated (money operations, ESF, purchases).
     'supplier_references' => [
         ['table' => 'material_aliases', 'column' => 'supplier_id'], // M03: the supplier of a material alias
+        ['table' => 'incoming_invoices', 'column' => 'supplier_id'], // M05: the seller of an incoming ESF
     ],
 
     // Виды деятельности (legacy WORKSHOPS, L27195): production lines that staff and write-offs are bound to.

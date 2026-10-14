@@ -54,10 +54,17 @@ final class SupabaseReadOnlyClient
         return null;
     }
 
-    /** @return list<array<string, mixed>> */
-    public function page(string $table, ?string $order, int $from, int $to): array
+    /**
+     * One page of rows. Without `$order` PostgREST returns the table's natural (insertion) order, as legacy pages read it.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function page(string $table, ?string $order, int $from, int $to, string $direction = 'asc'): array
     {
-        $query = ['select' => '*'] + ($order ? ['order' => "{$order}.asc"] : []);
+        if (! in_array($direction, ['asc', 'desc'], true)) {
+            throw new InvalidArgumentException("Invalid order direction: {$direction}");
+        }
+        $query = ['select' => '*'] + ($order ? ['order' => "{$order}.{$direction}"] : []);
 
         return $this->get($table, $query, ['Range' => "{$from}-{$to}", 'Prefer' => 'count=none'])->json() ?? [];
     }

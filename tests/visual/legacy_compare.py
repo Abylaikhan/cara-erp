@@ -1,5 +1,5 @@
 """Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
-the dealers tab, M06 «Поставщики», M03 «Склад» (and their modals), dark and light themes, 1440×900.
+the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ» (and their modals), dark and light themes, 1440×900.
 
 Legacy runs from the accepted snapshot in .local-audit/blobs with every network request blocked except Google Fonts —
 it never reaches the legacy backend. Both sides get the same synthetic directory (DatabaseSeeder).
@@ -105,6 +105,17 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-warehouse-add-{theme}.png'))
         page.locator('#mat-category-grid button').first.click(); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-warehouse-add-step2-{theme}.png'))  # not compared: documented deviation (ADR-0002, item 27)
+        page.locator('#addMaterialModal .modal-close').click()
+        page.goto(TARGET + '/esf', wait_until='networkidle'); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-esf-{theme}.png'))
+        invoices = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['invoices']
+        esf_detail = page.evaluate(f"fetch('/esf/{invoices[0]['id']}/detail', {{headers: {{Accept: 'application/json'}}}}).then(r => r.json())") if invoices else None
+        if invoices:
+            page.locator('#esf-list tbody tr').first.locator('td').nth(1).click(); page.wait_for_timeout(500)
+            page.screenshot(path=str(OUT / f'target-esf-detail-{theme}.png'))
+            page.locator('#esfDetailModal .modal-close').click(); page.wait_for_timeout(200)
+        page.set_input_files('#esf-xml-input', str(ROOT / 'tests/Fixtures/esf/two-invoices.xml')); page.wait_for_timeout(1000)
+        page.screenshot(path=str(OUT / f'target-esf-import-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -219,8 +230,31 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-warehouse-add-{theme}.png'))
         page.evaluate("selectMatCategory('lumber')"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-warehouse-add-step2-{theme}.png'))
+        # ESF: legacy gets the target's invoices and payment links; for the detail, the same lines and the materials they match.
+        page.evaluate("""([invoices, detail]) => {
+            closeModal('addMaterialModal');
+            const items = detail ? detail.items.map(it => ({...it, invoice_id: detail.id})) : [];
+            _esfData = {invoices: invoices.map(i => detail && i.id === detail.id ? {...i, buyer_name: detail.buyer_name} : {...i}), items};
+            esfLinksData = invoices.filter(i => i.linked > 0).map(i => ({esf_invoice_id: i.id, amount: i.linked})); esfLinksLoaded = true;
+            if (detail) {
+                // Legacy reads window.warehouseData, which a `let` global never is: its matching never works (ADR-0002, item 29).
+                window.warehouseData = detail.items.filter(it => it.match).map((it, k) => ({id: 'm' + k, name: it.match.material}));
+                window._materialAliases = detail.items.filter(it => it.match && it.match.via === 'alias').map(it => ({alias_name: it.description, material_name: it.match.material}));
+            }
+            showPage('esf', document.querySelector(".nav-item[onclick*=\\"showPage('esf'\\"]"));
+        }""", [invoices, esf_detail])
+        page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'legacy-esf-{theme}.png'))
+        if invoices:
+            page.evaluate(f"openEsfDetail({invoices[0]['id']})"); page.wait_for_timeout(500)
+            page.screenshot(path=str(OUT / f'legacy-esf-detail-{theme}.png'))
+            page.evaluate("closeModal('esfDetailModal')")
+        fixture = (ROOT / 'tests/Fixtures/esf/two-invoices.xml').read_text(encoding='utf-8')
+        page.evaluate("(x) => { _esfXmlParsed = parseEsfXmlText(x, 'two-invoices.xml'); renderEsfXmlImportPreview(); document.getElementById('esfXmlImportModal').classList.add('open'); }", fixture)
+        page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'legacy-esf-import-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import',):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

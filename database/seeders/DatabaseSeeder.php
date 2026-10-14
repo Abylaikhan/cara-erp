@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Customer;
 use App\Models\ExpenseCategory;
+use App\Models\IncomingInvoice;
+use App\Models\IncomingInvoiceItem;
 use App\Models\Material;
 use App\Models\MaterialAlias;
 use App\Models\Product;
@@ -120,6 +122,31 @@ class DatabaseSeeder extends Seeder
         MaterialAlias::query()->create(['material_name' => 'ЛДСП Демо 16мм белый', 'alias_name' => 'Плита ЛДСП Демо 16/2800/2070 белая', 'category' => 'ЛДСП/МДФ']);
     }
 
+    /** Two synthetic incoming ESF of a synthetic supplier; skipped once real ESF were imported or exist. */
+    private function seedIncomingInvoices(): void
+    {
+        if (IncomingInvoice::query()->exists() || DB::table('legacy_id_map')->where('target_table', 'incoming_invoices')->exists()) {
+            return;
+        }
+        $supplier = Supplier::query()->where('name', 'ТОО «Демо Плита»')->first();
+        $sum = fn (array $lines, int $column) => array_reduce($lines, fn (string $s, array $line) => bcadd($s, $line[$column], 2), '0');
+        $items = [
+            ['ESF-000000000011-DEMO-0001', '1', '2026-01-15', 'goods', [['ЛДСП Демо 16мм белый', '10', '8500.00', '85000.00', '12.00', '10200.00', '95200.00']]],
+            ['ESF-000000000011-DEMO-0002', '2', '2026-02-10', 'service', [['Доставка демо', '1', '5000.00', '5000.00', '12.00', '600.00', '5600.00']]],
+        ];
+        foreach ($items as [$reg, $num, $date, $type, $lines]) {
+            $invoice = IncomingInvoice::query()->create([
+                'reg_num' => $reg, 'num' => $num, 'date' => $date, 'status' => 'DELIVERED', 'invoice_type' => $type,
+                'supplier_id' => $supplier?->id, 'supplier_name' => 'ТОО «Демо Плита»', 'supplier_bin' => '000000000011',
+                'total_amount' => $sum($lines, 3), 'total_nds' => $sum($lines, 5), 'total_with_nds' => $sum($lines, 6),
+            ]);
+            foreach ($lines as $n => [$description, $qty, $price, $amount, $rate, $nds, $total]) {
+                IncomingInvoiceItem::query()->create(['invoice_id' => $invoice->id, 'line_no' => $n + 1, 'description' => $description, 'qty' => $qty,
+                    'unit_price' => $price, 'amount' => $amount, 'nds_rate' => $rate, 'nds_amount' => $nds, 'total' => $total]);
+            }
+        }
+    }
+
     public function run(): void
     {
         if (app()->environment('production')) {
@@ -148,6 +175,7 @@ class DatabaseSeeder extends Seeder
         // Real directory imported from the legacy snapshot (legacy:import) replaces the synthetic one.
         if (DB::table('legacy_id_map')->where('target_table', 'expense_categories')->exists()) {
             $this->seedSuppliers();
+            $this->seedIncomingInvoices();
 
             return;
         }
@@ -162,5 +190,6 @@ class DatabaseSeeder extends Seeder
             }
         }
         $this->seedSuppliers();
+        $this->seedIncomingInvoices();
     }
 }

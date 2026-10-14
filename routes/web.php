@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DealerController;
+use App\Http\Controllers\EsfController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
@@ -48,6 +49,15 @@ Route::middleware('auth')->group(function () {
         Route::delete('/aliases/{alias}', 'destroyAlias')->whereNumber('alias')->name('aliases.destroy');
     });
 
+    // M05 «Входящие ЭСФ»: список, детализация, тип, импорт XML (сверка с оплатами — ERP-048)
+    Route::middleware('page:esf')->prefix('esf')->name('esf.')->controller(EsfController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{invoice}/detail', 'detail')->whereNumber('invoice')->name('detail');
+        Route::put('/{invoice}/type', 'setType')->whereNumber('invoice')->name('type');
+        Route::post('/import/preview', 'preview')->name('import.preview');
+        Route::post('/import', 'import')->name('import');
+    });
+
     // M06 «Поставщики»
     Route::middleware('page:suppliers')->prefix('suppliers')->name('suppliers.')->controller(SupplierController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -73,7 +83,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Pages that are not migrated yet — the menu stays 1:1, the page says so honestly.
-    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse'];
+    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf'];
     Route::get('/{page}', [PageController::class, 'notMigrated'])
         ->whereIn('page', array_values(array_diff(array_keys(Erp::pages()), $migrated)))
         ->middleware('page')->name('page');

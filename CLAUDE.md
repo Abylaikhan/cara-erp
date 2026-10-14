@@ -15,5 +15,6 @@
   Данные с каналом (офис/салон/дилер) выбираются и меняются только через `App\Support\ChannelScope` (legacy getChannelFilter).
 - Новый раздел: строки в `docs/coverage/requirements.csv` (legacy_locator = имена функций legacy), тесты на PostgreSQL, статус в трекере;
   импортёр `legacy:import <таблица>` с построчной SQL-сверкой; текстовые столбцы для сортировки — `COLLATE "en-US-x-icu"` (как в Supabase).
+  Если legacy показывает строки без сортировки и в таблице нет поля для порядка — `legacy:natural-order <таблица>` (только GET).
 - Legacy Supabase — строго только чтение: только GET через `App\Legacy\SupabaseReadOnlyClient` (`legacy:snapshot`, сверки). Снимки и реальные данные — только в
   `.local-audit/` и локальной БД; не выводить строки реальных данных в чат, логи, отчёты, тесты и коммиты.

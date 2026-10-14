@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<esf:invoiceInfoContainer xmlns:esf="esf">
+  <invoiceSet>
+    <invoiceInfo>
+      <invoiceId>1</invoiceId>
+      <invoiceStatus>DELIVERED</invoiceStatus>
+      <registrationNumber>ESF-000000000071-DEMO-0001</registrationNumber>
+      <invoiceBody><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<v2:invoice xmlns:v2="v2.esf">
+  <date>02.03.2026</date>
+  <num>101</num>
+  <turnoverDate>28.02.2026</turnoverDate>
+  <consignor><name>ТОО «Демо Склад-Отправитель»</name><tin>000000000099</tin></consignor>
+  <sellers><seller><address>Демо-адрес</address><name>Товарищество с ограниченной ответственностью «Демо Плита»</name><tin>000000000071</tin></seller></sellers>
+  <customers><customer><name>ТОО «Демо Покупатель»</name><tin>000000000001</tin></customer></customers>
+  <productSet><products>
+    <product><description>ЛДСП Демо 16мм</description><quantity>10</quantity><unitPrice>8 500,50</unitPrice><priceWithoutTax>85005</priceWithoutTax><ndsRate>12</ndsRate><ndsAmount>10200.6</ndsAmount><priceWithTax>95205.6</priceWithTax></product>
+    <product><description>Доставка демо</description><quantity>1</quantity><unitPrice>3000</unitPrice><turnoverSize>3000</turnoverSize><ndsRate>12</ndsRate><ndsAmount>360</ndsAmount><priceWithTax>3360</priceWithTax></product>
+    <product><description></description><quantity>0</quantity><priceWithTax>0</priceWithTax></product>
+  </products></productSet>
+</v2:invoice>]]></invoiceBody>
+    </invoiceInfo>
+    <invoiceInfo>
+      <registrationNumber>ESF-000000000072-DEMO-0002</registrationNumber>
+      <invoiceBody><![CDATA[<v2:invoice xmlns:v2="v2.esf"><date>05.03.2026</date><num>7</num>
+<sellers><seller><name>Индивидуальный предприниматель Демо</name><tin>000000000072</tin></seller></sellers>
+<productSet><products><product><description>Петля демо</description><quantity>100</quantity><unitPrice>280</unitPrice><priceWithoutTax>28000</priceWithoutTax><ndsRate>0</ndsRate><ndsAmount>0</ndsAmount><priceWithTax>28000</priceWithTax></product></products></productSet>
+</v2:invoice>]]></invoiceBody>
+    </invoiceInfo>
+  </invoiceSet>
+</esf:invoiceInfoContainer>

@@ -149,10 +149,36 @@ class LegacyCopyTest extends TestCase
         new SupabaseReadOnlyClient('https://evil.example.com', 'k');
     }
 
+    public function test_client_reads_pages_in_natural_or_requested_order_only(): void
+    {
+        $client = new SupabaseReadOnlyClient('https://testproject.supabase.co', 'k');
+        $client->page('customers', null, 0, 9);
+        $client->page('customers', 'id', 0, 9, 'desc');
+        $this->assertSame(['GET', 'GET'], array_column($client->log, 'method'));
+        $this->assertStringNotContainsString('order=', $client->log[0]['path']);
+        $this->assertStringContainsString('order=id.desc', $client->log[1]['path']);
+        $this->expectException(InvalidArgumentException::class);
+        $client->page('customers', 'id', 0, 9, 'desc;drop');
+    }
+
     public function test_client_refuses_injected_table_names(): void
     {
         $this->expectException(InvalidArgumentException::class);
         (new SupabaseReadOnlyClient('https://testproject.supabase.co', 'k'))->count('customers?select=*&delete=1');
+    }
+
+    public function test_natural_order_is_read_with_get_and_must_match_the_snapshot(): void
+    {
+        $this->artisan('legacy:snapshot')->assertSuccessful();
+        $this->artisan('legacy:load')->assertSuccessful();
+        $this->artisan('legacy:natural-order customers')->assertSuccessful()->expectsOutputToContain('other methods: 0');
+
+        $expected = array_map(fn (array $r) => (string) $r['id'], $this->data['customers']);
+        $this->assertSame($expected, DB::table('legacy.natural_order')->where('table_name', 'customers')->orderBy('position')->pluck('row_id')->all());
+
+        $this->data['customers'][] = ['id' => 99, 'name' => 'Новая строка', 'total' => 0, 'tags' => []];
+        $this->expectException(\RuntimeException::class);
+        $this->artisan('legacy:natural-order customers');
     }
 
     public function test_load_verifies_count_and_content_and_is_idempotent(): void
