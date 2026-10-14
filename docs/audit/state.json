@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T162834Z-1664",
-    "started_at": "2026-10-14T16:28:34Z",
+    "run_id": "20261014T163703Z-81be",
+    "started_at": "2026-10-14T16:37:03Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T16:29:36Z",
+    "finished_at": "2026-10-14T16:38:07Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "d35c8511f512b3c13ec1fbf128e19198161b2fd3",
-    "target_ref": "ac81dfbae6ee398177943327723046bfb4167196",
-    "at": "2026-10-14T16:28:34Z"
+    "target_ref": "b76d01ec021bed794b5a05847574a2088e2ebbef",
+    "at": "2026-10-14T16:37:03Z"
   },
   "last_reported": {
-    "run_id": "20261014T162834Z-1664",
+    "run_id": "20261014T163703Z-81be",
     "source_ref": "d35c8511f512b3c13ec1fbf128e19198161b2fd3",
     "source_blob": "0b5a45728ff2c7f928cc38e529466bf7bcc9a0dd",
-    "target_ref": "ac81dfbae6ee398177943327723046bfb4167196",
-    "logical_key": "4685874b3d2e7b7d",
+    "target_ref": "b76d01ec021bed794b5a05847574a2088e2ebbef",
+    "logical_key": "8c6473ba45df28d1",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T16:29:36Z",
-    "report": "daily/2026-10-14/20261014T162834Z-1664.md",
-    "artifact_sha256": "b93947c7962cf32452e8397d18563e69747b661d55cf79e8170823e13cacec2e",
+    "completed_at": "2026-10-14T16:38:07Z",
+    "report": "daily/2026-10-14/20261014T163703Z-81be.md",
+    "artifact_sha256": "e18f4c92038bb4debfb4a20e84f4bc4ad39006ef9f92661e448821ea0f385531",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -39,6 +39,7 @@
       "SRC-WATCHED",
       "TASKS-READ",
       "TASKS-WRITE",
+      "TGT-BACKUP",
       "TGT-BUILD",
       "TGT-DB",
       "TGT-DEPS",
@@ -243,15 +244,15 @@
   },
   "last_verified": {
     "source_ref": "d35c8511f512b3c13ec1fbf128e19198161b2fd3",
-    "target_ref": "ac81dfbae6ee398177943327723046bfb4167196",
-    "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-14T16:29:36Z",
-    "run_id": "20261014T162834Z-1664"
+    "target_ref": "b76d01ec021bed794b5a05847574a2088e2ebbef",
+    "required_suite_version": "suite-1+055594",
+    "completed_at": "2026-10-14T16:38:07Z",
+    "run_id": "20261014T163703Z-81be"
   },
   "changelog": {
-    "entries": 22,
-    "last_header": "## 2026-10-14 · 20261014T162834Z-1664",
-    "sha256": "ed54d128e3d069e897c65dda3bcc88d29d1d7743cd81c3d79fe16eeea345ba11"
+    "entries": 23,
+    "last_header": "## 2026-10-14 · 20261014T163703Z-81be",
+    "sha256": "d10e40b6aea8fd1c1d23ba4a53f55d4ffc8e27a4903caa3cfc814a564ac2f9c6"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
