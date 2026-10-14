@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T030354Z-cd08",
-    "started_at": "2026-10-14T03:03:54Z",
+    "run_id": "20261014T032832Z-766b",
+    "started_at": "2026-10-14T03:28:32Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T03:04:42Z",
+    "finished_at": "2026-10-14T03:29:26Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "136c7a6f92ab398b5c8e6af86aa7129063a1f7f8",
-    "at": "2026-10-14T03:03:54Z"
+    "target_ref": "51fa16b8245df2fde8acdc12885ae6e17aa317e4",
+    "at": "2026-10-14T03:28:32Z"
   },
   "last_reported": {
-    "run_id": "20261014T030354Z-cd08",
+    "run_id": "20261014T032832Z-766b",
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
     "source_blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0",
-    "target_ref": "136c7a6f92ab398b5c8e6af86aa7129063a1f7f8",
-    "logical_key": "1d0bb4a98ed13977",
+    "target_ref": "51fa16b8245df2fde8acdc12885ae6e17aa317e4",
+    "logical_key": "d54d8999b41029b6",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T03:04:42Z",
-    "report": "daily/2026-10-14/20261014T030354Z-cd08.md",
-    "artifact_sha256": "545130eeaba0133062a90f6727376883c15126b4fc9e2464c4e259ae3faa1b75",
+    "completed_at": "2026-10-14T03:29:26Z",
+    "report": "daily/2026-10-14/20261014T032832Z-766b.md",
+    "artifact_sha256": "a75b948c15bd7a5600c673649692dd860c9b2b1c2626bef601eb5fdb3986bcf1",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -128,6 +128,12 @@
       "Tests\\Feature\\Customers\\DealerTest::test_roles_without_the_page_cannot_manage_dealers",
       "Tests\\Feature\\Customers\\DealerTest::test_second_editor_gets_a_conflict",
       "Tests\\Feature\\Customers\\DealerTest::test_tab_lists_the_legacy_dealers_and_puts_new_ones_first",
+      "Tests\\Feature\\Esf\\EsfTest::test_duplicate_by_fields_when_there_is_no_registration_number",
+      "Tests\\Feature\\Esf\\EsfTest::test_import_creates_an_unknown_supplier_and_refuses_a_second_copy",
+      "Tests\\Feature\\Esf\\EsfTest::test_page_lists_invoices_with_linked_amounts_type_change_and_detail_with_material_match",
+      "Tests\\Feature\\Esf\\EsfTest::test_parser_follows_legacy_rules",
+      "Tests\\Feature\\Esf\\EsfTest::test_preview_marks_duplicates_and_import_stores_invoice_lines_and_supplier",
+      "Tests\\Feature\\Esf\\EsfTest::test_roles_without_the_page_cannot_read_or_import",
       "Tests\\Feature\\ExampleTest::test_guest_is_redirected_to_login",
       "Tests\\Feature\\ExampleTest::test_health_endpoint_is_up",
       "Tests\\Feature\\ExampleTest::test_logout_ends_session",
@@ -151,15 +157,20 @@
       "Tests\\Feature\\Legacy\\CustomerImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\CustomerImportTest::test_imports_every_row_keeping_fields_channels_and_dates",
       "Tests\\Feature\\Legacy\\CustomerImportTest::test_rows_the_new_schema_cannot_keep_change_nothing",
+      "Tests\\Feature\\Legacy\\EsfImportTest::test_bad_rows_change_nothing",
+      "Tests\\Feature\\Legacy\\EsfImportTest::test_import_is_idempotent",
+      "Tests\\Feature\\Legacy\\EsfImportTest::test_imports_invoices_lines_in_natural_order_and_links",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_invalid_legacy_data_changes_nothing",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_only_migrated_modules_can_be_imported",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_real_directory_replaces_the_synthetic_one",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_seeder_keeps_the_imported_directory",
+      "Tests\\Feature\\Legacy\\LegacyCopyTest::test_client_reads_pages_in_natural_or_requested_order_only",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_client_refuses_injected_table_names",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_client_rejects_foreign_urls_and_odd_table_names",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_credentials_are_not_copied",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_load_verifies_count_and_content_and_is_idempotent",
+      "Tests\\Feature\\Legacy\\LegacyCopyTest::test_natural_order_is_read_with_get_and_must_match_the_snapshot",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_rows_changing_during_read_are_reread_then_flagged",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_snapshot_reads_everything_with_get_only",
       "Tests\\Feature\\Legacy\\ProductImportTest::test_import_is_idempotent",
@@ -205,15 +216,15 @@
   },
   "last_verified": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "136c7a6f92ab398b5c8e6af86aa7129063a1f7f8",
+    "target_ref": "51fa16b8245df2fde8acdc12885ae6e17aa317e4",
     "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-14T03:04:42Z",
-    "run_id": "20261014T030354Z-cd08"
+    "completed_at": "2026-10-14T03:29:26Z",
+    "run_id": "20261014T032832Z-766b"
   },
   "changelog": {
-    "entries": 18,
-    "last_header": "## 2026-10-14 · 20261014T030354Z-cd08",
-    "sha256": "6d98158428e831bd1faa1056d841030cfff597d1009f8afb590cf0708fb106d6"
+    "entries": 19,
+    "last_header": "## 2026-10-14 · 20261014T032832Z-766b",
+    "sha256": "26faf7e2cd88256145315f15cf5a9988dc6e61a0e237fbc1d90fa9a11a210f1c"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
