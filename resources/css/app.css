@@ -34,3 +34,6 @@ a.notif-btn {
 .mat-cat-btn:hover { border-color: var(--accent) !important; }
 .mat-chip:hover { border-color: var(--accent) !important; color: var(--accent); }
 .mat-ac-item:hover { background: var(--bg3); }
+
+/* CRM task form: legacy highlights a lead of the search list with onmouseover/onmouseout */
+.task-lead-option:hover { background: var(--bg2); }

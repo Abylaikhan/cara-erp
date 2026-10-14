@@ -151,6 +151,12 @@ return [
         'proposal' => ['label' => '📄 КП отправлено', 'statuses' => ['proposal']],
         'negotiation' => ['label' => '🤝 Переговоры', 'statuses' => ['negotiation']],
     ],
+    // Legacy CRM_STAGE_ORDER (L29285): «→ Следующий этап» of the lead card moves a lead along it; «Лид» is a new lead.
+    'stage_order' => ['new', 'qualify', 'proposal', 'negotiation', 'won', 'lost'],
+    // Task priorities as the legacy task form stores them (its PRIORITY_CONFIG names «normal» «medium»), communication types:
+    // COMM_TYPES (L29386).
+    'task_priorities' => ['high', 'normal', 'low'],
+    'communication_types' => ['call', 'letter', 'meeting', 'whatsapp', 'email', 'note'],
 
     // Виды деятельности (legacy WORKSHOPS, L27195): production lines that staff and write-offs are bound to.
     'workshops' => [

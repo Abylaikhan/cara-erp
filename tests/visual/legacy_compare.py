@@ -2,22 +2,24 @@
 the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды» and «Воронка лидов» (and their modals),
 dark and light themes, 1440×900.
 
-Legacy runs from the accepted snapshot in .local-audit/blobs with every network request blocked except Google Fonts —
+Legacy runs from the accepted reference in .local-audit/blobs with every network request blocked except Google Fonts —
 it never reaches the legacy backend. Both sides get the same synthetic directory (DatabaseSeeder).
 Requires host python3 with `pip install playwright==1.55.0 pillow` and Google Chrome; the app must be up (make up)
 and seeded. Interim tool until the Dockerised TGT-VISUAL suite exists.
 
     python3 tests/visual/legacy_compare.py            # → .local-audit/visual/<time>/, prints % of differing pixels
 """
-import datetime, json, re, sys
+import datetime, hashlib, json, re, sys
 from pathlib import Path
 from PIL import Image, ImageChops
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 CFG = json.loads((ROOT / 'tools/harness/config.json').read_text())
-STATE = json.loads((ROOT / 'docs/audit/state.json').read_text())
-BLOB = ROOT / '.local-audit/blobs' / f"{STATE['last_reported']['source_blob']}.html"
+# The accepted reference (config: source.accepted_ref), not the last observed legacy: the port follows the reference until a
+# separate decision moves it.
+ACCEPTED = CFG['source']['accepted_ref']['sha256']
+BLOB = next(b for b in sorted((ROOT / '.local-audit/blobs').glob('*.html')) if hashlib.sha256(b.read_bytes()).hexdigest() == ACCEPTED)
 OUT = ROOT / '.local-audit/visual' / datetime.datetime.now().strftime('%Y%m%dT%H%M%S'); OUT.mkdir(parents=True, exist_ok=True)
 LEGACY = BLOB.as_uri()
 ENV = (ROOT / '.env').read_text()
@@ -134,6 +136,18 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-crm-funnel-{theme}.png'))
         page.locator('#orders-funnel button', has_text='+ Новый лид').click(); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-crm-funnel-modal-{theme}.png'))
+        page.locator('#crmLeadModal .modal-close').click(); page.wait_for_timeout(200)
+        funnel = [l for l in crm['leads'] if l['status'] in ('qualify', 'proposal', 'negotiation', 'contact', 'meeting')]
+        stage_of = lambda l: next(s['key'] for s in crm['funnelStages'] if l['status'] in s['statuses'])
+        first_card = next((l['id'] for s in crm['funnelStages'] for l in funnel if stage_of(l) == s['key']), None)  # DOM order: column by column
+        if first_card is not None:
+            page.locator('#crm-kanban-board .crm-card-detail-btn').first.click(); page.wait_for_timeout(600)
+            page.screenshot(path=str(OUT / f'target-crm-popover-{theme}.png'))
+            page.locator('#crm-popover .crm-popover-close').click(); page.wait_for_timeout(200)
+        page.locator('#page-crm .tab', has_text='Задачи').click(); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-crm-tasks-{theme}.png'))
+        page.locator('#orders-tasks button', has_text='+ Новая задача').click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-crm-task-modal-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -307,8 +321,31 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-crm-funnel-{theme}.png'))
         page.evaluate("openCrmLeadModal(null)"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-crm-funnel-modal-{theme}.png'))
+        page.evaluate("closeModal('crmLeadModal')")
+        # Lead card: the built-in demo history of legacy is not data (ADR-0002, item 22) and is cleared.
+        if first_card is not None:
+            page.evaluate(f"""() => {{ Object.keys(commHistory).forEach(k => delete commHistory[k]);
+                openCrmPopover({first_card}, document.querySelector(".crm-card[data-lead-id='{first_card}'] .crm-card-detail-btn")); }}""")
+            page.wait_for_timeout(600)
+            page.screenshot(path=str(OUT / f'legacy-crm-popover-{theme}.png'))
+            page.evaluate("closeCrmPopover()")
+        # Tasks: legacy tasksData gets the target's tasks. A task about a closed lead shows the lead in the target; legacy
+        # finds it only when closed leads are loaded, so they are added to leadsData (ADR-0002, item 38).
+        page.evaluate("""([tasks, leads]) => {
+            const have = new Set(leadsData.map(l => l.id));
+            leads.filter(l => tasks.some(t => t.lead_id === l.id) && !have.has(String(l.id))).forEach(l => leadsData.push({id: String(l.id), name: l.name,
+                phone: l.phone || '', status: l.status, interest: l.interest || '', budget: l.budget || 0, source: l.source || '', comment: l.comment || '',
+                channel: 'office', manager: l.manager || '', created: '', fromLeads: true}));
+            tasksData = tasks.map(t => ({id: String(t.id), title: t.title, date: t.due_date || '', time: t.due_time || '', manager: t.manager || '',
+                priority: t.priority, status: t.status, leadId: t.lead_id ? String(t.lead_id) : null}));
+            showOrdersTab('tasks', [...document.querySelectorAll('#page-crm .tab')].find(t => t.textContent.includes('Задачи')));
+        }""", [crm['tasks'], crm['leads']])
+        page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'legacy-crm-tasks-{theme}.png'))
+        page.evaluate("openTaskModal(null)"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-crm-task-modal-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

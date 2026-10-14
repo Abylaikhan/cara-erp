@@ -1,5 +1,6 @@
-// CRM leads (M10) — shared by the «Лиды» and «Воронка лидов» tabs: types, legacy formats and the status actions of legacy
-// quickChangeLeadStatus / crmDrop / leadWon / leadLost / convertLeadToClient (L28949–32135). Every action is saved by the server.
+// CRM (M10) — shared by the tabs «Лиды», «Воронка лидов» and «Задачи»: types, legacy formats and the actions of legacy
+// quickChangeLeadStatus / crmDrop / leadWon / leadLost / convertLeadToClient / crmMoveToNextStage / toggleTask
+// (L28949–32135). Every action is saved by the server.
 import { router } from '@inertiajs/vue3';
 import { reactive } from 'vue';
 
@@ -90,6 +91,102 @@ export function convertLeadToClient(lead: LeadRow): void {
     router.post(`/crm/leads/${lead.id}/client`, { lock_version: lead.lock_version }, { ...visit, onError: fail });
 }
 
-/** Functions of other modules: orders (M09) and CRM tasks (next part). */
+/** Functions of other modules: orders (M09). */
 export const ORDERS_LATER = 'Заказы покупателей появятся после переноса раздела «Продажи».';
-export const TASKS_LATER = 'Задачи CRM появятся в следующей части переноса раздела.';
+
+// ── «→ Следующий этап» (legacy crmMoveToNextStage, CRM_STAGE_ORDER) ──
+/** Stage of a lead in the funnel order: «Контакт» and «Встреча» stand in «Квалификация», a new lead is «Лид». */
+export const stageOfStatus = (status: string): string => (['contact', 'meeting'].includes(status) ? 'qualify' : status);
+
+/** Next status after the lead's stage, up to «Выиграли»; null when there is none. */
+export function nextStatus(lead: LeadRow, order: string[]): string | null {
+    const idx = order.indexOf(stageOfStatus(lead.status));
+    return idx < 0 || idx >= order.indexOf('won') ? null : order[idx + 1];
+}
+
+/** Moves the lead on; «Выиграли» offers the customer's order, as legacy does (without the confirmation of the card button). */
+export function moveToNextStage(lead: LeadRow, order: string[]): void {
+    const status = nextStatus(lead, order);
+    if (status === null) return;
+    router.put(`/crm/leads/${lead.id}/status`, { status, lock_version: lead.lock_version }, {
+        ...visit,
+        onError: fail,
+        onSuccess: () => {
+            if (status !== 'won') return;
+            convert.label = `«${lead.name}» выиграли! Создать заказ покупателя?`;
+            convert.open = true;
+        },
+    });
+}
+
+// ── Business time: «today» and «now» in the business time zone (legacy took the UTC date, so before 05:00 in Almaty
+// «today» was yesterday) ──
+export function businessNow(timezone: string): { date: string; time: string } {
+    const parts = Object.fromEntries(
+        new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+            .formatToParts(new Date())
+            .map((p) => [p.type, p.value]),
+    );
+    return { date: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}` };
+}
+
+/** Whole days from `from` to `to` (both YYYY-MM-DD). */
+export const daysBetween = (from: string, to: string): number => Math.round((Date.parse(to + 'T00:00:00Z') - Date.parse(from + 'T00:00:00Z')) / 86400000);
+
+// ── Tasks (legacy tasks, PRIORITY_CONFIG, isTaskOverdue, fmtTaskDateTime) ──
+export interface TaskRow {
+    id: number;
+    title: string;
+    due_date: string | null;
+    due_time: string | null;
+    manager: string | null;
+    priority: string;
+    status: string;
+    lead_id: number | null;
+    lock_version: number;
+}
+
+export const PRIORITY_CONFIG: Record<string, { label: string; icon: string; cls: string; textCls: string }> = {
+    high: { label: 'Высокий', icon: '🔴', cls: 'task-high', textCls: 'priority-high' },
+    medium: { label: 'Средний', icon: '🟡', cls: 'task-medium', textCls: 'priority-medium' },
+    low: { label: 'Низкий', icon: '⚪', cls: 'task-low', textCls: 'priority-low' },
+};
+/** The form stores «normal», which PRIORITY_CONFIG calls «medium». */
+export const priorityOf = (t: TaskRow) => PRIORITY_CONFIG[t.priority] ?? PRIORITY_CONFIG.medium;
+
+export function isTaskOverdue(t: TaskRow, now: { date: string; time: string }): boolean {
+    if (t.status === 'done' || !t.due_date) return false;
+    if (t.due_date < now.date) return true;
+    return t.due_date === now.date && !!t.due_time && t.due_time < now.time;
+}
+
+export function fmtTaskDateTime(t: TaskRow): string {
+    if (!t.due_date) return '—';
+    const d = new Date(t.due_date + 'T00:00:00').toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return d + (t.due_time ? ' ' + t.due_time : '');
+}
+
+export const TASK_RELOAD = ['tasks', 'managers', 'flash'];
+
+/** Legacy toggleTask: the round checkbox. */
+export function toggleTask(t: TaskRow): void {
+    router.put(`/crm/tasks/${t.id}/toggle`, { lock_version: t.lock_version }, { preserveScroll: true, preserveState: true, only: TASK_RELOAD, onError: fail });
+}
+
+// ── Communication history of a lead (legacy COMM_TYPES) ──
+export interface Communication {
+    id: number;
+    type: string;
+    happened_on: string | null;
+    text: string;
+    manager: string | null;
+}
+
+export const COMM_TYPES: Record<string, { label: string; icon: string; dot: string }> = {
+    call: { label: 'Звонок', icon: '📞', dot: 'comm-dot-call' },
+    letter: { label: 'Письмо', icon: '✉️', dot: 'comm-dot-letter' },
+    meeting: { label: 'Встреча', icon: '🤝', dot: 'comm-dot-meeting' },
+    whatsapp: { label: 'WhatsApp', icon: '💬', dot: 'comm-dot-whatsapp' },
+    email: { label: 'Email', icon: '📧', dot: 'comm-dot-email' },
+    note: { label: 'Заметка', icon: '📝', dot: 'comm-dot-note' },
+};

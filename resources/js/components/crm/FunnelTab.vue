@@ -4,12 +4,22 @@
 // fails as soon as one lead is in the funnel; the columns here are the statuses its lead form marks «→ воронка»
 // (config erp.funnel_stages). The segment filter compares the id as a number (legacy compared a string with a number and
 // always emptied the board). The segment is the lead's own (legacy showed «Новый» on every card), «Сумма воронки» adds the
-// budgets (legacy added a field its leads never have). Moves, «Выиграли» and «Отказ» are saved.
+// budgets (legacy added a field its leads never have). Moves, «Выиграли» and «Отказ» are saved. «⋯» opens the lead card
+// (LeadPopover); the lead form and the task form belong to the page, which the tab asks to open them.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import FunnelLeadModal from '@/components/crm/FunnelLeadModal.vue';
-import { changeStatus, crmFmtAmount, leadLost, leadWon, TASKS_LATER, type FunnelStage, type LeadRow, type Segment } from '@/lib/crm';
+import LeadPopover from '@/components/crm/LeadPopover.vue';
+import { businessNow, changeStatus, crmFmtAmount, leadLost, leadWon, type FunnelStage, type LeadRow, type Segment } from '@/lib/crm';
 
-const props = defineProps<{ leads: LeadRow[]; stages: FunnelStage[]; segments: Segment[]; sources: Record<string, string>; managers: string[]; active: boolean }>();
+const props = defineProps<{
+    leads: LeadRow[];
+    stages: FunnelStage[];
+    segments: Segment[];
+    sources: Record<string, string>;
+    stageOrder: string[];
+    timezone: string;
+    active: boolean;
+}>();
+const emit = defineEmits<{ 'open-lead': [lead: LeadRow | null]; 'new-task': [leadId: number] }>();
 
 const stageOf = (l: LeadRow) => props.stages.find((s) => s.statuses.includes(l.status))?.key ?? null;
 const funnel = computed(() => props.leads.filter((l) => stageOf(l) !== null));
@@ -38,12 +48,8 @@ const summary = computed(() => {
 });
 
 const segment = (id: number | null) => props.segments.find((s) => s.id === id);
-const overdue = (l: LeadRow) => {
-    if (!l.next_date) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return new Date(l.next_date) < today;
-};
+// The next action is overdue from the day after its date, in the business time zone.
+const overdue = (l: LeadRow) => !!l.next_date && l.next_date < businessNow(props.timezone).date;
 const nextLabel = (l: LeadRow) => (l.next_date ? new Date(l.next_date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }) : '');
 
 // Row heights follow the tallest cell of the row (legacy renderCrmKanban, requestAnimationFrame); a hidden tab has no
@@ -80,8 +86,7 @@ function onDrop(stageKey: string): void {
     changeStatus(lead, stageKey);
 }
 
-const modal = ref<InstanceType<typeof FunnelLeadModal> | null>(null);
-const task = () => window.alert(TASKS_LATER);
+const popover = ref<InstanceType<typeof LeadPopover> | null>(null);
 </script>
 
 <template>
@@ -92,7 +97,7 @@ const task = () => window.alert(TASKS_LATER);
                 <option value="">Все менеджеры</option>
                 <option v-for="m in managers" :key="m" :value="m">{{ m }}</option>
             </select>
-            <button class="btn btn-primary btn-sm" @click="modal?.openCrmLeadModal(null)">+ Новый лид</button>
+            <button class="btn btn-primary btn-sm" @click="emit('open-lead', null)">+ Новый лид</button>
         </div>
     </div>
 
@@ -139,13 +144,13 @@ const task = () => window.alert(TASKS_LATER);
                 <div class="crm-row-labels">
                     <div class="crm-row-label-header">Клиент</div>
                     <div v-for="l in leads" :key="l.id" class="crm-row-label">
-                        <div class="crm-row-label-name" title="Открыть карточку" @click="modal?.openCrmLeadModal(l)">{{ l.name }}</div>
+                        <div class="crm-row-label-name" title="Открыть карточку" @click="emit('open-lead', l)">{{ l.name }}</div>
                         <div class="crm-row-label-meta">{{ l.phone || '—' }}</div>
                         <div v-if="overdue(l)" style="font-size: 10px; color: var(--red)">⚠ просроченное действие</div>
                         <button
                             title="Создать задачу по лиду"
                             style="margin-top: 3px; font-size: 10px; padding: 2px 6px; background: rgba(79, 142, 247, 0.1); border: 1px solid var(--accent); border-radius: 4px; cursor: pointer; color: var(--accent)"
-                            @click="task"
+                            @click="emit('new-task', l.id)"
                         >
                             📋 Задача
                         </button>
@@ -196,12 +201,12 @@ const task = () => window.alert(TASKS_LATER);
                                 <button
                                     style="font-size: 11px; padding: 3px 6px; background: rgba(79, 142, 247, 0.1); border: 1px solid var(--accent); border-radius: 5px; cursor: pointer; color: var(--accent)"
                                     title="Создать задачу"
-                                    @click.stop="task"
+                                    @click.stop="emit('new-task', l.id)"
                                 >
                                     📋
                                 </button>
                             </div>
-                            <button class="crm-card-detail-btn" title="Детали лида" @click.stop="modal?.openCrmLeadModal(l)">⋯</button>
+                            <button class="crm-card-detail-btn" title="Детали лида" @click.stop="popover?.open(l, $event.currentTarget as HTMLElement)">⋯</button>
                         </div>
                         <div v-else style="height: 4px"></div>
                     </div>
@@ -209,5 +214,13 @@ const task = () => window.alert(TASKS_LATER);
             </div>
         </div>
     </div>
-    <FunnelLeadModal ref="modal" :segments="props.segments" :sources="props.sources" :managers="props.managers" />
+    <LeadPopover
+        ref="popover"
+        :leads="props.leads"
+        :segments="props.segments"
+        :sources="props.sources"
+        :stage-order="props.stageOrder"
+        :timezone="props.timezone"
+        @edit="(l) => emit('open-lead', l)"
+    />
 </template>

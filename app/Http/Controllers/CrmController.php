@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Crm\LeadRequest;
+use App\Models\CrmTask;
 use App\Models\Lead;
 use App\Models\User;
+use App\Services\CrmTaskService;
 use App\Services\LeadService;
 use App\Support\ChannelScope;
 use App\Support\Erp;
@@ -17,8 +19,9 @@ use Inertia\Response;
 
 /**
  * M10 CRM — legacy page-crm (L4134–5346): tabs «Лиды» (loadLeadsFromDB/renderLeadsTab/saveLead/quickChangeLeadStatus/
- * convertLeadToClient) and «Воронка лидов» (renderCrmKanban/crmDrop/leadWon/leadLost/saveCrmLead). Leads are limited to the
- * channels the user may see. Clients, order boards and tasks wait for orders (M09) and the next part.
+ * convertLeadToClient), «Воронка лидов» (renderCrmKanban/crmDrop/leadWon/leadLost/saveCrmLead, the lead card) and «Задачи»
+ * (loadTasksFromDB/renderTasks). Leads are limited to the channels the user may see, tasks about a lead follow the lead.
+ * Clients and the order boards wait for orders (M09).
  */
 class CrmController extends Controller
 {
@@ -30,6 +33,8 @@ class CrmController extends Controller
         // Legacy loads leads newest first (order=created_at.desc).
         $leads = ChannelScope::apply(Lead::query()->active(), $request->user())->orderByDesc('created_at')->orderByDesc('id')->get();
         $crmUsers = User::query()->where('is_active', true)->orderBy('name')->get()->filter(fn (User $u) => Erp::canAccess($u, 'crm'))->pluck('name');
+        // Legacy loads tasks newest first (order=created_at.desc); the tab sorts them itself.
+        $tasks = CrmTaskService::visible($request->user())->orderByDesc('created_at')->orderByDesc('id')->get();
 
         return Inertia::render('Crm', [
             'leads' => $leads->map(fn (Lead $l) => [
@@ -53,9 +58,22 @@ class CrmController extends Controller
             'sources' => config('erp.lead_sources'),
             'segments' => collect(config('erp.lead_segments'))->map(fn (array $s, int $id) => ['id' => $id] + $s)->values(),
             'funnelStages' => collect(config('erp.funnel_stages'))->map(fn (array $s, string $key) => ['key' => $key] + $s)->values(),
-            // Managers to choose in the funnel form: the CRM users and whoever already leads a visible lead.
-            'managers' => $crmUsers->merge($leads->pluck('manager')->filter())->unique()->sort()->values(),
+            'stageOrder' => config('erp.stage_order'),
+            'tasks' => $tasks->map(fn (CrmTask $t) => [
+                'id' => $t->id,
+                'title' => $t->title,
+                'due_date' => $t->due_date?->format('Y-m-d'),
+                'due_time' => $t->timeLabel(),
+                'manager' => $t->manager,
+                'priority' => $t->priority,
+                'status' => $t->status,
+                'lead_id' => $t->lead_id,
+                'lock_version' => $t->lock_version,
+            ])->values(),
+            // Managers to choose in the funnel and task forms: the CRM users and whoever already leads a visible lead or task.
+            'managers' => $crmUsers->merge($leads->pluck('manager')->filter())->merge($tasks->pluck('manager')->filter())->unique()->sort()->values(),
             'currentYear' => (int) now(config('erp.business_timezone'))->format('Y'),
+            'timezone' => config('erp.business_timezone'),
         ]);
     }
 

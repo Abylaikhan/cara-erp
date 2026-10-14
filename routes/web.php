@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CrmController;
+use App\Http\Controllers\CrmTaskController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DealerController;
 use App\Http\Controllers\EsfController;
 use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\LeadCommunicationController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
@@ -69,7 +71,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{supplier}', 'destroy')->whereNumber('supplier')->name('destroy');
     });
 
-    // M10 CRM: лиды и воронка (клиенты, заказы и задачи — с переносом заказов и следующей частью)
+    // M10 CRM: лиды, воронка, задачи, история коммуникаций (клиенты и доски заказов — с переносом заказов)
     Route::middleware('page:crm')->prefix('crm')->name('crm.')->controller(CrmController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/leads', 'store')->name('leads.store');
@@ -77,6 +79,13 @@ Route::middleware('auth')->group(function () {
         Route::put('/leads/{lead}/status', 'status')->whereNumber('lead')->name('leads.status');
         Route::post('/leads/{lead}/client', 'client')->whereNumber('lead')->name('leads.client');
         Route::delete('/leads/{lead}', 'destroy')->whereNumber('lead')->name('leads.destroy');
+        Route::get('/leads/{lead}/communications', [LeadCommunicationController::class, 'index'])->whereNumber('lead')->name('communications.index');
+        Route::post('/leads/{lead}/communications', [LeadCommunicationController::class, 'store'])->whereNumber('lead')->name('communications.store');
+        Route::delete('/communications/{communication}', [LeadCommunicationController::class, 'destroy'])->whereNumber('communication')->name('communications.destroy');
+        Route::post('/tasks', [CrmTaskController::class, 'store'])->name('tasks.store');
+        Route::put('/tasks/{task}', [CrmTaskController::class, 'update'])->whereNumber('task')->name('tasks.update');
+        Route::put('/tasks/{task}/toggle', [CrmTaskController::class, 'toggle'])->whereNumber('task')->name('tasks.toggle');
+        Route::delete('/tasks/{task}', [CrmTaskController::class, 'destroy'])->whereNumber('task')->name('tasks.destroy');
     });
 
     // M08 «Покупатели» — tab «Контрагенты»

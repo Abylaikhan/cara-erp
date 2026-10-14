@@ -1,14 +1,18 @@
 <script setup lang="ts">
-// M10 CRM — legacy page-crm (L4134–4373), showOrdersTab (L30753), crmConvertModal (L4869). Tabs «Лиды» and «Воронка лидов»
-// are migrated (LeadsTab, FunnelTab); «Клиенты», the order boards and «Задачи» need orders (M09) and the next part of CRM.
-// As in legacy, no tab content is shown until a tab is chosen, and each tab is built when first opened.
+// M10 CRM — legacy page-crm (L4134–4373), showOrdersTab (L30753), crmConvertModal (L4869). Tabs «Лиды», «Воронка лидов» and
+// «Задачи» are migrated (LeadsTab, FunnelTab, TasksTab); «Клиенты» and the order boards need orders (M09). As in legacy, no
+// tab content is shown until a tab is chosen, and each tab is built when first opened. The lead form of the funnel and the
+// task form are opened from several tabs, so they belong to the page.
 import { usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
+import FunnelLeadModal from '@/components/crm/FunnelLeadModal.vue';
 import FunnelTab from '@/components/crm/FunnelTab.vue';
 import LeadsTab from '@/components/crm/LeadsTab.vue';
+import TaskModal from '@/components/crm/TaskModal.vue';
+import TasksTab from '@/components/crm/TasksTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
-import { convert, ORDERS_LATER, type FunnelStage, type LeadRow, type LeadStatus, type Segment } from '@/lib/crm';
+import { convert, ORDERS_LATER, type FunnelStage, type LeadRow, type LeadStatus, type Segment, type TaskRow } from '@/lib/crm';
 import type { SharedProps } from '@/types';
 
 const props = defineProps<{
@@ -17,8 +21,11 @@ const props = defineProps<{
     sources: Record<string, string>;
     segments: Segment[];
     funnelStages: FunnelStage[];
+    stageOrder: string[];
+    tasks: TaskRow[];
     managers: string[];
     currentYear: number;
+    timezone: string;
 }>();
 
 type Tab = 'clients' | 'leads' | 'funnel' | 'orders-kanban-prod' | 'orders-kanban-pay' | 'tasks';
@@ -35,12 +42,18 @@ function showOrdersTab(tab: Tab): void {
 }
 
 const activeLeads = computed(() => props.leads.filter((l) => l.status !== 'won' && l.status !== 'lost').length);
+const openTasks = computed(() => props.tasks.filter((t) => t.status === 'open').length);
 const LATER: Partial<Record<Tab, string>> = {
     clients: 'Клиенты салонов считаются по заказам покупателей: вкладка появится после переноса раздела «Продажи».',
     'orders-kanban-prod': 'Доска заказов по производству появится после переноса раздела «Продажи».',
     'orders-kanban-pay': 'Доска заказов по оплате появится после переноса раздела «Продажи».',
-    tasks: 'Задачи и напоминания CRM переносятся следующей частью раздела.',
 };
+
+const leadModal = ref<InstanceType<typeof FunnelLeadModal> | null>(null);
+const taskModal = ref<InstanceType<typeof TaskModal> | null>(null);
+const openLead = (lead: LeadRow | null) => leadModal.value?.openCrmLeadModal(lead);
+const newTask = (leadId: number | null = null) => taskModal.value?.openTaskModal(null, leadId);
+const editTask = (task: TaskRow) => taskModal.value?.openTaskModal(task);
 
 const page = usePage<SharedProps>();
 watch(
@@ -74,7 +87,7 @@ function convertLeadToOrder(): void {
                 <div class="tab" :class="{ active: active === 'funnel' }" @click="showOrdersTab('funnel')">🎯 Воронка лидов</div>
                 <div class="tab" :class="{ active: active === 'orders-kanban-prod' }" @click="showOrdersTab('orders-kanban-prod')">🏭 По производству</div>
                 <div class="tab" :class="{ active: active === 'orders-kanban-pay' }" @click="showOrdersTab('orders-kanban-pay')">💳 По оплате</div>
-                <div class="tab" :class="{ active: active === 'tasks' }" @click="showOrdersTab('tasks')">✅ Задачи (<span id="tasks-open-count">—</span>)</div>
+                <div class="tab" :class="{ active: active === 'tasks' }" @click="showOrdersTab('tasks')">✅ Задачи (<span id="tasks-open-count">{{ openTasks }}</span>)</div>
             </div>
 
             <div v-if="visited.has('leads')" id="orders-leads" class="orders-tab" :style="display('leads')">
@@ -86,9 +99,15 @@ function convertLeadToOrder(): void {
                     :stages="props.funnelStages"
                     :segments="props.segments"
                     :sources="props.sources"
-                    :managers="props.managers"
+                    :stage-order="props.stageOrder"
+                    :timezone="props.timezone"
                     :active="shown === 'funnel'"
+                    @open-lead="openLead"
+                    @new-task="newTask"
                 />
+            </div>
+            <div v-if="visited.has('tasks')" id="orders-tasks" class="orders-tab" :style="display('tasks')">
+                <TasksTab :tasks="props.tasks" :leads="props.leads" :timezone="props.timezone" @new-task="newTask()" @edit-task="editTask" @open-lead="openLead" />
             </div>
             <template v-for="(text, key) in LATER" :key="key">
                 <div v-if="visited.has(key)" :id="'orders-' + key" class="orders-tab" :style="display(key)">
@@ -99,6 +118,8 @@ function convertLeadToOrder(): void {
             </template>
         </div>
 
+        <FunnelLeadModal ref="leadModal" :segments="props.segments" :sources="props.sources" :managers="props.managers" />
+        <TaskModal ref="taskModal" :leads="props.leads" :managers="props.managers" :timezone="props.timezone" />
         <ErpModal id="crmConvertModal" :open="convert.open" max-width="440px" overlay-class="modal-overlay-elevated" @close="convert.open = false">
             <div class="modal-header">
                 <div class="modal-title">🎉 Сделка закрыта!</div>
