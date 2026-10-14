@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T173452Z-96a3",
-    "started_at": "2026-10-14T17:34:52Z",
+    "run_id": "20261014T174443Z-001b",
+    "started_at": "2026-10-14T17:44:43Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T17:35:56Z",
+    "finished_at": "2026-10-14T17:45:49Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
-    "target_ref": "615791ffe9e478a958dc5534ee56be345e6ff1fb",
-    "at": "2026-10-14T17:34:52Z"
+    "target_ref": "e9afb5305f9fd62b777c99b833af86691811b931",
+    "at": "2026-10-14T17:44:43Z"
   },
   "last_reported": {
-    "run_id": "20261014T173452Z-96a3",
+    "run_id": "20261014T174443Z-001b",
     "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
     "source_blob": "0b5a45728ff2c7f928cc38e529466bf7bcc9a0dd",
-    "target_ref": "615791ffe9e478a958dc5534ee56be345e6ff1fb",
-    "logical_key": "f576bec65767272a",
+    "target_ref": "e9afb5305f9fd62b777c99b833af86691811b931",
+    "logical_key": "389227f85f7b6950",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T17:35:56Z",
-    "report": "daily/2026-10-14/20261014T173452Z-96a3.md",
-    "artifact_sha256": "486677511705b7256c23fe44a0233dd84dca6a7b6bd052c55e7d30816eab0e13",
+    "completed_at": "2026-10-14T17:45:49Z",
+    "report": "daily/2026-10-14/20261014T174443Z-001b.md",
+    "artifact_sha256": "99f215c6698928e7a8ea7a92f242e0a2a1e120f291db7cf20da7e0b872d70c41",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -112,6 +112,7 @@
       "Tests\\Feature\\Crm\\CrmTaskTest::test_roles_without_crm_cannot_reach_tasks",
       "Tests\\Feature\\Crm\\LeadCommunicationTest::test_entries_are_added_listed_and_deleted",
       "Tests\\Feature\\Crm\\LeadCommunicationTest::test_history_of_another_channel_is_not_reachable",
+      "Tests\\Feature\\Crm\\LeadTest::test_clients_tab_counts_salon_end_clients_and_loads_their_orders_with_the_tab",
       "Tests\\Feature\\Crm\\LeadTest::test_deleted_lead_leaves_the_lists",
       "Tests\\Feature\\Crm\\LeadTest::test_funnel_form_keeps_segment_tags_and_the_next_action",
       "Tests\\Feature\\Crm\\LeadTest::test_lead_becomes_a_client_of_its_channel_and_is_won",
@@ -256,15 +257,15 @@
   },
   "last_verified": {
     "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
-    "target_ref": "615791ffe9e478a958dc5534ee56be345e6ff1fb",
+    "target_ref": "e9afb5305f9fd62b777c99b833af86691811b931",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-14T17:35:56Z",
-    "run_id": "20261014T173452Z-96a3"
+    "completed_at": "2026-10-14T17:45:49Z",
+    "run_id": "20261014T174443Z-001b"
   },
   "changelog": {
-    "entries": 27,
-    "last_header": "## 2026-10-14 · 20261014T173452Z-96a3",
-    "sha256": "b7eb437b6b6e1f353f1b7b375a85d468ded4f9982dc87dfdcc41e737f513d5d6"
+    "entries": 28,
+    "last_header": "## 2026-10-14 · 20261014T174443Z-001b",
+    "sha256": "7dcc06a08d1c8dc07c7237a2733f0849c92fb8bae4080ffab7081cc942c90e34"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
