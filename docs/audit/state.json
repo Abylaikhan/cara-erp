@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T025220Z-7846",
-    "started_at": "2026-10-14T02:52:20Z",
+    "run_id": "20261014T030354Z-cd08",
+    "started_at": "2026-10-14T03:03:54Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T02:53:09Z",
+    "finished_at": "2026-10-14T03:04:42Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "3085e4a5b2b8cb74b3044cf316e7f8c7d639ed6f",
-    "at": "2026-10-14T02:52:20Z"
+    "target_ref": "136c7a6f92ab398b5c8e6af86aa7129063a1f7f8",
+    "at": "2026-10-14T03:03:54Z"
   },
   "last_reported": {
-    "run_id": "20261014T025220Z-7846",
+    "run_id": "20261014T030354Z-cd08",
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
     "source_blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0",
-    "target_ref": "3085e4a5b2b8cb74b3044cf316e7f8c7d639ed6f",
-    "logical_key": "22eef3a0d3a2c911",
+    "target_ref": "136c7a6f92ab398b5c8e6af86aa7129063a1f7f8",
+    "logical_key": "1d0bb4a98ed13977",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T02:53:09Z",
-    "report": "daily/2026-10-14/20261014T025220Z-7846.md",
-    "artifact_sha256": "60b75c2a4359ce542078818d6d047e99ca8b19714d5254abb63d35c391762bb4",
+    "completed_at": "2026-10-14T03:04:42Z",
+    "report": "daily/2026-10-14/20261014T030354Z-cd08.md",
+    "artifact_sha256": "545130eeaba0133062a90f6727376883c15126b4fc9e2464c4e259ae3faa1b75",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -191,6 +191,8 @@
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_directory_holds_the_nine_legacy_warehouses",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_inline_cells_are_saved_and_the_quantity_is_not_edited_directly",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_merging_suppliers_moves_alias_suppliers",
+      "Tests\\Feature\\Warehouse\\WarehouseTest::test_new_material_gets_its_warehouse_an_automatic_sku_and_no_stock",
+      "Tests\\Feature\\Warehouse\\WarehouseTest::test_new_material_is_refused_like_legacy",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_only_a_material_without_stock_is_deleted_and_it_does_not_return",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_page_lists_active_materials_by_name_with_row_values_and_stock_value",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_roles_without_the_page_cannot_read_or_write",
@@ -203,15 +205,15 @@
   },
   "last_verified": {
     "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "3085e4a5b2b8cb74b3044cf316e7f8c7d639ed6f",
+    "target_ref": "136c7a6f92ab398b5c8e6af86aa7129063a1f7f8",
     "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-14T02:53:09Z",
-    "run_id": "20261014T025220Z-7846"
+    "completed_at": "2026-10-14T03:04:42Z",
+    "run_id": "20261014T030354Z-cd08"
   },
   "changelog": {
-    "entries": 17,
-    "last_header": "## 2026-10-14 · 20261014T025220Z-7846",
-    "sha256": "062c140e7dd07b3f182f8b3fea5e440f5a0f24b506910aaa749934720cbd4a8c"
+    "entries": 18,
+    "last_header": "## 2026-10-14 · 20261014T030354Z-cd08",
+    "sha256": "6d98158428e831bd1faa1056d841030cfff597d1009f8afb590cf0708fb106d6"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
