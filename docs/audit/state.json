@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T174443Z-001b",
-    "started_at": "2026-10-14T17:44:43Z",
+    "run_id": "20261014T175514Z-edcc",
+    "started_at": "2026-10-14T17:55:14Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T17:45:49Z",
+    "finished_at": "2026-10-14T17:56:12Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
-    "target_ref": "e9afb5305f9fd62b777c99b833af86691811b931",
-    "at": "2026-10-14T17:44:43Z"
+    "target_ref": "c97de3dd4c9966f33323acf9c4a7024e7ce457aa",
+    "at": "2026-10-14T17:55:14Z"
   },
   "last_reported": {
-    "run_id": "20261014T174443Z-001b",
+    "run_id": "20261014T175514Z-edcc",
     "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
     "source_blob": "0b5a45728ff2c7f928cc38e529466bf7bcc9a0dd",
-    "target_ref": "e9afb5305f9fd62b777c99b833af86691811b931",
-    "logical_key": "389227f85f7b6950",
+    "target_ref": "c97de3dd4c9966f33323acf9c4a7024e7ce457aa",
+    "logical_key": "7c0901cc0ec405a4",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T17:45:49Z",
-    "report": "daily/2026-10-14/20261014T174443Z-001b.md",
-    "artifact_sha256": "99f215c6698928e7a8ea7a92f242e0a2a1e120f291db7cf20da7e0b872d70c41",
+    "completed_at": "2026-10-14T17:56:12Z",
+    "report": "daily/2026-10-14/20261014T175514Z-edcc.md",
+    "artifact_sha256": "00123e6ef9ce6ed63ff122c89acb3d4dc275e932167754f2688f4029e302fc7f",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -118,6 +118,7 @@
       "Tests\\Feature\\Crm\\LeadTest::test_lead_becomes_a_client_of_its_channel_and_is_won",
       "Tests\\Feature\\Crm\\LeadTest::test_leads_follow_the_channel_scope",
       "Tests\\Feature\\Crm\\LeadTest::test_leads_form_creates_and_edits_a_lead",
+      "Tests\\Feature\\Crm\\LeadTest::test_order_boards_load_the_orders_that_are_not_cancelled",
       "Tests\\Feature\\Crm\\LeadTest::test_page_lists_leads_newest_first_with_the_legacy_dictionaries",
       "Tests\\Feature\\Crm\\LeadTest::test_roles_without_crm_cannot_reach_leads",
       "Tests\\Feature\\Crm\\LeadTest::test_salons_manager_cannot_create_a_lead_without_a_salon",
@@ -257,15 +258,15 @@
   },
   "last_verified": {
     "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
-    "target_ref": "e9afb5305f9fd62b777c99b833af86691811b931",
+    "target_ref": "c97de3dd4c9966f33323acf9c4a7024e7ce457aa",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-14T17:45:49Z",
-    "run_id": "20261014T174443Z-001b"
+    "completed_at": "2026-10-14T17:56:12Z",
+    "run_id": "20261014T175514Z-edcc"
   },
   "changelog": {
-    "entries": 28,
-    "last_header": "## 2026-10-14 · 20261014T174443Z-001b",
-    "sha256": "7dcc06a08d1c8dc07c7237a2733f0849c92fb8bae4080ffab7081cc942c90e34"
+    "entries": 29,
+    "last_header": "## 2026-10-14 · 20261014T175514Z-edcc",
+    "sha256": "e3b4b6f6a31ab8f4d1095d7fb50a622cfe119dbb69d675e5b2cd13ff02cf702f"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
