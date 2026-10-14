@@ -2,6 +2,7 @@
 
 - ТЗ (вне репозитория, локально `../docs/`): `HARNESS-DEVELOPMENT-SPEC.md` (harness, окружение), `TECHNICAL-SPEC.md` (функции ERP). Текущее состояние: `docs/agent-state.md`.
 - Всё запускается через Docker: `make setup | up | down | doctor | check`. Локальные php/composer/node не использовать.
+  Копия dev-БД — `make db-backup` (в `.local-audit/backups/`, вне Git: там реальные данные), проверка — `make db-restore-check`.
 - Аудит: `make audit-daily` (отчёт `docs/daily/`, журнал `docs/DAILY-CHANGELOG.md`), самопроверки `make harness-selftest`. Отчёты, state и findings пишет только harness; руками их не править. Провалы не превращать в PASS, проверки не удалять — `HAR-COVERAGE` это поймает.
 - Зависимости только из lock-файлов; `composer update` / `npm update` без отдельной задачи не выполнять. Версии образов закреплены.
 - Тесты — только на `db-test` (подключение `pgsql_test`), не на SQLite и не на dev-БД. Не ослаблять `Tests\Support\GuardsTestDatabase`.

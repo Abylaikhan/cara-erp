@@ -33,7 +33,7 @@ MATRIX = [
     ('H-21', 'Секрет-маркер в данных', 'test_h21'),
     ('H-22', 'Отказ между шагами записи', 'NOT_IMPLEMENTED: бизнес-операций ERP ещё нет'),
     ('H-23', 'Два одновременных проведения', 'NOT_IMPLEMENTED: бизнес-операций ERP ещё нет'),
-    ('H-24', 'Backup → restore-БД', 'NOT_IMPLEMENTED: make db-backup / db-restore-check ещё не реализованы'),
+    ('H-24', 'Backup → restore-БД', 'test_h24'),
     ('H-25', 'Новый сотрудник по инструкции', 'NOT_VERIFIED: нужна проверка человеком по README'),
 ]
 

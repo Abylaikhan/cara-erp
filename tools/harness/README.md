@@ -6,7 +6,7 @@
 ```sh
 make audit-daily                      # полный аудит: legacy + целевой код, MD/JSON-отчёт, журнал
 make audit-daily TARGET_REF=<ref>     # аудит конкретного коммита/ветки целевого кода
-make harness-selftest                 # сценарии H-04…H-21 на локальных фикстурах
+make harness-selftest                 # сценарии H-04…H-21 на локальных фикстурах, H-24 на временной БД сервиса db
 python3 tools/harness/run.py status   # указатели состояния
 ```
 
@@ -27,7 +27,9 @@ python3 tools/harness/run.py status   # указатели состояния
 4. **Diff и влияние** (`compare.py`): добавленные/удалённые/изменённые функции, страницы, таблицы; через граф вызовов
    от обработчиков кнопок — затронутые страницы и модули M01–M23; связь с `docs/coverage/requirements.csv`, иначе `UNMAPPED_CHANGE`.
 5. **Целевой код** (`target.py`): чистый `git worktree` зафиксированного коммита, отдельный Compose-проект `promtech-audit`
-   (свой `.env`, свои тома, случайные порты). Шаги — те же, что у `make check`: `scripts/check.sh deps pint types build tests migrate dbcheck http`.
+   (свой `.env`, свои тома, случайные порты). Шаги — те же, что у `make check`: `scripts/check.sh deps pint types build tests migrate dbcheck http`;
+   после миграций `backup` (`TGT-BACKUP`): копия синтетической БД аудита восстанавливается во временный контейнер того же
+   образа, схема, строки и контрольные суммы каждой таблицы и последовательности должны совпасть (H-24).
 6. **Google Sheets** (`tasks.py`): чтение трекера по API-ключу; запись требует service account — до этого `BLOCKED`.
 7. **Самоконтроль:** `HAR-COVERAGE` (исчезнувшие проверки/тесты → FAIL и review), `HAR-JOURNAL` (журнал не потерял записи),
    `HAR-SECRETS` (секреты и маркеры отсутствуют в MD, JSON и логах).

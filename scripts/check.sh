@@ -2,7 +2,7 @@
 # make check — code style, types, build, backend tests on PostgreSQL. Non-zero exit on failure.
 # Usage: scripts/check.sh [step ...]
 #   default steps: pint types build tests dbcheck
-#   extra steps (used by the audit harness on its isolated project): deps migrate http
+#   extra steps (used by the audit harness on its isolated project): deps migrate backup http
 # One source of truth for check commands: `make check` and tools/harness both call these steps.
 source "$(dirname "$0")/lib.sh"
 require_docker
@@ -46,6 +46,14 @@ step_dbcheck() {
     dc up -d --wait db db-test
     dc run --rm app php artisan app:db-check
     dc run --rm app php artisan app:db-check --connection=pgsql_test
+}
+step_backup() {
+    info "Backup → restore-check into a separate database (the database itself is not changed)"
+    local dir
+    dir="$(mktemp -d "${TMPDIR:-/tmp}/promtech-backup.XXXXXX")"
+    bash scripts/db-backup.sh --out "$dir/copy"
+    bash scripts/db-restore-check.sh "$dir/copy"
+    rm -rf "$dir"
 }
 step_http() {
     info "HTTP smoke through nginx"

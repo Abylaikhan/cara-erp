@@ -70,6 +70,12 @@
                 "required": true
             },
             {
+                "id": "TGT-BACKUP",
+                "step": "backup",
+                "title": "Backup → restore-check в отдельную БД",
+                "required": true
+            },
+            {
                 "id": "TGT-HTTP",
                 "step": "http",
                 "title": "HTTP smoke: /up и /login через nginx",
@@ -96,10 +102,6 @@
             {
                 "id": "TGT-VISUAL",
                 "title": "Визуальное сравнение с эталоном legacy"
-            },
-            {
-                "id": "TGT-BACKUP",
-                "title": "Backup → restore-check в отдельную БД"
             }
         ],
         "ephemeral_volumes": [
