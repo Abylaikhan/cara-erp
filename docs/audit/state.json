@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T163703Z-81be",
-    "started_at": "2026-10-14T16:37:03Z",
+    "run_id": "20261014T170457Z-5947",
+    "started_at": "2026-10-14T17:04:57Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T16:38:07Z",
+    "finished_at": "2026-10-14T17:05:58Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "d35c8511f512b3c13ec1fbf128e19198161b2fd3",
-    "target_ref": "b76d01ec021bed794b5a05847574a2088e2ebbef",
-    "at": "2026-10-14T16:37:03Z"
+    "target_ref": "5696be005316a8a754e0e69f9469bfb3d0218a2b",
+    "at": "2026-10-14T17:04:57Z"
   },
   "last_reported": {
-    "run_id": "20261014T163703Z-81be",
+    "run_id": "20261014T170457Z-5947",
     "source_ref": "d35c8511f512b3c13ec1fbf128e19198161b2fd3",
     "source_blob": "0b5a45728ff2c7f928cc38e529466bf7bcc9a0dd",
-    "target_ref": "b76d01ec021bed794b5a05847574a2088e2ebbef",
-    "logical_key": "8c6473ba45df28d1",
+    "target_ref": "5696be005316a8a754e0e69f9469bfb3d0218a2b",
+    "logical_key": "70d5942eb775c98f",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T16:38:07Z",
-    "report": "daily/2026-10-14/20261014T163703Z-81be.md",
-    "artifact_sha256": "e18f4c92038bb4debfb4a20e84f4bc4ad39006ef9f92661e448821ea0f385531",
+    "completed_at": "2026-10-14T17:05:58Z",
+    "report": "daily/2026-10-14/20261014T170457Z-5947.md",
+    "artifact_sha256": "12513cd1203afc0a0bc2eeb49104af0925348a64b9587718650c416e3f2e57e7",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -197,6 +197,9 @@
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_snapshot_reads_everything_with_get_only",
       "Tests\\Feature\\Legacy\\MaterialRequestImportTest::test_imports_requests_with_exact_quantities_and_times",
       "Tests\\Feature\\Legacy\\MaterialRequestImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
+      "Tests\\Feature\\Legacy\\OrderImportTest::test_imports_orders_with_their_lines_in_legacy_order",
+      "Tests\\Feature\\Legacy\\OrderImportTest::test_realizations_link_to_orders_by_number_and_keep_the_others",
+      "Tests\\Feature\\Legacy\\OrderImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
       "Tests\\Feature\\Legacy\\ProductImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\ProductImportTest::test_imports_products_keeping_legacy_dates_authors_and_flags",
       "Tests\\Feature\\Legacy\\ProductImportTest::test_invalid_rows_change_nothing",
@@ -212,6 +215,10 @@
       "Tests\\Feature\\Purchases\\MaterialRequestTest::test_plan_fact_adds_open_requests_and_subtracts_stock",
       "Tests\\Feature\\Purchases\\MaterialRequestTest::test_roles_without_the_page_cannot_reach_requests",
       "Tests\\Feature\\Purchases\\MaterialRequestTest::test_status_moves_one_step_at_a_time_and_stock_is_not_touched",
+      "Tests\\Feature\\Sales\\OrderJournalTest::test_a_dealer_order_realized_to_99_percent_is_completed_by_hand",
+      "Tests\\Feature\\Sales\\OrderJournalTest::test_another_channel_cannot_complete_an_order",
+      "Tests\\Feature\\Sales\\OrderJournalTest::test_journal_shows_totals_progress_and_dates_of_the_orders",
+      "Tests\\Feature\\Sales\\OrderJournalTest::test_orders_follow_the_channel_scope",
       "Tests\\Feature\\Suppliers\\SupplierImportMergeTest::test_csv_is_planned_confirmed_and_applied_like_legacy",
       "Tests\\Feature\\Suppliers\\SupplierImportMergeTest::test_csv_problems_are_reported_and_change_nothing",
       "Tests\\Feature\\Suppliers\\SupplierImportMergeTest::test_merge_keeps_history_fills_fields_and_moves_references",
@@ -236,6 +243,7 @@
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_page_lists_active_materials_by_name_with_row_values_and_stock_value",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_roles_without_the_page_cannot_read_or_write",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_second_editor_gets_a_conflict",
+      "Tests\\Unit\\LegacyDateTest::test_reads_the_legacy_forms",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_accepts_isolated_test_database",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_development_connection",
       "Tests\\Unit\\TestDatabaseGuardTest::test_guard_refuses_test_connection_pointing_to_dev_database",
@@ -244,15 +252,15 @@
   },
   "last_verified": {
     "source_ref": "d35c8511f512b3c13ec1fbf128e19198161b2fd3",
-    "target_ref": "b76d01ec021bed794b5a05847574a2088e2ebbef",
+    "target_ref": "5696be005316a8a754e0e69f9469bfb3d0218a2b",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-14T16:38:07Z",
-    "run_id": "20261014T163703Z-81be"
+    "completed_at": "2026-10-14T17:05:58Z",
+    "run_id": "20261014T170457Z-5947"
   },
   "changelog": {
-    "entries": 23,
-    "last_header": "## 2026-10-14 · 20261014T163703Z-81be",
-    "sha256": "d10e40b6aea8fd1c1d23ba4a53f55d4ffc8e27a4903caa3cfc814a564ac2f9c6"
+    "entries": 24,
+    "last_header": "## 2026-10-14 · 20261014T170457Z-5947",
+    "sha256": "d036442cd0f1cadcf677ebe96909db013315255ec8844ce5d2ed420ca7857039"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
