@@ -1,5 +1,5 @@
 """Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
-the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды», «Воронка лидов», «Задачи», M04 «Закупки», M09 «Продажи» (and their modals),
+the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды», «Воронка лидов», «Задачи», M04 «Закупки», M09 «Продажи», M02 «Производство» (and their modals),
 dark and light themes, 1440×900.
 
 Legacy runs from the accepted reference in .local-audit/blobs with every network request blocked except Google Fonts —
@@ -215,6 +215,11 @@ with sync_playwright() as p:
                 'X-Inertia-Partial-Data': 'report', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
             return (await r.json()).props.report;
         }""")
+        page.goto(TARGET + '/mrp', wait_until='networkidle'); page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'target-mrp-{theme}.png'))
+        mrp = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['positions']
+        page.locator('#mrp-orders > .tabs .tab').nth(1).click(); page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'target-mrp-queue-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -502,8 +507,27 @@ with sync_playwright() as p:
         }""", [sales, report])
         page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))
+        # Production journal: legacy gets the order lines with the effective status the server counted (its own rule, applied
+        # to the same data) and the stages recorded on the worksheet; nothing is left for it to load.
+        page.evaluate("""(positions) => {
+            const byNum = {};
+            positions.forEach(p => (byNum[p.num] = byNum[p.num] || []).push(p));
+            ordersData = Object.entries(byNum).map(([num, list]) => ({num, channel: 'office', customer: '', status: 'queue', payment: 0, createdDate: '', date: '',
+                items: list.map(p => ({name: p.name, category: p.category || '', qty: p.qty, progress: p.progress, status: p.status, resp: p.resp || '', date: p.date || '', attributes: {}}))}));
+            prodProgress = {};
+            Object.entries(byNum).forEach(([num, list]) => list.forEach((p, i) => {
+                if (p.stages !== null) prodProgress[num + '|' + i] = {id: 0, version: 1, stages: p.stages.map(s => ({stage: s === '(без названия)' ? '' : s})), materials: [], completed: p.completed};
+            }));
+            realizationsData = [{order_num: '—', name: '—', revenue: 0}]; _cacheLoaded_realiz = true;
+            employeesData = [{name: '—'}]; _prodWbLoaded = true;
+            showPage('mrp', document.querySelector(".nav-item[onclick*=\\"showPage('mrp'\\"]"));
+        }""", mrp)
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'legacy-mrp-{theme}.png'))
+        page.evaluate("showMrpOrdersFilter('queue', document.querySelectorAll('#mrp-orders > .tabs .tab')[1])"); page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'legacy-mrp-queue-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

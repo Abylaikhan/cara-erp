@@ -8,6 +8,7 @@ use App\Http\Controllers\DealerController;
 use App\Http\Controllers\EsfController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\LeadCommunicationController;
+use App\Http\Controllers\MrpController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
@@ -90,6 +91,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/tasks/{task}', [CrmTaskController::class, 'destroy'])->whereNumber('task')->name('tasks.destroy');
     });
 
+    // M02 «Производство», часть 1: журнал производственных позиций (просмотр)
+    Route::get('/mrp', [MrpController::class, 'index'])->middleware('page:mrp')->name('mrp.index');
+
     // M04 «Закупки»: заявки на материал (поступления — с документами склада, нормы — с технологическими картами)
     Route::middleware('page:purchases')->prefix('purchases')->name('purchases.')->controller(PurchaseController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -118,7 +122,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Pages that are not migrated yet — the menu stays 1:1, the page says so honestly.
-    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf', 'crm', 'purchases', 'sales'];
+    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf', 'crm', 'purchases', 'sales', 'mrp'];
     Route::get('/{page}', [PageController::class, 'notMigrated'])
         ->whereIn('page', array_values(array_diff(array_keys(Erp::pages()), $migrated)))
         ->middleware('page')->name('page');
