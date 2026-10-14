@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T180613Z-e407",
-    "started_at": "2026-10-14T18:06:13Z",
+    "run_id": "20261014T211755Z-2103",
+    "started_at": "2026-10-14T21:17:55Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T18:07:58Z",
+    "finished_at": "2026-10-14T21:18:56Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
-    "target_ref": "454993b05fbc4df14ed9a9f3a0b7215aba1daf28",
-    "at": "2026-10-14T18:06:13Z"
+    "target_ref": "be03dd9cfaa1add698ce4ee18f6fa44c402e0a91",
+    "at": "2026-10-14T21:17:55Z"
   },
   "last_reported": {
-    "run_id": "20261014T180613Z-e407",
+    "run_id": "20261014T211755Z-2103",
     "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
     "source_blob": "0b5a45728ff2c7f928cc38e529466bf7bcc9a0dd",
-    "target_ref": "454993b05fbc4df14ed9a9f3a0b7215aba1daf28",
-    "logical_key": "cfbca9a0e6f2680e",
-    "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T18:07:58Z",
-    "report": "daily/2026-10-14/20261014T180613Z-e407.md",
-    "artifact_sha256": "079f72b6ce3792145df433709224d8876a2dddb37144898a0112b46c4037b1cf",
+    "target_ref": "be03dd9cfaa1add698ce4ee18f6fa44c402e0a91",
+    "logical_key": "a67fcfa9799105b5",
+    "local_date": "2026-10-15",
+    "completed_at": "2026-10-14T21:18:56Z",
+    "report": "daily/2026-10-15/20261014T211755Z-2103.md",
+    "artifact_sha256": "8a7e477f333a280880c87c0b6492dd4ca623a5609ca8bcbcef55b69b501755a9",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -201,6 +201,8 @@
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_snapshot_reads_everything_with_get_only",
       "Tests\\Feature\\Legacy\\MaterialRequestImportTest::test_imports_requests_with_exact_quantities_and_times",
       "Tests\\Feature\\Legacy\\MaterialRequestImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
+      "Tests\\Feature\\Legacy\\MoneyImportTest::test_imports_accounts_operations_payments_and_advances",
+      "Tests\\Feature\\Legacy\\MoneyImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
       "Tests\\Feature\\Legacy\\OrderImportTest::test_imports_orders_with_their_lines_in_legacy_order",
       "Tests\\Feature\\Legacy\\OrderImportTest::test_realizations_link_to_orders_by_number_and_keep_the_others",
       "Tests\\Feature\\Legacy\\OrderImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
@@ -217,6 +219,8 @@
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_imports_materials_with_exact_quantities_and_legacy_prices",
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_legacy_rounding_matches_javascript",
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_material_import_is_idempotent",
+      "Tests\\Feature\\Money\\MoneyJournalTest::test_page_lists_accounts_operations_with_orders_esf_and_the_advance_debt",
+      "Tests\\Feature\\Money\\MoneyJournalTest::test_roles_without_the_page_cannot_open_it",
       "Tests\\Feature\\Mrp\\ProductionJournalTest::test_lines_show_the_effective_status_and_recorded_stages",
       "Tests\\Feature\\Mrp\\ProductionJournalTest::test_only_roles_with_the_page_and_their_channels_see_lines",
       "Tests\\Feature\\Purchases\\MaterialRequestTest::test_manual_request_is_created_with_its_author",
@@ -262,15 +266,15 @@
   },
   "last_verified": {
     "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
-    "target_ref": "454993b05fbc4df14ed9a9f3a0b7215aba1daf28",
+    "target_ref": "be03dd9cfaa1add698ce4ee18f6fa44c402e0a91",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-14T18:07:58Z",
-    "run_id": "20261014T180613Z-e407"
+    "completed_at": "2026-10-14T21:18:56Z",
+    "run_id": "20261014T211755Z-2103"
   },
   "changelog": {
-    "entries": 30,
-    "last_header": "## 2026-10-14 · 20261014T180613Z-e407",
-    "sha256": "4fd3cb5ac49e3705b7e61f790244859253faf0369226b95e87a28f3ba56f44c1"
+    "entries": 31,
+    "last_header": "## 2026-10-15 · 20261014T211755Z-2103",
+    "sha256": "212bbb21bbfa09a4c7f524b59948152526ee70105f67868e856d484aa2cb24d5"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
