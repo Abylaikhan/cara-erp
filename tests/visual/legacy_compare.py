@@ -1,5 +1,5 @@
 """Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
-the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды», «Воронка лидов», «Задачи», M04 «Закупки», M09 «Продажи», M02 «Производство» (and their modals),
+the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды», «Воронка лидов», «Задачи», M04 «Закупки», M09 «Продажи», M02 «Производство», M12 «Деньги» (and their modals),
 dark and light themes, 1440×900.
 
 Legacy runs from the accepted reference in .local-audit/blobs with every network request blocked except Google Fonts —
@@ -220,6 +220,12 @@ with sync_playwright() as p:
         mrp = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['positions']
         page.locator('#mrp-orders > .tabs .tab').nth(1).click(); page.wait_for_timeout(800)
         page.screenshot(path=str(OUT / f'target-mrp-queue-{theme}.png'))
+        page.goto(TARGET + '/money', wait_until='networkidle'); page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'target-money-{theme}.png'))
+        money = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        for i, shot in ((1, 'bank'), (5, 'all')):
+            page.locator('#page-money > .tabs .tab').nth(i).click(); page.wait_for_timeout(1500)
+            page.screenshot(path=str(OUT / f'target-money-{shot}-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -526,8 +532,27 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-mrp-{theme}.png'))
         page.evaluate("showMrpOrdersFilter('queue', document.querySelectorAll('#mrp-orders > .tabs .tab')[1])"); page.wait_for_timeout(800)
         page.screenshot(path=str(OUT / f'legacy-mrp-queue-{theme}.png'))
+        # Money: legacy gets the target's accounts (without account numbers, which are not stored — ADR-0002, item 54), the
+        # operations in the same order, the expense items, the ESF links and order payments of each operation, and one open
+        # advance carrying the advance debt.
+        page.evaluate("""(m) => {
+            bankAccounts = m.accounts.map(a => ({id: String(a.id), name: a.name, bank: a.bank, iin: '', bik: '', balance: 0, openingBalance: a.opening, currency: a.currency, type: a.type, icon: a.icon || ''}));
+            moneyTx = m.transactions.map(t => ({id: t.id, sbId: String(t.id), date: t.date, accountId: String(t.account), flow: t.flow, category: t.category,
+                subcategory: t.item || '', endClient: '', amount: t.amount, desc: t.desc, counterparty: t.ctr, bin: '', orderNum: t.order, amountFx: t.fx, fxCurrency: ''}));
+            _expenseCats = [...new Set(m.transactions.map(t => t.item).filter(Boolean))].map(n => ({code: n, name: n})); _expenseCatsLoaded = true;
+            esfLinksData = m.transactions.filter(t => t.esf > 0).map(t => ({source_type: 'money_tx', source_id: String(t.id), amount: t.esf})); esfLinksLoaded = true;
+            window._orderPaymentsData = m.transactions.flatMap(t => t.orders.filter(n => n !== t.order).map(n => ({tx_id: String(t.id), order_num: n, amount: 0})));
+            advanceReports = m.advanceDebt > 0 ? [{id: 1, issued: m.advanceDebt, spent: 0, status: 'open', lines: []}] : [];
+            _cacheLoaded.money = true; if (!ordersData.length) ordersData = [{num: '—', items: []}];
+            showPage('money', document.querySelector(".nav-item[onclick*=\\"showPage('money'\\"]"));
+        }""", money)
+        page.wait_for_timeout(2000)
+        page.screenshot(path=str(OUT / f'legacy-money-{theme}.png'))
+        for idx, tab in ((1, 'bank'), (5, 'all')):
+            page.evaluate(f"showMoneyTab('{tab}', document.querySelectorAll('#page-money > .tabs .tab')[{idx}])"); page.wait_for_timeout(1500)
+            page.screenshot(path=str(OUT / f'legacy-money-{tab}-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

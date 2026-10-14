@@ -32,7 +32,7 @@ audit-daily: ## Daily audit: pin legacy + target refs, diff, checks, MD/JSON rep
 harness-selftest: ## Self-tests of the audit harness (H-xx scenarios on local fixtures)
 	@python3 tools/harness/selftest.py
 
-visual-compare: ## Screenshots legacy vs target (login, M14, M07, M08, M06, M03, M05, M10, M04, M09, M02) and % of differing pixels; needs host playwright + Chrome
+visual-compare: ## Screenshots legacy vs target (login, M14, M07, M08, M06, M03, M05, M10, M04, M09, M02, M12) and % of differing pixels; needs host playwright + Chrome
 	@python3 tests/visual/legacy_compare.py
 
 db-backup: ## Copy of the dev database + manifest (commit, checksums) → .local-audit/backups/ (git-ignored, owner-only)

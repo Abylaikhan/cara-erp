@@ -114,6 +114,7 @@ return [
     // Modules add their references here when they are migrated (money operations, advance reports, ESF).
     'expense_category_references' => [
         ['table' => 'suppliers', 'column' => 'expense_category_id'], // M06: the expense item of the supplier card
+        ['table' => 'money_transactions', 'column' => 'expense_category_id'], // M12: the expense item of a money operation
     ],
 
     // Tables/columns that reference suppliers by id. «Объединить» moves all of them to the kept supplier in one transaction.
@@ -157,6 +158,22 @@ return [
     // COMM_TYPES (L29386).
     'task_priorities' => ['high', 'normal', 'low'],
     'communication_types' => ['call', 'letter', 'meeting', 'whatsapp', 'email', 'note'],
+
+    // Категории денежных операций (legacy TX_INCOME_CATS / TX_EXPENSE_CATS, L8590): id → icon + label.
+    'money_income_categories' => [
+        'order_payment' => ['📦', 'От покупателя'], 'supplier_return' => ['🔄', 'Возврат от поставщика'], 'advance_return' => ['👤', 'Возврат от подотчётника'],
+        'transfer_in' => ['↔️', 'С другого счёта'], 'tax_return' => ['🏛', 'Возврат налога'], 'deposit_in' => ['🏦', 'Вклад / депозит'],
+        'loan_in' => ['💳', 'Кредит / займ'], 'other_in' => ['➕', 'Прочее поступление'],
+    ],
+    'money_expense_categories' => [
+        'supplier' => ['🏭', 'Поставщику'], 'salary' => ['👷', 'Заработная плата'], 'salary_transfer' => ['💼', 'Перевод на кассу ЗП'],
+        'advance_out' => ['👤', 'Подотчётнику'], 'tax' => ['🏛', 'Налоги и сборы'], 'rent' => ['🏠', 'Аренда'], 'utilities' => ['💡', 'Коммунальные услуги'],
+        'internet' => ['🌐', 'Интернет и связь'], 'bank_fee' => ['🏦', 'Комиссия банка'], 'construction' => ['🔨', 'Строительные работы'],
+        'material' => ['📦', 'Материалы'], 'transport' => ['🚚', 'Транспорт и доставка'], 'expense' => ['🧾', 'Расходы (аренда/утилиты)'],
+        'transfer_out' => ['↔️', 'На другой счёт'], 'transfer' => ['↔️', 'Перевод между счетами'], 'customer_return' => ['↩️', 'Возврат покупателю'],
+        'loan_out' => ['🤝', 'Выдача в долг'], 'loan_repay' => ['💰', 'Погашение займа'], 'deposit_out' => ['🏦', 'На депозит'],
+        'bank' => ['🏦', 'Банковские расходы'], 'other_out' => ['➖', 'Прочее списание'],
+    ],
 
     // Операции производства — названия из legacy tariffData (L16935), справочник фильтра «Все этапы» журнала производства.
     // Расценки и разряды — зарплатная политика (D-06), переносятся со сдельной оплатой (ERP-055).
