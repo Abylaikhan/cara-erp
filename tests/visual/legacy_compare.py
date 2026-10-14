@@ -1,5 +1,5 @@
 """Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
-the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды», «Воронка лидов», «Задачи», M04 «Закупки» (and their modals),
+the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды», «Воронка лидов», «Задачи», M04 «Закупки», M09 «Продажи» (and their modals),
 dark and light themes, 1440×900.
 
 Legacy runs from the accepted reference in .local-audit/blobs with every network request blocked except Google Fonts —
@@ -159,6 +159,13 @@ with sync_playwright() as p:
         page.locator('#page-purchases > .tabs .tab').nth(0).click()
         page.locator('#purch-extra-requests button', has_text='+ Заявка вручную').click(); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-purchases-modal-{theme}.png'))
+        page.goto(TARGET + '/sales', wait_until='networkidle'); page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'target-sales-{theme}.png'))
+        sales = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['orders']
+        breakdown = page.evaluate("document.querySelector('#ord-summary-stats span:nth-child(3)')?.textContent || ''")
+        for i, shot in ((1, 'queue'), (3, 'done')):
+            page.locator('#sales-tabs .tab').nth(i).click(); page.wait_for_timeout(800)
+            page.screenshot(path=str(OUT / f'target-sales-{shot}-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -373,8 +380,28 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-purchases-planfact-{theme}.png'))
         page.evaluate("showPurchExtraTab('requests', document.querySelectorAll('#page-purchases > .tabs .tab')[0]); openNewMaterialRequestModal()"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-purchases-modal-{theme}.png'))
+        # Sales: legacy ordersData gets the target's orders; one line per order carries the target's total and mean progress,
+        # and realizationsData is what makes «Завершить» appear where the target shows it. The status breakdown of the summary,
+        # empty in legacy, is the documented fix (ADR-0002, item 43).
+        page.evaluate("""(orders) => {
+            closeModal('newMaterialRequestModal');
+            ordersData = orders.map(o => ({num: o.num, channel: o.channel, customer: o.customer || '', seller: o.seller || '', resp: o.seller || '',
+                createdDate: o.created || '', date: o.date || '', deliveryDate: '', payment: o.payment, status: o.status, comment: '', paymentDue: '',
+                salonClientName: o.end_client || '', paymentHistory: [],
+                items: [{name: 'x', itemType: '', category: '', qty: 1, price: o.total, progress: o.progress, status: o.status, resp: '', date: '', attributes: {}}]}));
+            realizationsData = orders.filter(o => o.can_complete).map(o => ({order_num: o.num, revenue: o.total}));
+            _cacheLoaded.orders = true; _ordersLoadedForChannel = '';
+            showPage('sales', document.querySelector(".nav-item[onclick*=\\"showPage('sales'\\"]"));
+        }""", sales)
+        page.wait_for_timeout(1500)
+        page.evaluate("(text) => { const el = document.querySelector('#ord-summary-stats span:nth-child(3)'); if (el) el.textContent = text; }", breakdown)
+        page.screenshot(path=str(OUT / f'legacy-sales-{theme}.png'))
+        for i, (tab, shot) in enumerate((('queue', 'queue'), ('done', 'done'))):
+            idx = {'queue': 1, 'done': 3}[tab]
+            page.evaluate(f"showSalesTab('{tab}', document.querySelectorAll('#sales-tabs .tab')[{idx}])"); page.wait_for_timeout(1200)
+            page.screenshot(path=str(OUT / f'legacy-sales-{shot}-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

@@ -110,6 +110,6 @@ class ExpenseCategoryImportTest extends TestCase
 
     public function test_only_migrated_modules_can_be_imported(): void
     {
-        $this->artisan('legacy:import orders')->assertExitCode(2)->expectsOutputToContain('not migrated yet');
+        $this->artisan('legacy:import money_tx')->assertExitCode(2)->expectsOutputToContain('not migrated yet');
     }
 }

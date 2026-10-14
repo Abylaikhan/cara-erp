@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Models\SalesChannel;
+use App\Services\OrderService;
+use App\Support\ChannelScope;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
+use Inertia\Response;
+
+/**
+ * M09 «Продажи», part 1 — legacy page-sales (L3824–4133): loadOrdersFromDB (L1356), renderOrders/getOrderSortValue/
+ * resolveCustomerName/setOrderYear/clearOrderFilters/sortOrders (L29892–30237), updateOrderTabCounts, showSalesTab,
+ * markOrderDone (L31140). Orders are shown, not edited: the order form, new orders and payments wait for decisions D-02,
+ * D-03, D-12 (ERP-029/030). Only orders of the user's channels are read.
+ */
+class SalesController extends Controller
+{
+    public function __construct(private readonly OrderService $service) {}
+
+    public function index(Request $request): Response
+    {
+        Gate::authorize('viewAny', Order::class);
+        // Totals and progress of the lines, realized revenue — counted in the database; legacy loads orders newest first.
+        $orders = ChannelScope::apply(Order::query(), $request->user(), 'orders.channel')
+            ->leftJoinSub(DB::table('order_items')->groupBy('order_id')
+                ->selectRaw('order_id, sum(qty * price) AS total, sum(progress) AS progress_sum, count(*) AS lines'), 'i', 'i.order_id', '=', 'orders.id')
+            ->leftJoinSub(DB::table('realizations')->whereNotNull('order_id')->groupBy('order_id')
+                ->selectRaw('order_id, sum(revenue) AS realized'), 'r', 'r.order_id', '=', 'orders.id')
+            ->select('orders.*', DB::raw('coalesce(i.total, 0) AS total'), DB::raw('coalesce(i.progress_sum, 0) AS progress_sum'),
+                DB::raw('coalesce(i.lines, 0) AS lines'), DB::raw('coalesce(r.realized, 0) AS realized'))
+            ->orderByDesc('orders.created_at')->orderByDesc('orders.id')->get();
+
+        return Inertia::render('Sales', [
+            'orders' => $orders->map(fn (Order $o) => [
+                'id' => $o->id,
+                'num' => $o->num,
+                'channel' => $o->channel,
+                'customer' => $o->customer,
+                'end_client' => $o->end_client,
+                'seller' => $o->seller,
+                'created' => $o->order_date?->format('d.m.Y'),
+                'date' => $o->due_date?->format('d.m.Y'),
+                'payment' => $o->payment_pct,
+                'status' => $o->status,
+                'total' => (float) $o->getAttribute('total'),
+                // Legacy Math.round of the mean progress of the lines.
+                'progress' => (int) round((int) $o->getAttribute('progress_sum') / max((int) $o->getAttribute('lines'), 1), 0, PHP_ROUND_HALF_UP),
+                'can_complete' => OrderService::canComplete($o, (string) $o->getAttribute('total'), (string) $o->getAttribute('realized')),
+                'lock_version' => $o->lock_version,
+            ])->values(),
+            'channels' => SalesChannel::query()->ordered()->pluck('name', 'code'),
+        ]);
+    }
+
+    public function complete(Request $request, int $order): RedirectResponse
+    {
+        $data = $request->validate(['lock_version' => ['required', 'integer']]);
+        $done = $this->service->complete($order, (int) $data['lock_version'], $request->user());
+
+        return back()->with('toast', "✅ {$done->num} завершён");
+    }
+}

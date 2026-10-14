@@ -11,6 +11,7 @@ use App\Http\Controllers\LeadCommunicationController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\WarehouseController;
 use App\Support\Erp;
@@ -96,6 +97,12 @@ Route::middleware('auth')->group(function () {
         Route::put('/requests/{materialRequest}/status', 'status')->whereNumber('materialRequest')->name('requests.status');
     });
 
+    // M09 «Продажи», часть 1: журнал заказов (просмотр); заказы создаются и меняются с ERP-029/030
+    Route::middleware('page:sales')->prefix('sales')->name('sales.')->controller(SalesController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/orders/{order}/complete', 'complete')->whereNumber('order')->name('orders.complete');
+    });
+
     // M08 «Покупатели» — tab «Контрагенты»
     Route::middleware('page:customers')->prefix('customers')->name('customers.')->controller(CustomerController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -111,7 +118,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Pages that are not migrated yet — the menu stays 1:1, the page says so honestly.
-    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf', 'crm', 'purchases'];
+    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf', 'crm', 'purchases', 'sales'];
     Route::get('/{page}', [PageController::class, 'notMigrated'])
         ->whereIn('page', array_values(array_diff(array_keys(Erp::pages()), $migrated)))
         ->middleware('page')->name('page');
