@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // M10 CRM — legacy page-crm (L4134–4373), showOrdersTab (L30753), crmConvertModal (L4869). Tabs «Клиенты», «Лиды», «Воронка
-// лидов» and «Задачи» are migrated (ClientsTab, LeadsTab, FunnelTab, TasksTab); the order boards come next. As in legacy, no
+// лидов», «Задачи» and the order boards are migrated (ClientsTab, LeadsTab, FunnelTab, TasksTab, OrderBoards). As in legacy, no
 // tab content is shown until a tab is chosen, and each tab is built when first opened. The lead form of the funnel and the
 // task form are opened from several tabs, so they belong to the page.
 import { usePage } from '@inertiajs/vue3';
@@ -10,6 +10,7 @@ import ClientsTab from '@/components/crm/ClientsTab.vue';
 import FunnelLeadModal from '@/components/crm/FunnelLeadModal.vue';
 import FunnelTab from '@/components/crm/FunnelTab.vue';
 import LeadsTab from '@/components/crm/LeadsTab.vue';
+import OrderBoards from '@/components/crm/OrderBoards.vue';
 import TaskModal from '@/components/crm/TaskModal.vue';
 import TasksTab from '@/components/crm/TasksTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
@@ -29,6 +30,9 @@ const props = defineProps<{
     timezone: string;
     clientsCount: number;
     clientOrders?: InstanceType<typeof ClientsTab>['$props']['orders'];
+    boardOrders?: InstanceType<typeof OrderBoards>['$props']['orders'];
+    channelBound: boolean;
+    today: string;
 }>();
 
 type Tab = 'clients' | 'leads' | 'funnel' | 'orders-kanban-prod' | 'orders-kanban-pay' | 'tasks';
@@ -49,10 +53,6 @@ const openTasks = computed(() => props.tasks.filter((t) => t.status === 'open').
 const clientsTab = ref<InstanceType<typeof ClientsTab> | null>(null);
 // Legacy shows the number of salon clients, then the number the tab lists (with its filters).
 const clientsShown = computed(() => (props.clientOrders !== undefined && clientsTab.value ? clientsTab.value.count : props.clientsCount));
-const LATER: Partial<Record<Tab, string>> = {
-    'orders-kanban-prod': 'Доска заказов по производству появится после переноса раздела «Продажи».',
-    'orders-kanban-pay': 'Доска заказов по оплате появится после переноса раздела «Продажи».',
-};
 
 const leadModal = ref<InstanceType<typeof FunnelLeadModal> | null>(null);
 const taskModal = ref<InstanceType<typeof TaskModal> | null>(null);
@@ -117,11 +117,9 @@ function convertLeadToOrder(): void {
             <div v-if="visited.has('tasks')" id="orders-tasks" class="orders-tab" :style="display('tasks')">
                 <TasksTab :tasks="props.tasks" :leads="props.leads" :timezone="props.timezone" @new-task="newTask()" @edit-task="editTask" @open-lead="openLead" />
             </div>
-            <template v-for="(text, key) in LATER" :key="key">
-                <div v-if="visited.has(key)" :id="'orders-' + key" class="orders-tab" :style="display(key)">
-                    <div class="card">
-                        <div style="font-size: 13px; color: var(--text3); line-height: 1.6">{{ text }}</div>
-                    </div>
+            <template v-for="b in [{ tab: 'orders-kanban-prod', kind: 'prod' }, { tab: 'orders-kanban-pay', kind: 'pay' }] as const" :key="b.tab">
+                <div v-if="visited.has(b.tab)" :id="'orders-' + b.tab" class="orders-tab" :style="display(b.tab)">
+                    <OrderBoards :orders="props.boardOrders" :kind="b.kind" :channel-bound="props.channelBound" :today="props.today" :active="shown === b.tab" />
                 </div>
             </template>
         </div>

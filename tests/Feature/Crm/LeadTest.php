@@ -232,4 +232,25 @@ class LeadTest extends TestCase
             ->where('clientsCount', 1)
             ->reloadOnly('clientOrders', fn (Assert $reload) => $reload->where('clientOrders', fn ($orders) => collect($orders)->pluck('num')->sort()->values()->all() === ['МО-1', 'МО-2'])));
     }
+
+    public function test_order_boards_load_the_orders_that_are_not_cancelled(): void
+    {
+        foreach ([['МО-1', 'office', 'progress', [40, 60]], ['МО-2', 'salon_armada', 'queue', [0]], ['МО-3', 'office', 'cancelled', [0]]] as [$num, $channel, $status, $progress]) {
+            $order = new Order(['num' => $num, 'channel' => $channel, 'customer' => 'Демо', 'status' => $status, 'payment_pct' => 0, 'due_date' => '2026-10-20']);
+            $order->save();
+            foreach ($progress as $i => $p) {
+                $order->items()->create(['line_no' => $i, 'name' => 'Демо', 'qty' => '1', 'price' => '100', 'progress' => $p, 'status' => $status, 'attrs' => []]);
+            }
+        }
+
+        $this->actingAs(User::factory()->role('director')->create())->get('/crm')->assertInertia(fn (Assert $page) => $page
+            ->missing('boardOrders')
+            ->where('channelBound', false)
+            ->reloadOnly('boardOrders', fn (Assert $reload) => $reload
+                ->where('boardOrders', fn ($orders) => collect($orders)->pluck('progress', 'num')->sortKeys()->all() === ['МО-1' => 50, 'МО-2' => 0])));
+
+        $this->actingAs(User::factory()->role('salon_armada')->create())->get('/crm')->assertInertia(fn (Assert $page) => $page
+            ->where('channelBound', true)
+            ->reloadOnly('boardOrders', fn (Assert $reload) => $reload->where('boardOrders', fn ($orders) => collect($orders)->pluck('num')->all() === ['МО-2'])));
+    }
 }

@@ -164,6 +164,16 @@ with sync_playwright() as p:
         if first_client:
             page.locator('#clients-tbody tr').first.locator('button').click(); page.wait_for_timeout(300)
             page.screenshot(path=str(OUT / f'target-crm-client-card-{theme}.png'))
+            page.locator('#client-card-modal .modal-close').click(); page.wait_for_timeout(200)
+        for i, shot in ((3, 'prod'), (4, 'pay')):
+            page.locator('#page-crm .tabs .tab').nth(i).click(); page.wait_for_timeout(2500)
+            page.screenshot(path=str(OUT / f'target-crm-board-{shot}-{theme}.png'))
+        board_orders = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/crm', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Crm',
+                'X-Inertia-Partial-Data': 'boardOrders', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.boardOrders;
+        }""")
         client_orders = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/crm', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Crm',
@@ -416,6 +426,21 @@ with sync_playwright() as p:
             page.evaluate("(name) => openClientCard(name)", first_client); page.wait_for_timeout(300)
             page.screenshot(path=str(OUT / f'legacy-crm-client-card-{theme}.png'))
             page.evaluate("closeModal('client-card-modal')")
+        # Order boards: legacy gets the same orders and the month in local dates. For «По производству» the orders in work
+        # and the completed unpaid ones are given the statuses its columns look for (ADR-0002, item 51).
+        for tab, idx in (('orders-kanban-prod', 3), ('orders-kanban-pay', 4)):
+            page.evaluate("""([orders, tab, idx, prod]) => {
+                ordersData = orders.map(o => ({num: o.num, channel: o.channel, customer: o.customer || '', salonClientName: o.end_client || '', createdDate: o.created || '',
+                    date: o.date || '', payment: o.payment, status: prod && o.status === 'progress' ? 'production' : prod && o.status === 'done' ? 'delivered' : o.status,
+                    items: [{qty: 1, price: o.total, progress: o.progress}]}));
+                _cacheLoaded.money = true;
+                showOrdersTab(tab, document.querySelectorAll('#page-crm .tabs .tab')[idx]);
+                const now = new Date(); const iso = (y, m, d) => localISODate(y, m, d);
+                _okDateFrom = iso(now.getFullYear(), now.getMonth(), 1); _okDateTo = iso(now.getFullYear(), now.getMonth() + 1, 0);
+                renderOrdersKanban();
+            }""", [board_orders, tab, idx, tab == 'orders-kanban-prod'])
+            page.wait_for_timeout(1200)
+            page.screenshot(path=str(OUT / f"legacy-crm-board-{'prod' if idx == 3 else 'pay'}-{theme}.png"))
         # Purchases: legacy gets the target's requests; the date is the business date the target shows (ADR-0002, item 40).
         # warehouseData (for «План-факт») is the target's directory given at the warehouse step.
         page.evaluate("""(requests) => {
@@ -478,7 +503,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

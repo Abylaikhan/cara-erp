@@ -81,6 +81,12 @@ class CrmController extends Controller
             // their orders. Their number is shown on the tab at once; the orders are loaded when the tab is opened.
             'clientsCount' => fn () => $this->salonClientsCount($request->user()),
             'clientOrders' => Inertia::optional(fn () => $this->clientOrders($request->user())),
+            // Tabs «По производству» and «По оплате» (legacy renderOrdersKanban): orders that are not cancelled, with their
+            // total and mean progress — loaded when one of the boards is opened.
+            'boardOrders' => Inertia::optional(fn () => $this->boardOrders($request->user())),
+            // Legacy hides the channel filter of the boards from a salon or dealer account (getChannelFilter()).
+            'channelBound' => ChannelScope::filterFor($request->user()) !== null,
+            'today' => now(config('erp.business_timezone'))->format('Y-m-d'),
         ]);
     }
 
@@ -119,6 +125,28 @@ class CrmController extends Controller
             'status' => $o->status,
             'products' => ($products[$o->id] ?? collect())->pluck('name')->values(),
         ])->values();
+    }
+
+    /** @return Collection<int, array<string, mixed>> */
+    private function boardOrders(User $user)
+    {
+        return ChannelScope::apply(Order::query()->where('orders.status', '!=', 'cancelled'), $user, 'orders.channel')
+            ->leftJoinSub(DB::table('order_items')->groupBy('order_id')
+                ->selectRaw('order_id, sum(qty * price) AS total, sum(progress) AS progress_sum, count(*) AS lines'), 'i', 'i.order_id', '=', 'orders.id')
+            ->orderByDesc('orders.created_at')->orderByDesc('orders.id')
+            ->get(['orders.*', DB::raw('coalesce(i.total, 0) AS total'), DB::raw('coalesce(i.progress_sum, 0) AS progress_sum'), DB::raw('coalesce(i.lines, 0) AS lines')])
+            ->map(fn (Order $o) => [
+                'num' => $o->num,
+                'channel' => $o->channel,
+                'customer' => $o->customer,
+                'end_client' => $o->end_client,
+                'created' => $o->order_date?->format('d.m.Y'),
+                'date' => $o->due_date?->format('d.m.Y'),
+                'total' => (float) $o->getAttribute('total'),
+                'payment' => $o->payment_pct,
+                'status' => $o->status,
+                'progress' => (int) round((int) $o->getAttribute('progress_sum') / max((int) $o->getAttribute('lines'), 1), 0, PHP_ROUND_HALF_UP),
+            ])->values();
     }
 
     public function store(LeadRequest $request): RedirectResponse
