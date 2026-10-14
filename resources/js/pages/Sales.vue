@@ -1,19 +1,19 @@
 <script setup lang="ts">
 // M09 «Продажи», part 1 — legacy page-sales (L3824–4133): showPage('sales') (L16390), showSalesTab, renderOrders,
 // setOrderYear/setOrderMonth/clearOrderFilters/sortOrders, updateOrderTabCounts (L29921–30252). The journal is the same; the
-// orders are those of the user's channels. Orders are not edited yet: the order form, «+ Новый заказ», realization, its
-// worksheet and the report come with ERP-029/030/049/050 (decisions D-02, D-03, D-08, D-12).
+// orders are those of the user's channels; tab «Реализация» is RealizationJournal. Orders are not edited yet: the order form,
+// «+ Новый заказ», the realization worksheet and the report come with ERP-029/030/049/050 (decisions D-02, D-03, D-08, D-12).
 import { computed, reactive, ref } from 'vue';
 import OrdersTable from '@/components/sales/OrdersTable.vue';
+import RealizationJournal from '@/components/sales/RealizationJournal.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
-import { fmtCurrency, paidOf, PL_MONTH_LABELS, sortValue, toISO, type OrderRow } from '@/lib/sales';
+import { fmtCurrency, paidOf, PL_MONTH_LABELS, sortValue, toISO, type OrderRow, type RealizationRow } from '@/lib/sales';
 
-const props = defineProps<{ orders: OrderRow[]; channels: Record<string, string> }>();
+const props = defineProps<{ orders: OrderRow[]; channels: Record<string, string>; realizations?: RealizationRow[] }>();
 
 type Tab = 'all-orders' | 'queue' | 'progress' | 'done' | 'sales-journal' | 'worksheet' | 'report';
 const tab = ref<Tab>('all-orders');
 const LATER: Partial<Record<Tab, string>> = {
-    'sales-journal': 'Журнал реализации переносится следующей частью раздела «Продажи».',
     worksheet: 'Рабочий лист реализации появится вместе с проведением реализации (ERP-049/050, решение D-08).',
     report: 'Отчёт по заказам переносится следующей частью раздела «Продажи».',
 };
@@ -140,6 +140,10 @@ const count = (s: string) => props.orders.filter((o) => o.status === s).length;
                 <div class="card">
                     <OrdersTable v-if="tab === s" :orders="byStatus(s)" :channels="props.channels" :sort-col="sort.col" :sort-asc="sort.asc" @sort="sortOrders" />
                 </div>
+            </div>
+
+            <div id="orders-sales-journal" class="orders-tab" :style="{ display: tab === 'sales-journal' ? 'block' : 'none' }">
+                <RealizationJournal :realizations="props.realizations" :orders="props.orders" :channels="props.channels" :active="tab === 'sales-journal'" />
             </div>
 
             <div v-for="(text, key) in LATER" :id="'orders-' + key" :key="key" class="orders-tab" :style="{ display: tab === key ? 'block' : 'none' }">

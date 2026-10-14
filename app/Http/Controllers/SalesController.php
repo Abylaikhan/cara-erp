@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Realization;
 use App\Models\SalesChannel;
+use App\Models\User;
 use App\Services\OrderService;
 use App\Support\ChannelScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -16,8 +19,9 @@ use Inertia\Response;
 /**
  * M09 «Продажи», part 1 — legacy page-sales (L3824–4133): loadOrdersFromDB (L1356), renderOrders/getOrderSortValue/
  * resolveCustomerName/setOrderYear/clearOrderFilters/sortOrders (L29892–30237), updateOrderTabCounts, showSalesTab,
- * markOrderDone (L31140). Orders are shown, not edited: the order form, new orders and payments wait for decisions D-02,
- * D-03, D-12 (ERP-029/030). Only orders of the user's channels are read.
+ * markOrderDone (L31140), renderSalesJournal/sortSJ/setSjPeriod/setSjMonthYear (L30830–31096). Orders are shown, not
+ * edited: the order form, new orders and payments wait for decisions D-02, D-03, D-12 (ERP-029/030). Only orders and
+ * realizations of the user's channels are read.
  */
 class SalesController extends Controller
 {
@@ -55,7 +59,35 @@ class SalesController extends Controller
                 'lock_version' => $o->lock_version,
             ])->values(),
             'channels' => SalesChannel::query()->ordered()->pluck('name', 'code'),
+            // Tab «Реализация» (legacy renderSalesJournal): loaded when the tab is opened, as legacy does.
+            'realizations' => Inertia::optional(fn () => $this->realizations($request->user())),
         ]);
+    }
+
+    /**
+     * Realizations of the user's channels. Legacy shows an office user also the lines whose order number names no order;
+     * a channel-bound user sees only lines of its orders. Legacy sorts by date only; within a date — by posting time.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function realizations(User $user)
+    {
+        $channels = ChannelScope::channelsFor($user);
+        $query = Realization::query()->orderByDesc('doc_date')->orderBy('created_at')->orderBy('id');
+        if ($channels !== null) {
+            $query->whereIn('order_id', Order::query()->select('id')->whereIn('channel', $channels));
+        }
+
+        return $query->get()->map(fn (Realization $r) => [
+            'id' => $r->id,
+            'date' => $r->doc_date->format('Y-m-d'),
+            'doc_num' => $r->doc_num,
+            'order_num' => $r->order_num,
+            'customer' => $r->customer,
+            'name' => $r->name,
+            'qty' => (float) $r->qty,
+            'revenue' => (float) $r->revenue,
+        ])->values();
     }
 
     public function complete(Request $request, int $order): RedirectResponse

@@ -166,6 +166,15 @@ with sync_playwright() as p:
         for i, shot in ((1, 'queue'), (3, 'done')):
             page.locator('#sales-tabs .tab').nth(i).click(); page.wait_for_timeout(800)
             page.screenshot(path=str(OUT / f'target-sales-{shot}-{theme}.png'))
+        page.locator('#sales-tabs .tab').nth(4).click(); page.wait_for_timeout(1500)
+        page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)  # the filters fill the first screen
+        page.screenshot(path=str(OUT / f'target-sales-journal-{theme}.png'))
+        realizations = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
+                'X-Inertia-Partial-Data': 'realizations', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.realizations;
+        }""")
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -400,8 +409,18 @@ with sync_playwright() as p:
             idx = {'queue': 1, 'done': 3}[tab]
             page.evaluate(f"showSalesTab('{tab}', document.querySelectorAll('#sales-tabs .tab')[{idx}])"); page.wait_for_timeout(1200)
             page.screenshot(path=str(OUT / f'legacy-sales-{shot}-{theme}.png'))
+        # Realization journal: legacy gets the same lines (as loadRealizationsFromDB keeps them), already loaded.
+        page.evaluate("""(rows) => {
+            realizationsData = rows.map(r => ({id: String(r.id), doc_date: r.date, doc_num: r.doc_num, order_num: r.order_num, customer: r.customer,
+                name: r.name, qty: r.qty, revenue: r.revenue}));
+            _cacheLoaded_realiz = true;
+            showSalesTab('sales-journal', document.querySelectorAll('#sales-tabs .tab')[4]);
+        }""", realizations)
+        page.wait_for_timeout(1500)
+        page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-sales-journal-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

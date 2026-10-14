@@ -70,3 +70,39 @@ export function markOrderDone(o: OrderRow): void {
 
 /** The order form comes with editing orders (ERP-030). */
 export const ORDER_FORM_LATER = 'Карточка заказа откроется после переноса редактирования заказов: цена и состав заказа ждут решений D-02 и D-12.';
+
+// ── Realization journal (legacy renderSalesJournal) ──
+export interface RealizationRow {
+    id: number;
+    date: string;
+    doc_num: string | null;
+    order_num: string | null;
+    customer: string | null;
+    name: string;
+    qty: number;
+    revenue: number;
+}
+
+/** Legacy short channel names of the journal. */
+export const SJ_CHANNELS: Record<string, string> = {
+    office: 'Офис',
+    salon_armada: 'Армада',
+    salon_nazarbayeva: 'Назарбаева',
+    dealer_astana: 'Астана',
+    dealer_aktau: 'Актау',
+    dealer_shymkent: 'Шымкент',
+    dealer_atyrau: 'Атырау',
+    dealer_aktobe: 'Актобе',
+};
+
+/** Order status in the journal. Legacy named the orders in work «production», which they never are, and showed them queued. */
+export const sjStatus = (status: string | undefined): string =>
+    status === undefined
+        ? '—'
+        : ({ done: '✅ Завершён', delivered: '🚚 Доставлен', ready: '📦 Готов', progress: '🔨 В работе', production: '🔨 В работе' }[status] ?? '⏳ В очереди');
+
+/** Business date YYYY-MM-DD of a calendar day (legacy localISODate). */
+export const localISODate = (y: number, m: number, d: number): string => {
+    const dt = new Date(y, m, d);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+};

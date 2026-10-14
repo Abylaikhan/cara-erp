@@ -104,6 +104,29 @@ class OrderJournalTest extends TestCase
         $this->assertSame(['queue', 'queue'], [$short->fresh()->status, $office->fresh()->status]);
     }
 
+    public function test_realizations_load_with_their_tab_and_follow_the_channel_of_their_order(): void
+    {
+        $armada = $this->order('МО-1', 'salon_armada');
+        $office = $this->order('МО-2', 'office');
+        $this->realize($armada, '100.50');
+        $this->realize($office, '200');
+        $orphan = new Realization(['order_num' => 'МО-404', 'doc_date' => '2026-09-30', 'name' => 'Демо без заказа', 'qty' => '2.5', 'revenue' => '300']);
+        $orphan->save();
+
+        // Not part of the first load: legacy loads them when «Реализация» is opened.
+        $this->actingAs($this->director)->get('/sales')->assertInertia(fn (Assert $page) => $page
+            ->missing('realizations')
+            ->reloadOnly('realizations', fn (Assert $reload) => $reload
+                ->where('realizations', fn ($rows) => collect($rows)->pluck('order_num')->all() === ['МО-1', 'МО-2', 'МО-404'])
+                ->where('realizations.2.date', '2026-09-30')
+                ->where('realizations.2.qty', 2.5)
+                ->where('realizations.0.revenue', 100.5)));
+
+        // A salon sees the lines of its orders only, not those without an order.
+        $this->actingAs(User::factory()->role('salon_armada')->create())->get('/sales')->assertInertia(fn (Assert $page) => $page
+            ->reloadOnly('realizations', fn (Assert $reload) => $reload->where('realizations', fn ($rows) => collect($rows)->pluck('order_num')->all() === ['МО-1'])));
+    }
+
     public function test_another_channel_cannot_complete_an_order(): void
     {
         $order = $this->order('МО-1', 'dealer_astana', [['1', '100']]);
