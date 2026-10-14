@@ -1,5 +1,5 @@
 """Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
-the dealers tab, M06 «Поставщики» (and their modals), dark and light themes, 1440×900.
+the dealers tab, M06 «Поставщики», M03 «Склад» (and their modals), dark and light themes, 1440×900.
 
 Legacy runs from the accepted snapshot in .local-audit/blobs with every network request blocked except Google Fonts —
 it never reaches the legacy backend. Both sides get the same synthetic directory (DatabaseSeeder).
@@ -94,6 +94,13 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-suppliers-rating-{theme}.png'))
         page.locator('#page-suppliers button', has_text='🔗 Объединить').click(); page.wait_for_timeout(500)
         page.screenshot(path=str(OUT / f'target-supplier-merge-{theme}.png'))
+        page.goto(TARGET + '/warehouse', wait_until='networkidle'); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-warehouse-{theme}.png'))
+        wh_props = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        materials, aliases = wh_props['materials'], wh_props['aliases']
+        for i, shot in ((1, 'categories'), (2, 'workshops'), (3, 'docs'), (4, 'remains'), (7, 'aliases')):
+            page.locator('#page-warehouse .tab').nth(i).click(); page.wait_for_timeout(800 if shot == 'remains' else 300)
+            page.screenshot(path=str(OUT / f'target-warehouse-{shot}-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -188,8 +195,24 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-suppliers-rating-{theme}.png'))
         page.evaluate("openMergeSuppliersModal()"); page.wait_for_timeout(500)
         page.screenshot(path=str(OUT / f'legacy-supplier-merge-{theme}.png'))
+        # Warehouse: legacy gets the target's materials and aliases. Its built-in demo documents are cleared: they are not
+        # migrated data (ADR-0002, item 22), and without them «Цехи» and «Документы» show what the target shows.
+        page.evaluate("""([materials, aliases]) => {
+            closeModal('mergeSuppliersModal');
+            warehouseData = materials.map(m => ({id: String(m.id), sbId: String(m.id), name: m.name, sku: m.sku || '', category: m.category, unit: m.unit,
+                qty: m.qty, minQty: m.min_qty, price: m.price, supplier: '', warehouse_id: m.warehouse || ''}));
+            _cacheLoaded.warehouse = true; whDocuments = [];
+            materialAliases = aliases.map(a => ({id: String(a.id), materialId: null, name: a.alias_name, materialName: a.material_name, category: a.category || ''}));
+            showPage('warehouse', document.querySelector(".nav-item[onclick*=\\"showPage('warehouse'\\"]"));
+        }""", [materials, aliases])
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'legacy-warehouse-{theme}.png'))
+        for i, (tab, shot) in enumerate((('stocks', 'categories'), ('workshops', 'workshops'), ('docs', 'docs'), ('remains', 'remains'), ('aliases', 'aliases'))):
+            idx = {'stocks': 1, 'workshops': 2, 'docs': 3, 'remains': 4, 'aliases': 7}[tab]
+            page.evaluate(f"showWhTab('{tab}', document.querySelectorAll('#page-warehouse .tab')[{idx}])"); page.wait_for_timeout(1500 if tab in ('remains', 'aliases') else 300)
+            page.screenshot(path=str(OUT / f'legacy-warehouse-{shot}-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

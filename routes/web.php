@@ -7,6 +7,7 @@ use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\WarehouseController;
 use App\Support\Erp;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,15 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{product}', 'destroy')->whereNumber('product')->name('destroy');
     });
 
+    // M03 «Склад»: справочник материалов и алиасы (документы склада — ERP-039/040)
+    Route::middleware('page:warehouse')->prefix('warehouse')->name('warehouse.')->controller(WarehouseController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::put('/materials/{material}', 'updateMaterial')->whereNumber('material')->name('materials.update');
+        Route::delete('/materials/{material}', 'destroyMaterial')->whereNumber('material')->name('materials.destroy');
+        Route::post('/aliases', 'storeAlias')->name('aliases.store');
+        Route::delete('/aliases/{alias}', 'destroyAlias')->whereNumber('alias')->name('aliases.destroy');
+    });
+
     // M06 «Поставщики»
     Route::middleware('page:suppliers')->prefix('suppliers')->name('suppliers.')->controller(SupplierController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -62,7 +72,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Pages that are not migrated yet — the menu stays 1:1, the page says so honestly.
-    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers'];
+    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse'];
     Route::get('/{page}', [PageController::class, 'notMigrated'])
         ->whereIn('page', array_values(array_diff(array_keys(Erp::pages()), $migrated)))
         ->middleware('page')->name('page');

@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Legacy\Importers\CustomerImporter;
 use App\Legacy\Importers\ExpenseCategoryImporter;
+use App\Legacy\Importers\MaterialAliasImporter;
+use App\Legacy\Importers\MaterialImporter;
 use App\Legacy\Importers\ProductImporter;
 use App\Legacy\Importers\SupplierImporter;
 use Illuminate\Console\Command;
@@ -13,7 +15,7 @@ use RuntimeException;
 /** Moves one legacy table from the loaded snapshot (schema legacy) into the application tables of a migrated module. */
 class LegacyImport extends Command
 {
-    protected $signature = 'legacy:import {entity : expense_categories | products | customers | suppliers} {--snapshot= : Snapshot id (default: the latest loaded)}';
+    protected $signature = 'legacy:import {entity : expense_categories | products | customers | suppliers | warehouse | material_aliases} {--snapshot= : Snapshot id (default: the latest loaded)}';
 
     protected $description = 'Import a legacy table into the application (only modules that are already migrated)';
 
@@ -23,6 +25,8 @@ class LegacyImport extends Command
         'products' => ProductImporter::class,
         'customers' => CustomerImporter::class,
         'suppliers' => SupplierImporter::class,
+        'warehouse' => MaterialImporter::class,
+        'material_aliases' => MaterialAliasImporter::class,
     ];
 
     public function handle(): int

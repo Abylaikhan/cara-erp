@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Customer;
 use App\Models\ExpenseCategory;
+use App\Models\Material;
+use App\Models\MaterialAlias;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\User;
@@ -97,6 +99,27 @@ class DatabaseSeeder extends Seeder
         }
     }
 
+    /** Synthetic warehouse directory; skipped once real materials were imported or exist. */
+    private function seedMaterials(): void
+    {
+        if (Material::query()->exists() || DB::table('legacy_id_map')->where('target_table', 'materials')->exists()) {
+            return;
+        }
+        $items = [
+            ['ЛДСП Демо 16мм белый', 'ЛДСП/МДФ', 'лист', '24', '8500', '10', 'wh_plates'],
+            ['ЛДСП Демо 16мм дуб', 'ЛДСП/МДФ', 'лист', '4', '9200', '10', 'wh_plates'],
+            ['Ткань Демо рогожка', 'Ткань/Обивочные', 'м', '120.5', '3200', '0', 'wh_fabric'],
+            ['Поролон Демо ППУ-40', 'Поролон/Набивка', 'лист', '0', '18500', '0', 'wh_fabric'],
+            ['Петля Демо мебельная', 'Фурнитура/Крепёж', 'шт', '300', '280', '100', 'wh_main'],
+            ['Лак Демо матовый', 'ЛКМ/Химия', 'кан', '7', '12000', '5', 'wh_paint'],
+        ];
+        foreach ($items as [$name, $category, $unit, $qty, $price, $min, $warehouse]) {
+            (new Material(['name' => $name, 'category' => $category, 'unit' => $unit, 'price' => $price, 'min_qty' => $min, 'warehouse_code' => $warehouse]))
+                ->forceFill(['qty' => $qty])->save();
+        }
+        MaterialAlias::query()->create(['material_name' => 'ЛДСП Демо 16мм белый', 'alias_name' => 'Плита ЛДСП Демо 16/2800/2070 белая', 'category' => 'ЛДСП/МДФ']);
+    }
+
     public function run(): void
     {
         if (app()->environment('production')) {
@@ -120,6 +143,7 @@ class DatabaseSeeder extends Seeder
 
         $this->seedProducts();
         $this->seedCustomers();
+        $this->seedMaterials();
 
         // Real directory imported from the legacy snapshot (legacy:import) replaces the synthetic one.
         if (DB::table('legacy_id_map')->where('target_table', 'expense_categories')->exists()) {

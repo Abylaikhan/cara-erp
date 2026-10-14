@@ -118,5 +118,16 @@ return [
 
     // Tables/columns that reference suppliers by id. «Объединить» moves all of them to the kept supplier in one transaction.
     // Modules add their references here when they are migrated (money operations, ESF, purchases).
-    'supplier_references' => [],
+    'supplier_references' => [
+        ['table' => 'material_aliases', 'column' => 'supplier_id'], // M03: the supplier of a material alias
+    ],
+
+    // Виды деятельности (legacy WORKSHOPS, L27195): production lines that staff and write-offs are bound to.
+    'workshops' => [
+        ['id' => 'act_chair', 'name' => 'Стул', 'icon' => '🪑'],
+        ['id' => 'act_table', 'name' => 'Стол', 'icon' => '🪞'],
+        ['id' => 'act_bed', 'name' => 'Кровать', 'icon' => '🛏'],
+        ['id' => 'act_soft', 'name' => 'Мягкая мебель', 'icon' => '🛋'],
+        ['id' => 'act_cabinet', 'name' => 'Корпусная мебель', 'icon' => '🗄'],
+    ],
 ];
