@@ -24,7 +24,8 @@ use Inertia\Response;
  * M10 CRM — legacy page-crm (L4134–5346): tabs «Лиды» (loadLeadsFromDB/renderLeadsTab/saveLead/quickChangeLeadStatus/
  * convertLeadToClient), «Воронка лидов» (renderCrmKanban/crmDrop/leadWon/leadLost/saveCrmLead, the lead card) and «Задачи»
  * (loadTasksFromDB/renderTasks), «Клиенты» (renderClientsTab/openClientCard, from the orders). Leads and orders are limited
- * to the channels the user may see, tasks about a lead follow the lead. The order boards come next.
+ * to the channels the user may see, tasks about a lead follow the lead. A dealer account and the head of the shop see only
+ * the tab «Проекты» (legacy prjApplyRole), so nothing of the other tabs is sent to them.
  */
 class CrmController extends Controller
 {
@@ -32,12 +33,14 @@ class CrmController extends Controller
 
     public function index(Request $request): Response
     {
-        Gate::authorize('viewAny', Lead::class);
+        $projectsOnly = Erp::crmProjectsOnly($request->user());
         // Legacy loads leads newest first (order=created_at.desc).
-        $leads = ChannelScope::apply(Lead::query()->active(), $request->user())->orderByDesc('created_at')->orderByDesc('id')->get();
-        $crmUsers = User::query()->where('is_active', true)->orderBy('name')->get()->filter(fn (User $u) => Erp::canAccess($u, 'crm'))->pluck('name');
+        $leads = $projectsOnly ? collect()
+            : ChannelScope::apply(Lead::query()->active(), $request->user())->orderByDesc('created_at')->orderByDesc('id')->get();
+        $crmUsers = $projectsOnly ? collect()
+            : User::query()->where('is_active', true)->orderBy('name')->get()->filter(fn (User $u) => Gate::forUser($u)->allows('viewAny', Lead::class))->pluck('name');
         // Legacy loads tasks newest first (order=created_at.desc); the tab sorts them itself.
-        $tasks = CrmTaskService::visible($request->user())->orderByDesc('created_at')->orderByDesc('id')->get();
+        $tasks = $projectsOnly ? collect() : CrmTaskService::visible($request->user())->orderByDesc('created_at')->orderByDesc('id')->get();
 
         return Inertia::render('Crm', [
             'leads' => $leads->map(fn (Lead $l) => [
@@ -79,14 +82,15 @@ class CrmController extends Controller
             'timezone' => config('erp.business_timezone'),
             // Tab «Клиенты» (legacy renderClientsTab/openClientCard): the customers of the salons are the end clients of
             // their orders. Their number is shown on the tab at once; the orders are loaded when the tab is opened.
-            'clientsCount' => fn () => $this->salonClientsCount($request->user()),
-            'clientOrders' => Inertia::optional(fn () => $this->clientOrders($request->user())),
+            'clientsCount' => fn () => $projectsOnly ? 0 : $this->salonClientsCount($request->user()),
+            'clientOrders' => Inertia::optional(fn () => $projectsOnly ? [] : $this->clientOrders($request->user())),
             // Tabs «По производству» and «По оплате» (legacy renderOrdersKanban): orders that are not cancelled, with their
             // total and mean progress — loaded when one of the boards is opened.
-            'boardOrders' => Inertia::optional(fn () => $this->boardOrders($request->user())),
+            'boardOrders' => Inertia::optional(fn () => $projectsOnly ? [] : $this->boardOrders($request->user())),
             // Legacy hides the channel filter of the boards from a salon or dealer account (getChannelFilter()).
             'channelBound' => ChannelScope::filterFor($request->user()) !== null,
             'today' => now(config('erp.business_timezone'))->format('Y-m-d'),
+            'projectsOnly' => $projectsOnly,
         ]);
     }
 

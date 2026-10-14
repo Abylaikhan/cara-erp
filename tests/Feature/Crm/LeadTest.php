@@ -211,6 +211,34 @@ class LeadTest extends TestCase
         $this->assertSame(['new', 1], [$lead->fresh()->status, Lead::count()]);
     }
 
+    public function test_dealer_and_head_of_the_shop_see_only_projects(): void
+    {
+        $lead = $this->lead(['name' => 'Демо Офис']);
+        $order = new Order(['num' => 'МО-1', 'channel' => 'dealer_astana', 'customer' => 'Демо', 'end_client' => 'Демо Клиент', 'status' => 'queue', 'payment_pct' => 0]);
+        $order->save();
+
+        foreach (['dealer_astana', 'foreman'] as $role) {
+            $user = User::factory()->role($role)->create();
+            // Legacy prjApplyRole: the page opens, but nothing of leads, tasks, clients or boards is sent.
+            $this->actingAs($user)->get('/crm')->assertOk()->assertInertia(fn (Assert $page) => $page
+                ->where('projectsOnly', true)
+                ->where('leads', [])
+                ->where('tasks', [])
+                ->where('managers', [])
+                ->where('clientsCount', 0)
+                ->reloadOnly('clientOrders', fn (Assert $reload) => $reload->where('clientOrders', []))
+                ->reloadOnly('boardOrders', fn (Assert $reload) => $reload->where('boardOrders', [])));
+            $this->from('/crm');
+            $this->post('/crm/leads', ['form' => 'leads', 'name' => 'Демо'])->assertForbidden();
+            $this->put("/crm/leads/{$lead->id}/status", ['status' => 'won', 'lock_version' => 1])->assertSessionHasErrors(['lead' => LeadService::NOT_FOUND]);
+            $this->post('/crm/tasks', ['title' => 'Демо задача', 'due_date' => '2026-10-20', 'priority' => 'normal'])->assertForbidden();
+        }
+        $this->assertSame(['new', 1], [$lead->fresh()->status, Lead::count()]);
+        $this->actingAs($this->manager)->get('/crm')->assertInertia(fn (Assert $page) => $page
+            ->where('projectsOnly', false)
+            ->where('managers', fn ($m) => collect($m)->contains('Демо Продажи')));
+    }
+
     public function test_clients_tab_counts_salon_end_clients_and_loads_their_orders_with_the_tab(): void
     {
         foreach ([['МО-1', 'salon_armada', ' Демо Клиентка ', '1000'], ['МО-2', 'salon_armada', 'Демо Клиентка', '500'], ['МО-3', 'salon_nazarbayeva', 'NaT', '100'],

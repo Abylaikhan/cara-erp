@@ -15,7 +15,7 @@ const pinBusy = ref(false);
 const activeTab = 'background:var(--accent);color:#fff;border-color:var(--accent)';
 const idleTab = 'background:transparent;color:var(--text2);border-color:var(--border)';
 const tabBase = 'flex:1;padding:8px;border-radius:8px;border:2px solid;font-size:13px;font-weight:600;cursor:pointer;';
-const pinDisplay = computed(() => [...pin.value.split('').map(() => '●'), ...Array(4 - pin.value.length).fill('_')].join(' '));
+const pinDisplay = computed(() => [...pin.value.split('').map(() => '●'), ...Array(Math.max(0, 6 - pin.value.length)).fill('_')].join(' '));
 
 function shake(): void {
     const el = box.value;
@@ -55,10 +55,14 @@ function pinPadPress(key: string): void {
     if (pinBusy.value) return;
     if (key === '⌫') {
         pin.value = pin.value.slice(0, -1);
-    } else if (/[0-9]/.test(key) && pin.value.length < 4) {
+    } else if (key === 'OK') {
+        // Legacy: OK sends a 4- or 5-digit code; a 6-digit one is sent by itself.
+        if (pin.value.length >= 4) checkLoginPin();
+        return;
+    } else if (/[0-9]/.test(key) && pin.value.length < 6) {
         pin.value += key;
     }
-    if (pin.value.length === 4) checkLoginPin();
+    if (pin.value.length === 6) checkLoginPin();
 }
 
 function checkLoginPin(): void {
@@ -69,12 +73,11 @@ function checkLoginPin(): void {
         {
             preserveState: true,
             onError: (errors) => {
+                // Legacy checkLoginPin (c917d37): the code is cleared at once, the message stays 2.5 s.
                 pinError.value = errors.pin ?? 'Неверный PIN-код';
-                setTimeout(() => {
-                    pin.value = '';
-                    pinError.value = '';
-                    pinBusy.value = false;
-                }, 1000);
+                pin.value = '';
+                pinBusy.value = false;
+                setTimeout(() => (pinError.value = ''), 2500);
             },
             onSuccess: () => {
                 pinBusy.value = false;
@@ -121,16 +124,22 @@ const pinKeyStyle =
 
             <div v-show="tab === 'pin'" id="login-pin-form">
                 <div style="text-align: center; margin-bottom: 16px">
-                    <div style="font-size: 13px; color: var(--text3); margin-bottom: 12px">Введите ваш PIN-код (4 цифры)</div>
+                    <div style="font-size: 13px; color: var(--text3); margin-bottom: 12px">Введите ваш код (6 цифр, затем вход автоматически)</div>
                     <div
                         id="login-pin-display"
-                        style="font-size: 36px; font-family: monospace; letter-spacing: 12px; font-weight: 700; color: var(--text1); margin-bottom: 16px; min-height: 48px"
+                        style="font-size: 36px; font-family: monospace; letter-spacing: 6px; font-weight: 700; color: var(--text1); margin-bottom: 16px; min-height: 48px"
                     >
                         {{ pinDisplay }}
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 240px; margin: 0 auto">
                         <button v-for="d in ['1', '2', '3', '4', '5', '6', '7', '8', '9']" :key="d" :style="pinKeyStyle" @click="pinPadPress(d)">{{ d }}</button>
-                        <div></div>
+                        <button
+                            title="Для 4-значного кода"
+                            style="padding: 14px; font-size: 15px; font-weight: 700; border-radius: 10px; border: 1px solid var(--border); background: var(--bg3); color: var(--green); cursor: pointer"
+                            @click="pinPadPress('OK')"
+                        >
+                            OK
+                        </button>
                         <button :style="pinKeyStyle" @click="pinPadPress('0')">0</button>
                         <button :style="pinKeyStyle.replace('color:var(--text1)', 'color:var(--red)')" @click="pinPadPress('⌫')">⌫</button>
                     </div>

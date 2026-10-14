@@ -3,7 +3,8 @@
 // setOrderYear/setOrderMonth/clearOrderFilters/sortOrders, updateOrderTabCounts (L29921–30252). The journal is the same; the
 // orders are those of the user's channels; tabs «Реализация» and «Отчёт» are RealizationJournal and OrderReport. Orders are
 // not edited yet: the order form, «+ Новый заказ» and the realization worksheet come with ERP-029/030/049/050 (decisions
-// D-02, D-03, D-08, D-12).
+// D-02, D-03, D-08, D-12); the restorations (legacy rs*, L31740) — with ERP-080. A salon or dealer account does not see the
+// worksheet and the restorations (legacy swApplyRole).
 import { computed, reactive, ref } from 'vue';
 import OrderReport from '@/components/sales/OrderReport.vue';
 import OrdersTable from '@/components/sales/OrdersTable.vue';
@@ -15,14 +16,17 @@ const props = defineProps<{
     orders: OrderRow[];
     channels: Record<string, string>;
     realizations?: RealizationRow[];
+    channelAccount: boolean;
     report?: InstanceType<typeof OrderReport>['$props']['report'];
 }>();
 
-type Tab = 'all-orders' | 'queue' | 'progress' | 'done' | 'sales-journal' | 'worksheet' | 'report';
+type Tab = 'all-orders' | 'queue' | 'progress' | 'done' | 'sales-journal' | 'worksheet' | 'restorations' | 'report';
 const tab = ref<Tab>('all-orders');
 const LATER: Partial<Record<Tab, string>> = {
     worksheet: 'Рабочий лист реализации появится вместе с проведением реализации (ERP-049/050, решение D-08).',
+    restorations: 'Реставрации (приём изделий на гарантийный и платный ремонт, забор и возврат по рабочему листу) переносятся следующим этапом (ERP-080).',
 };
+const roleHidden = computed(() => (props.channelAccount ? { display: 'none' } : undefined));
 const newOrder = () => window.alert('Создание заказа появится после решений по сохраняемой цене и составу заказа (D-02, D-12).');
 
 // ── Filters (legacy ord-* controls) ──
@@ -124,7 +128,8 @@ const count = (s: string) => props.orders.filter((o) => o.status === s).length;
                 <div class="tab" :class="{ active: tab === 'progress' }" @click="tab = 'progress'">🔧 В работе (<span id="s-count-progress">{{ count('progress') }}</span>)</div>
                 <div class="tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">✅ Завершено (<span id="s-count-done">{{ count('done') }}</span>)</div>
                 <div class="tab" :class="{ active: tab === 'sales-journal' }" @click="tab = 'sales-journal'">📒 Реализация</div>
-                <div id="sw-tab-btn" class="tab" :class="{ active: tab === 'worksheet' }" @click="tab = 'worksheet'">📝 Рабочий лист реализации</div>
+                <div id="sw-tab-btn" class="tab" :class="{ active: tab === 'worksheet' }" :style="roleHidden" @click="tab = 'worksheet'">📝 Рабочий лист реализации</div>
+                <div id="rs-tab-btn" class="tab" :class="{ active: tab === 'restorations' }" :style="roleHidden" @click="tab = 'restorations'">🔧 Реставрации (<span id="rs-count">0</span>)</div>
                 <div class="tab" :class="{ active: tab === 'report' }" @click="tab = 'report'">📈 Отчёт</div>
             </div>
 

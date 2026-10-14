@@ -39,7 +39,10 @@ class LoginTest extends TestCase
     {
         $user = User::factory()->inactive()->create(['password' => 'secret-password']);
 
+        // Legacy doLogin: a disabled user with the right password is told the account is blocked, otherwise the usual message.
         $this->from('/login')->post('/login', ['login' => $user->login, 'password' => 'secret-password'])
+            ->assertSessionHasErrors(['login' => 'Пользователь заблокирован']);
+        $this->from('/login')->post('/login', ['login' => $user->login, 'password' => 'wrong-password'])
             ->assertSessionHasErrors(['login' => 'Неверный логин или пароль']);
         $this->assertGuest();
     }

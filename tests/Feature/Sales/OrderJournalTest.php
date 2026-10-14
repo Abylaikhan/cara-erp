@@ -80,6 +80,17 @@ class OrderJournalTest extends TestCase
         $this->actingAs(User::factory()->role('storekeeper')->create())->get('/sales')->assertForbidden();
     }
 
+    public function test_salon_and_dealer_accounts_do_not_see_worksheet_and_restorations(): void
+    {
+        // Legacy swApplyRole hides both tabs from an account with a channel; the head of the salons has none.
+        $flag = fn (User $u) => $this->actingAs($u)->get('/sales')->viewData('page')['props']['channelAccount'];
+
+        $this->assertFalse($flag($this->director));
+        $this->assertFalse($flag(User::factory()->role('salon_armada_mgr')->create()));
+        $this->assertTrue($flag(User::factory()->role('salon_armada')->create()));
+        $this->assertTrue($flag(User::factory()->role('dealer_astana')->create()));
+    }
+
     public function test_a_dealer_order_realized_to_99_percent_is_completed_by_hand(): void
     {
         $ready = $this->order('МО-1', 'dealer_astana', [['2', '500']]);

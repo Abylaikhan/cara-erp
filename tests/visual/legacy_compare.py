@@ -165,7 +165,7 @@ with sync_playwright() as p:
             page.locator('#clients-tbody tr').first.locator('button').click(); page.wait_for_timeout(300)
             page.screenshot(path=str(OUT / f'target-crm-client-card-{theme}.png'))
             page.locator('#client-card-modal .modal-close').click(); page.wait_for_timeout(200)
-        for i, shot in ((3, 'prod'), (4, 'pay')):
+        for i, shot in ((4, 'prod'), (5, 'pay')):
             page.locator('#page-crm .tabs .tab').nth(i).click(); page.wait_for_timeout(2500)
             page.screenshot(path=str(OUT / f'target-crm-board-{shot}-{theme}.png'))
         board_orders = page.evaluate("""async () => {
@@ -207,7 +207,7 @@ with sync_playwright() as p:
                 'X-Inertia-Partial-Data': 'realizations', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
             return (await r.json()).props.realizations;
         }""")
-        page.locator('#sales-tabs .tab').nth(6).click(); page.wait_for_timeout(2000)
+        page.locator('#sales-tabs .tab').nth(7).click(); page.wait_for_timeout(2000)
         page.screenshot(path=str(OUT / f'target-sales-report-{theme}.png'))
         report = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
@@ -406,7 +406,7 @@ with sync_playwright() as p:
         page.route(re.compile(r'/rest/v1/leads\?'), lambda route: route.fulfill(json=rows) if route.request.method == 'GET' else route.abort())
         page.evaluate("""(stages) => {
             window.CRM_STAGES = stages.map(s => ({key: s.key, label: s.label, cls: ''}));
-            showOrdersTab('funnel', document.querySelectorAll('#page-crm .tab')[2]);
+            showOrdersTab('funnel', document.querySelectorAll('#page-crm .tab')[3]);
         }""", crm['funnelStages'])
         page.wait_for_timeout(1000)
         page.evaluate("(own) => { crmLeads.forEach(l => { l.segment = own[String(l.id)] ?? null; }); renderCrmKanban(); }", {str(l['id']): l['segment'] for l in funnel})
@@ -445,7 +445,7 @@ with sync_playwright() as p:
             page.evaluate("closeModal('client-card-modal')")
         # Order boards: legacy gets the same orders and the month in local dates. For «По производству» the orders in work
         # and the completed unpaid ones are given the statuses its columns look for (ADR-0002, item 51).
-        for tab, idx in (('orders-kanban-prod', 3), ('orders-kanban-pay', 4)):
+        for tab, idx in (('orders-kanban-prod', 4), ('orders-kanban-pay', 5)):
             page.evaluate("""([orders, tab, idx, prod]) => {
                 ordersData = orders.map(o => ({num: o.num, channel: o.channel, customer: o.customer || '', salonClientName: o.end_client || '', createdDate: o.created || '',
                     date: o.date || '', payment: o.payment, status: prod && o.status === 'progress' ? 'production' : prod && o.status === 'done' ? 'delivered' : o.status,
@@ -457,7 +457,7 @@ with sync_playwright() as p:
                 renderOrdersKanban();
             }""", [board_orders, tab, idx, tab == 'orders-kanban-prod'])
             page.wait_for_timeout(1200)
-            page.screenshot(path=str(OUT / f"legacy-crm-board-{'prod' if idx == 3 else 'pay'}-{theme}.png"))
+            page.screenshot(path=str(OUT / f"legacy-crm-board-{'prod' if tab == 'orders-kanban-prod' else 'pay'}-{theme}.png"))
         # Purchases: legacy gets the target's requests; the date is the business date the target shows (ADR-0002, item 40).
         # warehouseData (for «План-факт») is the target's directory given at the warehouse step.
         page.evaluate("""(requests) => {
@@ -515,7 +515,7 @@ with sync_playwright() as p:
                 comment: (report.notes[o.id] || {}).comment || '', paymentDue: '', salonClientName: o.end_client || '', paymentHistory: [],
                 items: (lines[o.id] || []).map(l => ({name: l.name, itemType: '', category: '', qty: l.qty, price: 0, progress: 0, status: o.status, resp: '', date: '',
                     attributes: l.attrs}))}));
-            showSalesTab('report', document.querySelectorAll('#sales-tabs .tab')[6]);
+            showSalesTab('report', document.querySelectorAll('#sales-tabs .tab')[7]);
         }""", [sales, report])
         page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))

@@ -41,7 +41,10 @@ class LoginController extends Controller
         }
         if (! Auth::attempt(['login' => $login, 'password' => $password, 'is_active' => true])) {
             RateLimiter::hit($key, 60);
-            throw ValidationException::withMessages(['login' => 'Неверный логин или пароль']);
+            // Legacy doLogin (c917d37): a disabled user who gives the right password is told so.
+            $user = Auth::getProvider()->retrieveByCredentials(['login' => $login]);
+            $blocked = $user !== null && ! $user->is_active && Auth::getProvider()->validateCredentials($user, ['password' => $password]);
+            throw ValidationException::withMessages(['login' => $blocked ? 'Пользователь заблокирован' : 'Неверный логин или пароль']);
         }
         RateLimiter::clear($key);
         $request->session()->regenerate();

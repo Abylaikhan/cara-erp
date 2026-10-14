@@ -47,6 +47,21 @@ class Erp
         return in_array($page, self::pagesFor($user), true);
     }
 
+    /** The sales channel of the account (legacy getCurrentRole().channel): its own or that of its role; null for office roles. */
+    public static function channelOf(User $user): ?string
+    {
+        return $user->channel ?? (self::role($user->role)['channel'] ?? null);
+    }
+
+    /**
+     * Legacy prjApplyRole: in «CRM» a dealer account and the head of the shop see only the tab «Проекты» — no leads, tasks,
+     * clients or order boards. Legacy tells the head of the shop by the login «foreman»; here it is the role.
+     */
+    public static function crmProjectsOnly(User $user): bool
+    {
+        return str_starts_with((string) self::channelOf($user), 'dealer_') || $user->role === 'foreman';
+    }
+
     /** Legacy doLogin: the first page of the role that is not «Мой кабинет», otherwise the first page. */
     public static function firstPage(User $user): ?string
     {

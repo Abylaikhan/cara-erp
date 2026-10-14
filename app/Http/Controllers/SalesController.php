@@ -8,6 +8,7 @@ use App\Models\SalesChannel;
 use App\Models\User;
 use App\Services\OrderService;
 use App\Support\ChannelScope;
+use App\Support\Erp;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -65,6 +66,8 @@ class SalesController extends Controller
             // Tab «Отчёт» (legacy renderOrderReport): the lines of the orders with their characteristics, the comment and
             // the delivery date — loaded when the tab is opened.
             'report' => Inertia::optional(fn () => $this->report($request->user())),
+            // Legacy swApplyRole: a salon or dealer account does not see the worksheet and the restorations.
+            'channelAccount' => Erp::channelOf($request->user()) !== null,
         ]);
     }
 
