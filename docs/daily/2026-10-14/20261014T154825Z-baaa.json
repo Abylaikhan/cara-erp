@@ -1,0 +1,2344 @@
+{
+  "schema": "promtech.audit-run/1",
+  "run_id": "20261014T154825Z-baaa",
+  "mode": "manual",
+  "started_at": "2026-10-14T15:48:25Z",
+  "finished_at": "2026-10-14T15:49:17Z",
+  "duration_s": 52.0,
+  "local_date": "2026-10-14",
+  "local_time": "20:48",
+  "timezone": "Asia/Almaty",
+  "logical_key": "baee7033951a2098",
+  "repeat_of": null,
+  "harness": {
+    "version": "0.1.0",
+    "suite_version": "suite-1+1f7357",
+    "config_hash": "6d0d06586c52",
+    "code_hash": "86fc69831032",
+    "inventory_tool": "17c5b35c1b925f97",
+    "python": "3.9.6"
+  },
+  "source": {
+    "repository": "https://github.com/Cara-ERP/promtech-erp",
+    "branch": "main",
+    "path": "index.html",
+    "observed_head": "9f49a2440e97fef8ca30177507cca1caa0f0eadb",
+    "base_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+    "blob": "f6c75f488b1d9babdbef216b23c870f1a08f91c1",
+    "sha256": "ddf5f1ff656635374fa10138269ffc0042ee445917be721e384c83d4fb4b13be",
+    "status": "CHANGED",
+    "commits": [
+      {
+        "sha": "2ff263b2884c9b5f344b12f7f4055ffb8d9ec71b",
+        "authored_at": "2026-10-14T18:50:12+05:00",
+        "committed_at": "2026-10-14T18:50:12+05:00",
+        "subject": "Add files via upload"
+      },
+      {
+        "sha": "9583061f17c8eec611c0160e6ff8558029b45c1d",
+        "authored_at": "2026-10-14T19:02:19+05:00",
+        "committed_at": "2026-10-14T19:02:19+05:00",
+        "subject": "Add files via upload"
+      },
+      {
+        "sha": "f3bf1707a4f6973690507d0b5742a576bb693ae3",
+        "authored_at": "2026-10-14T19:21:02+05:00",
+        "committed_at": "2026-10-14T19:21:02+05:00",
+        "subject": "Add files via upload"
+      },
+      {
+        "sha": "9f49a2440e97fef8ca30177507cca1caa0f0eadb",
+        "authored_at": "2026-10-14T19:28:37+05:00",
+        "committed_at": "2026-10-14T19:28:37+05:00",
+        "subject": "Add files via upload"
+      }
+    ],
+    "commit_count": 4,
+    "watched": [
+      {
+        "path": "Index.html",
+        "blob": "bc477eb7cc8d0ad491a93b70ac2838ef9a339949",
+        "previous_blob": "bc477eb7cc8d0ad491a93b70ac2838ef9a339949",
+        "changed": false
+      },
+      {
+        "path": "indexx.html",
+        "blob": "dcc480053c88efba2239e6dd75d4815494e869f1",
+        "previous_blob": "dcc480053c88efba2239e6dd75d4815494e869f1",
+        "changed": false
+      },
+      {
+        "path": "indrx.html",
+        "blob": "2d304e8d88347781079be34a2e9ee15319aaec55",
+        "previous_blob": "2d304e8d88347781079be34a2e9ee15319aaec55",
+        "changed": false
+      }
+    ],
+    "case_collisions": [
+      [
+        "Index.html",
+        "index.html"
+      ]
+    ],
+    "diff": {
+      "counts": {
+        "controls": {
+          "old": 2195,
+          "new": 2225
+        },
+        "html_tables": {
+          "old": 75,
+          "new": 76
+        },
+        "function_declarations": {
+          "old": 1083,
+          "new": 1156
+        },
+        "functions_all": {
+          "old": 1101,
+          "new": 1181
+        },
+        "db_tables": {
+          "old": 38,
+          "new": 42
+        },
+        "db_calls": {
+          "old": 219,
+          "new": 247
+        },
+        "storage_calls": {
+          "old": 6,
+          "new": 8
+        }
+      },
+      "functions": {
+        "added": [
+          "_pinSave#1",
+          "_pinState#1",
+          "dbUsersApply#1",
+          "dbUsersRefresh#1",
+          "genUniquePin#1",
+          "loadProjects#1",
+          "pinFailed#1",
+          "pinLockLeft#1",
+          "pinLockMsg#1",
+          "pinOk#1",
+          "pinSucceeded#1",
+          "prjAddComment#1",
+          "prjApplyMarkup#1",
+          "prjApplyRole#1",
+          "prjCalcAdd#1",
+          "prjCalcDel#1",
+          "prjCalcEdit#1",
+          "prjCalcHtml#1",
+          "prjCalcPrint#1",
+          "prjCalcSave#1",
+          "prjCalcSend#1",
+          "prjChName#1",
+          "prjClientDecide#1",
+          "prjClose#1",
+          "prjCompressImage#1",
+          "prjCostTotal#1",
+          "prjCreate#1",
+          "prjCreateOrder#1",
+          "prjDate#1",
+          "prjDeleteFile#1",
+          "prjDeleteProject#1",
+          "prjDrop#1",
+          "prjEnsureModal#1",
+          "prjEsc#1",
+          "prjExecAdd#1",
+          "prjExecLogins#1",
+          "prjExecName#1",
+          "prjExecNames#1",
+          "prjExecRemove#1",
+          "prjExecSave#1",
+          "prjFileCard#1",
+          "prjFileUrl#1",
+          "prjFilesCol#1",
+          "prjFillExecFilter#1",
+          "prjFmt#1",
+          "prjIsAdmin#1",
+          "prjIsClient#1",
+          "prjMe#1",
+          "prjOnPaste#1",
+          "prjOpen#1",
+          "prjOpenNew#1",
+          "prjOpenTab#1",
+          "prjOrdTotal#1",
+          "prjPickFiles#1",
+          "prjPostComment#1",
+          "prjRefreshCalc#1",
+          "prjRenderCard#1",
+          "prjRole#1",
+          "prjSaveHead#1",
+          "prjSetStatus#1",
+          "prjStatusBadge#1",
+          "prjStorageDelete#1",
+          "prjToOrder#1",
+          "prjToast#1",
+          "prjTotal#1",
+          "prjUploadFiles#1",
+          "prjUploadTo#1",
+          "renderProjects#1",
+          "renderUsersStaffBlock#1",
+          "usrCreateFor#1",
+          "usrEmployeeByName#1",
+          "usrEsc#1",
+          "usrNorm#1",
+          "usrPages#1",
+          "usrPrintPins#1",
+          "usrReissuePins#1",
+          "usrSameName#1",
+          "usrSetPin#1",
+          "usrShowPinList#1",
+          "usrTranslit#1"
+        ],
+        "removed": [],
+        "changed": [
+          "checkLoginPin#1",
+          "checkPin#1",
+          "doLogin#1",
+          "openUserModal#1",
+          "pinPadPress#1",
+          "pinPress#1",
+          "renderUsersTable#1",
+          "saveAppUser#1",
+          "saveEmployeeCard#1",
+          "showOrdersTab#1",
+          "showPage#1",
+          "toggleUserActive#1",
+          "updateLoginPinDisplay#1",
+          "updatePinDisplay#1"
+        ]
+      },
+      "pages": {
+        "added": [],
+        "removed": [],
+        "changed": [
+          "page-crm",
+          "page-hr",
+          "page-mycabinet"
+        ],
+        "text_changed": [
+          "page-crm",
+          "page-hr",
+          "page-mycabinet"
+        ]
+      },
+      "modals": {
+        "added": [],
+        "removed": [],
+        "changed": [
+          "employeeCardModal"
+        ],
+        "text_changed": []
+      },
+      "controls": {
+        "added": [
+          {
+            "group": "global",
+            "tag": "button",
+            "calls": [
+              "pinPadPress"
+            ],
+            "line": 1992
+          },
+          {
+            "group": "page-crm",
+            "tag": "button",
+            "calls": [
+              "prjOpenNew"
+            ],
+            "line": 4259
+          },
+          {
+            "group": "page-crm",
+            "tag": "div",
+            "id": "crm-tab-projects",
+            "calls": [
+              "showOrdersTab"
+            ],
+            "line": 4207
+          },
+          {
+            "group": "page-crm",
+            "tag": "input",
+            "id": "prj-q",
+            "type": "search",
+            "calls": [
+              "renderProjects"
+            ],
+            "line": 4250
+          },
+          {
+            "group": "page-crm",
+            "tag": "option",
+            "line": 4252
+          },
+          {
+            "group": "page-crm",
+            "tag": "option",
+            "line": 4253
+          },
+          {
+            "group": "page-crm",
+            "tag": "option",
+            "line": 4252
+          },
+          {
+            "group": "page-crm",
+            "tag": "option",
+            "line": 4254
+          },
+          {
+            "group": "page-crm",
+            "tag": "option",
+            "line": 4253
+          },
+          {
+            "group": "page-crm",
+            "tag": "option",
+            "line": 4253
+          },
+          {
+            "group": "page-crm",
+            "tag": "option",
+            "line": 4254
+          },
+          {
+            "group": "page-crm",
+            "tag": "option",
+            "line": 4254
+          },
+          {
+            "group": "page-crm",
+            "tag": "select",
+            "id": "prj-ch",
+            "calls": [
+              "renderProjects"
+            ],
+            "line": 4256
+          },
+          {
+            "group": "page-crm",
+            "tag": "select",
+            "id": "prj-ex",
+            "calls": [
+              "renderProjects"
+            ],
+            "line": 4257
+          },
+          {
+            "group": "page-crm",
+            "tag": "select",
+            "id": "prj-st",
+            "calls": [
+              "renderProjects"
+            ],
+            "line": 4251
+          },
+          {
+            "group": "page-hr",
+            "tag": "button",
+            "calls": [
+              "usrReissuePins"
+            ],
+            "line": 7373
+          },
+          {
+            "group": "page-hr",
+            "tag": "input",
+            "id": "users-staff-q",
+            "type": "search",
+            "calls": [
+              "renderUsersStaffBlock"
+            ],
+            "line": 7374
+          },
+          {
+            "group": "page-hr",
+            "tag": "option",
+            "line": 7376
+          },
+          {
+            "group": "page-hr",
+            "tag": "option",
+            "line": 7376
+          },
+          {
+            "group": "page-hr",
+            "tag": "option",
+            "line": 7376
+          },
+          {
+            "group": "page-hr",
+            "tag": "option",
+            "line": 7376
+          },
+          {
+            "group": "page-hr",
+            "tag": "option",
+            "line": 7376
+          },
+          {
+            "group": "page-hr",
+            "tag": "select",
+            "id": "users-staff-filter",
+            "calls": [
+              "renderUsersStaffBlock"
+            ],
+            "line": 7375
+          },
+          {
+            "group": "page-hr",
+            "tag": "th",
+            "line": 7381
+          },
+          {
+            "group": "page-hr",
+            "tag": "th",
+            "line": 7381
+          },
+          {
+            "group": "page-hr",
+            "tag": "th",
+            "line": 7381
+          },
+          {
+            "group": "page-hr",
+            "tag": "th",
+            "line": 7363
+          },
+          {
+            "group": "page-hr",
+            "tag": "th",
+            "line": 7381
+          },
+          {
+            "group": "page-hr",
+            "tag": "th",
+            "line": 7363
+          },
+          {
+            "group": "page-hr",
+            "tag": "th",
+            "line": 7381
+          },
+          {
+            "group": "page-mycabinet",
+            "tag": "div",
+            "calls": [
+              "pinOk"
+            ],
+            "line": 8242
+          }
+        ],
+        "removed": [
+          {
+            "group": "page-mycabinet",
+            "tag": "div",
+            "calls": [
+              "pinClear"
+            ],
+            "line": 8141
+          }
+        ],
+        "changed": [
+          {
+            "group": "employeeCardModal",
+            "tag": "button",
+            "type": "button",
+            "calls": [
+              "genUniquePin",
+              "getElementById"
+            ],
+            "line": 7593
+          }
+        ]
+      },
+      "db": {
+        "tables_added": [
+          "project_calcs",
+          "project_comments",
+          "project_files",
+          "projects"
+        ],
+        "tables_removed": [],
+        "calls_changed": {
+          "app_users": {
+            "old": {
+              "sbFetch": 1,
+              "sbPatch": 2,
+              "sbInsert": 1,
+              "sbDelete": 1
+            },
+            "new": {
+              "sbFetch": 3,
+              "sbPatch": 3,
+              "sbInsert": 2,
+              "sbDelete": 1
+            }
+          },
+          "staff": {
+            "old": {
+              "sbFetch": 1,
+              "sbPatch": 5,
+              "sbInsert": 1
+            },
+            "new": {
+              "sbFetch": 1,
+              "sbPatch": 7,
+              "sbInsert": 1
+            }
+          }
+        },
+        "dynamic": {
+          "old": 2,
+          "new": 2
+        }
+      },
+      "storage": {
+        "added": [
+          "localStorage.getItem(pt_pin_lock)",
+          "localStorage.setItem(pt_pin_lock)"
+        ],
+        "removed": []
+      },
+      "resources": {
+        "added": [],
+        "removed": []
+      },
+      "network": {
+        "added": [
+          "prjStorageDelete → None",
+          "prjUploadFiles → None"
+        ],
+        "removed": []
+      },
+      "scripts_failed": []
+    },
+    "impact": [
+      {
+        "function": "_pinSave#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "_pinState#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "dbUsersApply#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "userModal"
+        ],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "dbUsersRefresh#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "userModal"
+        ],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "genUniquePin#1",
+        "change": "added",
+        "ui_groups": [
+          "employeeCardModal",
+          "page-hr"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "loadProjects#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-crm",
+          "page-finance"
+        ],
+        "modules": [
+          "M10 CRM",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "pinFailed#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "pinLockLeft#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "pinLockMsg#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "pinOk#1",
+        "change": "added",
+        "ui_groups": [
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "pinSucceeded#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjAddComment#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjApplyMarkup#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjApplyRole#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance"
+        ],
+        "modules": [
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCalcAdd#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCalcDel#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCalcEdit#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCalcHtml#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCalcPrint#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCalcSave#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCalcSend#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjChName#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjClientDecide#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjClose#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCompressImage#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCostTotal#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCreate#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjCreateOrder#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjDate#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjDeleteFile#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjDeleteProject#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjDrop#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjEnsureModal#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjEsc#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-crm",
+          "page-finance"
+        ],
+        "modules": [
+          "M10 CRM",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjExecAdd#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjExecLogins#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjExecName#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjExecNames#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjExecRemove#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjExecSave#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjFileCard#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjFileUrl#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjFilesCol#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjFillExecFilter#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjFmt#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjIsAdmin#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjIsClient#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-crm",
+          "page-finance"
+        ],
+        "modules": [
+          "M10 CRM",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjMe#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjOnPaste#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjOpen#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjOpenNew#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjOpenTab#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-crm",
+          "page-finance"
+        ],
+        "modules": [
+          "M10 CRM",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjOrdTotal#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjPickFiles#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjPostComment#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjRefreshCalc#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjRenderCard#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjRole#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-crm",
+          "page-finance"
+        ],
+        "modules": [
+          "M10 CRM",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjSaveHead#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjSetStatus#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjStatusBadge#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjStorageDelete#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjToOrder#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjToast#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjTotal#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjUploadFiles#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "prjUploadTo#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "renderProjects#1",
+        "change": "added",
+        "ui_groups": [
+          "page-crm"
+        ],
+        "modules": [
+          "M10 CRM"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "renderUsersStaffBlock#1",
+        "change": "added",
+        "ui_groups": [
+          "page-hr",
+          "userModal"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrCreateFor#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrEmployeeByName#1",
+        "change": "added",
+        "ui_groups": [
+          "page-hr",
+          "userModal"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrEsc#1",
+        "change": "added",
+        "ui_groups": [
+          "page-hr",
+          "userModal"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrNorm#1",
+        "change": "added",
+        "ui_groups": [
+          "page-hr",
+          "userModal"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrPages#1",
+        "change": "added",
+        "ui_groups": [
+          "page-hr",
+          "userModal"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrPrintPins#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrReissuePins#1",
+        "change": "added",
+        "ui_groups": [
+          "page-hr"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrSameName#1",
+        "change": "added",
+        "ui_groups": [
+          "page-hr",
+          "userModal"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrSetPin#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrShowPinList#1",
+        "change": "added",
+        "ui_groups": [
+          "page-hr"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "usrTranslit#1",
+        "change": "added",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "checkLoginPin#1",
+        "change": "changed",
+        "ui_groups": [
+          "global"
+        ],
+        "modules": [],
+        "requirement_ids": [
+          "AUTH-01.PIN"
+        ],
+        "test_ids": [
+          "Tests\\Feature\\Auth\\LoginTest::test_pin_sign_in_is_not_available_until_employees_are_migrated"
+        ],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "checkPin#1",
+        "change": "changed",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "doLogin#1",
+        "change": "changed",
+        "ui_groups": [
+          "global"
+        ],
+        "modules": [],
+        "requirement_ids": [
+          "AUTH-01.ROLES",
+          "UI-01.LOGIN"
+        ],
+        "test_ids": [
+          "Tests\\Feature\\Access\\PageAccessTest",
+          "Tests\\Feature\\Auth\\LoginTest",
+          "Tests\\Feature\\ExampleTest"
+        ],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "openUserModal#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-hr"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "pinPadPress#1",
+        "change": "changed",
+        "ui_groups": [
+          "global"
+        ],
+        "modules": [],
+        "requirement_ids": [
+          "AUTH-01.PIN"
+        ],
+        "test_ids": [
+          "Tests\\Feature\\Auth\\LoginTest::test_pin_sign_in_is_not_available_until_employees_are_migrated"
+        ],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "pinPress#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "renderUsersTable#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-hr",
+          "userModal"
+        ],
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "saveAppUser#1",
+        "change": "changed",
+        "ui_groups": [
+          "userModal"
+        ],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "saveEmployeeCard#1",
+        "change": "changed",
+        "ui_groups": [
+          "employeeCardModal"
+        ],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "showOrdersTab#1",
+        "change": "changed",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-crm",
+          "page-finance"
+        ],
+        "modules": [
+          "M10 CRM",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [
+          "M10.LEADS"
+        ],
+        "test_ids": [
+          "Tests\\Feature\\Crm\\LeadTest::test_page_lists_leads_newest_first_with_the_legacy_dictionaries"
+        ],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "showPage#1",
+        "change": "changed",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance"
+        ],
+        "modules": [
+          "M11 Финансы"
+        ],
+        "requirement_ids": [
+          "UI-01.SHELL"
+        ],
+        "test_ids": [
+          "Tests\\Feature\\Access\\PageAccessTest"
+        ],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "toggleUserActive#1",
+        "change": "changed",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "updateLoginPinDisplay#1",
+        "change": "changed",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [
+          "AUTH-01.PIN"
+        ],
+        "test_ids": [
+          "Tests\\Feature\\Auth\\LoginTest::test_pin_sign_in_is_not_available_until_employees_are_migrated"
+        ],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "updatePinDisplay#1",
+        "change": "changed",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "page": "page-crm",
+        "change": "page",
+        "modules": [
+          "M10 CRM"
+        ],
+        "mapping": "UNMAPPED_CHANGE",
+        "requirement_ids": [],
+        "test_ids": [],
+        "ui_groups": [
+          "page-crm"
+        ]
+      },
+      {
+        "page": "page-hr",
+        "change": "page",
+        "modules": [
+          "M17 Сотрудники"
+        ],
+        "mapping": "UNMAPPED_CHANGE",
+        "requirement_ids": [],
+        "test_ids": [],
+        "ui_groups": [
+          "page-hr"
+        ]
+      },
+      {
+        "page": "page-mycabinet",
+        "change": "page",
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "mapping": "UNMAPPED_CHANGE",
+        "requirement_ids": [],
+        "test_ids": [],
+        "ui_groups": [
+          "page-mycabinet"
+        ]
+      }
+    ],
+    "numstat": {
+      "added": 1000,
+      "removed": 122
+    },
+    "diff_vs_accepted": "функции +80/−0/~14, страницы изменены 3, модальные окна 1",
+    "accepted_ref": {
+      "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
+      "sha256": "e1715f8e4e2d243f6638cfbbb9005ad9e3409885c3776184b6a383d8d2586b9b",
+      "matches_observed": false
+    },
+    "bytes": 2282737
+  },
+  "target": {
+    "repository": "https://github.com/Abylaikhan/cara-erp",
+    "ref_requested": "HEAD",
+    "head": "f1f12bfbbe768730607c921905d6004cb065ac46",
+    "base_ref": "51fa16b8245df2fde8acdc12885ae6e17aa317e4",
+    "changed_files": [
+      "CLAUDE.md",
+      "Makefile",
+      "app/Console/Commands/LegacyImport.php",
+      "app/Http/Controllers/CrmController.php",
+      "app/Http/Requests/Crm/LeadRequest.php",
+      "app/Legacy/Importers/LeadImporter.php",
+      "app/Models/Lead.php",
+      "app/Policies/LeadPolicy.php",
+      "app/Services/LeadService.php",
+      "config/erp.php",
+      "database/migrations/2026_10_14_000015_create_leads_table.php",
+      "docs/DAILY-CHANGELOG.md",
+      "docs/adr/0002-ui-deviations.md",
+      "docs/adr/0010-crm.md",
+      "docs/agent-state.md",
+      "docs/audit/state.json",
+      "docs/coverage/requirements.csv",
+      "docs/daily/2026-10-14/20261014T032832Z-766b.json",
+      "docs/daily/2026-10-14/20261014T032832Z-766b.md",
+      "resources/js/components/ErpModal.vue",
+      "resources/js/components/crm/FunnelLeadModal.vue",
+      "resources/js/components/crm/FunnelTab.vue",
+      "resources/js/components/crm/LeadModal.vue",
+      "resources/js/components/crm/LeadsTab.vue",
+      "resources/js/lib/crm.ts",
+      "resources/js/pages/Crm.vue",
+      "routes/web.php",
+      "tests/Feature/Crm/LeadTest.php",
+      "tests/Feature/Legacy/LeadImportTest.php",
+      "tests/visual/legacy_compare.py"
+    ],
+    "tests": {
+      "tests": 175,
+      "passed": 175,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "committed_at": "2026-10-14T20:48:17+05:00",
+    "subject": "M10 CRM, часть 1: лиды и воронка, перенос 4964 лидов",
+    "on_remote_branches": [
+      "origin/HEAD -> origin/main",
+      "origin/main"
+    ],
+    "working_tree_dirty": true
+  },
+  "inventory": {
+    "counts": {
+      "pages": 23,
+      "modals": 67,
+      "controls": 2225,
+      "html_tables": 76,
+      "scripts": 5,
+      "scripts_failed": 0,
+      "function_declarations": 1156,
+      "function_declarations_regex": 1158,
+      "functions_all": 1181,
+      "db_tables": 42,
+      "db_calls": 247,
+      "db_calls_dynamic": 2,
+      "storage_calls": 8
+    }
+  },
+  "checks": [
+    {
+      "id": "SRC-PIN",
+      "title": "Фиксация HEAD источника один раз в начале запуска",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.75,
+      "command": "git ls-remote origin refs/heads/main",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "head": "9f49a2440e97fef8ca30177507cca1caa0f0eadb"
+        }
+      }
+    },
+    {
+      "id": "SRC-FETCH",
+      "title": "Получение коммитов по SHA (без checkout)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 1.35,
+      "command": "git fetch --no-tags origin <branch> <pinned SHAs>",
+      "exit_code": null,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/source-git.log"
+      ],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "SRC-ACCEPTED",
+      "title": "Целостность принятого эталона: SHA-256 точного пути",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.02,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0"
+        }
+      }
+    },
+    {
+      "id": "SRC-PATH",
+      "title": "Точный путь: blob, размер, git-хеш, SHA-256",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.02,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "blob": "f6c75f488b1d9babdbef216b23c870f1a08f91c1",
+          "bytes": 2282737,
+          "sha256": "ddf5f1ff656635374fa10138269ffc0042ee445917be721e384c83d4fb4b13be"
+        }
+      }
+    },
+    {
+      "id": "SRC-CASE",
+      "title": "Коллизии регистра в дереве (Index.html / index.html)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "обнаружены: Index.html/index.html",
+      "planned": false,
+      "details": {
+        "collisions": [
+          [
+            "Index.html",
+            "index.html"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "SRC-HISTORY",
+      "title": "Непрерывность истории от прошлого отчёта (ancestry)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.03,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "линейно: 4 коммит(ов) с прошлого отчёта",
+      "planned": false
+    },
+    {
+      "id": "SRC-INVENTORY",
+      "title": "Inventory: страницы, модальные окна, элементы, функции (AST), таблицы БД",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.74,
+      "command": "docker run --network none --read-only … node legacy_inventory.mjs",
+      "exit_code": null,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/source-inventory.log"
+      ],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "counts": {
+            "pages": 23,
+            "modals": 67,
+            "controls": 2225,
+            "html_tables": 76,
+            "scripts": 5,
+            "scripts_failed": 0,
+            "function_declarations": 1156,
+            "function_declarations_regex": 1158,
+            "functions_all": 1181,
+            "db_tables": 42,
+            "db_calls": 247,
+            "db_calls_dynamic": 2,
+            "storage_calls": 8
+          }
+        }
+      }
+    },
+    {
+      "id": "SRC-SYNTAX",
+      "title": "Синтаксис всех inline-скриптов (acorn)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "5 скриптов разобраны",
+      "planned": false,
+      "details": {
+        "failed_scripts": []
+      }
+    },
+    {
+      "id": "SRC-DIFF",
+      "title": "Структурный diff и карта влияния на модули",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.06,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "структурный diff построен",
+      "planned": false
+    },
+    {
+      "id": "SRC-WATCHED",
+      "title": "Изменения других HTML (не эталон)",
+      "required": false,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "Index.html, indexx.html, indrx.html",
+      "planned": false
+    },
+    {
+      "id": "TGT-REF",
+      "title": "Фиксация целевого коммита и чистый worktree",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 1.58,
+      "command": "",
+      "exit_code": null,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/target-worktree.log"
+      ],
+      "scope": "",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "head": "f1f12bfbbe768730607c921905d6004cb065ac46",
+          "worktree": ".local-audit/target/f1f12bfbbe76"
+        }
+      }
+    },
+    {
+      "id": "TGT-DEPS",
+      "title": "Установка зависимостей из composer.lock и package-lock.json",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 12.39,
+      "command": "scripts/check.sh deps",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/target-deps.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-PINT",
+      "title": "Стиль PHP (pint --test)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 2.66,
+      "command": "scripts/check.sh pint",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/target-pint.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-TYPES",
+      "title": "Типы TypeScript/Vue (vue-tsc)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 2.29,
+      "command": "scripts/check.sh types",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/target-types.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-BUILD",
+      "title": "Production-сборка (vite build)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 1.24,
+      "command": "scripts/check.sh build",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/target-build.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-TESTS",
+      "title": "Backend-тесты на изолированной PostgreSQL",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 12.48,
+      "command": "scripts/check.sh tests",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/target-tests.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "tests": {
+          "tests": 175,
+          "passed": 175,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "id": "TGT-MIGRATE",
+      "title": "Миграции и синтетический seed на чистой PostgreSQL",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 3.15,
+      "command": "scripts/check.sh migrate",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/target-migrate.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-DB",
+      "title": "Подключение именно к PostgreSQL (dev и test)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 2.85,
+      "command": "scripts/check.sh dbcheck",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/target-dbcheck.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-HTTP",
+      "title": "HTTP smoke: /up и /login через nginx",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 6.64,
+      "command": "scripts/check.sh http",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261014T154825Z-baaa/logs/target-http.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TASKS-READ",
+      "title": "Чтение Google Sheets-трекера",
+      "required": false,
+      "stage": "tasks",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "GET sheets.googleapis.com/v4/spreadsheets/<id> (API key)",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "вкладки: Список задач (211 строк), Что нужно от заказчика (36 строк)",
+      "planned": false,
+      "details": {
+        "tabs": [
+          {
+            "title": "Список задач",
+            "rows": 211
+          },
+          {
+            "title": "Что нужно от заказчика",
+            "rows": 36
+          }
+        ]
+      }
+    },
+    {
+      "id": "TASKS-WRITE",
+      "title": "Запись статусов в Google Sheets с read-back",
+      "required": false,
+      "stage": "tasks",
+      "status": "BLOCKED",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "нет service account с доступом «Редактор» (Sheets API не принимает запись по API-ключу)",
+      "planned": false
+    },
+    {
+      "id": "TGT-PHPSTAN",
+      "title": "Статанализ PHP (PHPStan/Larastan)",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-LINT",
+      "title": "Frontend lint",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-VITEST",
+      "title": "Frontend unit-тесты (Vitest)",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-E2E",
+      "title": "Сквозные сценарии Playwright",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-VISUAL",
+      "title": "Визуальное сравнение с эталоном legacy",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-BACKUP",
+      "title": "Backup → restore-check в отдельную БД",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "HAR-COVERAGE",
+      "title": "Набор проверок и тестов не сократился без review",
+      "required": true,
+      "stage": "harness",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "проверок 25, тестов 175",
+      "planned": false
+    },
+    {
+      "id": "HAR-JOURNAL",
+      "title": "DAILY-CHANGELOG сохраняет прежние записи",
+      "required": true,
+      "stage": "harness",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "записей 19",
+      "planned": false
+    },
+    {
+      "id": "HAR-SECRETS",
+      "title": "Секреты и маркеры отсутствуют в MD, JSON и логах",
+      "required": true,
+      "stage": "harness",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "логи проверены",
+      "planned": false
+    },
+    {
+      "id": "AI-REVIEW",
+      "title": "Разбор изменений Claude (дополнение, не заменяет проверки)",
+      "required": false,
+      "stage": "ai",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "structured diff, impact map, check results, open findings",
+      "reason": "Нет ключа Anthropic API и согласованного бюджета для автоматического запуска",
+      "planned": false
+    }
+  ],
+  "summary": {
+    "PASS": 23,
+    "FAIL": 0,
+    "BLOCKED": 1,
+    "NOT_RUN": 7,
+    "NOT_APPLICABLE": 0
+  },
+  "execution_status": "PARTIAL",
+  "product_status": "PASS",
+  "source_status": "CHANGED",
+  "findings": {
+    "new": [],
+    "repeated": [],
+    "closed": [],
+    "needs_review": [],
+    "open_total": 0,
+    "items": []
+  },
+  "task_sync_status": {
+    "read": "PASS",
+    "write": "BLOCKED",
+    "tabs": [
+      {
+        "title": "Список задач",
+        "rows": 211
+      },
+      {
+        "title": "Что нужно от заказчика",
+        "rows": 36
+      }
+    ],
+    "pending_events": 0,
+    "delivered": 0,
+    "conflicts": 0
+  },
+  "ai_review": {
+    "status": "NOT_RUN",
+    "reason": "Нет ключа Anthropic API и согласованного бюджета для автоматического запуска"
+  },
+  "previous_attempt": null,
+  "missed_days": [],
+  "not_checked": [
+    "TASKS-WRITE — Запись статусов в Google Sheets с read-back: нет service account с доступом «Редактор» (Sheets API не принимает запись по API-ключу)",
+    "TGT-PHPSTAN — Статанализ PHP (PHPStan/Larastan): запланирована, ещё не реализована",
+    "TGT-LINT — Frontend lint: запланирована, ещё не реализована",
+    "TGT-VITEST — Frontend unit-тесты (Vitest): запланирована, ещё не реализована",
+    "TGT-E2E — Сквозные сценарии Playwright: запланирована, ещё не реализована",
+    "TGT-VISUAL — Визуальное сравнение с эталоном legacy: запланирована, ещё не реализована",
+    "TGT-BACKUP — Backup → restore-check в отдельную БД: запланирована, ещё не реализована",
+    "AI-REVIEW — Разбор изменений Claude (дополнение, не заменяет проверки): Нет ключа Anthropic API и согласованного бюджета для автоматического запуска",
+    "Модули ERP M01–M23 ещё не перенесены: бизнес-сценарии, права и инварианты DATA-01 не проверяются.",
+    "Характеризационные пробы legacy (35 исторических наблюдений) в ежедневный набор пока не включены.",
+    "Карта требований docs/coverage/requirements.csv не создана: изменения legacy не связаны с требованиями."
+  ],
+  "exit_code": 0,
+  "publication": {
+    "status": "PUBLISHED"
+  },
+  "actions": [
+    "Ручной разбор 91 изменений legacy без привязки к требованиям (UNMAPPED_CHANGE); карта требований — задача ERP-003.",
+    "Google Sheets: запись недоступна — нужен service account с доступом «Редактор» (вопрос заказчику №1).",
+    "AI-разбор не выполнен: Нет ключа Anthropic API и согласованного бюджета для автоматического запуска."
+  ]
+}

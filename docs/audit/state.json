@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T032832Z-766b",
-    "started_at": "2026-10-14T03:28:32Z",
+    "run_id": "20261014T154825Z-baaa",
+    "started_at": "2026-10-14T15:48:25Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T03:29:26Z",
+    "finished_at": "2026-10-14T15:49:17Z",
     "exit_code": 0
   },
   "last_observed": {
-    "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "51fa16b8245df2fde8acdc12885ae6e17aa317e4",
-    "at": "2026-10-14T03:28:32Z"
+    "source_ref": "9f49a2440e97fef8ca30177507cca1caa0f0eadb",
+    "target_ref": "f1f12bfbbe768730607c921905d6004cb065ac46",
+    "at": "2026-10-14T15:48:25Z"
   },
   "last_reported": {
-    "run_id": "20261014T032832Z-766b",
-    "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "source_blob": "f07bf1869808df9f7f21482d364ee509ac3dbfb0",
-    "target_ref": "51fa16b8245df2fde8acdc12885ae6e17aa317e4",
-    "logical_key": "d54d8999b41029b6",
+    "run_id": "20261014T154825Z-baaa",
+    "source_ref": "9f49a2440e97fef8ca30177507cca1caa0f0eadb",
+    "source_blob": "f6c75f488b1d9babdbef216b23c870f1a08f91c1",
+    "target_ref": "f1f12bfbbe768730607c921905d6004cb065ac46",
+    "logical_key": "baee7033951a2098",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T03:29:26Z",
-    "report": "daily/2026-10-14/20261014T032832Z-766b.md",
-    "artifact_sha256": "a75b948c15bd7a5600c673649692dd860c9b2b1c2626bef601eb5fdb3986bcf1",
+    "completed_at": "2026-10-14T15:49:17Z",
+    "report": "daily/2026-10-14/20261014T154825Z-baaa.md",
+    "artifact_sha256": "7379e9dd79e1f0bf86319496ec13f223a359688ecbcbee020d12758037b5eca3",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -105,6 +105,16 @@
       "Tests\\Feature\\Catalog\\ProductTest::test_page_lists_active_products_with_rights",
       "Tests\\Feature\\Catalog\\ProductTest::test_roles_without_catalog_cannot_read_or_write",
       "Tests\\Feature\\Catalog\\ProductTest::test_validation_messages_repeat_legacy_texts",
+      "Tests\\Feature\\Crm\\LeadTest::test_deleted_lead_leaves_the_lists",
+      "Tests\\Feature\\Crm\\LeadTest::test_funnel_form_keeps_segment_tags_and_the_next_action",
+      "Tests\\Feature\\Crm\\LeadTest::test_lead_becomes_a_client_of_its_channel_and_is_won",
+      "Tests\\Feature\\Crm\\LeadTest::test_leads_follow_the_channel_scope",
+      "Tests\\Feature\\Crm\\LeadTest::test_leads_form_creates_and_edits_a_lead",
+      "Tests\\Feature\\Crm\\LeadTest::test_page_lists_leads_newest_first_with_the_legacy_dictionaries",
+      "Tests\\Feature\\Crm\\LeadTest::test_roles_without_crm_cannot_reach_leads",
+      "Tests\\Feature\\Crm\\LeadTest::test_salons_manager_cannot_create_a_lead_without_a_salon",
+      "Tests\\Feature\\Crm\\LeadTest::test_second_editor_gets_a_conflict",
+      "Tests\\Feature\\Crm\\LeadTest::test_status_moves_and_lost_reason_is_added_to_the_comment",
       "Tests\\Feature\\Customers\\CustomerTest::test_channel_bound_account_sees_and_changes_only_its_channel",
       "Tests\\Feature\\Customers\\CustomerTest::test_created_customer_gets_office_channel_author_and_audit",
       "Tests\\Feature\\Customers\\CustomerTest::test_head_of_salons_must_add_a_customer_from_a_salon",
@@ -165,6 +175,9 @@
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_only_migrated_modules_can_be_imported",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_real_directory_replaces_the_synthetic_one",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_seeder_keeps_the_imported_directory",
+      "Tests\\Feature\\Legacy\\LeadImportTest::test_import_is_idempotent_and_takes_changes",
+      "Tests\\Feature\\Legacy\\LeadImportTest::test_imports_every_row_with_legacy_defaults_and_dates",
+      "Tests\\Feature\\Legacy\\LeadImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_client_reads_pages_in_natural_or_requested_order_only",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_client_refuses_injected_table_names",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_client_rejects_foreign_urls_and_odd_table_names",
@@ -215,16 +228,16 @@
     ]
   },
   "last_verified": {
-    "source_ref": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
-    "target_ref": "51fa16b8245df2fde8acdc12885ae6e17aa317e4",
+    "source_ref": "9f49a2440e97fef8ca30177507cca1caa0f0eadb",
+    "target_ref": "f1f12bfbbe768730607c921905d6004cb065ac46",
     "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-14T03:29:26Z",
-    "run_id": "20261014T032832Z-766b"
+    "completed_at": "2026-10-14T15:49:17Z",
+    "run_id": "20261014T154825Z-baaa"
   },
   "changelog": {
-    "entries": 19,
-    "last_header": "## 2026-10-14 · 20261014T032832Z-766b",
-    "sha256": "26faf7e2cd88256145315f15cf5a9988dc6e61a0e237fbc1d90fa9a11a210f1c"
+    "entries": 20,
+    "last_header": "## 2026-10-14 · 20261014T154825Z-baaa",
+    "sha256": "b7b8642a6d5e06caf00e37065d78d1b58a8c1326c966e5e2aaf75b47317e4afb"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
