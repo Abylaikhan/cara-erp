@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T161408Z-a8ce",
-    "started_at": "2026-10-14T16:14:08Z",
+    "run_id": "20261014T162834Z-1664",
+    "started_at": "2026-10-14T16:28:34Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T16:15:10Z",
+    "finished_at": "2026-10-14T16:29:36Z",
     "exit_code": 0
   },
   "last_observed": {
-    "source_ref": "637c11292fc668ef4c2233a1ca22f3b992b19809",
-    "target_ref": "225e1f2535e7d5df340529430cfcdcf51f2f2273",
-    "at": "2026-10-14T16:14:08Z"
+    "source_ref": "d35c8511f512b3c13ec1fbf128e19198161b2fd3",
+    "target_ref": "ac81dfbae6ee398177943327723046bfb4167196",
+    "at": "2026-10-14T16:28:34Z"
   },
   "last_reported": {
-    "run_id": "20261014T161408Z-a8ce",
-    "source_ref": "637c11292fc668ef4c2233a1ca22f3b992b19809",
-    "source_blob": "3f828d719670b0a93a6b2f704758e1caafe88df2",
-    "target_ref": "225e1f2535e7d5df340529430cfcdcf51f2f2273",
-    "logical_key": "3fecb04df8f0802d",
+    "run_id": "20261014T162834Z-1664",
+    "source_ref": "d35c8511f512b3c13ec1fbf128e19198161b2fd3",
+    "source_blob": "0b5a45728ff2c7f928cc38e529466bf7bcc9a0dd",
+    "target_ref": "ac81dfbae6ee398177943327723046bfb4167196",
+    "logical_key": "4685874b3d2e7b7d",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T16:15:10Z",
-    "report": "daily/2026-10-14/20261014T161408Z-a8ce.md",
-    "artifact_sha256": "b9d2291126304a68d5ff3b0490f8534c3a9165c9c93d4eb7598ed3bfbdc3e2fc",
+    "completed_at": "2026-10-14T16:29:36Z",
+    "report": "daily/2026-10-14/20261014T162834Z-1664.md",
+    "artifact_sha256": "b93947c7962cf32452e8397d18563e69747b661d55cf79e8170823e13cacec2e",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -194,6 +194,8 @@
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_natural_order_is_read_with_get_and_must_match_the_snapshot",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_rows_changing_during_read_are_reread_then_flagged",
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_snapshot_reads_everything_with_get_only",
+      "Tests\\Feature\\Legacy\\MaterialRequestImportTest::test_imports_requests_with_exact_quantities_and_times",
+      "Tests\\Feature\\Legacy\\MaterialRequestImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
       "Tests\\Feature\\Legacy\\ProductImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\ProductImportTest::test_imports_products_keeping_legacy_dates_authors_and_flags",
       "Tests\\Feature\\Legacy\\ProductImportTest::test_invalid_rows_change_nothing",
@@ -205,6 +207,10 @@
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_imports_materials_with_exact_quantities_and_legacy_prices",
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_legacy_rounding_matches_javascript",
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_material_import_is_idempotent",
+      "Tests\\Feature\\Purchases\\MaterialRequestTest::test_manual_request_is_created_with_its_author",
+      "Tests\\Feature\\Purchases\\MaterialRequestTest::test_plan_fact_adds_open_requests_and_subtracts_stock",
+      "Tests\\Feature\\Purchases\\MaterialRequestTest::test_roles_without_the_page_cannot_reach_requests",
+      "Tests\\Feature\\Purchases\\MaterialRequestTest::test_status_moves_one_step_at_a_time_and_stock_is_not_touched",
       "Tests\\Feature\\Suppliers\\SupplierImportMergeTest::test_csv_is_planned_confirmed_and_applied_like_legacy",
       "Tests\\Feature\\Suppliers\\SupplierImportMergeTest::test_csv_problems_are_reported_and_change_nothing",
       "Tests\\Feature\\Suppliers\\SupplierImportMergeTest::test_merge_keeps_history_fills_fields_and_moves_references",
@@ -236,16 +242,16 @@
     ]
   },
   "last_verified": {
-    "source_ref": "637c11292fc668ef4c2233a1ca22f3b992b19809",
-    "target_ref": "225e1f2535e7d5df340529430cfcdcf51f2f2273",
+    "source_ref": "d35c8511f512b3c13ec1fbf128e19198161b2fd3",
+    "target_ref": "ac81dfbae6ee398177943327723046bfb4167196",
     "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-14T16:15:10Z",
-    "run_id": "20261014T161408Z-a8ce"
+    "completed_at": "2026-10-14T16:29:36Z",
+    "run_id": "20261014T162834Z-1664"
   },
   "changelog": {
-    "entries": 21,
-    "last_header": "## 2026-10-14 · 20261014T161408Z-a8ce",
-    "sha256": "90a2bceeb707f22d4cd9fbbd562a3b1ebcf0cf37b87261745672ae726be8bb5f"
+    "entries": 22,
+    "last_header": "## 2026-10-14 · 20261014T162834Z-1664",
+    "sha256": "ed54d128e3d069e897c65dda3bcc88d29d1d7743cd81c3d79fe16eeea345ba11"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
