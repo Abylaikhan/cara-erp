@@ -1,15 +1,22 @@
 <script setup lang="ts">
 // M12 «Деньги», part 1 — legacy page-money (L6002–6320): period, KPI (renderMoneyKPIs), tabs «Касса», «Расчётные счета» and
-// «Все операции» (CashTab, BankTab, AllTab). View only: new operations, editing, transfers and statement import come with
-// ERP-031…034 (decisions D-03, D-11); the salon worksheet, bank reconciliation, advances and the payment calendar are next.
+// «Авансовые отчёты», «Все операции» (CashTab, BankTab, AdvancesTab, AllTab). View only: new operations, editing, transfers and statement import come with
+// ERP-031…035 (decisions D-03, D-11); the salon worksheet, bank reconciliation and the payment calendar are next.
 import { computed, ref } from 'vue';
+import AdvancesTab from '@/components/money/AdvancesTab.vue';
 import AllTab from '@/components/money/AllTab.vue';
 import BankTab from '@/components/money/BankTab.vue';
 import CashTab from '@/components/money/CashTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import { accountStats, fmt, hasPeriod, LATER, period, setMoneyPeriod, type Categories, type MoneyAccount, type MoneyTx } from '@/lib/money';
 
-const props = defineProps<{ accounts: MoneyAccount[]; transactions: MoneyTx[]; advanceDebt: number; categories: Categories }>();
+const props = defineProps<{
+    accounts: MoneyAccount[];
+    transactions: MoneyTx[];
+    advanceDebt: number;
+    categories: Categories;
+    advances?: InstanceType<typeof AdvancesTab>['$props']['advances'];
+}>();
 
 type Tab = 'cash' | 'bank' | 'salonwb' | 'bankrecon' | 'advances' | 'all' | 'calendar';
 const tab = ref<Tab>('cash');
@@ -25,7 +32,6 @@ const tabs: { id: Tab; label: string }[] = [
 const LATER_TABS: Partial<Record<Tab, string>> = {
     salonwb: 'Рабочий лист салонов переносится следующей частью раздела «Деньги» (ERP-051).',
     bankrecon: 'Сверка с банком появится вместе с импортом банковских выписок (ERP-034).',
-    advances: 'Авансовые отчёты переносятся следующей частью раздела «Деньги» (ERP-035).',
     calendar: 'Платёжный календарь переносится следующей частью раздела «Деньги».',
 };
 const visited = ref(new Set<Tab>(['cash']));
@@ -133,6 +139,9 @@ const add = () => window.alert(LATER.add);
             </div>
             <div v-if="visited.has('bank')" id="money-tab-bank" :style="{ display: tab === 'bank' ? '' : 'none' }">
                 <BankTab :accounts="props.accounts" :txs="props.transactions" :categories="props.categories" />
+            </div>
+            <div v-if="visited.has('advances')" id="money-tab-advances" :style="{ display: tab === 'advances' ? '' : 'none' }">
+                <AdvancesTab :advances="props.advances" :active="tab === 'advances'" />
             </div>
             <div v-if="visited.has('all')" id="money-tab-all" :style="{ display: tab === 'all' ? '' : 'none' }">
                 <AllTab :accounts="props.accounts" :txs="props.transactions" :categories="props.categories" />

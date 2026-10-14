@@ -6,6 +6,7 @@ use App\Models\AdvanceReport;
 use App\Models\MoneyAccount;
 use App\Support\Erp;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,6 +20,37 @@ use Inertia\Response;
  */
 class MoneyController extends Controller
 {
+    /**
+     * Legacy renderAdvances: newest first (in the order legacy lists them); «Потрачено» is the sum of the report lines when
+     * there are any (advTotalSpent), the issuing operation is shown by its date and amount.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function advances()
+    {
+        $tx = DB::table('money_transactions')->whereIn('id', AdvanceReport::query()->whereNotNull('transaction_id')->pluck('transaction_id'))->get(['id', 'tx_date', 'amount'])->keyBy('id');
+
+        return AdvanceReport::query()->orderByDesc('report_date')->orderBy('id')->get()->map(function (AdvanceReport $a) use ($tx) {
+            $fromLines = collect($a->lines)->reduce(fn ($s, $l) => bcadd($s, is_numeric($l['amount'] ?? null) ? (string) $l['amount'] : '0', 12), '0');
+            $spent = bccomp($fromLines, '0', 12) > 0 ? $fromLines : $a->spent;
+            $t = $a->transaction_id !== null ? $tx->get($a->transaction_id) : null;
+
+            return [
+                'id' => $a->id,
+                'doc_num' => $a->doc_num,
+                'employee' => $a->employee_name,
+                'date' => $a->report_date->format('Y-m-d'),
+                'purpose' => $a->purpose,
+                'issued' => (float) $a->issued,
+                'spent' => (float) $spent,
+                'returned' => (float) $a->returned,
+                'status' => $a->status,
+                'issue_doc' => $t ? ['date' => $t->tx_date, 'amount' => (float) $t->amount] : null,
+                'esf' => collect($a->lines)->filter(fn ($l) => ! empty($l['esfInvoiceId']))->count(),
+            ];
+        })->values();
+    }
+
     public function index(Request $request): Response
     {
         abort_unless(Erp::canAccess($request->user(), 'money'), 403);
@@ -57,6 +89,8 @@ class MoneyController extends Controller
             // Legacy «Долг по авансам»: issued minus spent of the reports that are not closed.
             'advanceDebt' => (float) AdvanceReport::query()->where('status', '!=', 'closed')->get()
                 ->reduce(fn ($s, AdvanceReport $a) => bcadd($s, bccomp($a->issued, $a->spent, 12) > 0 ? bcsub($a->issued, $a->spent, 12) : '0', 12), '0'),
+            // Tab «Авансовые отчёты» (legacy loadAdvancesFromDB/renderAdvances): loaded when the tab is opened.
+            'advances' => Inertia::optional(fn () => $this->advances()),
             'categories' => [
                 'income' => config('erp.money_income_categories'),
                 'expense' => config('erp.money_expense_categories'),

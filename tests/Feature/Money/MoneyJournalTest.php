@@ -48,4 +48,25 @@ class MoneyJournalTest extends TestCase
         $this->actingAs(User::factory()->role('manager')->create())->get('/money')->assertForbidden();
         $this->actingAs(User::factory()->role('director')->create())->get('/money')->assertOk();
     }
+
+    public function test_advances_load_with_their_tab_spent_by_the_lines(): void
+    {
+        $acc = DB::table('money_accounts')->insertGetId(['name' => 'Касса Демо', 'type' => 'cash', 'currency' => 'KZT', 'opening_balance' => 0, 'sort_order' => 0]);
+        $tx = DB::table('money_transactions')->insertGetId(['account_id' => $acc, 'tx_date' => '2026-10-01', 'flow' => 'expense', 'category' => 'advance_out', 'amount' => '5000']);
+        DB::table('advance_reports')->insert([
+            ['doc_num' => 'АО-1', 'employee_name' => 'Демо Первый', 'report_date' => '2026-10-01', 'issued' => '5000', 'spent' => '100', 'returned' => '0', 'status' => 'reported',
+                'transaction_id' => $tx, 'lines' => json_encode([['amount' => 1200.5, 'esfInvoiceId' => 7], ['amount' => 300]])],
+            ['doc_num' => 'АО-2', 'employee_name' => 'Демо Второй', 'report_date' => '2026-10-05', 'issued' => '1000', 'spent' => '400', 'returned' => '0', 'status' => 'open',
+                'transaction_id' => null, 'lines' => '[]'],
+        ]);
+
+        $this->actingAs(User::factory()->role('director')->create())->get('/money')->assertInertia(fn (Assert $page) => $page
+            ->missing('advances')
+            ->reloadOnly('advances', fn (Assert $reload) => $reload
+                ->where('advances.0.doc_num', 'АО-2')
+                ->where('advances.0.spent', 400)
+                ->where('advances.1.spent', 1500.5)
+                ->where('advances.1.esf', 1)
+                ->where('advances.1.issue_doc', ['date' => '2026-10-01', 'amount' => 5000])));
+    }
 }

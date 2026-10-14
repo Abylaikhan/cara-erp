@@ -11,10 +11,12 @@ use RuntimeException;
  * Natural (insertion) order of a legacy table, read with GET only. Some legacy pages show rows unsorted — e.g. the lines of
  * an ESF in the order they were inserted from the XML — and such tables have no column to sort by, so the snapshot
  * (read in key order) cannot keep it. The order is stored next to the loaded snapshot; the set of rows must be the same.
+ * With --order the rows are read in the order a legacy page asks for (e.g. advance reports `order=date.desc`): rows that
+ * tie on that column keep the order the legacy database returns them in.
  */
 class LegacyNaturalOrder extends Command
 {
-    protected $signature = 'legacy:natural-order {table : Legacy table, e.g. incoming_invoice_items} {--snapshot= : Snapshot id (default: the latest loaded)}';
+    protected $signature = 'legacy:natural-order {table : Legacy table, e.g. incoming_invoice_items} {--snapshot= : Snapshot id (default: the latest loaded)} {--order= : Order a legacy page asks for, e.g. date.desc}';
 
     protected $description = 'Read the natural row order of a legacy table (GET only) and store it next to the loaded snapshot';
 
@@ -29,10 +31,19 @@ class LegacyNaturalOrder extends Command
         }
         $cfg = config('legacy');
         $client = new SupabaseReadOnlyClient((string) $cfg['supabase']['url'], (string) $cfg['supabase']['key'], (int) $cfg['supabase']['timeout']);
-        $read = function () use ($client, $table, $cfg): array {
+        [$column, $direction] = [null, 'asc'];
+        if ($this->option('order')) {
+            if (! preg_match('/^([a-z_][a-z0-9_]*)\.(asc|desc)$/', (string) $this->option('order'), $m)) {
+                $this->error('--order must look like column.asc or column.desc');
+
+                return self::INVALID;
+            }
+            [, $column, $direction] = $m;
+        }
+        $read = function () use ($client, $table, $cfg, $column, $direction): array {
             $ids = [];
             for ($from = 0; ; $from += (int) $cfg['page_size']) {
-                $page = $client->page($table, null, $from, $from + (int) $cfg['page_size'] - 1);
+                $page = $client->page($table, $column, $from, $from + (int) $cfg['page_size'] - 1, $direction);
                 foreach ($page as $row) {
                     $ids[] = (string) $row['id'];
                 }

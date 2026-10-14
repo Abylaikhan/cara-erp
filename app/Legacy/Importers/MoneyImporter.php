@@ -30,7 +30,13 @@ class MoneyImporter
             ORDER BY data->>'date' DESC, data->>'id' COLLATE "C" ASC
             SQL, [$snapshotId]))->map(fn ($r) => json_decode($r->data, true, flags: JSON_THROW_ON_ERROR) + ['amount_text' => $r->amount_text, 'fx_text' => $r->fx_text]);
         $payments = $this->rows($snapshotId, 'order_payments', "data->>'amount' AS amount_text");
-        $advances = $this->rows($snapshotId, 'advance_reports', "data->>'issued' AS issued_text, data->>'spent' AS spent_text, data->>'returned' AS returned_text, data->'lines' AS lines_json");
+        // Advance reports in the order the legacy page lists them (order=date.desc, `legacy:natural-order advance_reports
+        // --order=date.desc`): rows of one date keep that order through their ids.
+        // Without that read the snapshot order is kept.
+        $ordered = DB::selectOne("SELECT to_regclass('legacy.natural_order') IS NOT NULL AS ok")->ok;
+        $advances = $this->rows($snapshotId, 'advance_reports', "data->>'issued' AS issued_text, data->>'spent' AS spent_text, data->>'returned' AS returned_text, data->'lines' AS lines_json, "
+            .($ordered ? "(SELECT n.position FROM legacy.natural_order n WHERE n.snapshot_id = legacy.rows.snapshot_id AND n.table_name = 'advance_reports' AND n.row_id = legacy.rows.data->>'id')" : 'NULL').' AS position')
+            ->sortBy(fn ($a) => $a['position'] ?? PHP_INT_MAX)->values();
         if ($tx->isEmpty()) {
             throw new RuntimeException("Snapshot {$snapshotId} has no money_tx rows");
         }
@@ -59,7 +65,8 @@ class MoneyImporter
                 'status' => $a['status'] ?: 'open',
                 'account_id' => $accountIds[(string) $a['account_id']] ?? null,
                 'transaction_id' => isset($a['tx_id']) ? ($txIds[(string) $a['tx_id']] ?? null) : null,
-                'lines' => $a['lines_json'] ?? '[]',
+                // Legacy reads a missing list as an empty one.
+                'lines' => in_array($a['lines_json'] ?? null, [null, 'null'], true) ? '[]' : $a['lines_json'],
                 'created_at' => Carbon::parse($a['created_at']), 'updated_at' => Carbon::parse($a['created_at']),
             ], $snapshotId, $stats);
             $this->verify($tx->all(), $accountIds, $categories->all());

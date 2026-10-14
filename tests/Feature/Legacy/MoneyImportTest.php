@@ -53,7 +53,9 @@ class MoneyImportTest extends TestCase
         ]);
         $this->rows('order_payments', [['id' => 1, 'tx_id' => 'b-tx', 'order_num' => 'МО-2', 'amount' => 500, 'created_at' => '2026-10-01T05:00:00+00:00']]);
         $this->rows('advance_reports', [['id' => 'adv-1', 'doc_num' => 'АО-1', 'emp_name' => 'Демо Сотрудник', 'date' => '2026-10-01', 'purpose' => 'Демо', 'issued' => 1000.1234567, 'spent' => 400,
-            'returned' => 0, 'status' => 'open', 'account_id' => 'acc-cash', 'tx_ids' => null, 'tx_id' => 'a-tx', 'lines' => [['amount' => 400, 'desc' => 'Демо']], 'created_at' => '2026-10-01T05:00:00+00:00']]);
+            'returned' => 0, 'status' => 'open', 'account_id' => 'acc-cash', 'tx_ids' => null, 'tx_id' => 'a-tx', 'lines' => [['amount' => 400, 'desc' => 'Демо']], 'created_at' => '2026-10-01T05:00:00+00:00'],
+            ['id' => 'adv-2', 'doc_num' => 'АО-2', 'emp_name' => 'Демо Второй', 'date' => '2026-10-02', 'purpose' => null, 'issued' => 10, 'spent' => 0, 'returned' => 0,
+                'status' => 'closed', 'account_id' => 'acc-cash', 'tx_ids' => null, 'tx_id' => null, 'lines' => null, 'created_at' => '2026-10-02T05:00:00+00:00']]);
     }
 
     public function test_imports_accounts_operations_payments_and_advances(): void
@@ -61,7 +63,7 @@ class MoneyImportTest extends TestCase
         $this->legacyData();
         $stats = (new MoneyImporter(self::HTML))->import(self::SNAPSHOT);
 
-        $this->assertSame([2, 3, 1, 1, 7], [$stats['accounts'], $stats['operations'], $stats['order_payments'], $stats['advance_reports'], $stats['created']]);
+        $this->assertSame([2, 3, 1, 2, 8], [$stats['accounts'], $stats['operations'], $stats['order_payments'], $stats['advance_reports'], $stats['created']]);
         $bank = DB::table('money_accounts')->where('name', 'Банк Демо')->first();
         $this->assertSame(['АО «Демо»', 'DEMOKZKA', '1500.50', 'bank'], [$bank->bank, $bank->bik, $bank->opening_balance, $bank->type]);
         $this->assertStringNotContainsString('KZ000DEMO', json_encode(DB::table('money_accounts')->get()), 'the account number is not stored');
@@ -73,9 +75,10 @@ class MoneyImportTest extends TestCase
         $this->assertNotNull($c->expense_category_id);
         $this->assertSame('2026-10-01 05:00:00.123456+00', DB::table('money_transactions')->where('category', 'general')->value('created_at'));
         $this->assertSame('1000.123456700000', DB::table('advance_reports')->value('issued'));
+        $this->assertSame('[]', DB::table('advance_reports')->where('doc_num', 'АО-2')->value('lines'), 'a missing list is an empty one');
 
         $again = (new MoneyImporter(self::HTML))->import(self::SNAPSHOT);
-        $this->assertSame([0, 0, 7], [$again['created'], $again['updated'], $again['unchanged']]);
+        $this->assertSame([0, 0, 8], [$again['created'], $again['updated'], $again['unchanged']]);
     }
 
     public function test_rejects_the_whole_set_when_a_row_is_wrong(): void

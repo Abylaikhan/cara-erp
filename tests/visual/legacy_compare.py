@@ -223,9 +223,15 @@ with sync_playwright() as p:
         page.goto(TARGET + '/money', wait_until='networkidle'); page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'target-money-{theme}.png'))
         money = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
-        for i, shot in ((1, 'bank'), (5, 'all')):
+        for i, shot in ((1, 'bank'), (5, 'all'), (4, 'advances')):
             page.locator('#page-money > .tabs .tab').nth(i).click(); page.wait_for_timeout(1500)
             page.screenshot(path=str(OUT / f'target-money-{shot}-{theme}.png'))
+        advances = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/money', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Money',
+                'X-Inertia-Partial-Data': 'advances', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.advances;
+        }""")
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -551,8 +557,20 @@ with sync_playwright() as p:
         for idx, tab in ((1, 'bank'), (5, 'all')):
             page.evaluate(f"showMoneyTab('{tab}', document.querySelectorAll('#page-money > .tabs .tab')[{idx}])"); page.wait_for_timeout(1500)
             page.screenshot(path=str(OUT / f'legacy-money-{tab}-{theme}.png'))
+        # Advances: the same reports, with the issuing operation the target links (added without an account, so the totals
+        # stay) and «Потрачено» as its lines give it.
+        page.evaluate("""(rows) => {
+            moneyTx = moneyTx.concat(rows.filter(a => a.issue_doc).map(a => ({id: 'adv-tx-' + a.id, sbId: 'adv-tx-' + a.id, date: a.issue_doc.date, accountId: '', flow: 'expense', category: '', amount: a.issue_doc.amount, desc: '', counterparty: ''})));
+            advanceReports = rows.map(a => ({id: String(a.id), sbId: String(a.id), date: a.date, empName: a.employee, purpose: a.purpose || '', issued: a.issued, spent: a.spent,
+                returned: a.returned, status: a.status, accountId: '', txIds: [], txId: a.issue_doc ? 'adv-tx-' + a.id : '', docNum: a.doc_num || '', reportDate: '',
+                lines: Array.from({length: a.esf}, () => ({amount: 0, esfInvoiceId: 1}))}));
+            _advancesLoaded = true;
+            showMoneyTab('advances', document.querySelectorAll('#page-money > .tabs .tab')[4]);
+        }""", advances)
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'legacy-money-advances-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

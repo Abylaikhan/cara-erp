@@ -46,6 +46,7 @@ legacy-copy: ## Read-only copy of the legacy Supabase (GET only) → .local-audi
 	@docker compose run --rm app php artisan legacy:load
 	@docker compose run --rm app php artisan legacy:natural-order incoming_invoice_items
 	@docker compose run --rm app php artisan legacy:natural-order order_items
+	@docker compose run --rm app php artisan legacy:natural-order advance_reports --order=date.desc
 
 legacy-import: ## Move a legacy table into a migrated module, e.g. make legacy-import ENTITY=expense_categories
 	@docker compose run --rm app php artisan legacy:import $(ENTITY)
