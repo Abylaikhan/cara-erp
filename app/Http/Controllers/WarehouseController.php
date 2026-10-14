@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Warehouse\MaterialAliasRequest;
 use App\Http\Requests\Warehouse\MaterialCellRequest;
+use App\Http\Requests\Warehouse\NewMaterialRequest;
 use App\Models\Material;
 use App\Models\MaterialAlias;
 use App\Models\Supplier;
@@ -54,6 +55,14 @@ class WarehouseController extends Controller
                 ->get(['id', 'material_name', 'alias_name', 'category'])->values(),
             'suppliers' => Supplier::query()->active()->orderBy('name')->orderBy('id')->get(['id', 'name'])->values(),
         ]);
+    }
+
+    public function storeMaterial(NewMaterialRequest $request): RedirectResponse
+    {
+        Gate::authorize('create', Material::class);
+        $this->service->create($request->fields(), $request->user());
+
+        return back();
     }
 
     public function updateMaterial(MaterialCellRequest $request, int $material): RedirectResponse

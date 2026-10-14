@@ -5,6 +5,7 @@
 // until then documents, workshop stock and write-offs are empty, without legacy's built-in demo documents
 // (docs/adr/0008-warehouse.md).
 import { computed, reactive, ref } from 'vue';
+import AddMaterialModal from '@/components/warehouse/AddMaterialModal.vue';
 import AliasesTab from '@/components/warehouse/AliasesTab.vue';
 import InventoryTab from '@/components/warehouse/InventoryTab.vue';
 import StockTable, { type StockFilters } from '@/components/warehouse/StockTable.vue';
@@ -119,7 +120,7 @@ function filterWhByCat(cat: string): void {
 const docType = ref('all');
 const docWorkshop = ref('all');
 const later = () => window.alert(DOCUMENTS_LATER);
-const addMaterial = () => window.alert('Добавление материала появится в следующей части переноса раздела «Склад».');
+const addMaterialModal = ref<InstanceType<typeof AddMaterialModal> | null>(null);
 </script>
 
 <template>
@@ -134,7 +135,7 @@ const addMaterial = () => window.alert('Добавление материала 
                     <button class="btn btn-ghost btn-sm" @click="later">📥 Приход</button>
                     <button class="btn btn-ghost btn-sm" @click="later">↔️ Перемещение</button>
                     <button class="btn btn-ghost btn-sm" @click="later">📤 Списание</button>
-                    <button class="btn btn-primary btn-sm" @click="addMaterial">+ Материал</button>
+                    <button class="btn btn-primary btn-sm" @click="addMaterialModal?.openAddMaterialModal()">+ Материал</button>
                 </div>
             </div>
 
@@ -354,5 +355,7 @@ const addMaterial = () => window.alert('Добавление материала 
                 <AliasesTab :aliases="props.aliases" :materials="items" :suppliers="props.suppliers" />
             </div>
         </div>
+
+        <AddMaterialModal ref="addMaterialModal" :materials="items" />
     </ErpLayout>
 </template>

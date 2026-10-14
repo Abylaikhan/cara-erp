@@ -6,10 +6,15 @@ use App\Models\Material;
 use App\Models\User;
 use App\Support\Erp;
 
-/** Legacy warehouse functions (renderWarehouse, startEditCell, deleteWarehouseRow, saveAlias, deleteAlias) have no checks of their own. */
+/** Legacy warehouse functions (renderWarehouse, startEditCell, deleteWarehouseRow, saveNewMaterial, saveAlias, deleteAlias) have no checks of their own. */
 class MaterialPolicy
 {
     public function viewAny(User $user): bool
+    {
+        return Erp::canAccess($user, 'warehouse');
+    }
+
+    public function create(User $user): bool
     {
         return Erp::canAccess($user, 'warehouse');
     }

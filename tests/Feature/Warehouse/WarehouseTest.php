@@ -145,6 +145,36 @@ class WarehouseTest extends TestCase
         $this->assertDatabaseHas('audit_events', ['action' => 'material_alias.deleted', 'subject_id' => (string) $alias->id]);
     }
 
+    public function test_new_material_gets_its_warehouse_an_automatic_sku_and_no_stock(): void
+    {
+        $this->actingAs($this->storekeeper)->from('/warehouse');
+        $this->post('/warehouse/materials', ['name' => ' ЛДСП ', 'attrs' => ' 16мм Демо-дуб ', 'category' => 'ЛДСП/МДФ', 'unit' => 'листов', 'price' => '9100.5', 'min_qty' => '5', 'sku' => ''])
+            ->assertSessionHasNoErrors();
+
+        $m = Material::sole();
+        $this->assertSame(['ЛДСП 16мм Демо-дуб', 'ЛДСП/МДФ', 'wh_plates', 'листов', '9100.50', '5.000', '0.000', 'SKU-'.(9000 + $m->id), 'Демо Склад'],
+            [$m->name, $m->category, $m->warehouse_code, $m->unit, $m->price, $m->min_qty, $m->qty, $m->sku, $m->created_by_name]);
+        $this->assertDatabaseHas('audit_events', ['action' => 'material.created', 'subject_id' => (string) $m->id]);
+
+        $this->post('/warehouse/materials', ['name' => 'Без склада', 'category' => 'Новая категория', 'sku' => 'S-1'])->assertSessionHasNoErrors();
+        $this->assertSame([null, 'S-1', 'шт'], [Material::where('name', 'Без склада')->value('warehouse_code'), Material::where('name', 'Без склада')->value('sku'), Material::where('name', 'Без склада')->value('unit')]);
+    }
+
+    public function test_new_material_is_refused_like_legacy(): void
+    {
+        $this->material(['name' => 'ЛДСП Демо 16мм']);
+        $this->actingAs($this->storekeeper)->from('/warehouse');
+
+        $this->post('/warehouse/materials', ['name' => 'лдсп демо', 'attrs' => '16ММ', 'category' => 'ЛДСП/МДФ'])
+            ->assertSessionHasErrors(['name' => '⚠ Позиция «лдсп демо 16ММ» уже есть на складе (без SKU). Уточните характеристики.']);
+        $this->post('/warehouse/materials', ['name' => ' ', 'category' => 'ЛДСП/МДФ'])->assertSessionHasErrors(['name' => 'Введите или выберите наименование материала']);
+        $this->post('/warehouse/materials', ['name' => 'Новый', 'category' => ''])->assertSessionHasErrors(['category' => 'Выберите категорию']);
+        $this->post('/warehouse/materials', ['name' => 'Новый', 'category' => 'Прочее', 'qty' => '10'])->assertSessionHasErrors(['qty' => 'Начальный остаток вносится приходом на склад.']);
+        $this->post('/warehouse/materials', ['name' => 'Новый', 'category' => 'Прочее', 'price' => '-5'])->assertSessionHasErrors(['price' => 'Цена не может быть отрицательной']);
+        $this->assertSame(1, Material::count());
+        $this->actingAs(User::factory()->role('manager')->create())->post('/warehouse/materials', ['name' => 'Чужой', 'category' => 'Прочее'])->assertForbidden();
+    }
+
     public function test_merging_suppliers_moves_alias_suppliers(): void
     {
         $m = $this->material();

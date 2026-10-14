@@ -101,6 +101,10 @@ with sync_playwright() as p:
         for i, shot in ((1, 'categories'), (2, 'workshops'), (3, 'docs'), (4, 'remains'), (7, 'aliases')):
             page.locator('#page-warehouse .tab').nth(i).click(); page.wait_for_timeout(800 if shot == 'remains' else 300)
             page.screenshot(path=str(OUT / f'target-warehouse-{shot}-{theme}.png'))
+        page.locator('#page-warehouse button', has_text='+ Материал').click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-warehouse-add-{theme}.png'))
+        page.locator('#mat-category-grid button').first.click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-warehouse-add-step2-{theme}.png'))  # not compared: documented deviation (ADR-0002, item 27)
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -211,8 +215,12 @@ with sync_playwright() as p:
             idx = {'stocks': 1, 'workshops': 2, 'docs': 3, 'remains': 4, 'aliases': 7}[tab]
             page.evaluate(f"showWhTab('{tab}', document.querySelectorAll('#page-warehouse .tab')[{idx}])"); page.wait_for_timeout(1500 if tab in ('remains', 'aliases') else 300)
             page.screenshot(path=str(OUT / f'legacy-warehouse-{shot}-{theme}.png'))
+        page.evaluate("openAddMaterialModal()"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-warehouse-add-{theme}.png'))
+        page.evaluate("selectMatCategory('lumber')"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-warehouse-add-step2-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

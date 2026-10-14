@@ -29,3 +29,8 @@ a.notif-btn {
     border-color: var(--red) !important;
     color: var(--red) !important;
 }
+
+/* «+ Материал» of «Склад»: legacy sets these hover styles with onmouseover/onmouseout handlers */
+.mat-cat-btn:hover { border-color: var(--accent) !important; }
+.mat-chip:hover { border-color: var(--accent) !important; color: var(--accent); }
+.mat-ac-item:hover { background: var(--bg3); }

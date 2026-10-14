@@ -6,6 +6,7 @@ use App\Models\Material;
 use App\Models\MaterialAlias;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -23,6 +24,32 @@ class MaterialService
     public const IN_STOCK = 'Материал с остатком удалить нельзя: остаток списывается документом склада.';
 
     private const FIELDS = ['name', 'sku', 'unit', 'price', 'min_qty'];
+
+    /**
+     * Legacy saveNewMaterial: refuses a name that is already on the warehouse (case-insensitive) and gives an empty SKU an
+     * automatic one. The material goes to the warehouse that lists its category; the quantity starts at zero.
+     *
+     * @param  array{name: string, category: string, unit: string, price: mixed, min_qty: mixed, sku: string|null}  $data
+     */
+    public function create(array $data, User $by): Material
+    {
+        return DB::transaction(function () use ($data, $by) {
+            DB::select('SELECT pg_advisory_xact_lock(?)', [crc32('materials')]);
+            $dup = Material::query()->active()->whereRaw('lower(name) = lower(?)', [$data['name']])->orderBy('id')->first();
+            if ($dup !== null) {
+                throw ValidationException::withMessages(['name' => "⚠ Позиция «{$data['name']}» уже есть на складе (".($dup->sku ?: 'без SKU').'). Уточните характеристики.']);
+            }
+            $warehouse = Warehouse::query()->ordered()->get()->first(fn (Warehouse $w) => in_array($data['category'], $w->categories, true));
+            $material = new Material($data + ['warehouse_code' => $warehouse?->code]);
+            $material->forceFill(['qty' => 0, 'created_by_id' => $by->id, 'created_by_name' => $by->name, 'updated_by_id' => $by->id, 'updated_by_name' => $by->name])->save();
+            if ($material->sku === null) {
+                $material->forceFill(['sku' => 'SKU-'.str_pad((string) (9000 + $material->id), 4, '0', STR_PAD_LEFT)])->save();
+            }
+            Audit::record('material.created', 'material', $material->id, $material->only(['name', 'category', 'unit', 'price', 'min_qty', 'sku', 'warehouse_code']), $by);
+
+            return $material;
+        });
+    }
 
     /** @param array<string, mixed> $changes */
     public function update(int $id, array $changes, int $lockVersion, User $by): Material

@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     // M03 «Склад»: справочник материалов и алиасы (документы склада — ERP-039/040)
     Route::middleware('page:warehouse')->prefix('warehouse')->name('warehouse.')->controller(WarehouseController::class)->group(function () {
         Route::get('/', 'index')->name('index');
+        Route::post('/materials', 'storeMaterial')->name('materials.store');
         Route::put('/materials/{material}', 'updateMaterial')->whereNumber('material')->name('materials.update');
         Route::delete('/materials/{material}', 'destroyMaterial')->whereNumber('material')->name('materials.destroy');
         Route::post('/aliases', 'storeAlias')->name('aliases.store');
