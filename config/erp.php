@@ -158,6 +158,17 @@ return [
     'task_priorities' => ['high', 'normal', 'low'],
     'communication_types' => ['call', 'letter', 'meeting', 'whatsapp', 'email', 'note'],
 
+    // Цеха сдельной работы (legacy PIECE_WORKSHOPS, L16907): the workshop of a material request.
+    'piece_workshops' => [
+        'paint' => 'Малярка',
+        'cut' => 'Столярка/Раскройный',
+        'grind' => 'Шлифовка',
+        'assemble' => 'Сборка',
+        'upholstery' => 'Обивочный цех',
+        'veneer' => 'Шпонирование',
+        'pack' => 'Упаковка',
+    ],
+
     // Виды деятельности (legacy WORKSHOPS, L27195): production lines that staff and write-offs are bound to.
     'workshops' => [
         ['id' => 'act_chair', 'name' => 'Стул', 'icon' => '🪑'],

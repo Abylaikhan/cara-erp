@@ -1,5 +1,5 @@
 """Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
-the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды» and «Воронка лидов» (and their modals),
+the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды», «Воронка лидов», «Задачи», M04 «Закупки» (and their modals),
 dark and light themes, 1440×900.
 
 Legacy runs from the accepted reference in .local-audit/blobs with every network request blocked except Google Fonts —
@@ -148,6 +148,17 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-crm-tasks-{theme}.png'))
         page.locator('#orders-tasks button', has_text='+ Новая задача').click(); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-crm-task-modal-{theme}.png'))
+        page.goto(TARGET + '/purchases', wait_until='networkidle'); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-purchases-{theme}.png'))
+        purchases = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['requests']
+        page.locator('#mreq-view-kanban-btn').click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-purchases-kanban-{theme}.png'))
+        page.locator('#mreq-view-table-btn').click()
+        page.locator('#page-purchases > .tabs .tab').nth(2).click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-purchases-planfact-{theme}.png'))
+        page.locator('#page-purchases > .tabs .tab').nth(0).click()
+        page.locator('#purch-extra-requests button', has_text='+ Заявка вручную').click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-purchases-modal-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -344,8 +355,26 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-crm-tasks-{theme}.png'))
         page.evaluate("openTaskModal(null)"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-crm-task-modal-{theme}.png'))
+        # Purchases: legacy gets the target's requests; the date is the business date the target shows (ADR-0002, item 40).
+        # warehouseData (for «План-факт») is the target's directory given at the warehouse step.
+        page.evaluate("""(requests) => {
+            closeModal('taskModal');
+            materialRequestsData = requests.map(r => ({id: r.id, created_at: r.date ? r.date.split('.').reverse().join('-') : '', material_name: r.material_name,
+                qty: r.qty, unit: r.unit || '', order_num: r.order_num || '', item_name: r.item_name || '', workshop: r.workshop || '', requested_by: r.requested_by || '',
+                status: r.status}));
+            goodsReceiptsData = []; techCardsData = []; _purchExtraLoaded = true;
+            showPage('purchases', document.querySelector(".nav-item[onclick*=\\"showPage('purchases'\\"]"));
+        }""", purchases)
+        page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'legacy-purchases-{theme}.png'))
+        page.evaluate("setMreqView('kanban')"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-purchases-kanban-{theme}.png'))
+        page.evaluate("setMreqView('table'); showPurchExtraTab('planfact', document.querySelectorAll('#page-purchases > .tabs .tab')[2])"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-purchases-planfact-{theme}.png'))
+        page.evaluate("showPurchExtraTab('requests', document.querySelectorAll('#page-purchases > .tabs .tab')[0]); openNewMaterialRequestModal()"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-purchases-modal-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))
