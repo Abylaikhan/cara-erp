@@ -157,6 +157,19 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-crm-tasks-{theme}.png'))
         page.locator('#orders-tasks button', has_text='+ Новая задача').click(); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-crm-task-modal-{theme}.png'))
+        page.locator('#taskModal .modal-close').click(); page.wait_for_timeout(200)
+        page.locator('#crm-tab-clients').click(); page.wait_for_timeout(2500)
+        page.screenshot(path=str(OUT / f'target-crm-clients-{theme}.png'))
+        first_client = page.evaluate("document.querySelector('#clients-tbody tr td')?.textContent?.trim() || null")
+        if first_client:
+            page.locator('#clients-tbody tr').first.locator('button').click(); page.wait_for_timeout(300)
+            page.screenshot(path=str(OUT / f'target-crm-client-card-{theme}.png'))
+        client_orders = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/crm', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Crm',
+                'X-Inertia-Partial-Data': 'clientOrders', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.clientOrders;
+        }""")
         page.goto(TARGET + '/purchases', wait_until='networkidle'); page.wait_for_timeout(500)
         page.screenshot(path=str(OUT / f'target-purchases-{theme}.png'))
         purchases = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['requests']
@@ -337,14 +350,19 @@ with sync_playwright() as p:
         # for those filters). The funnel request is answered inside the browser with the target's funnel leads. CRM_STAGES,
         # which legacy never defines, gets the target's columns, and the segment legacy forces to «Новый» is set back to the
         # lead's own (ADR-0002, items 31, 32).
-        page.evaluate("""(leads) => {
+        # Orders with an end client (CRM «Клиенты»): each carries its total on the first product line.
+        page.evaluate("""([leads, orders]) => {
             closeModal('esfXmlImportModal');
+            ordersData = orders.map(o => ({num: o.num, channel: o.channel, customer: '', seller: o.seller || '', resp: o.seller || '', createdDate: o.created || '',
+                date: o.date || '', payment: o.payment, status: o.status, salonClientName: o.end_client, comment: '', paymentHistory: [],
+                items: (o.products.length ? o.products : ['']).map((name, k) => ({name, qty: 1, price: k === 0 ? o.total : 0, progress: 0, status: o.status}))}));
+            _cacheLoaded.orders = true; _ordersLoadedForChannel = '';
             leadsData = leads.filter(l => l.status !== 'won' && l.status !== 'lost').map(l => ({id: String(l.id), name: l.name, phone: l.phone || '',
                 status: l.status || 'new', interest: l.interest || '', budget: l.budget || 0, source: l.source || '', comment: l.comment || '',
                 channel: 'office', manager: l.manager || '', created: l.created_at ? new Date(l.created_at).toLocaleDateString('ru-RU') : '', fromLeads: true}));
             _cacheLoaded.leads = true; _leadsLoadedForChannel = '';
             showPage('crm', document.querySelector(".nav-item[onclick*=\\"showPage('crm'\\"]"));
-        }""", crm['leads'])
+        }""", [crm['leads'], client_orders])
         page.wait_for_timeout(800)
         page.screenshot(path=str(OUT / f'legacy-crm-{theme}.png'))
         page.evaluate("showOrdersTab('leads', document.getElementById('crm-tab-leads'))"); page.wait_for_timeout(800)
@@ -392,6 +410,12 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-crm-tasks-{theme}.png'))
         page.evaluate("openTaskModal(null)"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-crm-task-modal-{theme}.png'))
+        page.evaluate("closeModal('taskModal'); showOrdersTab('clients', document.getElementById('crm-tab-clients'))"); page.wait_for_timeout(2500)
+        page.screenshot(path=str(OUT / f'legacy-crm-clients-{theme}.png'))
+        if first_client:
+            page.evaluate("(name) => openClientCard(name)", first_client); page.wait_for_timeout(300)
+            page.screenshot(path=str(OUT / f'legacy-crm-client-card-{theme}.png'))
+            page.evaluate("closeModal('client-card-modal')")
         # Purchases: legacy gets the target's requests; the date is the business date the target shows (ADR-0002, item 40).
         # warehouseData (for «План-факт») is the target's directory given at the warehouse step.
         page.evaluate("""(requests) => {
@@ -454,7 +478,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

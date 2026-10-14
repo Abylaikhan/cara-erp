@@ -5,6 +5,7 @@ namespace Tests\Feature\Crm;
 use App\Models\AuditEvent;
 use App\Models\Customer;
 use App\Models\Lead;
+use App\Models\Order;
 use App\Models\User;
 use App\Services\LeadService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -208,5 +209,27 @@ class LeadTest extends TestCase
         $this->put("/crm/leads/{$lead->id}/status", ['status' => 'won', 'lock_version' => 1])->assertForbidden();
         $this->post("/crm/leads/{$lead->id}/client", ['lock_version' => 1])->assertForbidden();
         $this->assertSame(['new', 1], [$lead->fresh()->status, Lead::count()]);
+    }
+
+    public function test_clients_tab_counts_salon_end_clients_and_loads_their_orders_with_the_tab(): void
+    {
+        foreach ([['МО-1', 'salon_armada', ' Демо Клиентка ', '1000'], ['МО-2', 'salon_armada', 'Демо Клиентка', '500'], ['МО-3', 'salon_nazarbayeva', 'NaT', '100'],
+            ['МО-4', 'salon_nazarbayeva', 'Демо Второй', '200'], ['МО-5', 'office', 'Демо Офисный', '300']] as [$num, $channel, $client, $price]) {
+            $order = new Order(['num' => $num, 'channel' => $channel, 'customer' => 'Демо', 'end_client' => $client, 'seller' => 'Демо Продавец', 'status' => 'done', 'payment_pct' => 50]);
+            $order->save();
+            $order->items()->create(['line_no' => 0, 'name' => 'Демо изделие', 'qty' => '1', 'price' => $price, 'progress' => 0, 'status' => 'done', 'attrs' => []]);
+        }
+
+        // Distinct trimmed end clients of the salon orders, «NaT» aside; the orders come only with the tab.
+        $this->actingAs(User::factory()->role('director')->create())->get('/crm')->assertInertia(fn (Assert $page) => $page
+            ->where('clientsCount', 2)
+            ->missing('clientOrders')
+            ->reloadOnly('clientOrders', fn (Assert $reload) => $reload
+                ->where('clientOrders', fn ($orders) => collect($orders)->pluck('num')->sort()->values()->all() === ['МО-1', 'МО-2', 'МО-3', 'МО-4', 'МО-5'])
+                ->where('clientOrders', fn ($orders) => collect($orders)->firstWhere('num', 'МО-1')['products'] === ['Демо изделие'] && collect($orders)->firstWhere('num', 'МО-1')['total'] == 1000)));
+
+        $this->actingAs(User::factory()->role('salon_armada')->create())->get('/crm')->assertInertia(fn (Assert $page) => $page
+            ->where('clientsCount', 1)
+            ->reloadOnly('clientOrders', fn (Assert $reload) => $reload->where('clientOrders', fn ($orders) => collect($orders)->pluck('num')->sort()->values()->all() === ['МО-1', 'МО-2'])));
     }
 }

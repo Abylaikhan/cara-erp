@@ -1,11 +1,12 @@
 <script setup lang="ts">
-// M10 CRM — legacy page-crm (L4134–4373), showOrdersTab (L30753), crmConvertModal (L4869). Tabs «Лиды», «Воронка лидов» and
-// «Задачи» are migrated (LeadsTab, FunnelTab, TasksTab); «Клиенты» and the order boards need orders (M09). As in legacy, no
+// M10 CRM — legacy page-crm (L4134–4373), showOrdersTab (L30753), crmConvertModal (L4869). Tabs «Клиенты», «Лиды», «Воронка
+// лидов» and «Задачи» are migrated (ClientsTab, LeadsTab, FunnelTab, TasksTab); the order boards come next. As in legacy, no
 // tab content is shown until a tab is chosen, and each tab is built when first opened. The lead form of the funnel and the
 // task form are opened from several tabs, so they belong to the page.
 import { usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
+import ClientsTab from '@/components/crm/ClientsTab.vue';
 import FunnelLeadModal from '@/components/crm/FunnelLeadModal.vue';
 import FunnelTab from '@/components/crm/FunnelTab.vue';
 import LeadsTab from '@/components/crm/LeadsTab.vue';
@@ -26,6 +27,8 @@ const props = defineProps<{
     managers: string[];
     currentYear: number;
     timezone: string;
+    clientsCount: number;
+    clientOrders?: InstanceType<typeof ClientsTab>['$props']['orders'];
 }>();
 
 type Tab = 'clients' | 'leads' | 'funnel' | 'orders-kanban-prod' | 'orders-kanban-pay' | 'tasks';
@@ -43,8 +46,10 @@ function showOrdersTab(tab: Tab): void {
 
 const activeLeads = computed(() => props.leads.filter((l) => l.status !== 'won' && l.status !== 'lost').length);
 const openTasks = computed(() => props.tasks.filter((t) => t.status === 'open').length);
+const clientsTab = ref<InstanceType<typeof ClientsTab> | null>(null);
+// Legacy shows the number of salon clients, then the number the tab lists (with its filters).
+const clientsShown = computed(() => (props.clientOrders !== undefined && clientsTab.value ? clientsTab.value.count : props.clientsCount));
 const LATER: Partial<Record<Tab, string>> = {
-    clients: 'Клиенты салонов считаются по заказам покупателей: вкладка появится после переноса раздела «Продажи».',
     'orders-kanban-prod': 'Доска заказов по производству появится после переноса раздела «Продажи».',
     'orders-kanban-pay': 'Доска заказов по оплате появится после переноса раздела «Продажи».',
 };
@@ -80,7 +85,7 @@ function convertLeadToOrder(): void {
                 </div>
             </div>
             <div class="tabs" style="align-items: center">
-                <div id="crm-tab-clients" class="tab" :class="{ active: active === 'clients' }" @click="showOrdersTab('clients')">👥 Клиенты (<span id="tab-count-clients">—</span>)</div>
+                <div id="crm-tab-clients" class="tab" :class="{ active: active === 'clients' }" @click="showOrdersTab('clients')">👥 Клиенты (<span id="tab-count-clients">{{ clientsShown }}</span>)</div>
                 <div id="crm-tab-leads" class="tab" :class="{ active: active === 'leads' }" @click="showOrdersTab('leads')">
                     🎯 Лиды (<span id="tab-count-leads">{{ activeLeads }}</span>)
                 </div>
@@ -90,6 +95,9 @@ function convertLeadToOrder(): void {
                 <div class="tab" :class="{ active: active === 'tasks' }" @click="showOrdersTab('tasks')">✅ Задачи (<span id="tasks-open-count">{{ openTasks }}</span>)</div>
             </div>
 
+            <div v-if="visited.has('clients')" id="orders-clients" class="orders-tab" :style="display('clients')">
+                <ClientsTab ref="clientsTab" :orders="props.clientOrders" :active="shown === 'clients'" />
+            </div>
             <div v-if="visited.has('leads')" id="orders-leads" class="orders-tab" :style="display('leads')">
                 <LeadsTab :leads="props.leads" :statuses="props.statuses" :sources="props.sources" :current-year="props.currentYear" />
             </div>
