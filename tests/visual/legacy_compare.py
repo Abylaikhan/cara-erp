@@ -175,6 +175,14 @@ with sync_playwright() as p:
                 'X-Inertia-Partial-Data': 'realizations', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
             return (await r.json()).props.realizations;
         }""")
+        page.locator('#sales-tabs .tab').nth(6).click(); page.wait_for_timeout(2000)
+        page.screenshot(path=str(OUT / f'target-sales-report-{theme}.png'))
+        report = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
+                'X-Inertia-Partial-Data': 'report', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.report;
+        }""")
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -419,8 +427,21 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-sales-journal-{theme}.png'))
+        # Report: the orders now carry their real lines, characteristics, comment and delivery date.
+        page.evaluate("""([orders, report]) => {
+            const lines = {};
+            report.lines.forEach(l => (lines[l.order_id] = lines[l.order_id] || []).push(l));
+            ordersData = orders.map(o => ({num: o.num, channel: o.channel, customer: o.customer || '', seller: o.seller || '', resp: o.seller || '',
+                createdDate: o.created || '', date: o.date || '', deliveryDate: (report.notes[o.id] || {}).delivery || '', payment: o.payment, status: o.status,
+                comment: (report.notes[o.id] || {}).comment || '', paymentDue: '', salonClientName: o.end_client || '', paymentHistory: [],
+                items: (lines[o.id] || []).map(l => ({name: l.name, itemType: '', category: '', qty: l.qty, price: 0, progress: 0, status: o.status, resp: '', date: '',
+                    attributes: l.attrs}))}));
+            showSalesTab('report', document.querySelectorAll('#sales-tabs .tab')[6]);
+        }""", [sales, report])
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

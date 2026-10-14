@@ -19,7 +19,8 @@ use Inertia\Response;
 /**
  * M09 «Продажи», part 1 — legacy page-sales (L3824–4133): loadOrdersFromDB (L1356), renderOrders/getOrderSortValue/
  * resolveCustomerName/setOrderYear/clearOrderFilters/sortOrders (L29892–30237), updateOrderTabCounts, showSalesTab,
- * markOrderDone (L31140), renderSalesJournal/sortSJ/setSjPeriod/setSjMonthYear (L30830–31096). Orders are shown, not
+ * markOrderDone (L31140), renderSalesJournal/sortSJ/setSjPeriod/setSjMonthYear (L30830–31096), renderOrderReport/
+ * getReportOrders/fillRepMonths/toggleRepPeriod/sortReport (L32129–32315). Orders are shown, not
  * edited: the order form, new orders and payments wait for decisions D-02, D-03, D-12 (ERP-029/030). Only orders and
  * realizations of the user's channels are read.
  */
@@ -61,7 +62,24 @@ class SalesController extends Controller
             'channels' => SalesChannel::query()->ordered()->pluck('name', 'code'),
             // Tab «Реализация» (legacy renderSalesJournal): loaded when the tab is opened, as legacy does.
             'realizations' => Inertia::optional(fn () => $this->realizations($request->user())),
+            // Tab «Отчёт» (legacy renderOrderReport): the lines of the orders with their characteristics, the comment and
+            // the delivery date — loaded when the tab is opened.
+            'report' => Inertia::optional(fn () => $this->report($request->user())),
         ]);
+    }
+
+    /** @return array{lines: Collection<int, array<string, mixed>>, notes: Collection<int, array<string, mixed>>} */
+    private function report(User $user): array
+    {
+        $orders = ChannelScope::apply(Order::query(), $user)->get(['id', 'comment', 'delivery_date']);
+        $lines = DB::table('order_items')->whereIn('order_id', $orders->pluck('id'))->orderBy('order_id')->orderBy('line_no')
+            ->get(['order_id', 'name', 'qty', 'attrs']);
+
+        return [
+            'lines' => $lines->map(fn ($l) => ['order_id' => $l->order_id, 'name' => $l->name, 'qty' => (float) $l->qty, 'attrs' => json_decode($l->attrs)])->values(),
+            'notes' => $orders->filter(fn (Order $o) => $o->comment !== null || $o->delivery_date !== null)
+                ->mapWithKeys(fn (Order $o) => [$o->id => ['comment' => $o->comment, 'delivery' => $o->delivery_date?->format('d.m.Y')]]),
+        ];
     }
 
     /**

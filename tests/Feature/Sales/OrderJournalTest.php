@@ -127,6 +127,24 @@ class OrderJournalTest extends TestCase
             ->reloadOnly('realizations', fn (Assert $reload) => $reload->where('realizations', fn ($rows) => collect($rows)->pluck('order_num')->all() === ['МО-1'])));
     }
 
+    public function test_report_lines_load_with_their_tab_in_order_with_characteristics(): void
+    {
+        $order = $this->order('МО-1', 'office', [['2', '100'], ['1', '50']], ['comment' => 'Демо комментарий', 'delivery_date' => '2026-10-20']);
+        $order->items()->where('line_no', 0)->update(['attrs' => json_encode(['Цвет' => 'Дуб', 'Патина2' => 'Серебро'])]);
+        $this->order('МО-2', 'salon_armada', [['1', '10']]);
+
+        $this->actingAs($this->director)->get('/sales')->assertInertia(fn (Assert $page) => $page
+            ->missing('report')
+            ->reloadOnly('report', fn (Assert $reload) => $reload
+                ->where('report.lines.0', ['order_id' => $order->id, 'name' => 'Демо изделие', 'qty' => 2, 'attrs' => ['Цвет' => 'Дуб', 'Патина2' => 'Серебро']])
+                ->where('report.lines.1.attrs', [])
+                ->where("report.notes.{$order->id}", ['comment' => 'Демо комментарий', 'delivery' => '20.10.2026'])
+                ->where('report.lines', fn ($lines) => count($lines) === 3)));
+
+        $this->actingAs(User::factory()->role('salon_armada')->create())->get('/sales')->assertInertia(fn (Assert $page) => $page
+            ->reloadOnly('report', fn (Assert $reload) => $reload->where('report.lines', fn ($lines) => count($lines) === 1)->where('report.notes', [])));
+    }
+
     public function test_another_channel_cannot_complete_an_order(): void
     {
         $order = $this->order('МО-1', 'dealer_astana', [['1', '100']]);
