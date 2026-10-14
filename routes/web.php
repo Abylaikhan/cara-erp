@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CrmController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DealerController;
 use App\Http\Controllers\EsfController;
@@ -68,6 +69,16 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{supplier}', 'destroy')->whereNumber('supplier')->name('destroy');
     });
 
+    // M10 CRM: лиды и воронка (клиенты, заказы и задачи — с переносом заказов и следующей частью)
+    Route::middleware('page:crm')->prefix('crm')->name('crm.')->controller(CrmController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/leads', 'store')->name('leads.store');
+        Route::put('/leads/{lead}', 'update')->whereNumber('lead')->name('leads.update');
+        Route::put('/leads/{lead}/status', 'status')->whereNumber('lead')->name('leads.status');
+        Route::post('/leads/{lead}/client', 'client')->whereNumber('lead')->name('leads.client');
+        Route::delete('/leads/{lead}', 'destroy')->whereNumber('lead')->name('leads.destroy');
+    });
+
     // M08 «Покупатели» — tab «Контрагенты»
     Route::middleware('page:customers')->prefix('customers')->name('customers.')->controller(CustomerController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -83,7 +94,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Pages that are not migrated yet — the menu stays 1:1, the page says so honestly.
-    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf'];
+    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf', 'crm'];
     Route::get('/{page}', [PageController::class, 'notMigrated'])
         ->whereIn('page', array_values(array_diff(array_keys(Erp::pages()), $migrated)))
         ->middleware('page')->name('page');

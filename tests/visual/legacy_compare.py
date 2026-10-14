@@ -1,5 +1,6 @@
 """Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
-the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ» (and their modals), dark and light themes, 1440×900.
+the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды» and «Воронка лидов» (and their modals),
+dark and light themes, 1440×900.
 
 Legacy runs from the accepted snapshot in .local-audit/blobs with every network request blocked except Google Fonts —
 it never reaches the legacy backend. Both sides get the same synthetic directory (DatabaseSeeder).
@@ -116,6 +117,23 @@ with sync_playwright() as p:
             page.locator('#esfDetailModal .modal-close').click(); page.wait_for_timeout(200)
         page.set_input_files('#esf-xml-input', str(ROOT / 'tests/Fixtures/esf/two-invoices.xml')); page.wait_for_timeout(1000)
         page.screenshot(path=str(OUT / f'target-esf-import-{theme}.png'))
+        page.goto(TARGET + '/crm', wait_until='networkidle'); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-crm-{theme}.png'))
+        crm = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        first_lead = page.evaluate("(leads) => (leads.find(l => l.status !== 'won' && l.status !== 'lost' && l.created_at && new Date(l.created_at).getFullYear() === new Date().getFullYear()) || {}).id ?? null", crm['leads'])
+        page.locator('#crm-tab-leads').click(); page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'target-crm-leads-{theme}.png'))
+        page.locator('#leads-view-table').click(); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'target-crm-leads-table-{theme}.png'))
+        page.locator('#leads-view-cards').click(); page.wait_for_timeout(500)
+        if first_lead is not None:
+            page.locator('#leads-body .card').first.locator('button', has_text='✏️ Изменить').click(); page.wait_for_timeout(300)
+            page.screenshot(path=str(OUT / f'target-crm-lead-modal-{theme}.png'))
+            page.locator('#leadModal .modal-close').click(); page.wait_for_timeout(200)
+        page.locator('#page-crm .tab', has_text='Воронка лидов').click(); page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'target-crm-funnel-{theme}.png'))
+        page.locator('#orders-funnel button', has_text='+ Новый лид').click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-crm-funnel-modal-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -253,8 +271,44 @@ with sync_playwright() as p:
         page.evaluate("(x) => { _esfXmlParsed = parseEsfXmlText(x, 'two-invoices.xml'); renderEsfXmlImportPreview(); document.getElementById('esfXmlImportModal').classList.add('open'); }", fixture)
         page.wait_for_timeout(500)
         page.screenshot(path=str(OUT / f'legacy-esf-import-{theme}.png'))
+        # CRM: legacy leadsData gets the target's open leads, mapped as its loader maps them (it loads won and lost ones only
+        # for those filters). The funnel request is answered inside the browser with the target's funnel leads. CRM_STAGES,
+        # which legacy never defines, gets the target's columns, and the segment legacy forces to «Новый» is set back to the
+        # lead's own (ADR-0002, items 31, 32).
+        page.evaluate("""(leads) => {
+            closeModal('esfXmlImportModal');
+            leadsData = leads.filter(l => l.status !== 'won' && l.status !== 'lost').map(l => ({id: String(l.id), name: l.name, phone: l.phone || '',
+                status: l.status || 'new', interest: l.interest || '', budget: l.budget || 0, source: l.source || '', comment: l.comment || '',
+                channel: 'office', manager: l.manager || '', created: l.created_at ? new Date(l.created_at).toLocaleDateString('ru-RU') : '', fromLeads: true}));
+            _cacheLoaded.leads = true; _leadsLoadedForChannel = '';
+            showPage('crm', document.querySelector(".nav-item[onclick*=\\"showPage('crm'\\"]"));
+        }""", crm['leads'])
+        page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'legacy-crm-{theme}.png'))
+        page.evaluate("showOrdersTab('leads', document.getElementById('crm-tab-leads'))"); page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'legacy-crm-leads-{theme}.png'))
+        page.evaluate("setLeadsView('table')"); page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'legacy-crm-leads-table-{theme}.png'))
+        page.evaluate("setLeadsView('cards')"); page.wait_for_timeout(500)
+        if first_lead is not None:
+            page.evaluate(f"openLeadModal('{first_lead}')"); page.wait_for_timeout(300)
+            page.screenshot(path=str(OUT / f'legacy-crm-lead-modal-{theme}.png'))
+            page.evaluate("closeModal('leadModal')")
+        funnel = [l for l in crm['leads'] if l['status'] in ('qualify', 'proposal', 'negotiation', 'contact', 'meeting')]
+        rows = [{k: l[k] for k in ('id', 'name', 'phone', 'status', 'interest', 'budget', 'source', 'manager')} for l in funnel]
+        page.route(re.compile(r'/rest/v1/leads\?'), lambda route: route.fulfill(json=rows) if route.request.method == 'GET' else route.abort())
+        page.evaluate("""(stages) => {
+            window.CRM_STAGES = stages.map(s => ({key: s.key, label: s.label, cls: ''}));
+            showOrdersTab('funnel', document.querySelectorAll('#page-crm .tab')[2]);
+        }""", crm['funnelStages'])
+        page.wait_for_timeout(1000)
+        page.evaluate("(own) => { crmLeads.forEach(l => { l.segment = own[String(l.id)] ?? null; }); renderCrmKanban(); }", {str(l['id']): l['segment'] for l in funnel})
+        page.wait_for_timeout(500)
+        page.screenshot(path=str(OUT / f'legacy-crm-funnel-{theme}.png'))
+        page.evaluate("openCrmLeadModal(null)"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-crm-funnel-modal-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import',):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

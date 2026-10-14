@@ -123,6 +123,35 @@ return [
         ['table' => 'incoming_invoices', 'column' => 'supplier_id'], // M05: the seller of an incoming ESF
     ],
 
+    // CRM (M10). Lead statuses and sources: legacy LEAD_STATUSES / LEAD_SOURCES (L31463); segments: segmentsCatalog (L28812).
+    'lead_statuses' => [
+        'new' => ['label' => '🆕 Новый', 'color' => 'var(--text3)'],
+        'contact' => ['label' => '📞 Контакт', 'color' => 'var(--accent)'],
+        'meeting' => ['label' => '🤝 Встреча', 'color' => '#8b5cf6'],
+        'qualify' => ['label' => '🔍 Квалификация', 'color' => '#0ea5e9'],
+        'proposal' => ['label' => '📄 КП отправлено', 'color' => '#f59e0b'],
+        'negotiation' => ['label' => '🤝 Переговоры', 'color' => '#f97316'],
+        'won' => ['label' => '✅ Выиграли', 'color' => 'var(--green)'],
+        'lost' => ['label' => '❌ Проиграли', 'color' => 'var(--red)'],
+    ],
+    'lead_sources' => ['instagram' => 'Instagram', 'referral' => 'Рекомендация', 'walk-in' => 'Зашёл сам', 'call' => 'Звонок', 'site' => 'Сайт', 'other' => 'Другое'],
+    'lead_segments' => [
+        1 => ['label' => 'Новый', 'color' => '#4f8ef7'],
+        2 => ['label' => 'Активный', 'color' => '#3dd68c'],
+        3 => ['label' => 'Потенциальный крупный', 'color' => '#a78bfa'],
+        4 => ['label' => 'Розница', 'color' => '#f5a623'],
+        5 => ['label' => 'Опт', 'color' => '#38bdf8'],
+        6 => ['label' => 'Спящий', 'color' => '#94a3b8'],
+        7 => ['label' => 'VIP', 'color' => '#f43f5e'],
+    ],
+    // Columns of «Воронка лидов». Legacy uses CRM_STAGES without defining it, so its board never renders; the stages are the
+    // statuses its lead form marks «→ воронка», and «Контакт»/«Встреча» go to «Квалификация» as its loader maps them.
+    'funnel_stages' => [
+        'qualify' => ['label' => '🔍 Квалификация', 'statuses' => ['contact', 'meeting', 'qualify']],
+        'proposal' => ['label' => '📄 КП отправлено', 'statuses' => ['proposal']],
+        'negotiation' => ['label' => '🤝 Переговоры', 'statuses' => ['negotiation']],
+    ],
+
     // Виды деятельности (legacy WORKSHOPS, L27195): production lines that staff and write-offs are bound to.
     'workshops' => [
         ['id' => 'act_chair', 'name' => 'Стул', 'icon' => '🪑'],
