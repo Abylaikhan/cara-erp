@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T154825Z-baaa",
-    "started_at": "2026-10-14T15:48:25Z",
+    "run_id": "20261014T161408Z-a8ce",
+    "started_at": "2026-10-14T16:14:08Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T15:49:17Z",
+    "finished_at": "2026-10-14T16:15:10Z",
     "exit_code": 0
   },
   "last_observed": {
-    "source_ref": "9f49a2440e97fef8ca30177507cca1caa0f0eadb",
-    "target_ref": "f1f12bfbbe768730607c921905d6004cb065ac46",
-    "at": "2026-10-14T15:48:25Z"
+    "source_ref": "637c11292fc668ef4c2233a1ca22f3b992b19809",
+    "target_ref": "225e1f2535e7d5df340529430cfcdcf51f2f2273",
+    "at": "2026-10-14T16:14:08Z"
   },
   "last_reported": {
-    "run_id": "20261014T154825Z-baaa",
-    "source_ref": "9f49a2440e97fef8ca30177507cca1caa0f0eadb",
-    "source_blob": "f6c75f488b1d9babdbef216b23c870f1a08f91c1",
-    "target_ref": "f1f12bfbbe768730607c921905d6004cb065ac46",
-    "logical_key": "baee7033951a2098",
+    "run_id": "20261014T161408Z-a8ce",
+    "source_ref": "637c11292fc668ef4c2233a1ca22f3b992b19809",
+    "source_blob": "3f828d719670b0a93a6b2f704758e1caafe88df2",
+    "target_ref": "225e1f2535e7d5df340529430cfcdcf51f2f2273",
+    "logical_key": "3fecb04df8f0802d",
     "local_date": "2026-10-14",
-    "completed_at": "2026-10-14T15:49:17Z",
-    "report": "daily/2026-10-14/20261014T154825Z-baaa.md",
-    "artifact_sha256": "7379e9dd79e1f0bf86319496ec13f223a359688ecbcbee020d12758037b5eca3",
+    "completed_at": "2026-10-14T16:15:10Z",
+    "report": "daily/2026-10-14/20261014T161408Z-a8ce.md",
+    "artifact_sha256": "b9d2291126304a68d5ff3b0490f8534c3a9165c9c93d4eb7598ed3bfbdc3e2fc",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -105,6 +105,12 @@
       "Tests\\Feature\\Catalog\\ProductTest::test_page_lists_active_products_with_rights",
       "Tests\\Feature\\Catalog\\ProductTest::test_roles_without_catalog_cannot_read_or_write",
       "Tests\\Feature\\Catalog\\ProductTest::test_validation_messages_repeat_legacy_texts",
+      "Tests\\Feature\\Crm\\CrmTaskTest::test_a_task_about_a_lead_follows_the_lead_channel",
+      "Tests\\Feature\\Crm\\CrmTaskTest::test_checkbox_marks_done_and_reopens_and_delete_hides_the_task",
+      "Tests\\Feature\\Crm\\CrmTaskTest::test_form_creates_and_edits_a_task",
+      "Tests\\Feature\\Crm\\CrmTaskTest::test_roles_without_crm_cannot_reach_tasks",
+      "Tests\\Feature\\Crm\\LeadCommunicationTest::test_entries_are_added_listed_and_deleted",
+      "Tests\\Feature\\Crm\\LeadCommunicationTest::test_history_of_another_channel_is_not_reachable",
       "Tests\\Feature\\Crm\\LeadTest::test_deleted_lead_leaves_the_lists",
       "Tests\\Feature\\Crm\\LeadTest::test_funnel_form_keeps_segment_tags_and_the_next_action",
       "Tests\\Feature\\Crm\\LeadTest::test_lead_becomes_a_client_of_its_channel_and_is_won",
@@ -164,6 +170,8 @@
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_top_level_category_and_zero_sort_order",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_update_keeps_code_and_level_and_records_changes",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_validation_messages_repeat_legacy_texts",
+      "Tests\\Feature\\Legacy\\CrmTaskImportTest::test_imports_tasks_with_their_lead_and_legacy_defaults",
+      "Tests\\Feature\\Legacy\\CrmTaskImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
       "Tests\\Feature\\Legacy\\CustomerImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\CustomerImportTest::test_imports_every_row_keeping_fields_channels_and_dates",
       "Tests\\Feature\\Legacy\\CustomerImportTest::test_rows_the_new_schema_cannot_keep_change_nothing",
@@ -228,16 +236,16 @@
     ]
   },
   "last_verified": {
-    "source_ref": "9f49a2440e97fef8ca30177507cca1caa0f0eadb",
-    "target_ref": "f1f12bfbbe768730607c921905d6004cb065ac46",
+    "source_ref": "637c11292fc668ef4c2233a1ca22f3b992b19809",
+    "target_ref": "225e1f2535e7d5df340529430cfcdcf51f2f2273",
     "required_suite_version": "suite-1+1f7357",
-    "completed_at": "2026-10-14T15:49:17Z",
-    "run_id": "20261014T154825Z-baaa"
+    "completed_at": "2026-10-14T16:15:10Z",
+    "run_id": "20261014T161408Z-a8ce"
   },
   "changelog": {
-    "entries": 20,
-    "last_header": "## 2026-10-14 · 20261014T154825Z-baaa",
-    "sha256": "b7b8642a6d5e06caf00e37065d78d1b58a8c1326c966e5e2aaf75b47317e4afb"
+    "entries": 21,
+    "last_header": "## 2026-10-14 · 20261014T161408Z-a8ce",
+    "sha256": "90a2bceeb707f22d4cd9fbbd562a3b1ebcf0cf37b87261745672ae726be8bb5f"
   },
   "accepted_source_ref": {
     "commit": "c5e745cab6e2f4a26df3a8cb6b912df626236d33",
