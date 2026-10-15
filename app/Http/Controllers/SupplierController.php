@@ -184,9 +184,10 @@ class SupplierController extends Controller
                 ->orWhereIn('id', ExpenseCategory::query()->select('parent_id')->whereIn('id', $referenced)))
             ->orderBy('sort_order')->orderBy('id')->get();
         $option = fn (ExpenseCategory $c) => ['id' => $c->id, 'name' => $c->name, 'deleted' => ! $c->active];
+        $articles = $items->whereNotNull('parent_id')->groupBy('parent_id'); // once: a lookup per group would be quadratic
 
         return $items->whereNull('parent_id')->map(fn (ExpenseCategory $top) => $option($top) + [
-            'articles' => $items->where('parent_id', $top->id)->map($option)->values()->all(),
+            'articles' => $articles->get($top->id, collect())->map($option)->values()->all(),
         ])->values()->all();
     }
 

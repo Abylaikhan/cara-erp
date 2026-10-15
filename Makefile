@@ -4,7 +4,7 @@ export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal
+.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal reliability-check
 
 help: ## Show available commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
@@ -34,6 +34,9 @@ harness-selftest: ## Self-tests of the audit harness (H-xx scenarios on local fi
 
 visual-compare: ## Screenshots legacy vs target (login, M14, M07, M08, M06, M03, M05, M10, M04, M09, M02, M12) and % of differing pixels; needs host playwright + Chrome
 	@python3 tests/visual/legacy_compare.py
+
+reliability-check: ## Browser check of failures (server error, no connection, expired session, double click); writes are intercepted, data untouched
+	@python3 tests/e2e/reliability_check.py
 
 db-backup: ## Copy of the dev database and uploaded files + manifest and the app's answers (checksums) → .local-audit/backups/ (owner-only)
 	@bash scripts/db-backup.sh

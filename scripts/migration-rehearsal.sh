@@ -76,6 +76,8 @@ step "migrate" artisan migrate --force
 for e in $ENTITIES; do
     step "import ${e}" artisan legacy:import "$e" --snapshot="$snapshot"
 done
+# A bulk load leaves the planner without statistics until autovacuum comes; the cut-over runs ANALYZE before the users do.
+step "analyze" dc exec -T db psql -X -q -v ON_ERROR_STOP=1 -U "$user" -d "$db" -c 'ANALYZE'
 step "control totals" artisan legacy:control-totals --snapshot="$snapshot" --out="$out/control-totals.json"
 business_fingerprint > "$out/fingerprint-1.tsv"
 for e in $ENTITIES; do

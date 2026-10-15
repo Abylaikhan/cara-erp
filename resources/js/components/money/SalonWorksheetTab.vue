@@ -85,8 +85,16 @@ const fail = (errors: Record<string, string>) => window.alert('Не удалос
 function updateSalonWbField(r: SalonRow, field: Field, v: string): void {
     router.put(`/money/salon-worksheet/${r.id}`, { field, value: v }, { ...RELOAD, onError: fail });
 }
+// A second click while the row is being created would create a second row (ERP-072, AC-72).
+const adding = ref(false);
 function addSalonWbRow(): void {
-    router.post('/money/salon-worksheet', { salon: salon.value }, { ...RELOAD, onError: (e) => window.alert('Не удалось создать строку.\n\n' + (Object.values(e)[0] ?? '')) });
+    if (adding.value) return;
+    router.post('/money/salon-worksheet', { salon: salon.value }, {
+        ...RELOAD,
+        onStart: () => (adding.value = true),
+        onFinish: () => (adding.value = false),
+        onError: (e) => window.alert('Не удалось создать строку.\n\n' + (Object.values(e)[0] ?? '')),
+    });
 }
 function deleteSalonWbRow(r: SalonRow): void {
     if (!window.confirm('Удалить строку из рабочего листа?')) return;
@@ -132,7 +140,7 @@ const ruDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('
         </div>
         <button class="btn btn-ghost btn-sm" @click="importLater">📥 Импорт из Excel</button>
         <button class="btn btn-ghost btn-sm" style="color: var(--red)" @click="clearSalonWbSheet">🗑 Очистить лист</button>
-        <button class="btn btn-primary btn-sm" @click="addSalonWbRow">+ Добавить строку</button>
+        <button class="btn btn-primary btn-sm" :disabled="adding" @click="addSalonWbRow">+ Добавить строку</button>
     </div>
     <div style="font-size: 11px; color: var(--text3); margin-bottom: 8px">
         Этот лист не влияет на базу данных программы, пока строка не будет перенесена вручную кнопкой «Перенести».

@@ -5,6 +5,7 @@
   Копия dev-БД и загруженных файлов — `make db-backup` (в `.local-audit/backups/`, вне Git: там реальные данные), проверка — `make db-restore-check`
   (БД, файлы и приложение на копии отвечают как при копии; ADR-0012).
   Репетиция переноса — `make migration-rehearsal` (временная БД, все импорты, контрольные итоги, повтор без изменений; ADR-0024).
+  Сбои в браузере — `make reliability-check` (500, обрыв связи, истёкшая сессия, два нажатия; запросы перехватываются; ADR-0025).
 - Аудит: `make audit-daily` (отчёт `docs/daily/`, журнал `docs/DAILY-CHANGELOG.md`), самопроверки `make harness-selftest`. Отчёты, state и findings пишет только harness; руками их не править. Провалы не превращать в PASS, проверки не удалять — `HAR-COVERAGE` это поймает.
 - Зависимости только из lock-файлов; `composer update` / `npm update` без отдельной задачи не выполнять. Версии образов закреплены.
 - Тесты — только на `db-test` (подключение `pgsql_test`), не на SQLite и не на dev-БД. Не ослаблять `Tests\Support\GuardsTestDatabase`.
