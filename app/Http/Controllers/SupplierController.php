@@ -6,8 +6,10 @@ use App\Http\Requests\Suppliers\SupplierRequest;
 use App\Models\ExpenseCategory;
 use App\Models\Supplier;
 use App\Services\SupplierService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -97,6 +99,75 @@ class SupplierController extends Controller
         };
 
         return back()->with('dialog', $dialog);
+    }
+
+    /** Legacy «📄 Импорт из ЭСФ» (importSuppliersFromEsf): the answer is the legacy alert or confirmation text. */
+    public function importEsf(Request $request): RedirectResponse
+    {
+        Gate::authorize('create', Supplier::class);
+
+        return back()->with('dialog', $this->service->importFromEsf($request->boolean('apply'), $request->user()));
+    }
+
+    /** Legacy openSupplierCard: the last 20 incoming invoices of the supplier — by BIN, otherwise by a name containing it. */
+    public function esf(int $supplier): JsonResponse
+    {
+        $s = Supplier::query()->active()->findOrFail($supplier);
+        $bin = trim((string) $s->bin);
+        $like = '%'.addcslashes(str_replace('"', '', (string) $s->name), '%_\\').'%';
+
+        return response()->json(DB::table('incoming_invoices')
+            ->when($bin !== '', fn ($q) => $q->where('supplier_bin', $bin), fn ($q) => $q->where('supplier_name', 'ilike', $like))
+            ->orderByDesc('date')->orderBy('id')->limit(20)->get(['num', 'date', 'total_with_nds', 'status'])
+            ->map(fn ($i) => ['num' => $i->num, 'date' => $i->date, 'total' => (string) $i->total_with_nds, 'status' => $i->status]));
+    }
+
+    /**
+     * Legacy findOrphanSupplierCounterparties and findCounterpartySpellingGroups (L18407–18450): the counterparties of the
+     * supplier payments that have no card, and the spellings of one counterparty, from the money journal.
+     */
+    public function counterparties(): JsonResponse
+    {
+        $known = Supplier::query()->active()->pluck('name')->mapWithKeys(fn ($n) => [Supplier::normalizedName($n) => $n]);
+        $orphans = [];
+        $spellings = [];
+        DB::table('money_transactions')->where('category', 'supplier')->whereNotNull('counterparty')->where('counterparty', '!=', '')
+            ->orderByDesc('tx_date')->orderBy('id')->get(['counterparty', 'amount', 'tx_date'])
+            ->each(function ($t) use ($known, &$orphans, &$spellings) {
+                $norm = Supplier::normalizedName($t->counterparty);
+                if ($norm === '') {
+                    return;
+                }
+                $add = function (array &$e) use ($t) {
+                    $e['count']++;
+                    $e['sum'] = bcadd($e['sum'], (string) $t->amount, 2);
+                    $e['lastDate'] = max($e['lastDate'], $t->tx_date);
+                };
+                if (! $known->has($norm)) {
+                    $orphans[$norm] ??= ['name' => $t->counterparty, 'count' => 0, 'sum' => '0', 'lastDate' => ''];
+                    $add($orphans[$norm]);
+                }
+                $spellings[$norm][$t->counterparty] ??= ['text' => $t->counterparty, 'count' => 0, 'sum' => '0', 'lastDate' => ''];
+                $add($spellings[$norm][$t->counterparty]);
+            });
+        $groups = collect($spellings)->filter(fn ($v) => count($v) > 1)
+            ->map(fn ($v, $norm) => ['norm' => (string) $norm, 'canonical' => $known[$norm] ?? null, 'variants' => collect($v)->values()->sortByDesc('count')->values()->all()])
+            ->sortByDesc(fn ($g) => array_sum(array_column($g['variants'], 'count')))->values();
+
+        return response()->json([
+            'orphans' => collect($orphans)->values()->sortByDesc(fn ($o) => (float) $o['sum'])->values(),
+            'spellings' => $groups,
+        ]);
+    }
+
+    /** Legacy createSupplierFromOrphan. */
+    public function storeOrphan(Request $request): RedirectResponse
+    {
+        Gate::authorize('create', Supplier::class);
+        $data = $request->validate(['name' => ['required', 'string', 'max:255']]);
+        $result = $this->service->createFromOrphan($data['name'], $request->user());
+
+        return $result['type'] === 'alert' ? back()->with('dialog', $result) : back();
     }
 
     /**

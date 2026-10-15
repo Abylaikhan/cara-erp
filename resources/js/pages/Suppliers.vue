@@ -156,11 +156,24 @@ function openSupplierCard(s: Supplier | null): void {
     card.expenseArticleId = s?.expense_article_id ?? '';
     card.expenseSource = s?.expense_source ?? 'payment';
     card.lockVersion = s?.lock_version ?? 0;
+    loadCardEsf(s);
     card.message = '';
     card.color = 'var(--red)';
     card.saved = false;
     card.open = true;
 }
+
+// ── ЭСФ поставщика in the card (legacy openSupplierCard: the last 20 invoices by BIN, otherwise by the name) ──
+const cardEsf = ref<{ num: string | null; date: string; total: string; status: string }[] | null | 'error'>(null);
+async function loadCardEsf(s: Supplier | null): Promise<void> {
+    cardEsf.value = null;
+    if (!s || (!s.bin && !s.name)) return;
+    const res = await fetch(`/suppliers/${s.id}/esf`, { headers: { Accept: 'application/json' } }).catch(() => null);
+    if (card.id !== s.id) return;
+    cardEsf.value = res && res.ok ? await res.json() : 'error';
+}
+const ESF_STATUS: Record<string, string> = { DELIVERED: '✅', CREATED: '📝', CANCELLED: '❌', POSTED: '🏷' };
+const fmtEsf = (n: number | string) => '₸' + Math.round(Number(n)).toLocaleString('ru-RU');
 
 function closeCard(): void {
     card.open = false;
@@ -239,23 +252,62 @@ const resetFile = () => {
     pendingFile = null;
     if (fileInput.value) fileInput.value.value = '';
 };
+let pending: 'csv' | 'esf' = 'csv';
 function sendCsv(apply: boolean): void {
     if (!pendingFile) return;
+    pending = 'csv';
     router.post('/suppliers/import', { file: pendingFile, apply: apply ? 1 : 0 }, { forceFormData: true, preserveScroll: true, preserveState: true });
 }
 function importSuppliersCSV(e: Event): void {
     pendingFile = (e.target as HTMLInputElement).files?.[0] ?? null;
     sendCsv(false);
 }
+// ── 📄 Импорт из ЭСФ (importSuppliersFromEsf): the same plan → confirmation → apply ──
+function importEsf(apply = false): void {
+    pending = 'esf';
+    router.post('/suppliers/import-esf', { apply: apply ? 1 : 0 }, { preserveScroll: true, preserveState: true });
+}
 watch(
     () => page.props.flash.dialog,
     (d) => {
         if (!d) return;
-        if (d.type === 'confirm' && window.confirm(d.text)) return sendCsv(true);
+        if (d.type === 'confirm' && window.confirm(d.text)) return pending === 'esf' ? importEsf(true) : sendCsv(true);
         if (d.type === 'alert') window.alert(d.text);
         resetFile();
     },
 );
+
+// ── 🕵️ Осиротевшие and 🔤 Разночтения (legacy findOrphanSupplierCounterparties / findCounterpartySpellingGroups) ──
+interface Orphan { name: string; count: number; sum: string; lastDate: string }
+interface Variant { text: string; count: number; sum: string; lastDate: string }
+const cp = reactive({ orphansOpen: false, spellingsOpen: false, orphans: [] as Orphan[], spellings: [] as { norm: string; canonical: string | null; variants: Variant[] }[], chosen: {} as Record<string, string> });
+async function loadCounterparties(): Promise<void> {
+    const res = await fetch('/suppliers/counterparties', { headers: { Accept: 'application/json' } });
+    if (!res.ok) return;
+    const d = await res.json();
+    cp.orphans = d.orphans;
+    cp.spellings = d.spellings;
+    cp.chosen = Object.fromEntries(d.spellings.map((g: { norm: string; canonical: string | null; variants: Variant[] }) => [g.norm, g.canonical ?? g.variants[0].text]));
+}
+async function orphans(): Promise<void> {
+    await loadCounterparties();
+    cp.orphansOpen = true;
+}
+async function spellings(): Promise<void> {
+    await loadCounterparties();
+    cp.spellingsOpen = true;
+}
+function createSupplierFromOrphan(o: Orphan): void {
+    router.post('/suppliers/orphans', { name: o.name }, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => loadCounterparties(),
+        onError: (e) => window.alert('Ошибка создания поставщика: ' + (Object.values(e)[0] ?? '')),
+    });
+}
+const mergeSpellingLater = () =>
+    window.alert('Сведение написаний меняет контрагента в денежных операциях и появится вместе с правкой операций (ERP-031…033, решения D-03 и D-11).');
+const fmtMoney = (n: string | number) => '₸' + Math.round(Number(n)).toLocaleString('ru');
 
 // ── 🔗 Объединить (findSupplierDuplicateGroups / mergeSupplierGroup); «Это разные поставщики» lasts until reload, as in legacy ──
 const mergeOpen = ref(false);
@@ -286,10 +338,7 @@ function mergeSupplierGroup(g: DuplicateGroup<Supplier>): void {
 
 // ── Tools that need modules not migrated yet ──
 const later = (text: string) => () => window.alert(text);
-const importEsf = later('Импорт из ЭСФ появится после переноса раздела «Входящие ЭСФ».');
-const orphans = later('Поиск осиротевших названий появится после переноса раздела «Деньги»: он сверяет поставщиков с денежными операциями.');
-const spellings = later('Разночтения написаний появятся после переноса раздела «Деньги»: они ищутся в денежных операциях.');
-const legalForms = later('Сокращение юрформ появится после переноса разделов «Деньги» и «Входящие ЭСФ»: оно меняет и их записи.');
+const legalForms = later('Сокращение юрформ меняет названия и во входящих ЭСФ, и в денежных операциях; появится вместе с правкой операций (ERP-031…033, решения D-03 и D-11).');
 </script>
 
 <template>
@@ -303,7 +352,7 @@ const legalForms = later('Сокращение юрформ появится п�
                 <div style="display: flex; gap: 8px">
                     <input id="supplier-file" ref="fileInput" type="file" accept=".csv" style="display: none" @change="importSuppliersCSV" />
                     <button class="btn btn-ghost btn-sm" @click="fileInput?.click()">📥 Импорт CSV</button>
-                    <button class="btn btn-ghost btn-sm" @click="importEsf">📄 Импорт из ЭСФ</button>
+                    <button class="btn btn-ghost btn-sm" @click="importEsf()">📄 Импорт из ЭСФ</button>
                     <button class="btn btn-ghost btn-sm" @click="orphans">🕵️ Осиротевшие в операциях</button>
                     <button class="btn btn-ghost btn-sm" @click="spellings">🔤 Разночтения написаний</button>
                     <button class="btn btn-ghost btn-sm" @click="mergeOpen = true">🔗 Объединить</button>
@@ -622,11 +671,37 @@ const legalForms = later('Сокращение юрформ появится п�
                 </div>
             </div>
 
-            <!-- ЭСФ поставщика: legacy loads them from incoming_invoices; that module is not migrated yet. -->
             <div v-show="card.id !== null" id="sup-card-esf-section" style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px">
                 <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px">📄 Входящие ЭСФ</div>
                 <div id="sup-card-esf-list" style="font-size: 12px; max-height: 200px; overflow-y: auto">
-                    <div style="color: var(--text3); padding: 8px">ЭСФ поставщика появятся после переноса раздела «Входящие ЭСФ»</div>
+                    <div v-if="cardEsf === null" style="color: var(--text3)">⏳ Загрузка...</div>
+                    <div v-else-if="cardEsf === 'error'" style="color: var(--red)">Ошибка загрузки</div>
+                    <div v-else-if="!cardEsf.length" style="color: var(--text3); padding: 8px">ЭСФ не найдены</div>
+                    <table v-else style="width: 100%; border-collapse: collapse">
+                        <thead>
+                            <tr style="color: var(--text3); border-bottom: 1px solid var(--border)">
+                                <th style="text-align: left; padding: 4px">Дата</th>
+                                <th style="text-align: left; padding: 4px">Номер</th>
+                                <th style="text-align: right; padding: 4px">Сумма</th>
+                                <th style="padding: 4px"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(inv, i) in cardEsf" :key="i" style="border-bottom: 1px solid var(--border)">
+                                <td style="padding: 4px; color: var(--text3)">{{ inv.date || '' }}</td>
+                                <td style="padding: 4px; font-family: monospace">{{ inv.num || '' }}</td>
+                                <td style="padding: 4px; text-align: right; font-weight: 600">{{ fmtEsf(inv.total) }}</td>
+                                <td style="padding: 4px">{{ ESF_STATUS[inv.status] || inv.status || '' }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2" style="padding: 4px; color: var(--text3)">Итого {{ cardEsf.length }} ЭСФ</td>
+                                <td style="padding: 4px; text-align: right; font-weight: 700">{{ fmtEsf(cardEsf.reduce((s, i) => s + Number(i.total), 0)) }}</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
 
@@ -643,6 +718,70 @@ const legalForms = later('Сокращение юрформ появится п�
                 </button>
                 <button class="btn btn-ghost" @click="closeCard">Отмена</button>
                 <button class="btn btn-primary" :disabled="card.busy || card.saved" @click="saveSupplierCard">Сохранить</button>
+            </div>
+        </ErpModal>
+        <ErpModal id="orphanSuppliersModal" :open="cp.orphansOpen" :modal-style="{ maxWidth: '720px', maxHeight: '85vh', overflowY: 'auto' }" @close="cp.orphansOpen = false">
+            <div class="modal-header">
+                <span class="modal-title">🕵️ Осиротевшие контрагенты-поставщики</span>
+                <button class="modal-close" @click="cp.orphansOpen = false">✕</button>
+            </div>
+            <div style="font-size: 12px; color: var(--text3); margin-bottom: 12px">
+                Эти названия встречаются как контрагент в денежных операциях (Расчётные счета), но отсутствуют в справочнике «Все поставщики». Нажмите «+ Создать
+                карточку», чтобы завести нормальную запись (после этого не забудьте заполнить БИН).
+            </div>
+            <div id="orphan-suppliers-body">
+                <div v-if="!cp.orphans.length" style="padding: 24px; text-align: center; color: var(--text3)">✅ Все контрагенты-поставщики из операций уже есть в справочнике</div>
+                <table v-else class="data-table" style="font-size: 12px">
+                    <thead>
+                        <tr>
+                            <th>Название (из операций)</th>
+                            <th style="text-align: right">Операций</th>
+                            <th style="text-align: right">Сумма</th>
+                            <th>Последняя</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="o in cp.orphans" :key="o.name">
+                            <td style="font-weight: 600">{{ o.name }}</td>
+                            <td style="text-align: right; font-family: 'IBM Plex Mono', monospace">{{ o.count }}</td>
+                            <td style="text-align: right; font-family: 'IBM Plex Mono', monospace">{{ fmtMoney(o.sum) }}</td>
+                            <td style="color: var(--text3)">{{ o.lastDate || '—' }}</td>
+                            <td><button class="btn btn-primary btn-sm" style="font-size: 11px" @click="createSupplierFromOrphan(o)">+ Создать карточку</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </ErpModal>
+
+        <ErpModal id="spellingGroupsModal" :open="cp.spellingsOpen" :modal-style="{ maxWidth: '640px', maxHeight: '85vh', overflowY: 'auto' }" @close="cp.spellingsOpen = false">
+            <div class="modal-header">
+                <span class="modal-title">🔤 Разночтения написаний</span>
+                <button class="modal-close" @click="cp.spellingsOpen = false">✕</button>
+            </div>
+            <div style="font-size: 12px; color: var(--text3); margin-bottom: 12px">
+                Найдены разные написания одного и того же контрагента-поставщика в операциях «Расчётные счета» (например, разница в кавычках, «ИП» или регистре).
+                Выберите, к какому написанию всё привести.
+            </div>
+            <div id="spelling-groups-body">
+                <div v-if="!cp.spellings.length" style="padding: 24px; text-align: center; color: var(--text3)">✅ Разночтений написаний не найдено</div>
+                <div v-for="g in cp.spellings" :key="g.norm" class="card" style="margin-bottom: 14px; padding: 14px">
+                    <div v-if="g.canonical" style="font-size: 11px; color: var(--accent); margin-bottom: 6px">Есть карточка поставщика: «{{ g.canonical }}»</div>
+                    <label
+                        v-for="v in g.variants"
+                        :key="v.text"
+                        style="display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--border); cursor: pointer"
+                    >
+                        <input v-model="cp.chosen[g.norm]" type="radio" :name="'spell-canon-' + g.norm" :value="v.text" style="width: auto; margin-top: 3px" />
+                        <span style="flex: 1">
+                            <div style="font-size: 13px">{{ v.text }}</div>
+                            <div style="font-size: 11px; color: var(--text3)">{{ v.count }} операц. · {{ fmtMoney(v.sum) }} · последняя {{ v.lastDate || '—' }}</div>
+                        </span>
+                    </label>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 10px">
+                        <button class="btn btn-primary btn-sm" @click="mergeSpellingLater">🔤 Свести к одному написанию</button>
+                    </div>
+                </div>
             </div>
         </ErpModal>
     </ErpLayout>

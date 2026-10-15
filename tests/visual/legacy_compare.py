@@ -308,6 +308,17 @@ with sync_playwright() as p:
         page.locator('#finance-tabs .tab').nth(2).click(); page.wait_for_timeout(3000)
         page.screenshot(path=str(OUT / f'target-finance-purchases-{theme}.png'))
         target_debts = page.locator('#pur-debts-tbody').inner_text()
+        # Supplier tools: the server's orphans, spellings and the plan of «Импорт из ЭСФ» (apply=0 changes nothing).
+        sup_tools = page.evaluate("""async () => {
+            const cp = await (await fetch('/suppliers/counterparties', {headers: {Accept: 'application/json'}})).json();
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const xsrf = decodeURIComponent((document.cookie.match(/XSRF-TOKEN=([^;]+)/) || [])[1] || '');
+            const r = await fetch('/suppliers/import-esf', {method: 'POST', headers: {'X-XSRF-TOKEN': xsrf, 'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '',
+                'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', Accept: 'text/html, application/xhtml+xml'}, body: JSON.stringify({apply: 0})});
+            const plan = (await r.json()).props.flash.dialog;
+            return {orphans: cp.orphans.map(o => [o.name, o.count, Math.round(+o.sum), o.lastDate].join('|')),
+                    spellings: cp.spellings.map(g => [g.canonical || '', ...g.variants.map(v => v.text + ':' + v.count)].join('|')), plan: plan ? plan.text : ''};
+        }""")
         fin_pur = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/finance', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Finance',
@@ -932,6 +943,26 @@ with sync_playwright() as p:
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-salon-report-{theme}.png'))
         legacy_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
         print(f'salon report ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a == b else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'продавцы', 'заказы'), target_sr, legacy_sr)))
+        ctx.close()
+        # Supplier tools in legacy: the same suppliers, supplier payments and invoices through its own functions.
+        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        ctx.route('**/*', guard)
+        page = ctx.new_page()
+        page.goto(LEGACY, wait_until='load', timeout=60000); page.wait_for_timeout(1500)
+        legacy_tools = page.evaluate("""async ([sup, tx, inv]) => {
+            suppliersData = sup.map(s => ({id: s.id, name: s.name, bin: s.bin || ''}));
+            moneyTx = tx.map(t => ({id: t.id, date: t.date, flow: t.flow, category: t.category, counterparty: t.ctr || '', amount: t.amount, accountId: String(t.account)}));
+            _esfData = {invoices: inv.map(i => ({supplier_name: i.supplier, supplier_bin: i.bin || '', total_with_nds: +i.total, date: i.date}))};
+            let plan = '';
+            window.confirm = m => { plan = m; return false; }; window.alert = m => { plan = m; };
+            await importSuppliersFromEsf(null);
+            return {orphans: findOrphanSupplierCounterparties().map(o => [o.name, o.count, Math.round(o.sum), o.lastDate].join('|')),
+                    spellings: findCounterpartySpellingGroups().map(g => [g.canonicalSupplierName || '', ...g.variants.map(v => v.text + ':' + v.count)].join('|')), plan};
+        }""", [suppliers, money['transactions'], fin_pur['invoices']])
+        for key in ('orphans', 'spellings', 'plan'):
+            a2, b2 = sup_tools[key], legacy_tools[key]
+            n = len(a2) if isinstance(a2, list) else 1
+            print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
         for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')

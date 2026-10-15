@@ -384,4 +384,100 @@ class SupplierService
 
         return $supplier;
     }
+
+    /**
+     * Legacy importSuppliersFromEsf (L18567): the suppliers of the incoming invoices (by BIN, otherwise by the normalized name)
+     * that the directory lacks are added; a known supplier without a BIN gets the BIN of its invoices. The first call reports
+     * the plan for the legacy confirmation, the second (apply) computes it again and applies it in one transaction.
+     *
+     * @return array{type: 'alert'|'confirm', text: string}
+     */
+    public function importFromEsf(bool $apply, User $by): array
+    {
+        $alert = fn (string $t) => ['type' => 'alert', 'text' => $t];
+        $invoices = DB::table('incoming_invoices')->orderByDesc('date')->orderBy('id')->get(['supplier_name', 'supplier_bin']);
+        if ($invoices->isEmpty()) {
+            return $alert('Не найдено ни одной входящей ЭСФ. Откройте раздел «Входящие ЭСФ» и убедитесь, что документы загружены.');
+        }
+        $fromEsf = [];
+        foreach ($invoices as $inv) {
+            $name = trim((string) $inv->supplier_name);
+            $bin = trim((string) $inv->supplier_bin);
+            if ($name === '' && $bin === '') {
+                continue;
+            }
+            $key = $bin !== '' ? $bin : Supplier::normalizedName($name);
+            if ($key === '') {
+                continue;
+            }
+            if (! isset($fromEsf[$key])) {
+                $fromEsf[$key] = ['name' => $name !== '' ? $name : $bin, 'bin' => $bin];
+            } elseif ($fromEsf[$key]['bin'] === '' && $bin !== '') {
+                $fromEsf[$key]['bin'] = $bin;
+            }
+        }
+
+        return DB::transaction(function () use ($fromEsf, $apply, $by, $alert) {
+            DB::select('SELECT pg_advisory_xact_lock(?)', [crc32('suppliers')]);
+            $existing = Supplier::query()->active()->orderBy('name')->orderBy('id')->when($apply, fn ($q) => $q->lockForUpdate())->get();
+            $byBin = $existing->filter(fn (Supplier $s) => trim((string) $s->bin) !== '')->keyBy(fn (Supplier $s) => trim($s->bin));
+            $byName = $existing->keyBy(fn (Supplier $s) => Supplier::normalizedName($s->name)); // the last of a name wins, as legacy
+            $create = [];
+            $enrich = [];
+            foreach ($fromEsf as ['name' => $name, 'bin' => $bin]) {
+                if ($bin !== '' && $byBin->has($bin)) {
+                    continue;
+                }
+                $known = $byName->get(Supplier::normalizedName($name));
+                if ($known !== null) {
+                    if ($bin !== '' && trim((string) $known->bin) === '' && ! isset($enrich[$known->id])) {
+                        $enrich[$known->id] = [$known, $bin];
+                    }
+
+                    continue;
+                }
+                $create[] = ['name' => mb_substr($name, 0, 255), 'bin' => $bin !== '' ? mb_substr($bin, 0, 32) : null];
+            }
+            if ($create === [] && $enrich === []) {
+                return $alert('Все поставщики из ЭСФ уже есть в справочнике «Поставщики». Новых записей не найдено.');
+            }
+            if (! $apply) {
+                return ['type' => 'confirm', 'text' => ($create ? 'Будет добавлено новых поставщиков: '.count($create)."\n" : '')
+                    .($enrich ? 'Будет дополнен БИН у существующих поставщиков: '.count($enrich)."\n" : '')."\nПродолжить?"];
+            }
+            foreach ($create as $row) {
+                $supplier = new Supplier(['name' => $row['name'], 'bin' => $row['bin'], 'status' => 'active', 'comment' => 'Добавлен автоматически из Входящих ЭСФ']);
+                $supplier->forceFill(['created_by_id' => $by->id, 'created_by_name' => $by->name, 'updated_by_id' => $by->id, 'updated_by_name' => $by->name])->save();
+                Audit::record('supplier.created', 'supplier', $supplier->id, $supplier->only(self::FIELDS) + ['source' => 'esf'], $by);
+            }
+            foreach ($enrich as [$supplier, $bin]) {
+                $supplier->forceFill(['bin' => mb_substr($bin, 0, 32), 'updated_by_id' => $by->id, 'updated_by_name' => $by->name]);
+                $supplier->lock_version++;
+                $supplier->save();
+                Audit::record('supplier.updated', 'supplier', $supplier->id, ['bin' => ['from' => null, 'to' => $supplier->bin], 'source' => 'esf'], $by);
+            }
+
+            return $alert("Готово!\nДобавлено: ".count($create)."\nОбновлён БИН: ".count($enrich));
+        });
+    }
+
+    /**
+     * Legacy createSupplierFromOrphan (L18545): a card for a counterparty of the supplier payments, unless findSupplierForName
+     * already finds one.
+     */
+    public function createFromOrphan(string $name, User $by): array
+    {
+        return DB::transaction(function () use ($name, $by) {
+            DB::select('SELECT pg_advisory_xact_lock(?)', [crc32('suppliers')]);
+            $existing = Supplier::findForName(Supplier::query()->active()->orderBy('name')->orderBy('id')->get(), $name, null);
+            if ($existing !== null) {
+                return ['type' => 'alert', 'text' => "Поставщик «{$existing->name}» уже есть в справочнике — отдельную карточку создавать не нужно."];
+            }
+            $supplier = new Supplier(['name' => mb_substr($name, 0, 255), 'status' => 'active', 'comment' => 'Добавлен из операций в Расчётных счетах']);
+            $supplier->forceFill(['created_by_id' => $by->id, 'created_by_name' => $by->name, 'updated_by_id' => $by->id, 'updated_by_name' => $by->name])->save();
+            Audit::record('supplier.created', 'supplier', $supplier->id, $supplier->only(self::FIELDS) + ['source' => 'money'], $by);
+
+            return ['type' => 'created', 'text' => ''];
+        });
+    }
 }
