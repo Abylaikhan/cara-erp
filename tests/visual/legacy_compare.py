@@ -99,6 +99,19 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-dealers-{theme}.png'))
         page.locator('#cust-dealers button', has_text='+ Подробно').click(); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-dealer-modal-{theme}.png'))
+        # «Сверки»: the empty state as a picture; the act with a dealer as text — KPIs, footer and rows without the running
+        # balance, in any order (legacy sorts «дд.мм.гггг» as text, the target by date — ADR-0002).
+        page.locator('#cust-dealers .modal-close, #addDealerModal .modal-close').first.click(); page.wait_for_timeout(200)
+        page.locator('#cust-tab-reconcile').click(); page.wait_for_timeout(2000)
+        page.screenshot(path=str(OUT / f'target-cust-reconcile-{theme}.png'))
+        rec_orders = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/customers', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Customers',
+                'X-Inertia-Partial-Data': 'reconcileOrders', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.reconcileOrders;
+        }""")
+        page.select_option('#rec-type', 'dealer'); page.wait_for_timeout(200); page.select_option('#rec-party', 'dealer_astana'); page.wait_for_timeout(800)
+        target_rec_act = (page.locator('#rec-kpi').inner_text(), page.locator('#rec-tfoot').inner_text(), page.evaluate("""() => [...document.querySelectorAll('#rec-tbody tr')].map(tr => [...tr.children].slice(0, 5).map(td => td.textContent.replace(/\\s+/g, ' ').trim()).join('|')).sort()"""))
         page.goto(TARGET + '/suppliers', wait_until='networkidle'); page.wait_for_timeout(500)
         page.screenshot(path=str(OUT / f'target-suppliers-{theme}.png'))
         suppliers = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['suppliers']
@@ -368,6 +381,19 @@ with sync_playwright() as p:
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-dealers-{theme}.png'))
         page.evaluate("showModal('addDealerModal')"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-dealer-modal-{theme}.png'))
+        page.evaluate("""(orders) => {
+            closeModal('addDealerModal');
+            const dmy = d => d ? d.split('-').reverse().join('.') : '';
+            ordersData = orders.map(o => ({num: o.num, channel: o.channel, customer: o.customer || '', date: dmy(o.date), createdDate: dmy(o.created), payment: o.payment, items: [{qty: 1, price: +o.total}]}));
+            showCustTab('reconcile-counterparties', document.getElementById('cust-tab-reconcile'));
+        }""", rec_orders)
+        page.wait_for_timeout(500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-cust-reconcile-{theme}.png'))
+        page.evaluate("document.getElementById('rec-type').value = 'dealer'; renderCounterpartyReconcile(); document.getElementById('rec-party').value = 'dealer_astana'; renderCounterpartyReconcile()")
+        page.wait_for_timeout(500)
+        legacy_rec_act = (page.locator('#rec-kpi').inner_text(), page.locator('#rec-tfoot').inner_text(), page.evaluate("""() => [...document.querySelectorAll('#rec-tbody tr')].map(tr => [...tr.children].slice(0, 5).map(td => td.textContent.replace(/\\s+/g, ' ').trim()).join('|')).sort()"""))
+        print(f'customers reconcile act ({theme}): KPI ' + ('совпадает' if target_rec_act[0] == legacy_rec_act[0] else 'РАСХОЖДЕНИЕ') + ', итог ' + ('совпадает' if target_rec_act[1] == legacy_rec_act[1] else 'РАСХОЖДЕНИЕ')
+              + f', строк {len(target_rec_act[2])} / {len(legacy_rec_act[2])} ' + ('совпадает' if target_rec_act[2] == legacy_rec_act[2] else 'РАСХОЖДЕНИЕ'))
         # Suppliers: legacy suppliersData gets the target's list. Its card loads the supplier's ESF from the (blocked) legacy
         # backend; the target shows that ESF come with the «Входящие ЭСФ» module (ADR-0002, item 20).
         page.evaluate("""(suppliers) => {
@@ -849,7 +875,7 @@ with sync_playwright() as p:
         tl, ll = target_salon.splitlines(), page.locator('#salon-cash-tbody').inner_text().splitlines()
         print(f'salon cash table ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-calendar', 'money-salonwb', 'money-salon', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-calendar', 'money-salonwb', 'money-salon', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

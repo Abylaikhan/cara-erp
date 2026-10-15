@@ -153,6 +153,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
         Route::put('/{customer}', 'update')->whereNumber('customer')->name('update');
+        Route::get('/reconcile/payments/{num}', 'orderPayments')->where('num', '[^/]{1,64}')->name('reconcile.payments');
     });
     // M08 «Покупатели» — tab «Дилеры»: a dealer is a sales channel of the group «dealer»
     Route::middleware('page:customers')->prefix('customers/dealers')->name('customers.dealers.')->controller(DealerController::class)->group(function () {

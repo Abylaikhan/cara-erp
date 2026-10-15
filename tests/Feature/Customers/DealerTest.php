@@ -9,6 +9,7 @@ use App\Models\SalesChannel;
 use App\Models\User;
 use App\Services\DealerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -152,5 +153,25 @@ class DealerTest extends TestCase
                 ['channel' => 'dealer_astana', 'date' => '2026-10-05', 'total' => 2000, 'payment' => 50],
             ])
             ->has('today'));
+    }
+
+    public function test_reconcile_tab_loads_orders_and_payments_of_a_visible_order_only(): void
+    {
+        foreach ([['МО-1', 'dealer_astana'], ['МО-2', 'salon_armada']] as [$num, $channel]) {
+            $o = new Order(['num' => $num, 'channel' => $channel, 'customer' => 'Демо', 'status' => 'done', 'payment_pct' => 40, 'due_date' => '2026-10-01', 'order_date' => '2026-09-20']);
+            $o->save();
+            $o->items()->create(['line_no' => 0, 'name' => 'Демо', 'qty' => '1', 'price' => '1000.50', 'progress' => 0, 'status' => 'done', 'attrs' => []]);
+        }
+        $acc = DB::table('money_accounts')->insertGetId(['name' => 'Банк Демо', 'type' => 'bank', 'currency' => 'KZT', 'opening_balance' => 0, 'sort_order' => 0]);
+        DB::table('money_transactions')->insert([
+            ['account_id' => $acc, 'tx_date' => '2026-10-03', 'flow' => 'income', 'category' => 'order_payment', 'amount' => '400.20', 'order_num' => 'МО-1', 'description' => 'Демо'],
+            ['account_id' => $acc, 'tx_date' => '2026-10-04', 'flow' => 'expense', 'category' => 'supplier', 'amount' => '1', 'order_num' => 'МО-1', 'description' => 'Не приход'],
+        ]);
+        $director = User::factory()->role('director')->create();
+        $this->actingAs($director)->get('/customers')->assertInertia(fn ($page) => $page
+            ->missing('reconcileOrders')
+            ->reloadOnly('reconcileOrders', fn ($reload) => $reload->where('reconcileOrders', fn ($o) => collect($o)->pluck('num')->sort()->values()->all() === ['МО-1', 'МО-2'])));
+        $this->getJson('/customers/reconcile/payments/МО-1')->assertOk()->assertExactJson([['date' => '2026-10-03', 'category' => 'order_payment', 'desc' => 'Демо', 'amount' => '400.20']]);
+        $this->getJson('/customers/reconcile/payments/МО-404')->assertNotFound();
     }
 }

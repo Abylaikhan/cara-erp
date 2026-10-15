@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // M08 «Покупатели» — legacy page-customers (L3640–3826), tab «Контрагенты»: renderPersons (L18856), openPersonModal (L18925),
 // savePerson (L18950), showCustTab (L19061), personModal (L8417). Same markup and texts; the list, the customer's channel
-// and saving are decided by the server. Tab «Дилеры» — DealersTab; «Салоны» and «Сверки» are migrated in later parts
-// (docs/adr/0006-customers-and-channels.md).
+// and saving are decided by the server. Tab «Дилеры» — DealersTab, «Сверки» — ReconcileTab; «Салоны» is a demonstration of
+// legacy (sellers and clients written in its code) and waits for the sellers of «Сотрудники» (docs/adr/0006-customers-and-channels.md).
 import { router } from '@inertiajs/vue3';
 import { computed, reactive, ref } from 'vue';
 import DealersTab from '@/components/customers/DealersTab.vue';
+import ReconcileTab, { type ReconcileOrder } from '@/components/customers/ReconcileTab.vue';
 import ErpModal from '@/components/ErpModal.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import type { Dealer, DealerOrder } from '@/types';
@@ -23,7 +24,7 @@ interface Person {
     lock_version: number;
 }
 
-const props = defineProps<{ persons: Person[]; dealers: Dealer[]; dealerOrders: DealerOrder[]; today: string }>();
+const props = defineProps<{ persons: Person[]; dealers: Dealer[]; dealerOrders: DealerOrder[]; today: string; reconcileOrders?: ReconcileOrder[] }>();
 const fmt = (n: number) => '₸' + Math.round(n).toLocaleString('ru-RU');
 
 type Tab = 'persons' | 'dealers' | 'salons' | 'reconcile-counterparties';
@@ -186,13 +187,16 @@ function savePerson(): void {
 
             <DealersTab :dealers="props.dealers" :orders="props.dealerOrders" :period="period" :today="props.today" :active="tab === 'dealers'" />
 
-            <div v-for="t in tabs.filter((x) => x.id === 'salons' || x.id === 'reconcile-counterparties')" v-show="tab === t.id" :id="'cust-' + t.id" :key="t.id" class="cust-tab">
+            <div v-show="tab === 'salons'" id="cust-salons" class="cust-tab">
                 <div class="card">
                     <div style="font-size: 13px; color: var(--text3); line-height: 1.6">
-                        Вкладка ещё не перенесена в новую систему. Перенос идёт по плану в трекере; данные этой вкладки здесь пока не
-                        показываются.
+                        Салоны → продавцы → их клиенты появятся вместе с продавцами раздела «Сотрудники» (ERP-026, ERP-053, решение D-13): в
+                        прежней системе эта вкладка показывала примерные данные, записанные в коде страницы.
                     </div>
                 </div>
+            </div>
+            <div v-show="tab === 'reconcile-counterparties'" id="cust-reconcile-counterparties" class="cust-tab">
+                <ReconcileTab :orders="props.reconcileOrders" :dealers="props.dealers" :active="tab === 'reconcile-counterparties'" />
             </div>
         </div>
 

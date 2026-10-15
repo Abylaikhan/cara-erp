@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\SalesChannel;
 use App\Services\CustomerService;
 use App\Support\ChannelScope;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -54,6 +55,14 @@ class CustomerController extends Controller
                 ->map(fn (Order $o) => ['channel' => $o->channel, 'date' => $o->due_date?->format('Y-m-d'), 'total' => (float) $o->getAttribute('total'), 'payment' => $o->payment_pct])
                 ->values(),
             'today' => now(config('erp.business_timezone'))->format('Y-m-d'),
+            // Tab «Сверки» (legacy renderCounterpartyReconcile): every order with its date, total and paid share, sent when
+            // the tab is opened.
+            'reconcileOrders' => Inertia::optional(fn () => ChannelScope::apply(Order::query(), $request->user(), 'orders.channel')
+                ->leftJoinSub(DB::table('order_items')->groupBy('order_id')->selectRaw('order_id, sum(qty * price) AS total'), 'i', 'i.order_id', '=', 'orders.id')
+                ->orderByDesc('orders.created_at')->orderByDesc('orders.id')
+                ->get(['orders.num', 'orders.channel', 'orders.customer', 'orders.due_date', 'orders.order_date', 'orders.payment_pct', DB::raw('coalesce(i.total, 0) AS total')])
+                ->map(fn (Order $o) => ['num' => $o->num, 'channel' => $o->channel, 'customer' => $o->customer, 'date' => $o->due_date?->format('Y-m-d'),
+                    'created' => $o->order_date?->format('Y-m-d'), 'total' => (string) $o->getAttribute('total'), 'payment' => $o->payment_pct])->values()),
             // Legacy dealersData: added dealers on top (unshift), then the five of the code in their order.
             'dealers' => ChannelScope::apply(SalesChannel::query()->dealers(), $request->user(), 'code')
                 ->orderByDesc('created_at')->orderBy('sort_order')->get()
@@ -64,6 +73,16 @@ class CustomerController extends Controller
                     'lock_version' => $d->lock_version,
                 ])->values(),
         ]);
+    }
+
+    /** Legacy openRecDrillTx: the income operations with the order's number, oldest first (only an order the user may see). */
+    public function orderPayments(Request $request, string $num): JsonResponse
+    {
+        abort_unless(ChannelScope::apply(Order::query()->where('num', $num), $request->user())->exists(), 404);
+
+        return response()->json(DB::table('money_transactions')->where('order_num', $num)->where('flow', 'income')->orderBy('tx_date')->orderBy('id')
+            ->get(['tx_date', 'category', 'description', 'amount'])
+            ->map(fn ($t) => ['date' => $t->tx_date, 'category' => $t->category, 'desc' => $t->description, 'amount' => (string) $t->amount]));
     }
 
     public function store(CustomerRequest $request): RedirectResponse
