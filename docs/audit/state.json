@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261014T220502Z-057f",
-    "started_at": "2026-10-14T22:05:02Z",
+    "run_id": "20261015T150356Z-3a19",
+    "started_at": "2026-10-15T15:03:56Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-14T22:06:04Z",
+    "finished_at": "2026-10-15T15:04:57Z",
     "exit_code": 0
   },
   "last_observed": {
-    "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
-    "target_ref": "852c409693a9c64dd565335fa6e26d0e87c46e09",
-    "at": "2026-10-14T22:05:02Z"
+    "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
+    "target_ref": "e4792682a55f42189e02ab4fc57e99b77beb899b",
+    "at": "2026-10-15T15:03:56Z"
   },
   "last_reported": {
-    "run_id": "20261014T220502Z-057f",
-    "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
-    "source_blob": "0b5a45728ff2c7f928cc38e529466bf7bcc9a0dd",
-    "target_ref": "852c409693a9c64dd565335fa6e26d0e87c46e09",
-    "logical_key": "a0243d706d39e068",
+    "run_id": "20261015T150356Z-3a19",
+    "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
+    "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
+    "target_ref": "e4792682a55f42189e02ab4fc57e99b77beb899b",
+    "logical_key": "fc174d824bf6ac30",
     "local_date": "2026-10-15",
-    "completed_at": "2026-10-14T22:06:04Z",
-    "report": "daily/2026-10-15/20261014T220502Z-057f.md",
-    "artifact_sha256": "42afde00c76d7f4e7a1d9ad6af42daec95e5d72bc9c56c68ec79e1510dd77bc6",
+    "completed_at": "2026-10-15T15:04:57Z",
+    "report": "daily/2026-10-15/20261015T150356Z-3a19.md",
+    "artifact_sha256": "b4f8f3e66af34d5a1a96bb6e04b0748da5922a1c441ee789d9ca0f88f5598876",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -125,6 +125,15 @@
       "Tests\\Feature\\Crm\\LeadTest::test_salons_manager_cannot_create_a_lead_without_a_salon",
       "Tests\\Feature\\Crm\\LeadTest::test_second_editor_gets_a_conflict",
       "Tests\\Feature\\Crm\\LeadTest::test_status_moves_and_lost_reason_is_added_to_the_comment",
+      "Tests\\Feature\\Crm\\ProjectTest::test_calculation_versions_totals_and_status",
+      "Tests\\Feature\\Crm\\ProjectTest::test_customer_decides_on_a_sent_calculation_only",
+      "Tests\\Feature\\Crm\\ProjectTest::test_executors_are_staff_users",
+      "Tests\\Feature\\Crm\\ProjectTest::test_files_sides_downloads_and_deleting",
+      "Tests\\Feature\\Crm\\ProjectTest::test_head_changes_follow_the_rights_and_the_record_version",
+      "Tests\\Feature\\Crm\\ProjectTest::test_only_the_director_deletes_a_project_and_it_is_kept_deactivated",
+      "Tests\\Feature\\Crm\\ProjectTest::test_open_projects_are_counted_and_staff_get_the_executor_list",
+      "Tests\\Feature\\Crm\\ProjectTest::test_projects_follow_the_channel_and_the_customer_does_not_get_costs_drafts_or_internal_things",
+      "Tests\\Feature\\Crm\\ProjectTest::test_staff_and_customer_create_projects_numbered_from_their_id",
       "Tests\\Feature\\Customers\\CustomerTest::test_channel_bound_account_sees_and_changes_only_its_channel",
       "Tests\\Feature\\Customers\\CustomerTest::test_created_customer_gets_office_channel_author_and_audit",
       "Tests\\Feature\\Customers\\CustomerTest::test_head_of_salons_must_add_a_customer_from_a_salon",
@@ -212,6 +221,9 @@
       "Tests\\Feature\\Legacy\\ProductImportTest::test_invalid_rows_change_nothing",
       "Tests\\Feature\\Legacy\\ProductionProgressImportTest::test_imports_progress_onto_its_order_line",
       "Tests\\Feature\\Legacy\\ProductionProgressImportTest::test_rejects_records_of_unknown_lines",
+      "Tests\\Feature\\Legacy\\ProjectImportTest::test_an_empty_legacy_set_is_imported_as_nothing",
+      "Tests\\Feature\\Legacy\\ProjectImportTest::test_files_and_bad_rows_are_refused_before_anything_is_written",
+      "Tests\\Feature\\Legacy\\ProjectImportTest::test_imports_projects_with_calculations_and_messages_idempotently",
       "Tests\\Feature\\Legacy\\SupplierImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\SupplierImportTest::test_imports_suppliers_with_expense_links_and_legacy_defaults",
       "Tests\\Feature\\Legacy\\SupplierImportTest::test_rows_that_cannot_be_kept_change_nothing",
@@ -268,16 +280,16 @@
     ]
   },
   "last_verified": {
-    "source_ref": "c917d375777059db4b06cf9aceca47861c7cf56a",
-    "target_ref": "852c409693a9c64dd565335fa6e26d0e87c46e09",
+    "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
+    "target_ref": "e4792682a55f42189e02ab4fc57e99b77beb899b",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-14T22:06:04Z",
-    "run_id": "20261014T220502Z-057f"
+    "completed_at": "2026-10-15T15:04:57Z",
+    "run_id": "20261015T150356Z-3a19"
   },
   "changelog": {
-    "entries": 34,
-    "last_header": "## 2026-10-15 · 20261014T220502Z-057f",
-    "sha256": "f3a9b3016cb1c49cb5c5b4f37e5e01e2ea2e6027eae6be7a198e5eb9968791f4"
+    "entries": 35,
+    "last_header": "## 2026-10-15 · 20261015T150356Z-3a19",
+    "sha256": "031ff3723961c82c96831cc198cf1baff909d732fcf01982be5440ae7a9e836b"
   },
   "accepted_source_ref": {
     "commit": "c917d375777059db4b06cf9aceca47861c7cf56a",
