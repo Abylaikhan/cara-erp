@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T150356Z-3a19",
-    "started_at": "2026-10-15T15:03:56Z",
+    "run_id": "20261015T152941Z-01b2",
+    "started_at": "2026-10-15T15:29:41Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T15:04:57Z",
+    "finished_at": "2026-10-15T15:30:43Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "e4792682a55f42189e02ab4fc57e99b77beb899b",
-    "at": "2026-10-15T15:03:56Z"
+    "target_ref": "a9601d8b274196b997fcfb2ed2a141e2630d8bb5",
+    "at": "2026-10-15T15:29:41Z"
   },
   "last_reported": {
-    "run_id": "20261015T150356Z-3a19",
+    "run_id": "20261015T152941Z-01b2",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "e4792682a55f42189e02ab4fc57e99b77beb899b",
-    "logical_key": "fc174d824bf6ac30",
+    "target_ref": "a9601d8b274196b997fcfb2ed2a141e2630d8bb5",
+    "logical_key": "b87ce255be6afa72",
     "local_date": "2026-10-15",
-    "completed_at": "2026-10-15T15:04:57Z",
-    "report": "daily/2026-10-15/20261015T150356Z-3a19.md",
-    "artifact_sha256": "b4f8f3e66af34d5a1a96bb6e04b0748da5922a1c441ee789d9ca0f88f5598876",
+    "completed_at": "2026-10-15T15:30:43Z",
+    "report": "daily/2026-10-15/20261015T152941Z-01b2.md",
+    "artifact_sha256": "8d024c2d3de69a354d0c8d4fce051bbbf80832bb810af809a73d68936f15dc66",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -159,6 +159,8 @@
       "Tests\\Feature\\Customers\\DealerTest::test_roles_without_the_page_cannot_manage_dealers",
       "Tests\\Feature\\Customers\\DealerTest::test_second_editor_gets_a_conflict",
       "Tests\\Feature\\Customers\\DealerTest::test_tab_lists_the_legacy_dealers_and_puts_new_ones_first",
+      "Tests\\Feature\\Dashboard\\DashboardTest::test_monthly_sums_counts_and_critical_stock",
+      "Tests\\Feature\\Dashboard\\DashboardTest::test_roles_without_the_dashboard_cannot_open_it",
       "Tests\\Feature\\Esf\\EsfTest::test_duplicate_by_fields_when_there_is_no_registration_number",
       "Tests\\Feature\\Esf\\EsfTest::test_import_creates_an_unknown_supplier_and_refuses_a_second_copy",
       "Tests\\Feature\\Esf\\EsfTest::test_page_lists_invoices_with_linked_amounts_type_change_and_detail_with_material_match",
@@ -281,15 +283,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "e4792682a55f42189e02ab4fc57e99b77beb899b",
+    "target_ref": "a9601d8b274196b997fcfb2ed2a141e2630d8bb5",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T15:04:57Z",
-    "run_id": "20261015T150356Z-3a19"
+    "completed_at": "2026-10-15T15:30:43Z",
+    "run_id": "20261015T152941Z-01b2"
   },
   "changelog": {
-    "entries": 35,
-    "last_header": "## 2026-10-15 · 20261015T150356Z-3a19",
-    "sha256": "031ff3723961c82c96831cc198cf1baff909d732fcf01982be5440ae7a9e836b"
+    "entries": 36,
+    "last_header": "## 2026-10-15 · 20261015T152941Z-01b2",
+    "sha256": "84f44d4b7a097a248c656d94b1730d8eda57c928f7333a72ef80c8c12cb55051"
   },
   "accepted_source_ref": {
     "commit": "c917d375777059db4b06cf9aceca47861c7cf56a",
