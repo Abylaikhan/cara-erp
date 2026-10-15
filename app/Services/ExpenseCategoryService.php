@@ -7,6 +7,7 @@ use App\Models\ExpenseCategoryMerge;
 use App\Models\User;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -78,8 +79,9 @@ class ExpenseCategoryService
     }
 
     /**
-     * Moves every registered reference from one article to another and deactivates the source — all or nothing.
-     * Legacy mergeExpCats changed only money_tx.category in a separate request (QA-062).
+     * Moves every registered reference from one article to another and deactivates the source — all or nothing: the ids
+     * (config erp.expense_category_references), the group code of the money operations of the article and the codes in the
+     * lines of the advance reports. Legacy mergeExpCats changed only money_tx.category in a separate request (QA-062).
      */
     public function merge(int $fromId, int $toId, User $by): ExpenseCategoryMerge
     {
@@ -100,11 +102,29 @@ class ExpenseCategoryService
                     throw ValidationException::withMessages([$field => 'Объединять можно только статьи второго уровня']);
                 }
             }
-            $before = $this->referenceCounts([$from->id, $to->id]);
+            $before = $this->referenceCounts([$from->id, $to->id]) + $this->codeReferenceCounts($from, $to);
+            $fromGroup = $from->parent?->code;
+            $toGroup = $to->parent?->code;
+            // A money operation keeps the group of its article by code (legacy money_tx.category): an article moved to another
+            // group takes its operations there too. Done before the ids move, while the operations still name the source.
+            if ($fromGroup !== $toGroup && Schema::hasTable('money_transactions')) {
+                DB::table('money_transactions')->where('expense_category_id', $from->id)->where('category', $fromGroup)->update(['category' => $toGroup]);
+            }
             foreach ($this->references() as $ref) {
                 DB::table($ref['table'])->where($ref['column'], $from->id)->update([$ref['column'] => $to->id]);
             }
-            $after = $this->referenceCounts([$from->id, $to->id]);
+            // Advance report lines name the article and its group by code (legacy lines[].subcategory / lines[].category).
+            if (Schema::hasTable('advance_reports')) {
+                DB::update(<<<'SQL'
+                    UPDATE advance_reports SET lines = (
+                        SELECT jsonb_agg(CASE WHEN x.l->>'subcategory' = ?
+                            THEN x.l || jsonb_build_object('subcategory', ?::text) || CASE WHEN x.l->>'category' = ? THEN jsonb_build_object('category', ?::text) ELSE '{}'::jsonb END
+                            ELSE x.l END ORDER BY x.ord)
+                        FROM jsonb_array_elements(advance_reports.lines) WITH ORDINALITY AS x(l, ord))
+                    WHERE EXISTS (SELECT 1 FROM jsonb_array_elements(advance_reports.lines) AS y(l) WHERE y.l->>'subcategory' = ?)
+                    SQL, [$from->code, $to->code, $fromGroup, $toGroup, $from->code]);
+            }
+            $after = $this->referenceCounts([$from->id, $to->id]) + $this->codeReferenceCounts($from, $to);
             $from->forceFill(['active' => false, 'deactivated_at' => now(), 'merged_into_id' => $to->id])->lock_version++;
             $from->save();
             $merge = ExpenseCategoryMerge::create([
@@ -116,6 +136,22 @@ class ExpenseCategoryService
 
             return $merge;
         });
+    }
+
+    /**
+     * The lines of the advance reports that name the two articles by code.
+     *
+     * @return array<string, array<int, int>>
+     */
+    private function codeReferenceCounts(ExpenseCategory $from, ExpenseCategory $to): array
+    {
+        if (! Schema::hasTable('advance_reports')) {
+            return [];
+        }
+        $rows = DB::table('advance_reports as a')->crossJoin(DB::raw('jsonb_array_elements(a.lines) AS l'))
+            ->whereRaw("l->>'subcategory' IN (?, ?)", [$from->code, $to->code])->selectRaw("l->>'subcategory' AS code, count(*) AS n")->groupByRaw('1')->pluck('n', 'code');
+
+        return ['advance_reports.lines.subcategory' => [$from->id => (int) ($rows[$from->code] ?? 0), $to->id => (int) ($rows[$to->code] ?? 0)]];
     }
 
     /** @return list<array{table: string, column: string, label?: string}> */

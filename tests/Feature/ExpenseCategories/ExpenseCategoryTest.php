@@ -175,6 +175,29 @@ class ExpenseCategoryTest extends TestCase
         $this->get('/expense_cats')->assertInertia(fn (Assert $page) => $page->has('categories', 2));
     }
 
+    public function test_merge_rewrites_the_article_codes_of_advance_lines_and_the_group_of_money_operations(): void
+    {
+        $production = ExpenseCategory::create(['code' => 'production', 'name' => 'Производство', 'sort_order' => 20]);
+        $tools = ExpenseCategory::create(['code' => 'prod_tools', 'name' => 'Инструмент', 'parent_id' => $production->id, 'sort_order' => 10]);
+        $acc = DB::table('money_accounts')->insertGetId(['name' => 'Касса Демо', 'type' => 'cash', 'currency' => 'KZT', 'opening_balance' => 0, 'sort_order' => 0]);
+        DB::table('money_transactions')->insert([
+            ['account_id' => $acc, 'tx_date' => '2026-10-01', 'flow' => 'expense', 'category' => 'general', 'expense_category_id' => $this->rent->id, 'amount' => 10],
+            ['account_id' => $acc, 'tx_date' => '2026-10-01', 'flow' => 'expense', 'category' => 'general', 'expense_category_id' => $this->electricity->id, 'amount' => 20],
+        ]);
+        DB::table('advance_reports')->insert(['doc_num' => 'АО-1', 'employee_name' => 'Демо', 'report_date' => '2026-10-01', 'issued' => 0, 'spent' => 0, 'returned' => 0, 'status' => 'open',
+            'lines' => json_encode([['type' => 'expense', 'category' => 'general', 'subcategory' => 'gen_rent', 'amount' => 5], ['type' => 'supplier', 'amount' => 7],
+                ['type' => 'expense', 'category' => 'general', 'subcategory' => 'gen_electricity', 'amount' => 3]])]);
+
+        $merge = app(ExpenseCategoryService::class)->merge($this->rent->id, $tools->id, $this->director);
+
+        $this->assertSame(['production', 'general'], DB::table('money_transactions')->orderBy('id')->pluck('category')->all());
+        $this->assertSame([$tools->id, $this->electricity->id], DB::table('money_transactions')->orderBy('id')->pluck('expense_category_id')->all());
+        $lines = json_decode(DB::table('advance_reports')->value('lines'), true);
+        $this->assertSame([['production', 'prod_tools', 5], [null, null, 7], ['general', 'gen_electricity', 3]], array_map(fn ($l) => [$l['category'] ?? null, $l['subcategory'] ?? null, $l['amount']], $lines));
+        $this->assertEquals([$this->rent->id => 1, $tools->id => 0], $merge->references_before['advance_reports.lines.subcategory']);
+        $this->assertEquals([$this->rent->id => 0, $tools->id => 1], $merge->references_after['advance_reports.lines.subcategory']);
+    }
+
     public function test_merge_is_all_or_nothing(): void
     {
         Schema::create('test_expense_refs', fn ($t) => [$t->id(), $t->foreignId('category_id')->constrained('expense_categories')]);

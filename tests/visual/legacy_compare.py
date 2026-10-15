@@ -71,6 +71,14 @@ with sync_playwright() as p:
         first = sorted((c for c in cats if c['parent_code']), key=lambda c: (c['sort_order'], c['code']))[0]['code']
         page.locator('#ec-table-wrap').get_by_text(first, exact=True).locator('xpath=ancestor::tr').locator('button').dispatch_event('click')  # no scroll: legacy opens it in place; page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'target-m14-modal-{theme}.png'))
+        # Filters of «Статьи расходов» (search, category, «Только постоянные»): the table text for the same combinations.
+        page.locator('#ec-modal .modal-close, .modal-overlay.open .modal-close').first.click(); page.wait_for_timeout(200)
+        first_top = page.evaluate("document.querySelector('#ec-filter-parent option:nth-child(2)')?.value || ''")
+        target_ec = []
+        for q, parent, fixed in [('', '', False), ('эл', '', False), ('', 'FIRSTTOP', False), ('', '', True), ('а', 'FIRSTTOP', True)]:
+            page.fill('#ec-search', q); page.select_option('#ec-filter-parent', first_top if parent else '')
+            if page.is_checked('#ec-show-fixed') != fixed: page.click('#ec-show-fixed')
+            page.wait_for_timeout(200); target_ec.append(page.locator('#ec-table-wrap').inner_text())
         page.goto(TARGET + '/catalog', wait_until='networkidle'); page.wait_for_timeout(500)
         page.screenshot(path=str(OUT / f'target-catalog-{theme}.png'))
         products = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['products']
@@ -361,6 +369,13 @@ with sync_playwright() as p:
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-m14-{theme}.png'))
         page.evaluate(f"openExpCatModal('{first}', null, false)"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-m14-modal-{theme}.png'))
+        legacy_ec = []
+        for q, parent, fixed in [('', '', False), ('эл', '', False), ('', 'FIRSTTOP', False), ('', '', True), ('а', 'FIRSTTOP', True)]:
+            legacy_ec.append(page.evaluate("""([q, parent, fixed]) => {
+                document.getElementById('ec-search').value = q; document.getElementById('ec-filter-parent').value = parent; document.getElementById('ec-show-fixed').checked = fixed;
+                renderExpCats(); return document.getElementById('ec-table-wrap').innerText; }""", [q, first_top if parent else '', fixed]))
+        bad = [i for i, (x, y) in enumerate(zip(target_ec, legacy_ec)) if x.split() != y.split()]
+        print(f'expense categories filters ({theme}): {len(target_ec)} combinations, ' + ('совпадает' if not bad else f'РАСХОЖДЕНИЕ в {bad}'))
         page.evaluate("""(products) => {
             window._currentUser = 'director';
             catalogData = products.map(p => ({...p, active: true}));
