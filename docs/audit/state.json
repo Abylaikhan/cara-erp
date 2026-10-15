@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T184239Z-57c1",
-    "started_at": "2026-10-15T18:42:39Z",
+    "run_id": "20261015T185816Z-d63d",
+    "started_at": "2026-10-15T18:58:16Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T18:43:45Z",
+    "finished_at": "2026-10-15T18:59:23Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "ec3ad0ee012d4e0e91f08befcbd29aa2478c7c08",
-    "at": "2026-10-15T18:42:39Z"
+    "target_ref": "9f005d7fcbebfa147148d1f5a7dee061d6730ba4",
+    "at": "2026-10-15T18:58:16Z"
   },
   "last_reported": {
-    "run_id": "20261015T184239Z-57c1",
+    "run_id": "20261015T185816Z-d63d",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "ec3ad0ee012d4e0e91f08befcbd29aa2478c7c08",
-    "logical_key": "aa4c8e8e2c4c9547",
+    "target_ref": "9f005d7fcbebfa147148d1f5a7dee061d6730ba4",
+    "logical_key": "1d278ae5c1e3d47d",
     "local_date": "2026-10-15",
-    "completed_at": "2026-10-15T18:43:45Z",
-    "report": "daily/2026-10-15/20261015T184239Z-57c1.md",
-    "artifact_sha256": "6ca3b679f2c73a9c09d5677957c04a04a86adc1b8bf823d9d78c039f1fc3a942",
+    "completed_at": "2026-10-15T18:59:23Z",
+    "report": "daily/2026-10-15/20261015T185816Z-d63d.md",
+    "artifact_sha256": "217e90cfa2a925874fb6a5730bbe01edcf5f7bd772b69800697b3a11e797a21c",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -245,6 +245,7 @@
       "Tests\\Feature\\Money\\MoneyJournalTest::test_roles_without_the_page_cannot_open_it",
       "Tests\\Feature\\Money\\ReconcileTest::test_dealer_gets_its_orders_payments_and_transfers_only",
       "Tests\\Feature\\Money\\SalonCashTest::test_each_salon_sees_its_cash_and_the_head_of_the_salons_both",
+      "Tests\\Feature\\Money\\SalonReportTest::test_head_of_the_salons_gets_the_salon_orders_only",
       "Tests\\Feature\\Money\\SalonWorksheetTest::test_legacy_rows_are_imported_exactly_and_idempotently",
       "Tests\\Feature\\Money\\SalonWorksheetTest::test_rows_load_with_the_tab_and_cells_are_saved_like_legacy",
       "Tests\\Feature\\Money\\SalonWorksheetTest::test_transferred_rows_are_locked_and_clearing_keeps_them",
@@ -294,15 +295,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "ec3ad0ee012d4e0e91f08befcbd29aa2478c7c08",
+    "target_ref": "9f005d7fcbebfa147148d1f5a7dee061d6730ba4",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T18:43:45Z",
-    "run_id": "20261015T184239Z-57c1"
+    "completed_at": "2026-10-15T18:59:23Z",
+    "run_id": "20261015T185816Z-d63d"
   },
   "changelog": {
-    "entries": 44,
-    "last_header": "## 2026-10-15 · 20261015T184239Z-57c1",
-    "sha256": "9f96042644b295daf7904bdd54b0f7559ad9089593210e8f53f4c9321838f5be"
+    "entries": 45,
+    "last_header": "## 2026-10-15 · 20261015T185816Z-d63d",
+    "sha256": "a6c347a1cd3d2af36c24b0bf4ccdffab0c8660972bdbcf166c3c825cfb234d0a"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
