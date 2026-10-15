@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T192359Z-c98d",
-    "started_at": "2026-10-15T19:23:59Z",
+    "run_id": "20261015T194208Z-035f",
+    "started_at": "2026-10-15T19:42:08Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T19:25:04Z",
+    "finished_at": "2026-10-15T19:43:15Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "ca5dbc55a2cdfa33cc51a912b2bc84fb0573617f",
-    "at": "2026-10-15T19:23:59Z"
+    "target_ref": "2185859f249a547ca231906f908acce5ee993452",
+    "at": "2026-10-15T19:42:08Z"
   },
   "last_reported": {
-    "run_id": "20261015T192359Z-c98d",
+    "run_id": "20261015T194208Z-035f",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "ca5dbc55a2cdfa33cc51a912b2bc84fb0573617f",
-    "logical_key": "40432dd9baea73b9",
+    "target_ref": "2185859f249a547ca231906f908acce5ee993452",
+    "logical_key": "3e3acfeb6582286a",
     "local_date": "2026-10-16",
-    "completed_at": "2026-10-15T19:25:04Z",
-    "report": "daily/2026-10-16/20261015T192359Z-c98d.md",
-    "artifact_sha256": "71927ace56e3ca730dc5275908730b5376827ce2f0b614af427fdcf19b94e301",
+    "completed_at": "2026-10-15T19:43:15Z",
+    "report": "daily/2026-10-16/20261015T194208Z-035f.md",
+    "artifact_sha256": "e8012cb976cd3bf0cad3a183777a1307b896ee7348d4127f09482d2fc51a3ac3",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -278,6 +278,9 @@
       "Tests\\Feature\\Suppliers\\SupplierTest::test_second_editor_gets_a_conflict",
       "Tests\\Feature\\Suppliers\\SupplierTest::test_update_changes_fields_and_expense_item_and_keeps_a_deleted_link",
       "Tests\\Feature\\Suppliers\\SupplierTest::test_validation_messages",
+      "Tests\\Feature\\Suppliers\\SupplierToolsTest::test_card_lists_the_invoices_by_bin_or_by_name",
+      "Tests\\Feature\\Suppliers\\SupplierToolsTest::test_import_from_esf_plans_then_adds_suppliers_and_fills_bins",
+      "Tests\\Feature\\Suppliers\\SupplierToolsTest::test_orphans_spellings_and_creating_a_card",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_aliases_are_added_once_per_material_and_deleted",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_directory_holds_the_nine_legacy_warehouses",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_inline_cells_are_saved_and_the_quantity_is_not_edited_directly",
@@ -297,15 +300,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "ca5dbc55a2cdfa33cc51a912b2bc84fb0573617f",
+    "target_ref": "2185859f249a547ca231906f908acce5ee993452",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T19:25:04Z",
-    "run_id": "20261015T192359Z-c98d"
+    "completed_at": "2026-10-15T19:43:15Z",
+    "run_id": "20261015T194208Z-035f"
   },
   "changelog": {
-    "entries": 46,
-    "last_header": "## 2026-10-16 · 20261015T192359Z-c98d",
-    "sha256": "fbae6edfd81f3b18be09b188f67cc83df851820a1c7f46b0dd64cbe3cf17b5c2"
+    "entries": 47,
+    "last_header": "## 2026-10-16 · 20261015T194208Z-035f",
+    "sha256": "cf11f2d92f88ef11778e90f1147f8d0c141f8df45b8a8d6316953b2a3d38f978"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
