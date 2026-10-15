@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T213908Z-34ef",
-    "started_at": "2026-10-15T21:39:08Z",
+    "run_id": "20261015T215421Z-e655",
+    "started_at": "2026-10-15T21:54:21Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T21:40:28Z",
+    "finished_at": "2026-10-15T21:55:40Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "6c051a5795916126a01eafa4fa5ad86b313fb93a",
-    "at": "2026-10-15T21:39:08Z"
+    "target_ref": "128eccff3d71af1c97cf811db82c112379198d67",
+    "at": "2026-10-15T21:54:21Z"
   },
   "last_reported": {
-    "run_id": "20261015T213908Z-34ef",
+    "run_id": "20261015T215421Z-e655",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "6c051a5795916126a01eafa4fa5ad86b313fb93a",
-    "logical_key": "484a97a43f0fdee5",
+    "target_ref": "128eccff3d71af1c97cf811db82c112379198d67",
+    "logical_key": "0415ac9ce84736ad",
     "local_date": "2026-10-16",
-    "completed_at": "2026-10-15T21:40:28Z",
-    "report": "daily/2026-10-16/20261015T213908Z-34ef.md",
-    "artifact_sha256": "710aa77964abe6fa3cf2a505b1ff8b2ad5d1dd66bd80fdf56f02e4e366a80384",
+    "completed_at": "2026-10-15T21:55:40Z",
+    "report": "daily/2026-10-16/20261015T215421Z-e655.md",
+    "artifact_sha256": "137d24e4eebcef0d1260e25ece754a811548ba9830c89f3a7c0e1381752748ac",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -222,6 +222,9 @@
       "Tests\\Feature\\Legacy\\LegacyCopyTest::test_snapshot_reads_everything_with_get_only",
       "Tests\\Feature\\Legacy\\MaterialRequestImportTest::test_imports_requests_with_exact_quantities_and_times",
       "Tests\\Feature\\Legacy\\MaterialRequestImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
+      "Tests\\Feature\\Legacy\\MigrationToolsTest::test_a_dry_run_imports_verifies_and_writes_nothing",
+      "Tests\\Feature\\Legacy\\MigrationToolsTest::test_a_refused_set_keeps_every_problem_in_the_error_journal",
+      "Tests\\Feature\\Legacy\\MigrationToolsTest::test_the_references_report_names_what_the_import_cannot_resolve_or_resolve_uniquely",
       "Tests\\Feature\\Legacy\\MoneyImportTest::test_imports_accounts_operations_payments_and_advances",
       "Tests\\Feature\\Legacy\\MoneyImportTest::test_operations_deleted_in_legacy_are_deleted_here_too",
       "Tests\\Feature\\Legacy\\MoneyImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
@@ -319,15 +322,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "6c051a5795916126a01eafa4fa5ad86b313fb93a",
+    "target_ref": "128eccff3d71af1c97cf811db82c112379198d67",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T21:40:28Z",
-    "run_id": "20261015T213908Z-34ef"
+    "completed_at": "2026-10-15T21:55:40Z",
+    "run_id": "20261015T215421Z-e655"
   },
   "changelog": {
-    "entries": 51,
-    "last_header": "## 2026-10-16 · 20261015T213908Z-34ef",
-    "sha256": "95aa5c3bb31d7cbace2a613cf5667cafd1e093eaa15f900bd909b20e9bc4b16f"
+    "entries": 52,
+    "last_header": "## 2026-10-16 · 20261015T215421Z-e655",
+    "sha256": "02495a9429899665902bb26f983b5cace2471bcaaa9d96399046c620fa16826d"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
