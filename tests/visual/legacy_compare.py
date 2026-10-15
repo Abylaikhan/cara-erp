@@ -848,6 +848,10 @@ with sync_playwright() as p:
         salon = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         sidebar = page.evaluate("({a: document.getElementById('sidebar-avatar').textContent.trim(), n: document.getElementById('sidebar-username').textContent.trim(), r: document.getElementById('sidebar-role').textContent.trim()})")
         target_salon = page.locator('#salon-cash-tbody').inner_text()
+        page.goto(TARGET + '/salon_report', wait_until='networkidle'); page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'target-salon-report-{theme}.png'))
+        sreport = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        target_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
         ctx.close()
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
         ctx.route('**/*', guard)
@@ -874,8 +878,22 @@ with sync_playwright() as p:
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-salon-{theme}.png'))
         tl, ll = target_salon.splitlines(), page.locator('#salon-cash-tbody').inner_text().splitlines()
         print(f'salon cash table ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
+        # «Отчёт салонов»: the same salon orders; legacy cannot load the staff (blocked), the target says the salary comes with them.
+        page.evaluate("""(r) => {
+            const dmy = d => d ? d.split('-').reverse().join('.') : '';
+            ordersData = r.orders.map(o => ({num: o.num, channel: o.channel, customer: o.customer || '', salonClientName: o.end_client || '', seller: o.seller || '',
+                createdDate: dmy(o.created), date: dmy(o.date), payment: o.payment, status: o.status === 'progress' ? 'production' : o.status, items: [{qty: 1, price: +o.total}]}));
+            employeesData = [];
+            showPage('salon_report', [...document.querySelectorAll('.nav-item')].find(n => (n.getAttribute('onclick') || '').includes("'salon_report'")));
+            ordersData.length || 0;
+        }""", sreport)
+        page.wait_for_timeout(1500)
+        page.evaluate("renderSalonReport()"); page.wait_for_timeout(500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-salon-report-{theme}.png'))
+        legacy_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
+        print(f'salon report ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a == b else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'продавцы', 'заказы'), target_sr, legacy_sr)))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-calendar', 'money-salonwb', 'money-salon', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

@@ -98,7 +98,8 @@ M17,M17,c5e745c,,,Сотрудники: все сценарии раздела (
 M18,M18,c5e745c,,,Сдельная оплата: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
 M19,M19,c5e745c,,,Зарплатная ведомость: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
 M20,M20,c5e745c,,,Начисления ЗП: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
-M21,M21,c5e745c,,,Отчёт салонов: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
+M21.CURRENT,M21,8d275a1,initSalonReport renderSalonReport showSalonReportTab,salon_armada_mgr,"Отчёт салонов, «Текущий период»: заказы салонов за месяц, KPI, продавцы, все заказы",resources/js/pages/SalonReport.vue app/Http/Controllers/SalonReportController.php,Tests\Feature\Money\SalonReportTest,salon-report-dark salon-report-light,,VERIFIED,"ADR-0023; KPI, продавцы и заказы совпадают с legacy текстом; visual-compare 0,06 %",Claude Code
+M21,M21,8d275a1,,,"Отчёт салонов: расчёт ЗП продавцов, платёжная ведомость, история ЗП",,,,DEC-13,BLOCKED,"ждёт «Сотрудников» и зарплаты (ERP-053, ERP-059)",Claude Code
 M22,M22,c5e745c,,,Мой кабинет: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
 M23,M23,c5e745c,,,AI Ассистент: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
 M10.LEAD_TO_ORDER,"M10,M09",c5e745c,convertLeadToOrder openNewCustOrderModal,crm,Заказ покупателя из выигранного лида и «+ Новый заказ покупателя»,,,,DEC-02,BLOCKED,создание заказа — ERP-029 после D-02/D-12,Claude Code
