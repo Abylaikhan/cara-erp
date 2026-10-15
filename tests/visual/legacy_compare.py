@@ -47,6 +47,8 @@ def diff(a, b, name):
     canvas.save(OUT / f'{name}-side-by-side.png')
     return round(100 * changed / (w * h), 2)
 
+# Labels of the money expense categories (config/erp.php) → their codes, for the dashboard of legacy.
+EXPENSE_CODES = {icon + ' ' + label: code for code, icon, label in re.findall(r"'([a-z_]+)' => \['([^']*)', '([^']+)'\]", (ROOT / 'config/erp.php').read_text().split("'money_expense_categories'")[1].split('\n    ],')[0])}
 results = {}
 with sync_playwright() as p:
     browser = p.chromium.launch(channel='chrome', headless=True)
@@ -238,6 +240,9 @@ with sync_playwright() as p:
                 'X-Inertia-Partial-Data': 'advances', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
             return (await r.json()).props.advances;
         }""")
+        page.goto(TARGET + '/dashboard', wait_until='networkidle'); page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'target-dashboard-{theme}.png'))
+        dash = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -586,8 +591,42 @@ with sync_playwright() as p:
         }""", advances)
         page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'legacy-money-advances-{theme}.png'))
+        # Dashboard: legacy gets data that sum to the same monthly totals (one operation per month and category, the advance
+        # lines as operations named like them), the period of the target (legacy shifts it by a day through UTC — ADR-0002)
+        # and the expense labels instead of the codes it would print.
+        page.evaluate("""([d, codes]) => {
+            const cur = d.today.slice(0, 7), last = new Date(+cur.slice(0, 4), +cur.slice(5), 0).getDate();
+            const tx = [], add = (date, flow, category, amount, categoryName) => tx.push({date, flow, category, amount: +amount, categoryName, accountId: 'x'});
+            Object.entries(d.cashIn).forEach(([m, v]) => add(m + '-15', 'income', 'order_payment', v));
+            const months = new Set([...Object.keys(d.cashOut), ...Object.keys(d.supplierPaid), ...Object.keys(d.fotPaid), ...Object.keys(d.expenses)]);
+            months.forEach(m => {
+                let rest = +(d.cashOut[m] || 0);
+                if (m === cur) Object.entries(d.expenses[m] || {}).forEach(([label, v]) => {
+                    const code = codes[label] || 'adv_line';
+                    add(m + '-15', 'expense', code, v, label);
+                    if (!['transfer_in', 'transfer_out', 'transfer'].includes(code)) rest -= +v;
+                });
+                else {
+                    add(m + '-15', 'expense', 'supplier', d.supplierPaid[m] || 0); add(m + '-15', 'expense', 'salary', d.fotPaid[m] || 0);
+                    rest -= +(d.supplierPaid[m] || 0) + +(d.fotPaid[m] || 0);
+                }
+                add(m + '-15', 'expense', 'advance_out', rest);
+            });
+            moneyTx = tx; advanceReports = [];
+            realizationsData = Object.entries(d.revenue).map(([m, v]) => ({doc_date: m + '-15', revenue: +v}));
+            ordersData = [...Array(d.ordersInWork).fill('production'), ...Array(d.ordersQueue).fill('queue')].map(status => ({status, items: []}));
+            warehouseData = [...d.critical.map(m => ({name: m.name, qty: +m.qty, unit: m.unit, minQty: +m.qty * 2 + 1})),
+                ...Array(d.stockCount - d.critical.length).fill(0).map((_, i) => ({name: 'x' + i, qty: 1, minQty: 0}))];
+            const paid = Object.values(d.supplierPaid).reduce((s, v) => s + +v, 0);
+            _esfData = {invoices: [{total_with_nds: paid + +d.supplierDebt}]};
+            _payrollData = {accruals: []};
+            _dashPeriodFrom = cur + '-01'; _dashPeriodTo = cur + '-' + last;
+            showPage('dashboard', document.querySelector(".nav-item[onclick*=\\"showPage('dashboard'\\"]"));
+        }""", [dash, EXPENSE_CODES])
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'legacy-dashboard-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'dashboard'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

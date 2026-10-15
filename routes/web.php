@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CrmController;
 use App\Http\Controllers\CrmTaskController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DealerController;
 use App\Http\Controllers\EsfController;
 use App\Http\Controllers\ExpenseCategoryController;
@@ -106,6 +107,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/projects/files/{file}', [ProjectController::class, 'deleteFile'])->whereNumber('file')->name('projects.files.destroy');
     });
 
+    // M01 «Дашборд»: сводка по перенесённым данным (просмотр)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('page:dashboard')->name('dashboard');
+
     // M02 «Производство», часть 1: журнал производственных позиций (просмотр)
     Route::get('/mrp', [MrpController::class, 'index'])->middleware('page:mrp')->name('mrp.index');
 
@@ -140,7 +144,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Pages that are not migrated yet — the menu stays 1:1, the page says so honestly.
-    $migrated = ['expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf', 'crm', 'purchases', 'sales', 'mrp', 'money'];
+    $migrated = ['dashboard', 'expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf', 'crm', 'purchases', 'sales', 'mrp', 'money'];
     Route::get('/{page}', [PageController::class, 'notMigrated'])
         ->whereIn('page', array_values(array_diff(array_keys(Erp::pages()), $migrated)))
         ->middleware('page')->name('page');
