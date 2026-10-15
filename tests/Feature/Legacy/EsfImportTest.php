@@ -49,7 +49,7 @@ class EsfImportTest extends TestCase
         ]);
         $this->rows('esf_payment_links', [
             '{"id":"l1","esf_invoice_id":"v1","source_type":"money_tx","source_id":"m1","amount":10000.004999999999,"created_at":"2026-03-02T10:00:00+00:00"}',
-            '{"id":"l2","esf_invoice_id":"v1","source_type":"advance_report","source_id":"a1","amount":5069.6,"created_at":"2026-03-03T10:00:00+00:00"}',
+            '{"id":"l2","esf_invoice_id":"v1","source_type":"advance_report","source_id":"a1","amount":5069.6,"created_at":"2026-03-03T10:00:00.654321+00:00"}',
         ]);
         // Natural order of the lines: «Первая строка» was inserted first.
         foreach (['i1', 'i3', 'i2'] as $pos => $id) {
@@ -76,15 +76,41 @@ class EsfImportTest extends TestCase
         $this->assertSame(['-100.00', 'general', null, 'CANCELED'], [$v2->total_with_nds, $v2->invoice_type, $v2->supplier_id, $v2->status], 'a correcting ESF; two suppliers share the BIN — no link');
         $this->assertSame(['10000.00', '5069.60'], EsfPaymentLink::orderBy('id')->pluck('amount')->all());
         $this->assertSame(['m1', 'a1'], EsfPaymentLink::orderBy('id')->pluck('source_legacy_id')->all());
+        $this->assertSame('2026-03-03 10:00:00.654321', EsfPaymentLink::where('source_legacy_id', 'a1')->sole()->created_at->utc()->format('Y-m-d H:i:s.u'), 'the time keeps its microseconds');
     }
 
     public function test_import_is_idempotent(): void
     {
         $this->legacyEsf();
         app(IncomingInvoiceImporter::class)->import(self::SNAPSHOT);
+        $lines = DB::table('incoming_invoice_items')->orderBy('id')->pluck('id')->all();
+        $links = EsfPaymentLink::orderBy('id')->pluck('id')->all();
         $stats = app(IncomingInvoiceImporter::class)->import(self::SNAPSHOT);
-        $this->assertSame([0, 0, 2], [$stats['created'], $stats['updated'], $stats['unchanged']]);
+        $this->assertSame([0, 0, 2, 0, 0], [$stats['created'], $stats['updated'], $stats['unchanged'], $stats['lines_rewritten'], $stats['links_rewritten']]);
         $this->assertSame([2, 3, 2], [IncomingInvoice::count(), DB::table('incoming_invoice_items')->count(), EsfPaymentLink::count()]);
+        $this->assertSame([$lines, $links], [DB::table('incoming_invoice_items')->orderBy('id')->pluck('id')->all(), EsfPaymentLink::orderBy('id')->pluck('id')->all()], 'unchanged lines and links keep their rows');
+    }
+
+    public function test_reimport_rewrites_only_the_changed_invoice(): void
+    {
+        $this->legacyEsf();
+        app(IncomingInvoiceImporter::class)->import(self::SNAPSHOT);
+        $v2 = IncomingInvoice::where('num', '7')->sole();
+        $kept = DB::table('incoming_invoice_items')->where('invoice_id', '<>', $v2->id)->orderBy('id')->pluck('id')->all();
+        // legacy: the line of v2 is corrected, a link of v1 is removed
+        $this->rows('incoming_invoice_items', [
+            '{"id":"i3","invoice_id":"v1","description":"Вторая строка","qty":1,"unit_price":455,"amount":455,"nds_rate":12.0,"nds_amount":54.6,"total":509.6,"warehouse_id":null}',
+            '{"id":"i1","invoice_id":"v1","description":"Первая строка","qty":1.5,"unit_price":8666.67,"amount":13000,"nds_rate":12,"nds_amount":1560,"total":14560,"warehouse_id":"wh_plates"}',
+            '{"id":"i2","invoice_id":"v2","description":"Возврат (исправлено)","qty":-1,"unit_price":100,"amount":-100,"nds_rate":0,"nds_amount":0,"total":-100,"warehouse_id":null}',
+        ]);
+        $this->rows('esf_payment_links', ['{"id":"l1","esf_invoice_id":"v1","source_type":"money_tx","source_id":"m1","amount":10000.004999999999,"created_at":"2026-03-02T10:00:00+00:00"}']);
+
+        $stats = app(IncomingInvoiceImporter::class)->import(self::SNAPSHOT);
+
+        $this->assertSame([1, 1], [$stats['lines_rewritten'], $stats['links_rewritten']]);
+        $this->assertSame($kept, DB::table('incoming_invoice_items')->where('invoice_id', '<>', $v2->id)->orderBy('id')->pluck('id')->all());
+        $this->assertSame(['Возврат (исправлено)'], DB::table('incoming_invoice_items')->where('invoice_id', $v2->id)->pluck('description')->all());
+        $this->assertSame(['m1'], EsfPaymentLink::pluck('source_legacy_id')->all());
     }
 
     public function test_bad_rows_change_nothing(): void

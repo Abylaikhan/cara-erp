@@ -65,25 +65,24 @@ class IncomingInvoiceImporter
                 ['source_table', 'source_key'], ['target_id', 'snapshot_id', 'imported_at'],
             );
 
-            // Lines and links are replaced as a whole for the imported invoices: they have no own identity in the UI.
-            IncomingInvoiceItem::query()->whereIn('invoice_id', $ids)->delete();
-            EsfPaymentLink::query()->whereIn('invoice_id', $ids)->delete();
-            $byInvoice = $items->sortBy(fn (array $r) => $itemOrder === 'natural' ? $natural[$r['id']] : $r['_row_no'])->groupBy('invoice_id');
-            foreach ($byInvoice as $legacyInvoiceId => $lines) {
-                $rows = $lines->values()->map(fn (array $r, int $i) => $this->itemAttributes($r) + ['invoice_id' => $ids[$legacyInvoiceId], 'line_no' => $i + 1])->all();
-                foreach (array_chunk($rows, 500) as $chunk) {
-                    IncomingInvoiceItem::query()->insert($chunk);
-                }
-            }
-            foreach ($links->chunk(500) as $chunk) {
-                EsfPaymentLink::query()->insert($chunk->map(fn (array $r) => [
-                    'invoice_id' => $ids[$r['esf_invoice_id']],
-                    'source_type' => $r['source_type'],
-                    'source_legacy_id' => $r['source_id'] ?? null,
-                    'amount' => self::decimal($r['amount_text'], 2),
-                    'created_at' => Carbon::parse($r['created_at']),
-                ])->values()->all());
-            }
+            // Lines and links have no own identity in the UI: the set of an invoice is rewritten only when it differs from
+            // legacy, so a repeated import (the cut-over delta) changes nothing.
+            $lineKey = fn (array $r) => json_encode([(int) $r['line_no'], $r['description'], $r['qty'], $r['unit_price'], $r['amount'], $r['nds_rate'], $r['nds_amount'], $r['total'], self::text($r['warehouse_code'])]);
+            $linkKey = fn (array $r) => json_encode([$r['source_type'], self::text($r['source_legacy_id']), $r['amount'], Carbon::parse($r['created_at'])->getPreciseTimestamp()]);
+            $stored = fn (string $table, array $columns, callable $key) => DB::table($table)->whereIn('invoice_id', $ids)->get(['invoice_id', ...$columns])
+                ->groupBy('invoice_id')->map(fn (Collection $g) => $g->map(fn ($r) => $key((array) $r))->sort()->values()->all());
+            $newLines = $items->sortBy(fn (array $r) => $itemOrder === 'natural' ? $natural[$r['id']] : $r['_row_no'])->groupBy('invoice_id')
+                ->mapWithKeys(fn (Collection $lines, $legacyId) => [$ids[$legacyId] => $lines->values()->map(fn (array $r, int $i) => $this->itemAttributes($r) + ['invoice_id' => $ids[$legacyId], 'line_no' => $i + 1])->all()]);
+            $newLinks = $links->map(fn (array $r) => [
+                'invoice_id' => $ids[$r['esf_invoice_id']],
+                'source_type' => $r['source_type'],
+                'source_legacy_id' => $r['source_id'] ?? null,
+                'amount' => self::decimal($r['amount_text'], 2),
+                // as text with the microseconds: the query builder would format a Carbon as Y-m-d H:i:s and drop them
+                'created_at' => Carbon::parse($r['created_at'])->format('Y-m-d H:i:s.uP'),
+            ])->groupBy('invoice_id');
+            $stats['lines_rewritten'] = $this->rewrite(IncomingInvoiceItem::class, $ids, $newLines, $stored('incoming_invoice_items', ['line_no', 'description', 'qty', 'unit_price', 'amount', 'nds_rate', 'nds_amount', 'total', 'warehouse_code'], $lineKey), $lineKey);
+            $stats['links_rewritten'] = $this->rewrite(EsfPaymentLink::class, $ids, $newLinks, $stored('esf_payment_links', ['source_type', 'source_legacy_id', 'amount', 'created_at'], $linkKey), $linkKey);
 
             $stats += $this->verify($invoices, $items, $links, $ids);
             $stats['items'] = $items->count();
@@ -95,6 +94,27 @@ class IncomingInvoiceImporter
 
             return $stats;
         });
+    }
+
+    /**
+     * Replaces the rows (lines or payment links) of the invoices whose set differs from legacy; returns how many invoices.
+     *
+     * @param  class-string<IncomingInvoiceItem|EsfPaymentLink>  $model
+     * @param  array<string, int>  $ids
+     * @param  Collection<int, mixed>  $new  invoice id → rows
+     * @param  Collection<int, list<string>>  $stored  invoice id → sorted keys
+     */
+    private function rewrite(string $model, array $ids, Collection $new, Collection $stored, callable $key): int
+    {
+        $changed = array_values(array_filter($ids, fn (int $id) => collect($new->get($id, []))->map(fn (array $r) => $key($r))->sort()->values()->all() !== $stored->get($id, [])));
+        foreach (array_chunk($changed, 1000) as $chunk) {
+            $model::query()->whereIn('invoice_id', $chunk)->delete();
+        }
+        foreach (array_chunk(array_merge(...array_map(fn (int $id) => collect($new->get($id, []))->all(), $changed)), 500) as $chunk) {
+            $model::query()->insert($chunk);
+        }
+
+        return count($changed);
     }
 
     /**
@@ -200,6 +220,12 @@ class IncomingInvoiceImporter
         }
 
         return ['invoices_totals_differ_from_lines' => $mismatch];
+    }
+
+    /** A key value as the text column stores it. */
+    private static function text(mixed $value): ?string
+    {
+        return $value === null ? null : (string) $value;
     }
 
     /** Exact decimal half-up rounding of the decimal text of a JSON number; an absent value is 0. */

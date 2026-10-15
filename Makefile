@@ -4,7 +4,7 @@ export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check
+.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal
 
 help: ## Show available commands
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
@@ -47,6 +47,9 @@ legacy-copy: ## Read-only copy of the legacy Supabase (GET only) → .local-audi
 	@docker compose run --rm app php artisan legacy:natural-order incoming_invoice_items
 	@docker compose run --rm app php artisan legacy:natural-order order_items
 	@docker compose run --rm app php artisan legacy:natural-order advance_reports --order=date.desc
+
+migration-rehearsal: ## Rehearsal of the legacy migration on a temporary database: migrate, every import, control totals, repeat (no change)
+	@bash scripts/migration-rehearsal.sh $(if $(SNAPSHOT),--snapshot $(SNAPSHOT))
 
 legacy-import: ## Move a legacy table into a migrated module, e.g. make legacy-import ENTITY=expense_categories
 	@docker compose run --rm app php artisan legacy:import $(ENTITY)
