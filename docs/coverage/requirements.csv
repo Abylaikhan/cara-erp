@@ -91,7 +91,8 @@ M12.SALONWB,M12,c917d37,loadSalonWbFromDB showSalonWbSalon renderSalonWorksheet 
 M12.BANKRECON,M12,c5e745c,showBankReconAccount,money,Сверка с банком,,,,,NOT_STARTED,вместе с импортом выписок (ERP-034),Claude Code
 M13.CHANNELS,M13,c5e745c,SALES_CHANNELS CH_GROUPS getChannelFilter channelMatches,все,"Справочник каналов (8 каналов, группы, регионы дилеров) и серверная область данных по каналу роли",database/migrations/2026_10_14_000008_create_sales_channels_table.php app/Support/ChannelScope.php,Tests\Feature\Access\ChannelScopeTest,,,VERIFIED,PHPUnit на PostgreSQL,Claude Code
 M13,M13,c5e745c,,,"Центры прибыли: отчёт по каналам (buildChannelPL), прямые статьи и ОПЗ (детализация — в трекере)",,,,,NOT_STARTED,,
-M15,M15,c5e745c,,,Касса салона: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
+M15.VIEW,M15,8d275a1,renderSalonMoney reloadSalonMoney smSort getCurrentRole cashAccountId,salon_armada salon_nazarbayeva salon_armada_mgr,"Касса салона (просмотр): своя касса / обе у начальника, фильтры, сортировка, KPI, «Передано в офис», бегущий остаток",resources/js/pages/MoneySalon.vue app/Http/Controllers/SalonCashController.php config/erp.php,Tests\Feature\Money\SalonCashTest,money-salon-dark money-salon-light,,VERIFIED,"ADR-0021; таблица 451 операция совпадает построчно; visual-compare 0,02–0,03 %",Claude Code
+M15,M15,8d275a1,,,"Касса салона: приход в кассу, перенос в офис",,,,DEC-03 DEC-11,NOT_STARTED,"проведение денег — ERP-031…033, ERP-051",Claude Code
 M16,M16,c5e745c,,,Сверка с офисом: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
 M17,M17,c5e745c,,,Сотрудники: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
 M18,M18,c5e745c,,,Сдельная оплата: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,

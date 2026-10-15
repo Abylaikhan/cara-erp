@@ -73,7 +73,8 @@ return [
     ],
 
     // Legacy role templates (_USERS). `techcards` is listed for director in legacy but has no page (D-15): it stays
-    // in the template for traceability and is ignored by navigation and access checks.
+    // in the template for traceability and is ignored by navigation and access checks. `cash_account` is the legacy id of the
+    // salon's cash account (legacy cashAccountId): «Касса салона» shows it; the head of the salons sees both.
     'roles' => [
         'director' => ['label' => 'Директор', 'color' => '#4f8ef7',
             'pages' => ['dashboard', 'mrp', 'warehouse', 'purchases', 'esf', 'suppliers', 'catalog', 'sales', 'customers', 'crm', 'finance', 'money', 'channels', 'expense_cats', 'reconcile', 'hr', 'wages', 'payroll', 'accruals', 'techcards', 'mycabinet', 'ai']],
@@ -89,10 +90,10 @@ return [
             'pages' => ['dashboard', 'hr', 'wages', 'mycabinet']],
         'buyer' => ['label' => 'Закупщик', 'color' => '#f59e0b',
             'pages' => ['dashboard', 'purchases', 'suppliers', 'warehouse', 'mycabinet']],
-        'salon_armada' => ['label' => 'Салон Армада', 'color' => '#8b5cf6', 'channel' => 'salon_armada', 'is_manager' => false,
+        'salon_armada' => ['label' => 'Салон Армада', 'color' => '#8b5cf6', 'channel' => 'salon_armada', 'is_manager' => false, 'cash_account' => 'c854b1e4-c0f7-436b-a274-5e8a59c4ef78',
             'pages' => ['catalog', 'sales', 'crm', 'money_salon'],
             'flags' => ['can_create_orders' => true, 'can_cash_in' => true, 'can_view_rs' => true, 'can_transfer_to_office' => true]],
-        'salon_nazarbayeva' => ['label' => 'Салон Назарбаева', 'color' => '#ec4899', 'channel' => 'salon_nazarbayeva', 'is_manager' => false,
+        'salon_nazarbayeva' => ['label' => 'Салон Назарбаева', 'color' => '#ec4899', 'channel' => 'salon_nazarbayeva', 'is_manager' => false, 'cash_account' => '701d7d6d-3dda-4403-ac3c-e4a3987836ea',
             'pages' => ['catalog', 'sales', 'crm', 'money_salon'],
             'flags' => ['can_create_orders' => true, 'can_cash_in' => true, 'can_view_rs' => true, 'can_transfer_to_office' => true]],
         'salon_armada_mgr' => ['label' => 'Начальник салонов', 'color' => '#8b5cf6', 'channel' => null, 'is_manager' => true,
