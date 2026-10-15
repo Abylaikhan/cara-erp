@@ -81,6 +81,26 @@ class MoneyImportTest extends TestCase
         $this->assertSame([0, 0, 8], [$again['created'], $again['updated'], $again['unchanged']]);
     }
 
+    public function test_operations_deleted_in_legacy_are_deleted_here_too(): void
+    {
+        $this->legacyData();
+        (new MoneyImporter(self::HTML))->import(self::SNAPSHOT);
+        // Legacy «🧩 Объединить платежи» (8d275a1) replaces payments with one: the next snapshot no longer has c-tx.
+        DB::table('legacy.rows')->where('table_name', 'money_tx')->whereRaw("data->>'id' = 'c-tx'")->delete();
+
+        $stats = (new MoneyImporter(self::HTML))->import(self::SNAPSHOT);
+        $this->assertSame([1, 0, 0], [$stats['removed_operations'], $stats['removed_order_payments'], $stats['removed_advance_reports']]);
+        $this->assertSame(2, DB::table('money_transactions')->count());
+        $this->assertNull(DB::table('legacy_id_map')->where('source_table', 'money_tx')->where('source_key', 'c-tx')->first());
+        $this->assertSame(['c-tx'], DB::table('audit_events')->where('action', 'legacy.removed')->where('subject_type', 'money_transactions')->get()
+            ->flatMap(fn ($e) => json_decode($e->changes, true)['legacy_keys'])->all());
+
+        // An advance report whose issuing operation is gone in legacy loses the link, as legacy shows it without the document.
+        DB::table('legacy.rows')->where('table_name', 'money_tx')->whereRaw("data->>'id' = 'a-tx'")->delete();
+        (new MoneyImporter(self::HTML))->import(self::SNAPSHOT);
+        $this->assertSame([1, null], [DB::table('money_transactions')->count(), DB::table('advance_reports')->where('doc_num', 'АО-1')->value('transaction_id')]);
+    }
+
     public function test_rejects_the_whole_set_when_a_row_is_wrong(): void
     {
         $this->rows('money_tx', [

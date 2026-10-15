@@ -151,6 +151,7 @@ const later = (text: string) => () => window.alert(text);
             <option value="all">Все категории</option>
             <option v-for="c in cats" :key="c" :value="c">{{ catLabel(props.categories, c) }}</option>
         </select>
+        <button class="btn btn-ghost btn-sm" title="Собрать разрозненные выплаты с одной датой и номером в одну платёжку" @click="later(LATER.merge)()">🧩 Объединить платежи</button>
         <button class="btn btn-ghost btn-sm" title="Сколько выдано каждому сотруднику / контрагенту за выбранный период" @click="cp = true">👥 Выдано по сотрудникам</button>
         <span id="cash-filter-count" style="font-size: 12px; color: var(--text3)"
             >{{ rows.length }} операций <span style="color: var(--green); margin-left: 8px">▲{{ fmtShort(sums.in) }}</span>{{ ' ' }}

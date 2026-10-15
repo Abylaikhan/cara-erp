@@ -69,6 +69,12 @@ class MoneyImporter
                 'lines' => in_array($a['lines_json'] ?? null, [null, 'null'], true) ? '[]' : $a['lines_json'],
                 'created_at' => Carbon::parse($a['created_at']), 'updated_at' => Carbon::parse($a['created_at']),
             ], $snapshotId, $stats);
+            // Rows deleted in legacy (e.g. «🧩 Объединить платежи» replaces several cash payments with one) are deleted here
+            // too: the money module is view-only, so nothing local depends on them. References are updated first (an order payment
+            // must name an existing operation — validated above; an advance report loses a link that legacy has lost too).
+            $stats['removed_order_payments'] = $this->removeGone('order_payments', 'order_payments', $payments->all());
+            $stats['removed_advance_reports'] = $this->removeGone('advance_reports', 'advance_reports', $advances->all());
+            $stats['removed_operations'] = $this->removeGone('money_transactions', 'money_tx', $tx->all());
             $this->verify($tx->all(), $accountIds, $categories->all());
             $stats['snapshot'] = $snapshotId;
             Audit::record('legacy.imported', 'money', null, $stats, $by);
@@ -133,6 +139,26 @@ class MoneyImporter
         }
 
         return $ids;
+    }
+
+    /**
+     * Delete the rows imported earlier whose legacy row is gone; their values stay in the audit trail.
+     *
+     * @param  list<array<string, mixed>>  $rows
+     */
+    private function removeGone(string $target, string $source, array $rows): int
+    {
+        $present = array_fill_keys(array_map(fn ($r) => (string) $r['id'], $rows), true);
+        $gone = DB::table('legacy_id_map')->where('source_table', $source)->get(['source_key', 'target_id'])->reject(fn ($m) => isset($present[$m->source_key]));
+        if ($gone->isEmpty()) {
+            return 0;
+        }
+        $values = DB::table($target)->whereIn('id', $gone->pluck('target_id'))->get();
+        Audit::record('legacy.removed', $target, null, ['legacy_keys' => $gone->pluck('source_key')->values()->all(), 'rows' => $values->map(fn ($r) => (array) $r)->all()], null);
+        DB::table($target)->whereIn('id', $gone->pluck('target_id'))->delete();
+        DB::table('legacy_id_map')->where('source_table', $source)->whereIn('source_key', $gone->pluck('source_key'))->delete();
+
+        return $gone->count();
     }
 
     private function same(mixed $stored, mixed $value): bool

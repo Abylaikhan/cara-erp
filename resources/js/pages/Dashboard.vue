@@ -184,12 +184,7 @@ const bar = (h: number) => Math.max(4, Math.round(h));
                     <div class="card-header">
                         <span class="card-title">👷 ФОТ по месяцам</span>
                         <span style="font-size: 11px; color: var(--text3)"
-                            ><span style="color: var(--amber)">▮</span> Начислено &nbsp;<span
-                                style="color: var(--accent)"
-                                title="Кассовые расходы по ЗП (оклады, сдельная, производство, офис). ЗП салонов не входит — её нет в зарплатной ведомости"
-                                >▮</span
-                            >
-                            Расход денег</span
+                            ><span style="color: var(--amber)">▮</span> Начислено &nbsp;<span style="color: var(--accent)">▮</span> Расход денег</span
                         >
                     </div>
                     <div id="dash-payroll-chart" style="display: flex; align-items: flex-end; gap: 6px; height: 140px; padding: 8px 0">
@@ -215,6 +210,10 @@ const bar = (h: number) => Math.max(4, Math.round(h));
                     </div>
                     <div id="dash-payroll-labels" style="display: flex; gap: 4px; font-size: 10px; color: var(--text3)">
                         <div v-for="m in fotMonths" :key="m" style="flex: 1; text-align: center">{{ label(m) }}</div>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text3); margin-top: 8px; line-height: 1.5">
+                        <b style="color: var(--amber)">Начислено</b> — по зарплатной ведомости. <b style="color: var(--accent)">Расход денег</b> — кассовые выплаты по статьям, которые идут в
+                        ведомость: «Зарплата», «Оклады производства», «Сдельная производства», «Оклады офиса». Не входят: ЗП салонов, повара, прочее, рекламации и переводы на кассу ЗП.
                     </div>
                 </div>
             </div>

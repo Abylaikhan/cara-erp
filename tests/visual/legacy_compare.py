@@ -37,6 +37,11 @@ def guard(route):
         return route.continue_()
     return route.abort()
 
+def unscroll(page):
+    """Legacy keeps one scroll position for all its pages: a long page leaves the next one scrolled. Back to the top, as a user
+    opening the page sees it (modal windows keep theirs)."""
+    page.evaluate("document.querySelectorAll('*').forEach(e => { if (e.scrollTop && !e.closest('.modal-overlay')) e.scrollTop = 0; })")
+
 def diff(a, b, name):
     ia, ib = Image.open(a).convert('RGB'), Image.open(b).convert('RGB')
     w, h = min(ia.width, ib.width), min(ia.height, ib.height)
@@ -298,7 +303,7 @@ with sync_playwright() as p:
         page.goto(LEGACY, wait_until='load', timeout=60000); page.wait_for_timeout(1500)
         page.evaluate("document.getElementById('diag-panel')?.remove(); document.getElementById('login-hints-block')?.remove()")
         page.evaluate("document.fonts.ready"); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'legacy-login-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-login-{theme}.png'))
         page.evaluate("""(cats) => {
             document.getElementById('login-screen').style.display = 'none';
             const pages = ['dashboard','mrp','warehouse','purchases','esf','suppliers','catalog','sales','customers','crm','finance','money','channels','expense_cats','reconcile','hr','wages','payroll','accruals','techcards','mycabinet','ai'];
@@ -316,9 +321,9 @@ with sync_playwright() as p:
             renderExpCats();
         }""", cats)
         page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'legacy-m14-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-m14-{theme}.png'))
         page.evaluate(f"openExpCatModal('{first}', null, false)"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-m14-modal-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-m14-modal-{theme}.png'))
         page.evaluate("""(products) => {
             window._currentUser = 'director';
             catalogData = products.map(p => ({...p, active: true}));
@@ -329,10 +334,10 @@ with sync_playwright() as p:
             renderCatalog();
         }""", products)
         page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'legacy-catalog-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-catalog-{theme}.png'))
         if product_id is not None:
             page.evaluate(f"openProductModal('{product_id}')"); page.wait_for_timeout(300)
-            page.screenshot(path=str(OUT / f'legacy-catalog-modal-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-catalog-modal-{theme}.png'))
         # Legacy gets the same persons (all of the office channel). The type is passed as the target classifies it: the
         # legal-form fix is a documented deviation (docs/adr/0002-ui-deviations.md, item 13), not a layout difference.
         # Their office orders are given as orders of that customer: the count and the turnover the target shows.
@@ -347,10 +352,10 @@ with sync_playwright() as p:
             renderPersons();
         }""", persons)
         page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'legacy-customers-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-customers-{theme}.png'))
         if persons:
             page.evaluate("openPersonModal(1)"); page.wait_for_timeout(300)  # a number: the row onclick passes a string and fails (ADR-0006)
-            page.screenshot(path=str(OUT / f'legacy-customers-modal-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-customers-modal-{theme}.png'))
         # Dealers: legacy keeps them in dealersData; it gets the target's list with the counts of «Текущий год» (legacy
         # recalculates them only when the period or the orders change, ADR-0002, item 17).
         page.evaluate("""([dealers, stats]) => {
@@ -360,9 +365,9 @@ with sync_playwright() as p:
             showCustTab('dealers', document.getElementById('cust-tab-dealers'));
         }""", [dealers, dealer_stats])
         page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-dealers-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-dealers-{theme}.png'))
         page.evaluate("showModal('addDealerModal')"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-dealer-modal-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-dealer-modal-{theme}.png'))
         # Suppliers: legacy suppliersData gets the target's list. Its card loads the supplier's ESF from the (blocked) legacy
         # backend; the target shows that ESF come with the «Входящие ЭСФ» module (ADR-0002, item 20).
         page.evaluate("""(suppliers) => {
@@ -376,17 +381,17 @@ with sync_playwright() as p:
             renderSupplierList();
         }""", suppliers)
         page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'legacy-suppliers-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-suppliers-{theme}.png'))
         if plain is not None:
             page.evaluate(f"openSupplierCard('{suppliers[plain]['id']}')"); page.wait_for_timeout(500)
-            page.screenshot(path=str(OUT / f'legacy-supplier-card-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-supplier-card-{theme}.png'))
             page.evaluate("closeModal('supplierCardModal')")
         page.evaluate("showSupTab('categories', document.querySelectorAll('#page-suppliers .tab')[1])"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-suppliers-categories-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-suppliers-categories-{theme}.png'))
         page.evaluate("showSupTab('rating', document.querySelectorAll('#page-suppliers .tab')[2])"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-suppliers-rating-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-suppliers-rating-{theme}.png'))
         page.evaluate("openMergeSuppliersModal()"); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'legacy-supplier-merge-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-supplier-merge-{theme}.png'))
         # Warehouse: legacy gets the target's materials and aliases. Its built-in demo documents are cleared: they are not
         # migrated data (ADR-0002, item 22), and without them «Цехи» and «Документы» show what the target shows.
         page.evaluate("""([materials, aliases]) => {
@@ -398,15 +403,15 @@ with sync_playwright() as p:
             showPage('warehouse', document.querySelector(".nav-item[onclick*=\\"showPage('warehouse'\\"]"));
         }""", [materials, aliases])
         page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'legacy-warehouse-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-warehouse-{theme}.png'))
         for i, (tab, shot) in enumerate((('stocks', 'categories'), ('workshops', 'workshops'), ('docs', 'docs'), ('remains', 'remains'), ('aliases', 'aliases'))):
             idx = {'stocks': 1, 'workshops': 2, 'docs': 3, 'remains': 4, 'aliases': 7}[tab]
             page.evaluate(f"showWhTab('{tab}', document.querySelectorAll('#page-warehouse .tab')[{idx}])"); page.wait_for_timeout(1500 if tab in ('remains', 'aliases') else 300)
-            page.screenshot(path=str(OUT / f'legacy-warehouse-{shot}-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-warehouse-{shot}-{theme}.png'))
         page.evaluate("openAddMaterialModal()"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-warehouse-add-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-warehouse-add-{theme}.png'))
         page.evaluate("selectMatCategory('lumber')"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-warehouse-add-step2-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-warehouse-add-step2-{theme}.png'))
         # ESF: legacy gets the target's invoices and payment links; for the detail, the same lines and the materials they match.
         page.evaluate("""([invoices, detail]) => {
             closeModal('addMaterialModal');
@@ -421,15 +426,15 @@ with sync_playwright() as p:
             showPage('esf', document.querySelector(".nav-item[onclick*=\\"showPage('esf'\\"]"));
         }""", [invoices, esf_detail])
         page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'legacy-esf-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-esf-{theme}.png'))
         if invoices:
             page.evaluate(f"openEsfDetail({invoices[0]['id']})"); page.wait_for_timeout(500)
-            page.screenshot(path=str(OUT / f'legacy-esf-detail-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-esf-detail-{theme}.png'))
             page.evaluate("closeModal('esfDetailModal')")
         fixture = (ROOT / 'tests/Fixtures/esf/two-invoices.xml').read_text(encoding='utf-8')
         page.evaluate("(x) => { _esfXmlParsed = parseEsfXmlText(x, 'two-invoices.xml'); renderEsfXmlImportPreview(); document.getElementById('esfXmlImportModal').classList.add('open'); }", fixture)
         page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'legacy-esf-import-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-esf-import-{theme}.png'))
         # CRM: legacy leadsData gets the target's open leads, mapped as its loader maps them (it loads won and lost ones only
         # for those filters). The funnel request is answered inside the browser with the target's funnel leads. CRM_STAGES,
         # which legacy never defines, gets the target's columns, and the segment legacy forces to «Новый» is set back to the
@@ -448,15 +453,15 @@ with sync_playwright() as p:
             showPage('crm', document.querySelector(".nav-item[onclick*=\\"showPage('crm'\\"]"));
         }""", [crm['leads'], client_orders])
         page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'legacy-crm-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-{theme}.png'))
         page.evaluate("showOrdersTab('leads', document.getElementById('crm-tab-leads'))"); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'legacy-crm-leads-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-leads-{theme}.png'))
         page.evaluate("setLeadsView('table')"); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'legacy-crm-leads-table-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-leads-table-{theme}.png'))
         page.evaluate("setLeadsView('cards')"); page.wait_for_timeout(500)
         if first_lead is not None:
             page.evaluate(f"openLeadModal('{first_lead}')"); page.wait_for_timeout(300)
-            page.screenshot(path=str(OUT / f'legacy-crm-lead-modal-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-lead-modal-{theme}.png'))
             page.evaluate("closeModal('leadModal')")
         funnel = [l for l in crm['leads'] if l['status'] in ('qualify', 'proposal', 'negotiation', 'contact', 'meeting')]
         rows = [{k: l[k] for k in ('id', 'name', 'phone', 'status', 'interest', 'budget', 'source', 'manager')} for l in funnel]
@@ -468,16 +473,16 @@ with sync_playwright() as p:
         page.wait_for_timeout(1000)
         page.evaluate("(own) => { crmLeads.forEach(l => { l.segment = own[String(l.id)] ?? null; }); renderCrmKanban(); }", {str(l['id']): l['segment'] for l in funnel})
         page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'legacy-crm-funnel-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-funnel-{theme}.png'))
         page.evaluate("openCrmLeadModal(null)"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-crm-funnel-modal-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-funnel-modal-{theme}.png'))
         page.evaluate("closeModal('crmLeadModal')")
         # Lead card: the built-in demo history of legacy is not data (ADR-0002, item 22) and is cleared.
         if first_card is not None:
             page.evaluate(f"""() => {{ Object.keys(commHistory).forEach(k => delete commHistory[k]);
                 openCrmPopover({first_card}, document.querySelector(".crm-card[data-lead-id='{first_card}'] .crm-card-detail-btn")); }}""")
             page.wait_for_timeout(600)
-            page.screenshot(path=str(OUT / f'legacy-crm-popover-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-popover-{theme}.png'))
             page.evaluate("closeCrmPopover()")
         # Tasks: legacy tasksData gets the target's tasks. A task about a closed lead shows the lead in the target; legacy
         # finds it only when closed leads are loaded, so they are added to leadsData (ADR-0002, item 38).
@@ -491,14 +496,14 @@ with sync_playwright() as p:
             showOrdersTab('tasks', [...document.querySelectorAll('#page-crm .tab')].find(t => t.textContent.includes('Задачи')));
         }""", [crm['tasks'], crm['leads']])
         page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'legacy-crm-tasks-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-tasks-{theme}.png'))
         page.evaluate("openTaskModal(null)"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-crm-task-modal-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-task-modal-{theme}.png'))
         page.evaluate("closeModal('taskModal'); showOrdersTab('clients', document.getElementById('crm-tab-clients'))"); page.wait_for_timeout(2500)
-        page.screenshot(path=str(OUT / f'legacy-crm-clients-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-clients-{theme}.png'))
         if first_client:
             page.evaluate("(name) => openClientCard(name)", first_client); page.wait_for_timeout(300)
-            page.screenshot(path=str(OUT / f'legacy-crm-client-card-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-client-card-{theme}.png'))
             page.evaluate("closeModal('client-card-modal')")
         # Order boards: legacy gets the same orders and the month in local dates. For «По производству» the orders in work
         # and the completed unpaid ones are given the statuses its columns look for (ADR-0002, item 51).
@@ -522,9 +527,9 @@ with sync_playwright() as p:
             showOrdersTab('projects', document.getElementById('crm-tab-projects'));
         }""")
         page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'legacy-crm-projects-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-projects-{theme}.png'))
         page.evaluate("prjOpenNew()"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-crm-project-new-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-project-new-{theme}.png'))
         page.evaluate("prjClose()")
         # Purchases: legacy gets the target's requests; the date is the business date the target shows (ADR-0002, item 40).
         # warehouseData (for «План-факт») is the target's directory given at the warehouse step.
@@ -537,13 +542,13 @@ with sync_playwright() as p:
             showPage('purchases', document.querySelector(".nav-item[onclick*=\\"showPage('purchases'\\"]"));
         }""", purchases)
         page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'legacy-purchases-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-purchases-{theme}.png'))
         page.evaluate("setMreqView('kanban')"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-purchases-kanban-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-purchases-kanban-{theme}.png'))
         page.evaluate("setMreqView('table'); showPurchExtraTab('planfact', document.querySelectorAll('#page-purchases > .tabs .tab')[2])"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-purchases-planfact-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-purchases-planfact-{theme}.png'))
         page.evaluate("showPurchExtraTab('requests', document.querySelectorAll('#page-purchases > .tabs .tab')[0]); openNewMaterialRequestModal()"); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'legacy-purchases-modal-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-purchases-modal-{theme}.png'))
         # Sales: legacy ordersData gets the target's orders; one line per order carries the target's total and mean progress,
         # and realizationsData is what makes «Завершить» appear where the target shows it. The status breakdown of the summary,
         # empty in legacy, is the documented fix (ADR-0002, item 43).
@@ -559,11 +564,11 @@ with sync_playwright() as p:
         }""", sales)
         page.wait_for_timeout(1500)
         page.evaluate("(text) => { const el = document.querySelector('#ord-summary-stats span:nth-child(3)'); if (el) el.textContent = text; }", breakdown)
-        page.screenshot(path=str(OUT / f'legacy-sales-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-sales-{theme}.png'))
         for i, (tab, shot) in enumerate((('queue', 'queue'), ('done', 'done'))):
             idx = {'queue': 1, 'done': 3}[tab]
             page.evaluate(f"showSalesTab('{tab}', document.querySelectorAll('#sales-tabs .tab')[{idx}])"); page.wait_for_timeout(1200)
-            page.screenshot(path=str(OUT / f'legacy-sales-{shot}-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-sales-{shot}-{theme}.png'))
         # Realization journal: legacy gets the same lines (as loadRealizationsFromDB keeps them), already loaded.
         page.evaluate("""(rows) => {
             realizationsData = rows.map(r => ({id: String(r.id), doc_date: r.date, doc_num: r.doc_num, order_num: r.order_num, customer: r.customer,
@@ -586,7 +591,7 @@ with sync_playwright() as p:
             showSalesTab('report', document.querySelectorAll('#sales-tabs .tab')[7]);
         }""", [sales, report])
         page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))
         # Production journal: legacy gets the order lines with the effective status the server counted (its own rule, applied
         # to the same data) and the stages recorded on the worksheet; nothing is left for it to load.
         page.evaluate("""(positions) => {
@@ -603,9 +608,9 @@ with sync_playwright() as p:
             showPage('mrp', document.querySelector(".nav-item[onclick*=\\"showPage('mrp'\\"]"));
         }""", mrp)
         page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'legacy-mrp-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-{theme}.png'))
         page.evaluate("showMrpOrdersFilter('queue', document.querySelectorAll('#mrp-orders > .tabs .tab')[1])"); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'legacy-mrp-queue-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-queue-{theme}.png'))
         # Money: legacy gets the target's accounts (without account numbers, which are not stored — ADR-0002, item 54), the
         # operations in the same order, the expense items, the ESF links and order payments of each operation, and one open
         # advance carrying the advance debt.
@@ -621,10 +626,10 @@ with sync_playwright() as p:
             showPage('money', document.querySelector(".nav-item[onclick*=\\"showPage('money'\\"]"));
         }""", money)
         page.wait_for_timeout(2000)
-        page.screenshot(path=str(OUT / f'legacy-money-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-{theme}.png'))
         for idx, tab in ((1, 'bank'), (5, 'all')):
             page.evaluate(f"showMoneyTab('{tab}', document.querySelectorAll('#page-money > .tabs .tab')[{idx}])"); page.wait_for_timeout(1500)
-            page.screenshot(path=str(OUT / f'legacy-money-{tab}-{theme}.png'))
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-{tab}-{theme}.png'))
         # Advances: the same reports, with the issuing operation the target links (added without an account, so the totals
         # stay) and «Потрачено» as its lines give it.
         page.evaluate("""(rows) => {
@@ -636,7 +641,7 @@ with sync_playwright() as p:
             showMoneyTab('advances', document.querySelectorAll('#page-money > .tabs .tab')[4]);
         }""", advances)
         page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'legacy-money-advances-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-advances-{theme}.png'))
         # Dashboard: legacy gets data that sum to the same monthly totals (one operation per month and category, the advance
         # lines as operations named like them), the period of the target (legacy shifts it by a day through UTC — ADR-0002)
         # and the expense labels instead of the codes it would print.
@@ -670,7 +675,7 @@ with sync_playwright() as p:
             showPage('dashboard', document.querySelector(".nav-item[onclick*=\\"showPage('dashboard'\\"]"));
         }""", [dash, EXPENSE_CODES])
         page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'legacy-dashboard-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-dashboard-{theme}.png'))
         # Finance: the same orders and operations (in tenge), the opening balances of the accounts as legacy balance (its CFS ignores
         # openingBalance — ADR-0002), the current year.
         page.evaluate("""([f, tx]) => {
@@ -686,9 +691,9 @@ with sync_playwright() as p:
             showFinanceTab('ar', document.querySelectorAll('#finance-tabs .tab')[1]);
         }""", [fin, fin_tx])
         page.wait_for_timeout(1200)
-        page.screenshot(path=str(OUT / f'legacy-finance-ar-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-finance-ar-{theme}.png'))
         page.evaluate("showFinanceTab('cfs', document.querySelectorAll('#finance-tabs .tab')[5])"); page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'legacy-finance-cfs-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-finance-cfs-{theme}.png'))
         # Purchases: the same invoices, payments with a counterparty (in tenge), suppliers and advance lines; the calendar month
         # the target shows (legacy shifts «Текущий месяц» through UTC — ADR-0002). The whole debts table is compared as text.
         page.evaluate("""([d, today]) => {
@@ -703,7 +708,7 @@ with sync_playwright() as p:
             showFinanceTab('purchases', document.querySelectorAll('#finance-tabs .tab')[2]);
         }""", [fin_pur, dash['today']])
         page.wait_for_timeout(2500)
-        page.screenshot(path=str(OUT / f'legacy-finance-purchases-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-finance-purchases-{theme}.png'))
         legacy_debts = page.locator('#pur-debts-tbody').inner_text()
         tl, ll = target_debts.splitlines(), legacy_debts.splitlines()
         print(f'purchases debts table ({theme}): rows {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
@@ -737,7 +742,7 @@ with sync_playwright() as p:
             document.getElementById('pc-chart').style.visibility = 'hidden';
         }""", [calendar, money['accounts'], money['categories']])
         page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'legacy-money-calendar-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-calendar-{theme}.png'))
         tl, ll = target_calendar.splitlines(), page.locator('#pc-tbody').inner_text().splitlines()
         (OUT / f'calendar-target-{theme}.txt').write_text(target_calendar); (OUT / f'calendar-legacy-{theme}.txt').write_text('\n'.join(ll))
         print(f'payment calendar table ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
@@ -756,7 +761,7 @@ with sync_playwright() as p:
             showMoneyTab('salonwb', document.querySelectorAll('#page-money > .tabs .tab')[2]);
         }""", salon_rows)
         page.wait_for_timeout(2500)
-        page.screenshot(path=str(OUT / f'legacy-money-salonwb-{theme}.png'))
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-salonwb-{theme}.png'))
         for sal in ('armada', 'nazarbayeva'):
             page.evaluate(f"showSalonWbSalon('{sal}')"); page.wait_for_timeout(800)
             page.evaluate("setSalonWbYearFilter('all')"); page.wait_for_timeout(2500)
