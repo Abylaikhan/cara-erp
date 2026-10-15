@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Money;
 
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -68,5 +69,30 @@ class MoneyJournalTest extends TestCase
                 ->where('advances.1.spent', 1500.5)
                 ->where('advances.1.esf', 1)
                 ->where('advances.1.issue_doc', ['date' => '2026-10-01', 'amount' => 5000])));
+    }
+
+    public function test_payment_calendar_loads_with_its_tab_in_tenge(): void
+    {
+        $kzt = DB::table('money_accounts')->insertGetId(['name' => 'Касса Демо', 'type' => 'cash', 'currency' => 'KZT', 'opening_balance' => '100.50', 'sort_order' => 0]);
+        $usd = DB::table('money_accounts')->insertGetId(['name' => 'Счёт USD Демо', 'type' => 'bank', 'currency' => 'USD', 'opening_balance' => 0, 'sort_order' => 1]);
+        $future = now(config('erp.business_timezone'))->addDays(3)->format('Y-m-d');
+        DB::table('money_transactions')->insert([
+            ['account_id' => $kzt, 'tx_date' => '2026-01-05', 'flow' => 'income', 'category' => 'order_payment', 'amount' => '1000', 'amount_fx' => '2', 'counterparty' => null],
+            ['account_id' => $usd, 'tx_date' => '2026-01-06', 'flow' => 'expense', 'category' => 'supplier', 'amount' => '1', 'amount_fx' => '500.25', 'counterparty' => null],
+            ['account_id' => $kzt, 'tx_date' => $future, 'flow' => 'expense', 'category' => 'rent', 'amount' => '300', 'amount_fx' => null, 'counterparty' => 'Демо'],
+        ]);
+        foreach ([['МО-1', 'progress'], ['МО-2', 'done'], ['МО-3', 'cancelled']] as [$num, $status]) {
+            $o = new Order(['num' => $num, 'channel' => 'dealer_astana', 'customer' => 'Демо', 'status' => $status, 'payment_pct' => 20, 'delivery_date' => '2026-12-01']);
+            $o->save();
+            $o->items()->create(['line_no' => 0, 'name' => 'Демо', 'qty' => '2', 'price' => '5000', 'progress' => 0, 'status' => $status, 'attrs' => []]);
+        }
+
+        $this->actingAs(User::factory()->role('director')->create())->get('/money')->assertInertia(fn (Assert $page) => $page
+            ->missing('calendar')
+            ->reloadOnly('calendar', fn (Assert $reload) => $reload
+                ->where('calendar.balances', [(string) $kzt => '800.50', (string) $usd => '-500.25'])
+                ->where('calendar.orders', [['num' => 'МО-1', 'channel' => 'dealer_astana', 'customer' => 'Демо', 'status' => 'progress', 'payment' => 20, 'delivery' => '2026-12-01', 'date' => null, 'total' => '10000.000000']])
+                ->where('calendar.future', [['date' => $future, 'account' => $kzt, 'flow' => 'expense', 'category' => 'rent', 'ctr' => 'Демо', 'desc' => '', 'amount' => '300.00']])
+                ->has('calendar.today')));
     }
 }

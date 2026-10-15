@@ -240,6 +240,17 @@ with sync_playwright() as p:
                 'X-Inertia-Partial-Data': 'advances', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
             return (await r.json()).props.advances;
         }""")
+        # Payment calendar (the chart is drawn differently — legacy needs Chart.js from the internet — and is hidden on both sides).
+        page.locator('#page-money > .tabs .tab').nth(6).click(); page.wait_for_timeout(2500)
+        page.evaluate("document.getElementById('pc-chart').style.visibility = 'hidden'")
+        page.screenshot(path=str(OUT / f'target-money-calendar-{theme}.png'))
+        target_calendar = page.locator('#pc-tbody').inner_text()
+        calendar = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/money', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Money',
+                'X-Inertia-Partial-Data': 'calendar', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.calendar;
+        }""")
         page.goto(TARGET + '/dashboard', wait_until='networkidle'); page.wait_for_timeout(800)
         page.screenshot(path=str(OUT / f'target-dashboard-{theme}.png'))
         dash = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
@@ -683,7 +694,40 @@ with sync_playwright() as p:
         tl, ll = target_debts.splitlines(), legacy_debts.splitlines()
         print(f'purchases debts table ({theme}): rows {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
+        # Payment calendar of legacy: its own page, clock at noon of the target's business date in UTC (legacy takes «today»
+        # through UTC — in Almaty a day early, ADR-0002); the same balances, unpaid orders (status «В работе» as the
+        # «production» it looks for) and dated operations.
+        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU', timezone_id='UTC')
+        ctx.route('**/*', guard)
+        page = ctx.new_page()
+        page.clock.set_fixed_time(calendar['today'] + 'T12:00:00Z')
+        page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
+        page.goto(LEGACY, wait_until='load', timeout=60000); page.wait_for_timeout(1500)
+        page.evaluate("""([c, accounts, cats]) => {
+            document.getElementById('diag-panel')?.remove();
+            document.getElementById('login-screen').style.display = 'none';
+            const pages = ['dashboard','mrp','warehouse','purchases','esf','suppliers','catalog','sales','customers','crm','finance','money','channels','expense_cats','reconcile','hr','wages','payroll','accruals','techcards','mycabinet','ai'];
+            document.querySelectorAll('.nav-item[onclick]').forEach(it => { const m = (it.getAttribute('onclick') || '').match(/showPage\\('(\\w+)'/); if (m) it.style.display = pages.indexOf(m[1]) >= 0 ? '' : 'none'; });
+            document.querySelectorAll('.nav-badge').forEach(b => b.remove());
+            const av = document.getElementById('sidebar-avatar'); av.textContent = 'ДД'; av.style.background = '#4f8ef733'; av.style.color = '#4f8ef7';
+            document.getElementById('sidebar-username').textContent = 'Демо Директор'; document.getElementById('sidebar-role').textContent = 'Директор';
+            const dmy = d => d ? d.split('-').reverse().join('.') : '';
+            bankAccounts.length = 0; accounts.forEach(a => bankAccounts.push({id: String(a.id), name: a.name, icon: a.icon, balance: 0, currency: a.currency, type: a.type}));
+            moneyTx = accounts.map(a => { const b = +c.balances[a.id]; return {id: 'b' + a.id, date: '2000-01-01', accountId: String(a.id), flow: b >= 0 ? 'income' : 'expense', category: '', amount: Math.abs(b)}; })
+                .concat(c.future.map((t, i) => ({id: 'f' + i, date: t.date, accountId: String(t.account), flow: t.flow, category: t.category, counterparty: t.ctr, desc: t.desc, amount: +t.amount})));
+            ordersData = c.orders.map(o => ({num: o.num, channel: o.channel, customer: o.customer || '', status: o.status === 'progress' ? 'production' : o.status, payment: o.payment,
+                deliveryDate: dmy(o.delivery), date: dmy(o.date), items: [{qty: 1, price: +o.total}]}));
+            fcPlanData = []; _cacheLoaded.money = true;
+            showPage('money', document.querySelector(".nav-item[onclick*=\\"showPage('money'\\"]"));
+            showMoneyTab('calendar', document.querySelectorAll('#page-money > .tabs .tab')[6]);
+            document.getElementById('pc-chart').style.visibility = 'hidden';
+        }""", [calendar, money['accounts'], money['categories']])
+        page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'legacy-money-calendar-{theme}.png'))
+        tl, ll = target_calendar.splitlines(), page.locator('#pc-tbody').inner_text().splitlines()
+        print(f'payment calendar table ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
+        ctx.close()
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-calendar', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

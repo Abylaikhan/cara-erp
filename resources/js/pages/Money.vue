@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // M12 «Деньги», part 1 — legacy page-money (L6002–6320): period, KPI (renderMoneyKPIs), tabs «Касса», «Расчётные счета» and
 // «Авансовые отчёты», «Все операции» (CashTab, BankTab, AdvancesTab, AllTab). View only: new operations, editing, transfers and statement import come with
-// ERP-031…035 (decisions D-03, D-11); the salon worksheet, bank reconciliation and the payment calendar are next.
+// ERP-031…035 (decisions D-03, D-11); «Платёжный календарь» is CalendarTab; the salon worksheet and bank reconciliation are next.
 import { computed, ref } from 'vue';
 import AdvancesTab from '@/components/money/AdvancesTab.vue';
 import AllTab from '@/components/money/AllTab.vue';
 import BankTab from '@/components/money/BankTab.vue';
+import CalendarTab, { type CalendarData } from '@/components/money/CalendarTab.vue';
 import CashTab from '@/components/money/CashTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import { accountStats, fmt, hasPeriod, LATER, period, setMoneyPeriod, type Categories, type MoneyAccount, type MoneyTx } from '@/lib/money';
@@ -16,6 +17,7 @@ const props = defineProps<{
     advanceDebt: number;
     categories: Categories;
     advances?: InstanceType<typeof AdvancesTab>['$props']['advances'];
+    calendar?: CalendarData;
 }>();
 
 type Tab = 'cash' | 'bank' | 'salonwb' | 'bankrecon' | 'advances' | 'all' | 'calendar';
@@ -32,7 +34,6 @@ const tabs: { id: Tab; label: string }[] = [
 const LATER_TABS: Partial<Record<Tab, string>> = {
     salonwb: 'Рабочий лист салонов переносится следующей частью раздела «Деньги» (ERP-051).',
     bankrecon: 'Сверка с банком появится вместе с импортом банковских выписок (ERP-034).',
-    calendar: 'Платёжный календарь переносится следующей частью раздела «Деньги».',
 };
 const visited = ref(new Set<Tab>(['cash']));
 function show(t: Tab): void {
@@ -145,6 +146,9 @@ const add = () => window.alert(LATER.add);
             </div>
             <div v-if="visited.has('all')" id="money-tab-all" :style="{ display: tab === 'all' ? '' : 'none' }">
                 <AllTab :accounts="props.accounts" :txs="props.transactions" :categories="props.categories" />
+            </div>
+            <div v-if="visited.has('calendar')" id="money-tab-calendar" :style="{ display: tab === 'calendar' ? '' : 'none' }">
+                <CalendarTab :data="props.calendar" :accounts="props.accounts" :categories="props.categories" :active="tab === 'calendar'" />
             </div>
             <div v-for="(text, key) in LATER_TABS" :id="'money-tab-' + key" :key="key" :style="{ display: tab === key ? '' : 'none' }">
                 <div class="card">

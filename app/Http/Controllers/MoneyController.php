@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\AdvanceReport;
 use App\Models\MoneyAccount;
+use App\Models\Order;
+use App\Support\ChannelScope;
 use App\Support\Erp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -51,6 +53,38 @@ class MoneyController extends Controller
         })->values();
     }
 
+    /**
+     * Legacy renderPayCalendar reads the balance of each account, the orders that are not done or cancelled (expected
+     * payments) and the operations dated after today. Amounts are in tenge (a dollar account counts amount_fx); the balance
+     * includes the opening balance of the account (legacy left it out).
+     *
+     * @return array<string, mixed>
+     */
+    private function calendar(Request $request): array
+    {
+        $today = now(config('erp.business_timezone'))->format('Y-m-d');
+        $kzt = "CASE WHEN a.currency = 'USD' THEN coalesce(t.amount_fx, t.amount) ELSE t.amount END";
+        $flows = DB::table('money_transactions as t')->join('money_accounts as a', 'a.id', '=', 't.account_id')->groupBy('t.account_id')
+            ->selectRaw("t.account_id, sum(CASE WHEN t.flow = 'income' THEN {$kzt} ELSE -({$kzt}) END) AS s")->pluck('s', 'account_id');
+
+        return [
+            'today' => $today,
+            'balances' => MoneyAccount::query()->orderBy('sort_order')->get()
+                ->mapWithKeys(fn (MoneyAccount $a) => [$a->id => bcadd((string) $a->opening_balance, (string) ($flows[$a->id] ?? '0'), 2)]),
+            'orders' => ChannelScope::apply(Order::query()->whereNotIn('orders.status', ['done', 'cancelled']), $request->user(), 'orders.channel')
+                ->leftJoinSub(DB::table('order_items')->groupBy('order_id')->selectRaw('order_id, sum(qty * price) AS total'), 'i', 'i.order_id', '=', 'orders.id')
+                ->orderByDesc('orders.created_at')->orderByDesc('orders.id')
+                ->get(['orders.num', 'orders.channel', 'orders.customer', 'orders.status', 'orders.payment_pct', 'orders.delivery_date', 'orders.due_date', DB::raw('coalesce(i.total, 0) AS total')])
+                ->map(fn (Order $o) => ['num' => $o->num, 'channel' => $o->channel, 'customer' => $o->customer, 'status' => $o->status, 'payment' => $o->payment_pct,
+                    'delivery' => $o->delivery_date?->format('Y-m-d'), 'date' => $o->due_date?->format('Y-m-d'), 'total' => (string) $o->getAttribute('total')])->values(),
+            'future' => DB::table('money_transactions as t')->join('money_accounts as a', 'a.id', '=', 't.account_id')->where('t.tx_date', '>', $today)
+                ->orderBy('t.tx_date')->orderBy('t.id')
+                ->get(['t.tx_date', 't.account_id', 't.flow', 't.category', 't.counterparty', 't.description', DB::raw("{$kzt} AS kzt")])
+                ->map(fn ($t) => ['date' => $t->tx_date, 'account' => $t->account_id, 'flow' => $t->flow, 'category' => $t->category ?? '', 'ctr' => $t->counterparty ?? '',
+                    'desc' => $t->description ?? '', 'amount' => (string) $t->kzt]),
+        ];
+    }
+
     public function index(Request $request): Response
     {
         abort_unless(Erp::canAccess($request->user(), 'money'), 403);
@@ -91,6 +125,8 @@ class MoneyController extends Controller
                 ->reduce(fn ($s, AdvanceReport $a) => bcadd($s, bccomp($a->issued, $a->spent, 12) > 0 ? bcsub($a->issued, $a->spent, 12) : '0', 12), '0'),
             // Tab «Авансовые отчёты» (legacy loadAdvancesFromDB/renderAdvances): loaded when the tab is opened.
             'advances' => Inertia::optional(fn () => $this->advances()),
+            // Tab «Платёжный календарь» (legacy renderPayCalendar): balances, unpaid orders and dated operations, in tenge.
+            'calendar' => Inertia::optional(fn () => $this->calendar($request)),
             'categories' => [
                 'income' => config('erp.money_income_categories'),
                 'expense' => config('erp.money_expense_categories'),
