@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BankReconController;
 use App\Http\Controllers\CrmController;
 use App\Http\Controllers\CrmTaskController;
 use App\Http\Controllers\CustomerController;
@@ -132,6 +133,7 @@ Route::middleware('auth')->group(function () {
 
     // M12 «Деньги», часть 1: кассы, счета, все операции (просмотр)
     Route::get('/money', [MoneyController::class, 'index'])->middleware('page:money')->name('money.index');
+    Route::post('/money/bank-recon/clear', [BankReconController::class, 'clear'])->middleware('page:money')->name('money.bank-recon.clear');
     Route::middleware('page:money')->prefix('money/salon-worksheet')->name('money.salon-worksheet.')->controller(SalonWorksheetController::class)->group(function () {
         Route::post('/', 'store')->name('store');
         Route::post('/clear', 'clear')->name('clear');

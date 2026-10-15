@@ -86,6 +86,26 @@ class MoneyController extends Controller
         ];
     }
 
+    /** @return array<string, mixed> */
+    private function bankRecon(): array
+    {
+        $keys = ['a1b2c3d4-e5f6-7890-abcd-ef1234567890', '0265fb65-7812-4bee-b794-71306246edb7']; // Kaspi, Halyk (legacy order)
+        $ids = DB::table('legacy_id_map')->where('source_table', 'money_accounts')->whereIn('source_key', $keys)->pluck('target_id', 'source_key');
+        $accounts = collect($keys)->map(fn ($k) => $ids[$k] ?? null)->filter()->values();
+
+        return [
+            'accounts' => $accounts->all(),
+            'rows' => DB::table('bank_statement_rows')->whereIn('account_id', $accounts)->orderBy('row_date')->orderBy('id')
+                ->get(['id', 'account_id', 'row_date', 'flow', 'amount', 'counterparty', 'bin', 'description', 'transferred_to_db'])
+                ->map(fn ($r) => ['id' => $r->id, 'account' => $r->account_id, 'date' => $r->row_date, 'flow' => $r->flow, 'amount' => (string) $r->amount,
+                    'counterparty' => $r->counterparty, 'bin' => $r->bin, 'description' => $r->description, 'transferred' => (bool) $r->transferred_to_db]),
+            // The journal of the accounts by day (legacy sums the operations of the account as they are).
+            'journal' => DB::table('money_transactions')->whereIn('account_id', $accounts)->groupBy('account_id', 'tx_date')
+                ->selectRaw("account_id, tx_date, sum(CASE WHEN flow = 'income' THEN amount ELSE 0 END) AS inc, sum(CASE WHEN flow = 'expense' THEN amount ELSE 0 END) AS out")->get()
+                ->map(fn ($j) => ['account' => $j->account_id, 'date' => $j->tx_date, 'in' => (string) $j->inc, 'out' => (string) $j->out]),
+        ];
+    }
+
     public function index(Request $request): Response
     {
         abort_unless(Erp::canAccess($request->user(), 'money'), 403);
@@ -128,6 +148,9 @@ class MoneyController extends Controller
             'advances' => Inertia::optional(fn () => $this->advances()),
             // Tab «Платёжный календарь» (legacy renderPayCalendar): balances, unpaid orders and dated operations, in tenge.
             'calendar' => Inertia::optional(fn () => $this->calendar($request)),
+            // Tab «Сверка с банком» (legacy BANK_RECON_ACCOUNTS, loadBankReconFromDB, renderBankRecon): the statements of Kaspi and
+            // Halyk and the journal of those accounts by day, sent when the tab is opened.
+            'bankRecon' => Inertia::optional(fn () => $this->bankRecon()),
             // Tab «Рабочий лист салонов» (legacy loadSalonWbFromDB): the rows of both salons, sent when the tab is opened.
             'salonRows' => Inertia::optional(fn () => SalonWorksheetRow::query()->orderBy('order_date')->orderBy('created_at')->orderBy('id')->get()
                 ->map(fn (SalonWorksheetRow $r) => ['id' => $r->id, 'uuid' => $r->uuid, 'salon' => $r->salon, 'transferred' => $r->transferred_to_db,

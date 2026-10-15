@@ -259,6 +259,19 @@ with sync_playwright() as p:
             return (await r.json()).props.advances;
         }""")
         # Payment calendar (the chart is drawn differently — legacy needs Chart.js from the internet — and is hidden on both sides).
+        page.locator('#page-money > .tabs .tab').nth(3).click(); page.wait_for_timeout(3000)
+        page.screenshot(path=str(OUT / f'target-money-bankrecon-{theme}.png'))
+        recon = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/money', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Money',
+                'X-Inertia-Partial-Data': 'bankRecon', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.bankRecon;
+        }""")
+        target_recon = []
+        for i in range(2):
+            page.select_option('#recon-account-select', index=i); page.wait_for_timeout(800)
+            target_recon.append(page.locator('#recon-tbody').inner_text())
+        page.select_option('#recon-account-select', index=0); page.wait_for_timeout(300)
         page.locator('#page-money > .tabs .tab').nth(6).click(); page.wait_for_timeout(2500)
         page.evaluate("document.getElementById('pc-chart').style.visibility = 'hidden'")
         page.screenshot(path=str(OUT / f'target-money-calendar-{theme}.png'))
@@ -668,6 +681,33 @@ with sync_playwright() as p:
         }""", advances)
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-advances-{theme}.png'))
+        # Bank reconciliation: the same statement rows (by legacy account id) and the journal of the day as one income and one expense.
+        page.evaluate("""([r, accounts]) => {
+            const keys = ['a1b2c3d4-e5f6-7890-abcd-ef1234567890', '0265fb65-7812-4bee-b794-71306246edb7'];
+            const key = id => keys[r.accounts.indexOf(id)];
+            // The select names the accounts by legacy id; the KPIs of the page stay as they were (the journal below is per day).
+            r.accounts.forEach((id, i) => { const a = accounts.find(x => x.id === id); if (a && !bankAccounts.some(b => b.id === keys[i])) bankAccounts.push({id: keys[i], name: a.name, icon: a.icon, type: 'bank_recon_only'}); });
+            window._kpiSaved = ['money-kpi-cash', 'money-kpi-bank', 'money-kpi-total', 'money-kpi-advances'].map(id => [id, document.getElementById(id)?.textContent]);
+            keys.forEach(k => { bankReconData[k] = []; bankReconLoaded[k] = true; });
+            r.rows.forEach(x => bankReconData[key(x.account)].push({id: 'r' + x.id, date: x.date, flow: x.flow, amount: +x.amount, counterparty: x.counterparty || '', bin: x.bin || '',
+                description: x.description || '', transferred_to_db: x.transferred}));
+            const extra = [];
+            r.journal.forEach((j, i) => { if (+j.in) extra.push({id: 'ji' + i, date: j.date, accountId: key(j.account), flow: 'income', amount: +j.in, desc: '', category: ''});
+                if (+j.out) extra.push({id: 'jo' + i, date: j.date, accountId: key(j.account), flow: 'expense', amount: +j.out, desc: '', category: ''}); });
+            window._savedMoneyTx = moneyTx; moneyTx = extra;
+            bankReconActiveAccount = keys[0];
+            showMoneyTab('bankrecon', document.querySelectorAll('#page-money > .tabs .tab')[3]);
+            window._kpiSaved.forEach(([id, t]) => { const e = document.getElementById(id); if (e && t != null) e.textContent = t; });
+        }""", [recon, money['accounts']])
+        page.wait_for_timeout(1500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-bankrecon-{theme}.png'))
+        legacy_recon = []
+        for k in ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '0265fb65-7812-4bee-b794-71306246edb7'):
+            page.evaluate(f"showBankReconAccount('{k}')"); page.wait_for_timeout(800)
+            legacy_recon.append(page.locator('#recon-tbody').inner_text())
+        for n, a2, b2 in zip(('Kaspi', 'Halyk'), target_recon, legacy_recon):
+            print(f'bank recon {n} ({theme}): lines {len(a2.splitlines())} / {len(b2.splitlines())}, ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
+        page.evaluate("moneyTx = window._savedMoneyTx; for (let i = bankAccounts.length - 1; i >= 0; i--) if (bankAccounts[i].type === 'bank_recon_only') bankAccounts.splice(i, 1)")
         # Dashboard: legacy gets data that sum to the same monthly totals (one operation per month and category, the advance
         # lines as operations named like them), the period of the target (legacy shifts it by a day through UTC — ADR-0002)
         # and the expense labels instead of the codes it would print.
@@ -893,7 +933,7 @@ with sync_playwright() as p:
         legacy_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
         print(f'salon report ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a == b else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'продавцы', 'заказы'), target_sr, legacy_sr)))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))
