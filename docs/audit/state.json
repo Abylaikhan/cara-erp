@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T182650Z-bcb0",
-    "started_at": "2026-10-15T18:26:50Z",
+    "run_id": "20261015T184239Z-57c1",
+    "started_at": "2026-10-15T18:42:39Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T18:27:52Z",
+    "finished_at": "2026-10-15T18:43:45Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "a3d98c101d616f43fd064f0c920116323b0ecfc2",
-    "at": "2026-10-15T18:26:50Z"
+    "target_ref": "ec3ad0ee012d4e0e91f08befcbd29aa2478c7c08",
+    "at": "2026-10-15T18:42:39Z"
   },
   "last_reported": {
-    "run_id": "20261015T182650Z-bcb0",
+    "run_id": "20261015T184239Z-57c1",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "a3d98c101d616f43fd064f0c920116323b0ecfc2",
-    "logical_key": "06e79fbafd804ad7",
+    "target_ref": "ec3ad0ee012d4e0e91f08befcbd29aa2478c7c08",
+    "logical_key": "aa4c8e8e2c4c9547",
     "local_date": "2026-10-15",
-    "completed_at": "2026-10-15T18:27:52Z",
-    "report": "daily/2026-10-15/20261015T182650Z-bcb0.md",
-    "artifact_sha256": "1e061e81698da00a32055b4ba58b9195a058efdf5718523b8de0163843c4163a",
+    "completed_at": "2026-10-15T18:43:45Z",
+    "report": "daily/2026-10-15/20261015T184239Z-57c1.md",
+    "artifact_sha256": "6ca3b679f2c73a9c09d5677957c04a04a86adc1b8bf823d9d78c039f1fc3a942",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -156,6 +156,7 @@
       "Tests\\Feature\\Customers\\DealerTest::test_modal_and_new_row_create_dealer_channels",
       "Tests\\Feature\\Customers\\DealerTest::test_only_an_unused_dealer_can_be_deleted",
       "Tests\\Feature\\Customers\\DealerTest::test_only_dealer_channels_are_managed_here",
+      "Tests\\Feature\\Customers\\DealerTest::test_reconcile_tab_loads_orders_and_payments_of_a_visible_order_only",
       "Tests\\Feature\\Customers\\DealerTest::test_roles_without_the_page_cannot_manage_dealers",
       "Tests\\Feature\\Customers\\DealerTest::test_second_editor_gets_a_conflict",
       "Tests\\Feature\\Customers\\DealerTest::test_tab_lists_the_legacy_dealers_and_puts_new_ones_first",
@@ -293,15 +294,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "a3d98c101d616f43fd064f0c920116323b0ecfc2",
+    "target_ref": "ec3ad0ee012d4e0e91f08befcbd29aa2478c7c08",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T18:27:52Z",
-    "run_id": "20261015T182650Z-bcb0"
+    "completed_at": "2026-10-15T18:43:45Z",
+    "run_id": "20261015T184239Z-57c1"
   },
   "changelog": {
-    "entries": 43,
-    "last_header": "## 2026-10-15 · 20261015T182650Z-bcb0",
-    "sha256": "73f27dd3d3d3ff1b55ca67be8b7dce1faf39a566bc9044544eeebbd47959a541"
+    "entries": 44,
+    "last_header": "## 2026-10-15 · 20261015T184239Z-57c1",
+    "sha256": "9f96042644b295daf7904bdd54b0f7559ad9089593210e8f53f4c9321838f5be"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
