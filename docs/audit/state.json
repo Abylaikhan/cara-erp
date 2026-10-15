@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T152941Z-01b2",
-    "started_at": "2026-10-15T15:29:41Z",
+    "run_id": "20261015T160018Z-b4a8",
+    "started_at": "2026-10-15T16:00:18Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T15:30:43Z",
+    "finished_at": "2026-10-15T16:01:19Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "a9601d8b274196b997fcfb2ed2a141e2630d8bb5",
-    "at": "2026-10-15T15:29:41Z"
+    "target_ref": "30867405829215679f8ca70bf1c5368ec4152a7b",
+    "at": "2026-10-15T16:00:18Z"
   },
   "last_reported": {
-    "run_id": "20261015T152941Z-01b2",
+    "run_id": "20261015T160018Z-b4a8",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "a9601d8b274196b997fcfb2ed2a141e2630d8bb5",
-    "logical_key": "b87ce255be6afa72",
+    "target_ref": "30867405829215679f8ca70bf1c5368ec4152a7b",
+    "logical_key": "0168236602f2586d",
     "local_date": "2026-10-15",
-    "completed_at": "2026-10-15T15:30:43Z",
-    "report": "daily/2026-10-15/20261015T152941Z-01b2.md",
-    "artifact_sha256": "8d024c2d3de69a354d0c8d4fce051bbbf80832bb810af809a73d68936f15dc66",
+    "completed_at": "2026-10-15T16:01:19Z",
+    "report": "daily/2026-10-15/20261015T160018Z-b4a8.md",
+    "artifact_sha256": "c909ddad164129ea0990e4ec1f8be1c44e81bf18dd863ba8915fd88240068d6e",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -187,6 +187,8 @@
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_top_level_category_and_zero_sort_order",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_update_keeps_code_and_level_and_records_changes",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_validation_messages_repeat_legacy_texts",
+      "Tests\\Feature\\Finance\\FinanceTest::test_orders_with_totals_and_operations_in_tenge_with_the_tab",
+      "Tests\\Feature\\Finance\\FinanceTest::test_roles_without_the_page_cannot_open_it",
       "Tests\\Feature\\Legacy\\CrmTaskImportTest::test_imports_tasks_with_their_lead_and_legacy_defaults",
       "Tests\\Feature\\Legacy\\CrmTaskImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
       "Tests\\Feature\\Legacy\\CustomerImportTest::test_import_is_idempotent",
@@ -283,15 +285,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "a9601d8b274196b997fcfb2ed2a141e2630d8bb5",
+    "target_ref": "30867405829215679f8ca70bf1c5368ec4152a7b",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T15:30:43Z",
-    "run_id": "20261015T152941Z-01b2"
+    "completed_at": "2026-10-15T16:01:19Z",
+    "run_id": "20261015T160018Z-b4a8"
   },
   "changelog": {
-    "entries": 36,
-    "last_header": "## 2026-10-15 · 20261015T152941Z-01b2",
-    "sha256": "84f44d4b7a097a248c656d94b1730d8eda57c928f7333a72ef80c8c12cb55051"
+    "entries": 37,
+    "last_header": "## 2026-10-15 · 20261015T160018Z-b4a8",
+    "sha256": "02b5dda4b14fa30c1d488b435628284e53bc08a222373d4b6d16308106da6626"
   },
   "accepted_source_ref": {
     "commit": "c917d375777059db4b06cf9aceca47861c7cf56a",
