@@ -243,6 +243,18 @@ with sync_playwright() as p:
         page.goto(TARGET + '/dashboard', wait_until='networkidle'); page.wait_for_timeout(800)
         page.screenshot(path=str(OUT / f'target-dashboard-{theme}.png'))
         dash = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        page.goto(TARGET + '/finance', wait_until='networkidle'); page.wait_for_timeout(500)
+        fin = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        page.locator('#finance-tabs .tab').nth(1).click(); page.wait_for_timeout(1200)
+        page.screenshot(path=str(OUT / f'target-finance-ar-{theme}.png'))
+        page.locator('#finance-tabs .tab').nth(5).click(); page.wait_for_timeout(2500)
+        page.screenshot(path=str(OUT / f'target-finance-cfs-{theme}.png'))
+        fin_tx = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/finance', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Finance',
+                'X-Inertia-Partial-Data': 'transactions', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.transactions;
+        }""")
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
@@ -625,8 +637,26 @@ with sync_playwright() as p:
         }""", [dash, EXPENSE_CODES])
         page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'legacy-dashboard-{theme}.png'))
+        # Finance: the same orders and operations (in tenge), the opening balances of the accounts as legacy balance (its CFS ignores
+        # openingBalance — ADR-0002), the current year.
+        page.evaluate("""([f, tx]) => {
+            const dmy = d => d ? d.split('-').reverse().join('.') : '';
+            ordersData = f.orders.map(o => ({num: o.num, channel: o.channel, customer: o.customer || '', seller: o.seller || '', resp: o.seller || '', date: dmy(o.date),
+                createdDate: dmy(o.created), payment: o.payment, status: o.status, paymentDue: o.payment_due || '', items: [{qty: 1, price: +o.total}]}));
+            moneyTx = tx.map(t => ({id: t.id, sbId: String(t.id), date: t.date, accountId: String(t.account), flow: t.flow, category: t.category, amount: +t.amount, desc: t.desc || ''}));
+            bankAccounts.length = 0; f.accounts.forEach(a => bankAccounts.push({id: String(a.id), name: a.name, icon: a.icon, balance: +a.opening}));
+            _expenseCats = Object.entries(f.categoryNames).map(([code, name]) => ({code, name})); _expenseCatsLoaded = true;
+            _cacheLoaded.money = true;
+            showPage('finance', document.querySelector(".nav-item[onclick*=\\"showPage('finance'\\"]"));
+            setFinancePeriod('year');
+            showFinanceTab('ar', document.querySelectorAll('#finance-tabs .tab')[1]);
+        }""", [fin, fin_tx])
+        page.wait_for_timeout(1200)
+        page.screenshot(path=str(OUT / f'legacy-finance-ar-{theme}.png'))
+        page.evaluate("showFinanceTab('cfs', document.querySelectorAll('#finance-tabs .tab')[5])"); page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'legacy-finance-cfs-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'dashboard'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'dashboard', 'finance-ar', 'finance-cfs'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))
