@@ -249,6 +249,15 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'target-finance-ar-{theme}.png'))
         page.locator('#finance-tabs .tab').nth(5).click(); page.wait_for_timeout(2500)
         page.screenshot(path=str(OUT / f'target-finance-cfs-{theme}.png'))
+        page.locator('#finance-tabs .tab').nth(2).click(); page.wait_for_timeout(3000)
+        page.screenshot(path=str(OUT / f'target-finance-purchases-{theme}.png'))
+        target_debts = page.locator('#pur-debts-tbody').inner_text()
+        fin_pur = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/finance', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Finance',
+                'X-Inertia-Partial-Data': 'purchases', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.purchases;
+        }""")
         fin_tx = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/finance', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Finance',
@@ -655,8 +664,26 @@ with sync_playwright() as p:
         page.screenshot(path=str(OUT / f'legacy-finance-ar-{theme}.png'))
         page.evaluate("showFinanceTab('cfs', document.querySelectorAll('#finance-tabs .tab')[5])"); page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'legacy-finance-cfs-{theme}.png'))
+        # Purchases: the same invoices, payments with a counterparty (in tenge), suppliers and advance lines; the calendar month
+        # the target shows (legacy shifts «Текущий месяц» through UTC — ADR-0002). The whole debts table is compared as text.
+        page.evaluate("""([d, today]) => {
+            _esfData = {invoices: d.invoices.map(i => ({num: i.num, date: i.date, status: i.status, supplier_name: i.supplier, supplier_bin: i.bin, total_with_nds: +i.total}))};
+            moneyTx = d.payments.map((t, i) => ({id: i, date: t.date, flow: 'expense', counterparty: t.counterparty, bin: t.bin, amount: +t.amount, desc: t.desc || ''}));
+            suppliersData = d.suppliers.map(s => ({name: s.name, bin: s.bin || ''}));
+            advanceReports = [{date: '', empName: '', lines: []}]; advanceReports = d.advanceLines.map(l => ({date: l.date, empName: l.employee || '', lines: [{type: 'supplier', supplier: l.supplier, amount: +l.amount, desc: l.desc || ''}]}));
+            _advancesLoaded = true;
+            const y = +today.slice(0, 4), m = +today.slice(5, 7), last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+            const range = {from: today.slice(0, 8) + '01', to: today.slice(0, 8) + String(last).padStart(2, '0')};
+            getPurDateRange = () => range;
+            showFinanceTab('purchases', document.querySelectorAll('#finance-tabs .tab')[2]);
+        }""", [fin_pur, dash['today']])
+        page.wait_for_timeout(2500)
+        page.screenshot(path=str(OUT / f'legacy-finance-purchases-{theme}.png'))
+        legacy_debts = page.locator('#pur-debts-tbody').inner_text()
+        tl, ll = target_debts.splitlines(), legacy_debts.splitlines()
+        print(f'purchases debts table ({theme}): rows {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'dashboard', 'finance-ar', 'finance-cfs'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))

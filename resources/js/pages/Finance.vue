@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // M11 «Финансы», part 1 — legacy page-finance (L5447–5900): header with the order selection, the period filter
 // (setFinancePeriod/fillFinanceMonths/initFinancePeriod, L25925–26035; the current year by default), the tabs (showFinanceTab
-// L22610). «Дебиторка» (ArTab) and «ДДС» (CfsTab) are migrated; P&L, purchases, margins, break-even, the trial balance and
+// L22610). «Дебиторка» (ArTab), «Закупки» (PurchasesTab) and «ДДС» (CfsTab) are migrated; P&L, margins, break-even, the trial balance and
 // P&L by activity need salaries, fixed costs and technological cards (ERP-060…062, decisions D-11, D-12).
 import { computed, ref } from 'vue';
 import ArTab, { type ArRecord } from '@/components/finance/ArTab.vue';
 import CfsTab, { type CfsTx } from '@/components/finance/CfsTab.vue';
+import PurchasesTab, { type PurchasesData } from '@/components/finance/PurchasesTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 
 export interface FinanceOrder {
@@ -29,13 +30,13 @@ const props = defineProps<{
     categoryNames: Record<string, string>;
     txLabels: Record<string, string>;
     transactions?: CfsTx[];
+    purchases?: PurchasesData;
 }>();
 
 type Tab = 'pl' | 'ar' | 'purchases' | 'margin' | 'bep' | 'cfs' | 'osv' | 'activity';
 const tab = ref<Tab>('pl');
 const LATER: Partial<Record<Tab, string>> = {
     pl: 'Отчёт о прибылях и убытках появится вместе с зарплатой, постоянными затратами и технологическими картами (ERP-060, решения D-11 и D-12).',
-    purchases: 'Дашборд закупок переносится следующим этапом (ERP-060).',
     margin: 'Маржинальность считается по технологическим картам и появится вместе с ними (ERP-028, решение D-12).',
     bep: 'Точка безубыточности строится по постоянным затратам и появится вместе с ними (ERP-060, решение D-11).',
     osv: 'Оборотно-сальдовая ведомость появится вместе с зарплатой и технологическими картами (ERP-061, решение D-11).',
@@ -178,6 +179,9 @@ const arRecords = computed<ArRecord[]>(() => {
 
             <div id="finance-ar" :style="{ display: tab === 'ar' ? 'block' : 'none' }">
                 <ArTab :records="arRecords" />
+            </div>
+ <div id="finance-purchases" :style="{ display: tab === 'purchases' ? 'block' : 'none' }">
+                <PurchasesTab :data="props.purchases" :today="props.today" :active="tab === 'purchases'" />
             </div>
             <div id="finance-cfs" :style="{ display: tab === 'cfs' ? 'block' : 'none' }">
                 <CfsTab

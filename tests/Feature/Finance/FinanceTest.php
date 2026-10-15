@@ -41,6 +41,25 @@ class FinanceTest extends TestCase
                 == [['2026-10-02', 'expense', '1000.50'], ['2026-10-01', 'income', '300.00']])));
     }
 
+    public function test_purchases_load_with_their_tab(): void
+    {
+        $acc = DB::table('money_accounts')->insertGetId(['name' => 'Счёт USD Демо', 'type' => 'bank', 'currency' => 'USD', 'opening_balance' => 0, 'sort_order' => 0]);
+        DB::table('money_transactions')->insert([
+            ['account_id' => $acc, 'tx_date' => '2026-10-02', 'flow' => 'expense', 'category' => 'supplier', 'amount' => '2', 'amount_fx' => '1000.50', 'counterparty' => 'ТОО «Демо»', 'bin' => '123456789012', 'description' => 'Демо'],
+            ['account_id' => $acc, 'tx_date' => '2026-10-03', 'flow' => 'expense', 'category' => 'salary', 'amount' => '1', 'amount_fx' => '500', 'counterparty' => null, 'bin' => null, 'description' => null],
+        ]);
+        DB::table('incoming_invoices')->insert(['num' => 'Демо-1', 'date' => '2026-10-01', 'status' => 'Принят', 'supplier_name' => 'ТОО «Демо»', 'supplier_bin' => '123456789012', 'total_amount' => '2000', 'total_nds' => '0', 'total_with_nds' => '2000']);
+        DB::table('advance_reports')->insert(['doc_num' => 'АО-1', 'employee_name' => 'Демо Сотрудник', 'report_date' => '2026-10-05', 'issued' => '0', 'spent' => '0', 'returned' => '0', 'status' => 'open',
+            'lines' => json_encode([['type' => 'supplier', 'supplier' => 'ТОО «Демо»', 'amount' => 300.25, 'desc' => 'Демо'], ['type' => 'expense', 'amount' => 5]])]);
+
+        $this->actingAs(User::factory()->role('director')->create())->get('/finance')->assertInertia(fn (Assert $page) => $page
+            ->missing('purchases')
+            ->reloadOnly('purchases', fn (Assert $reload) => $reload
+                ->where('purchases.invoices', [['num' => 'Демо-1', 'date' => '2026-10-01', 'status' => 'Принят', 'supplier' => 'ТОО «Демо»', 'bin' => '123456789012', 'total' => '2000.00']])
+                ->where('purchases.payments', [['date' => '2026-10-02', 'counterparty' => 'ТОО «Демо»', 'bin' => '123456789012', 'amount' => '1000.50', 'desc' => 'Демо']])
+                ->where('purchases.advanceLines', [['date' => '2026-10-05', 'supplier' => 'ТОО «Демо»', 'amount' => '300.25', 'desc' => 'Демо', 'employee' => 'Демо Сотрудник']])));
+    }
+
     public function test_roles_without_the_page_cannot_open_it(): void
     {
         $this->actingAs(User::factory()->role('manager')->create())->get('/finance')->assertForbidden();

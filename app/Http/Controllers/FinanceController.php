@@ -55,7 +55,31 @@ class FinanceController extends Controller
             'txLabels' => collect(config('erp.money_income_categories'))->merge(config('erp.money_expense_categories'))->map(fn (array $c) => $c[0].' '.$c[1]),
             // Tab «ДДС»: every operation in tenge, in the order legacy loads them; sent when the tab is opened.
             'transactions' => Inertia::optional(fn () => $this->transactions()),
+            // Tab «Закупки» (legacy renderPurchasesDash, openSupplierReconciliation): incoming invoices, payments with a
+            // counterparty (in tenge), suppliers and the supplier lines of the advance reports; sent when the tab is opened.
+            'purchases' => Inertia::optional(fn () => $this->purchases()),
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function purchases(): array
+    {
+        return [
+            'invoices' => DB::table('incoming_invoices')->orderByDesc('date')->orderBy('id')
+                ->get(['num', 'date', 'status', 'supplier_name', 'supplier_bin', 'total_with_nds'])
+                ->map(fn ($i) => ['num' => $i->num, 'date' => $i->date, 'status' => $i->status, 'supplier' => $i->supplier_name, 'bin' => $i->supplier_bin, 'total' => (string) $i->total_with_nds]),
+            'payments' => DB::table('money_transactions as t')->join('money_accounts as a', 'a.id', '=', 't.account_id')
+                ->where('t.flow', 'expense')->where(fn ($q) => $q->whereNotNull('t.counterparty')->orWhereNotNull('t.bin'))
+                ->orderByDesc('t.tx_date')->orderBy('t.id')
+                ->get(['t.tx_date', 't.counterparty', 't.bin', 't.description', DB::raw("CASE WHEN a.currency = 'USD' THEN coalesce(t.amount_fx, t.amount) ELSE t.amount END AS kzt")])
+                ->map(fn ($t) => ['date' => $t->tx_date, 'counterparty' => $t->counterparty, 'bin' => $t->bin, 'amount' => (string) $t->kzt, 'desc' => $t->description]),
+            'suppliers' => DB::table('suppliers')->where('active', true)->orderBy('name')->orderBy('id')->get(['name', 'bin']),
+            'advanceLines' => DB::table('advance_reports as a')->crossJoin(DB::raw('jsonb_array_elements(a.lines) AS l'))->whereRaw("l->>'type' = 'supplier'")
+                ->orderByDesc('a.report_date')->orderBy('a.id')
+                ->get(['a.report_date', 'a.employee_name', DB::raw("l->>'supplier' AS supplier"), DB::raw("l->>'desc' AS description"),
+                    DB::raw("CASE WHEN l->>'amount' ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN (l->>'amount')::numeric ELSE 0 END AS amount")])
+                ->map(fn ($l) => ['date' => $l->report_date, 'supplier' => $l->supplier, 'amount' => (string) $l->amount, 'desc' => $l->description, 'employee' => $l->employee_name]),
+        ];
     }
 
     /** @return Collection<int, array<string, mixed>> */
