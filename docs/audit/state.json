@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T185816Z-d63d",
-    "started_at": "2026-10-15T18:58:16Z",
+    "run_id": "20261015T192359Z-c98d",
+    "started_at": "2026-10-15T19:23:59Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T18:59:23Z",
+    "finished_at": "2026-10-15T19:25:04Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "9f005d7fcbebfa147148d1f5a7dee061d6730ba4",
-    "at": "2026-10-15T18:58:16Z"
+    "target_ref": "ca5dbc55a2cdfa33cc51a912b2bc84fb0573617f",
+    "at": "2026-10-15T19:23:59Z"
   },
   "last_reported": {
-    "run_id": "20261015T185816Z-d63d",
+    "run_id": "20261015T192359Z-c98d",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "9f005d7fcbebfa147148d1f5a7dee061d6730ba4",
-    "logical_key": "1d278ae5c1e3d47d",
-    "local_date": "2026-10-15",
-    "completed_at": "2026-10-15T18:59:23Z",
-    "report": "daily/2026-10-15/20261015T185816Z-d63d.md",
-    "artifact_sha256": "217e90cfa2a925874fb6a5730bbe01edcf5f7bd772b69800697b3a11e797a21c",
+    "target_ref": "ca5dbc55a2cdfa33cc51a912b2bc84fb0573617f",
+    "logical_key": "40432dd9baea73b9",
+    "local_date": "2026-10-16",
+    "completed_at": "2026-10-15T19:25:04Z",
+    "report": "daily/2026-10-16/20261015T192359Z-c98d.md",
+    "artifact_sha256": "71927ace56e3ca730dc5275908730b5376827ce2f0b614af427fdcf19b94e301",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -239,6 +239,8 @@
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_imports_materials_with_exact_quantities_and_legacy_prices",
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_legacy_rounding_matches_javascript",
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_material_import_is_idempotent",
+      "Tests\\Feature\\Money\\BankReconTest::test_legacy_statements_are_imported_and_rows_cleared_in_legacy_are_removed",
+      "Tests\\Feature\\Money\\BankReconTest::test_statements_and_the_journal_load_with_the_tab_and_clearing_keeps_transferred_rows",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_advances_load_with_their_tab_spent_by_the_lines",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_page_lists_accounts_operations_with_orders_esf_and_the_advance_debt",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_payment_calendar_loads_with_its_tab_in_tenge",
@@ -295,15 +297,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "9f005d7fcbebfa147148d1f5a7dee061d6730ba4",
+    "target_ref": "ca5dbc55a2cdfa33cc51a912b2bc84fb0573617f",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T18:59:23Z",
-    "run_id": "20261015T185816Z-d63d"
+    "completed_at": "2026-10-15T19:25:04Z",
+    "run_id": "20261015T192359Z-c98d"
   },
   "changelog": {
-    "entries": 45,
-    "last_header": "## 2026-10-15 · 20261015T185816Z-d63d",
-    "sha256": "a6c347a1cd3d2af36c24b0bf4ccdffab0c8660972bdbcf166c3c825cfb234d0a"
+    "entries": 46,
+    "last_header": "## 2026-10-16 · 20261015T192359Z-c98d",
+    "sha256": "fbae6edfd81f3b18be09b188f67cc83df851820a1c7f46b0dd64cbe3cf17b5c2"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
