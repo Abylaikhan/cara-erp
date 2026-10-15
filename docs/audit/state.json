@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T162136Z-c442",
-    "started_at": "2026-10-15T16:21:36Z",
+    "run_id": "20261015T164307Z-868e",
+    "started_at": "2026-10-15T16:43:07Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T16:22:39Z",
+    "finished_at": "2026-10-15T16:44:06Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "f4688a93442493834dd7329022e680818ea19ff4",
-    "at": "2026-10-15T16:21:36Z"
+    "target_ref": "831e7c9c07fbc0694ad67b46da49bc7b1504b55d",
+    "at": "2026-10-15T16:43:07Z"
   },
   "last_reported": {
-    "run_id": "20261015T162136Z-c442",
+    "run_id": "20261015T164307Z-868e",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "f4688a93442493834dd7329022e680818ea19ff4",
-    "logical_key": "b3f0557f0d23f4f0",
+    "target_ref": "831e7c9c07fbc0694ad67b46da49bc7b1504b55d",
+    "logical_key": "f73362bc3593f11c",
     "local_date": "2026-10-15",
-    "completed_at": "2026-10-15T16:22:39Z",
-    "report": "daily/2026-10-15/20261015T162136Z-c442.md",
-    "artifact_sha256": "e168eaf4ddac813a34a2101872f10770ba212618af4891831f067519b55cae0e",
+    "completed_at": "2026-10-15T16:44:06Z",
+    "report": "daily/2026-10-15/20261015T164307Z-868e.md",
+    "artifact_sha256": "444f1fe33214aa04e4c8367b74097236bb44e7b478b3fc4dcf52732c2c655caf",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -239,6 +239,7 @@
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_material_import_is_idempotent",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_advances_load_with_their_tab_spent_by_the_lines",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_page_lists_accounts_operations_with_orders_esf_and_the_advance_debt",
+      "Tests\\Feature\\Money\\MoneyJournalTest::test_payment_calendar_loads_with_its_tab_in_tenge",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_roles_without_the_page_cannot_open_it",
       "Tests\\Feature\\Mrp\\ProductionJournalTest::test_lines_show_the_effective_status_and_recorded_stages",
       "Tests\\Feature\\Mrp\\ProductionJournalTest::test_only_roles_with_the_page_and_their_channels_see_lines",
@@ -286,15 +287,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "f4688a93442493834dd7329022e680818ea19ff4",
+    "target_ref": "831e7c9c07fbc0694ad67b46da49bc7b1504b55d",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T16:22:39Z",
-    "run_id": "20261015T162136Z-c442"
+    "completed_at": "2026-10-15T16:44:06Z",
+    "run_id": "20261015T164307Z-868e"
   },
   "changelog": {
-    "entries": 38,
-    "last_header": "## 2026-10-15 · 20261015T162136Z-c442",
-    "sha256": "1fb3e8572dea4456033c91900560ddc77f3e82b47a4f3273aea965dacc9d1988"
+    "entries": 39,
+    "last_header": "## 2026-10-15 · 20261015T164307Z-868e",
+    "sha256": "62583e8a27efce81fcd8aed4ea45a16de04bd92dd2b0fc40bfd5ad9a365d3a8b"
   },
   "accepted_source_ref": {
     "commit": "c917d375777059db4b06cf9aceca47861c7cf56a",
