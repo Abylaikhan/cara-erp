@@ -16,6 +16,7 @@ use App\Legacy\Importers\ProductImporter;
 use App\Legacy\Importers\ProductionProgressImporter;
 use App\Legacy\Importers\ProjectImporter;
 use App\Legacy\Importers\RealizationImporter;
+use App\Legacy\Importers\SalonWorksheetImporter;
 use App\Legacy\Importers\SupplierImporter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,7 @@ use RuntimeException;
 /** Moves one legacy table from the loaded snapshot (schema legacy) into the application tables of a migrated module. */
 class LegacyImport extends Command
 {
-    protected $signature = 'legacy:import {entity : expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects} {--snapshot= : Snapshot id (default: the latest loaded)}';
+    protected $signature = 'legacy:import {entity : expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects | salon_worksheet} {--snapshot= : Snapshot id (default: the latest loaded)}';
 
     protected $description = 'Import a legacy table into the application (only modules that are already migrated)';
 
@@ -45,6 +46,7 @@ class LegacyImport extends Command
         'production_progress' => ProductionProgressImporter::class, // after orders: a record names its order line
         'money' => MoneyImporter::class, // accounts, operations, order payments, advance reports — after orders and expense items
         'projects' => ProjectImporter::class, // with their calculations and messages
+        'salon_worksheet' => SalonWorksheetImporter::class,
     ];
 
     public function handle(): int

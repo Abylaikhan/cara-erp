@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdvanceReport;
 use App\Models\MoneyAccount;
 use App\Models\Order;
+use App\Models\SalonWorksheetRow;
 use App\Support\ChannelScope;
 use App\Support\Erp;
 use Illuminate\Http\Request;
@@ -127,6 +128,13 @@ class MoneyController extends Controller
             'advances' => Inertia::optional(fn () => $this->advances()),
             // Tab «Платёжный календарь» (legacy renderPayCalendar): balances, unpaid orders and dated operations, in tenge.
             'calendar' => Inertia::optional(fn () => $this->calendar($request)),
+            // Tab «Рабочий лист салонов» (legacy loadSalonWbFromDB): the rows of both salons, sent when the tab is opened.
+            'salonRows' => Inertia::optional(fn () => SalonWorksheetRow::query()->orderBy('order_date')->orderBy('created_at')->orderBy('id')->get()
+                ->map(fn (SalonWorksheetRow $r) => ['id' => $r->id, 'uuid' => $r->uuid, 'salon' => $r->salon, 'transferred' => $r->transferred_to_db,
+                    'transferred_at' => $r->transferred_at?->toIso8601String()]
+                    + collect(SalonWorksheetRow::DATE_FIELDS)->mapWithKeys(fn ($f) => [$f => $r->getAttribute($f)?->format('Y-m-d')])->all()
+                    + collect(SalonWorksheetRow::TEXT_FIELDS)->mapWithKeys(fn ($f) => [$f => $r->getAttribute($f)])->all()
+                    + collect(SalonWorksheetRow::NUMBER_FIELDS)->mapWithKeys(fn ($f) => [$f => $r->getRawOriginal($f)])->all())->values()),
             'categories' => [
                 'income' => config('erp.money_income_categories'),
                 'expense' => config('erp.money_expense_categories'),

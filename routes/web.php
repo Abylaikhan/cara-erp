@@ -17,6 +17,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SalonWorksheetController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\WarehouseController;
 use App\Support\Erp;
@@ -119,6 +120,12 @@ Route::middleware('auth')->group(function () {
 
     // M12 «Деньги», часть 1: кассы, счета, все операции (просмотр)
     Route::get('/money', [MoneyController::class, 'index'])->middleware('page:money')->name('money.index');
+    Route::middleware('page:money')->prefix('money/salon-worksheet')->name('money.salon-worksheet.')->controller(SalonWorksheetController::class)->group(function () {
+        Route::post('/', 'store')->name('store');
+        Route::post('/clear', 'clear')->name('clear');
+        Route::put('/{row}', 'update')->whereNumber('row')->name('update');
+        Route::delete('/{row}', 'destroy')->whereNumber('row')->name('destroy');
+    });
 
     // M04 «Закупки»: заявки на материал (поступления — с документами склада, нормы — с технологическими картами)
     Route::middleware('page:purchases')->prefix('purchases')->name('purchases.')->controller(PurchaseController::class)->group(function () {

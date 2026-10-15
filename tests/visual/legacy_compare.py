@@ -245,6 +245,20 @@ with sync_playwright() as p:
         page.evaluate("document.getElementById('pc-chart').style.visibility = 'hidden'")
         page.screenshot(path=str(OUT / f'target-money-calendar-{theme}.png'))
         target_calendar = page.locator('#pc-tbody').inner_text()
+        page.locator('#page-money > .tabs .tab').nth(2).click(); page.wait_for_timeout(3000)
+        page.screenshot(path=str(OUT / f'target-money-salonwb-{theme}.png'))
+        target_swb = {}
+        for sal in ('armada', 'nazarbayeva'):
+            page.locator(f'#swb-tab-{sal}').click(); page.wait_for_timeout(1500)
+            page.select_option('#swb-year-filter', 'all'); page.wait_for_timeout(2500)
+            target_swb[sal] = (page.evaluate("""() => [...document.querySelectorAll('#swb-tbody tr')].map(tr => [...tr.children].slice(0, 15).map(td => { const i = td.querySelector('input'); return i ? i.value : td.textContent.trim(); }).join('|'))"""), page.locator('#swb-current-balance').inner_text())
+        page.locator('#swb-tab-armada').click(); page.wait_for_timeout(500)
+        salon_rows = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/money', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Money',
+                'X-Inertia-Partial-Data': 'salonRows', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.salonRows;
+        }""")
         calendar = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/money', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Money',
@@ -725,9 +739,37 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'legacy-money-calendar-{theme}.png'))
         tl, ll = target_calendar.splitlines(), page.locator('#pc-tbody').inner_text().splitlines()
+        (OUT / f'calendar-target-{theme}.txt').write_text(target_calendar); (OUT / f'calendar-legacy-{theme}.txt').write_text('\n'.join(ll))
         print(f'payment calendar table ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
+        # Salon worksheet: the same rows (legacy keeps the uuid as id and orders rows of one date by it); every cell and the
+        # running balance of both salons over all years are compared as text.
+        page.evaluate("""(rows) => {
+            const n = v => v == null ? null : Number(v);
+            ['armada', 'nazarbayeva'].forEach(s => {
+                salonWbData[s] = rows.filter(r => r.salon === s).map(r => ({id: r.uuid, salon: s, order_date: r.order_date, order_num: r.order_num, manager: r.manager,
+                    balance_before: n(r.balance_before), payment_date: r.payment_date, cash_amount: n(r.cash_amount), card_amount: n(r.card_amount), balance_after: n(r.balance_after),
+                    note: r.note, delivery_date: r.delivery_date, cod_amount: n(r.cod_amount), expense_amount: n(r.expense_amount), transferred_to_office: n(r.transferred_to_office),
+                    recipient_desc: r.recipient_desc, transferred_to_db: r.transferred, transferred_at: r.transferred_at}));
+                salonWbLoaded[s] = true;
+            });
+            salonWbYearFilter = 'current';
+            showMoneyTab('salonwb', document.querySelectorAll('#page-money > .tabs .tab')[2]);
+        }""", salon_rows)
+        page.wait_for_timeout(2500)
+        page.screenshot(path=str(OUT / f'legacy-money-salonwb-{theme}.png'))
+        for sal in ('armada', 'nazarbayeva'):
+            page.evaluate(f"showSalonWbSalon('{sal}')"); page.wait_for_timeout(800)
+            page.evaluate("setSalonWbYearFilter('all')"); page.wait_for_timeout(2500)
+            legacy_cells = page.evaluate("""() => [...document.querySelectorAll('#swb-tbody tr')].map(tr => [...tr.children].slice(0, 15).map(td => { const i = td.querySelector('input'); return i ? i.value : td.textContent.trim(); }).join('|'))""")
+            tc, tb = target_swb[sal]
+            bad = sum(1 for x, y in zip(tc, legacy_cells) if x != y) + abs(len(tc) - len(legacy_cells))
+            for i, (x, y) in enumerate(zip(tc, legacy_cells)):
+                if x != y:
+                    cols = [k for k, (p, q) in enumerate(zip(x.split('|'), y.split('|'))) if p != q]
+                    print(f'  row {i}: columns {cols} differ (values not printed)')
+            print(f'salon worksheet {sal} ({theme}): rows {len(tc)} / {len(legacy_cells)}, cells ' + ('совпадает' if not bad else f'РАСХОЖДЕНИЙ {bad}') + ', остаток ' + ('совпадает' if tb == page.locator('#swb-current-balance').inner_text() else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-calendar', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-calendar', 'money-salonwb', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))
