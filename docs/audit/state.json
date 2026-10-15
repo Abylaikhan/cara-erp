@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T203240Z-569a",
-    "started_at": "2026-10-15T20:32:40Z",
+    "run_id": "20261015T210211Z-1733",
+    "started_at": "2026-10-15T21:02:11Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T20:33:43Z",
+    "finished_at": "2026-10-15T21:03:18Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "abcf10ba215e9f33a68a194cf3c9d0917b0d5b7e",
-    "at": "2026-10-15T20:32:40Z"
+    "target_ref": "78756c2f63e71be69ac85b4e4203ed7d79c1ee22",
+    "at": "2026-10-15T21:02:11Z"
   },
   "last_reported": {
-    "run_id": "20261015T203240Z-569a",
+    "run_id": "20261015T210211Z-1733",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "abcf10ba215e9f33a68a194cf3c9d0917b0d5b7e",
-    "logical_key": "6b0432588bdf3341",
+    "target_ref": "78756c2f63e71be69ac85b4e4203ed7d79c1ee22",
+    "logical_key": "360d594358a1436a",
     "local_date": "2026-10-16",
-    "completed_at": "2026-10-15T20:33:43Z",
-    "report": "daily/2026-10-16/20261015T203240Z-569a.md",
-    "artifact_sha256": "23f7589a757362bbe29bf7970e34c101b671170a2b7e0f3bf047386205516482",
+    "completed_at": "2026-10-15T21:03:18Z",
+    "report": "daily/2026-10-16/20261015T210211Z-1733.md",
+    "artifact_sha256": "6823d657f487c4eda97cea219df80995bacdedc736e4b09a082e47c4ba3f98dd",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -258,6 +258,11 @@
       "Tests\\Feature\\Money\\SalonWorksheetTest::test_transferred_rows_are_locked_and_clearing_keeps_them",
       "Tests\\Feature\\Mrp\\ProductionJournalTest::test_lines_show_the_effective_status_and_recorded_stages",
       "Tests\\Feature\\Mrp\\ProductionJournalTest::test_only_roles_with_the_page_and_their_channels_see_lines",
+      "Tests\\Feature\\Ops\\ViewDigestTest::test_a_changed_sum_a_lost_file_and_a_changed_right_are_differences",
+      "Tests\\Feature\\Ops\\ViewDigestTest::test_a_copy_with_other_migrations_is_not_compared",
+      "Tests\\Feature\\Ops\\ViewDigestTest::test_every_active_user_page_and_file_is_recorded_and_the_same_database_compares_equal",
+      "Tests\\Feature\\Ops\\ViewDigestTest::test_pages_are_read_without_writing_sessions_cache_or_audit",
+      "Tests\\Feature\\Ops\\ViewDigestTest::test_the_clock_is_frozen_at_the_recorded_moment",
       "Tests\\Feature\\Purchases\\MaterialRequestTest::test_manual_request_is_created_with_its_author",
       "Tests\\Feature\\Purchases\\MaterialRequestTest::test_plan_fact_adds_open_requests_and_subtracts_stock",
       "Tests\\Feature\\Purchases\\MaterialRequestTest::test_roles_without_the_page_cannot_reach_requests",
@@ -305,15 +310,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "abcf10ba215e9f33a68a194cf3c9d0917b0d5b7e",
+    "target_ref": "78756c2f63e71be69ac85b4e4203ed7d79c1ee22",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T20:33:43Z",
-    "run_id": "20261015T203240Z-569a"
+    "completed_at": "2026-10-15T21:03:18Z",
+    "run_id": "20261015T210211Z-1733"
   },
   "changelog": {
-    "entries": 49,
-    "last_header": "## 2026-10-16 · 20261015T203240Z-569a",
-    "sha256": "38f51a5d8221315deae92d8063bb915f00a9d0bdf835a068a194d8ecd31ac5b3"
+    "entries": 50,
+    "last_header": "## 2026-10-16 · 20261015T210211Z-1733",
+    "sha256": "73b8e70cb08e15b065b3d7e0e28a41043c9b6444b4dea74806c85223cde29545"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
