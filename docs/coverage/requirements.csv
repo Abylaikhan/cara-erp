@@ -93,7 +93,7 @@ M13.CHANNELS,M13,c5e745c,SALES_CHANNELS CH_GROUPS getChannelFilter channelMatche
 M13,M13,c5e745c,,,"Центры прибыли: отчёт по каналам (buildChannelPL), прямые статьи и ОПЗ (детализация — в трекере)",,,,,NOT_STARTED,,
 M15.VIEW,M15,8d275a1,renderSalonMoney reloadSalonMoney smSort getCurrentRole cashAccountId,salon_armada salon_nazarbayeva salon_armada_mgr,"Касса салона (просмотр): своя касса / обе у начальника, фильтры, сортировка, KPI, «Передано в офис», бегущий остаток",resources/js/pages/MoneySalon.vue app/Http/Controllers/SalonCashController.php config/erp.php,Tests\Feature\Money\SalonCashTest,money-salon-dark money-salon-light,,VERIFIED,"ADR-0021; таблица 451 операция совпадает построчно; visual-compare 0,02–0,03 %",Claude Code
 M15,M15,8d275a1,,,"Касса салона: приход в кассу, перенос в офис",,,,DEC-03 DEC-11,NOT_STARTED,"проведение денег — ERP-031…033, ERP-051",Claude Code
-M16,M16,c5e745c,,,Сверка с офисом: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
+M16,M16,8d275a1,setReconcilePeriod getReconcileDateFilter renderReconcile,"дилеры, director, accountant","Сверка с офисом: отправленные заказы и основной долг, предоплата 50 %, переводы в офис, KPI",resources/js/pages/Reconcile.vue app/Http/Controllers/ReconcileController.php,Tests\Feature\Money\ReconcileTest,reconcile-dark reconcile-light,,VERIFIED,"ADR-0022; оплаты 5 дилеров совпадают с legacy; текст страницы совпадает; visual-compare 0,03–0,04 %",Claude Code
 M17,M17,c5e745c,,,Сотрудники: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
 M18,M18,c5e745c,,,Сдельная оплата: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
 M19,M19,c5e745c,,,Зарплатная ведомость: все сценарии раздела (детализация — в трекере),,,,,NOT_STARTED,,
