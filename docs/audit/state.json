@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T195905Z-efaa",
-    "started_at": "2026-10-15T19:59:05Z",
+    "run_id": "20261015T203240Z-569a",
+    "started_at": "2026-10-15T20:32:40Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T20:00:08Z",
+    "finished_at": "2026-10-15T20:33:43Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "0948846f17a5c9b634fb34866d12ff0d0b271210",
-    "at": "2026-10-15T19:59:05Z"
+    "target_ref": "abcf10ba215e9f33a68a194cf3c9d0917b0d5b7e",
+    "at": "2026-10-15T20:32:40Z"
   },
   "last_reported": {
-    "run_id": "20261015T195905Z-efaa",
+    "run_id": "20261015T203240Z-569a",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "0948846f17a5c9b634fb34866d12ff0d0b271210",
-    "logical_key": "c7eeca0b1145ac3e",
+    "target_ref": "abcf10ba215e9f33a68a194cf3c9d0917b0d5b7e",
+    "logical_key": "6b0432588bdf3341",
     "local_date": "2026-10-16",
-    "completed_at": "2026-10-15T20:00:08Z",
-    "report": "daily/2026-10-16/20261015T195905Z-efaa.md",
-    "artifact_sha256": "a526eb4cea77c5b4859644b64dc982f740696b95147481f23b895f01e7f7f8d3",
+    "completed_at": "2026-10-15T20:33:43Z",
+    "report": "daily/2026-10-16/20261015T203240Z-569a.md",
+    "artifact_sha256": "23f7589a757362bbe29bf7970e34c101b671170a2b7e0f3bf047386205516482",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -192,6 +192,9 @@
       "Tests\\Feature\\Finance\\FinanceTest::test_orders_with_totals_and_operations_in_tenge_with_the_tab",
       "Tests\\Feature\\Finance\\FinanceTest::test_purchases_load_with_their_tab",
       "Tests\\Feature\\Finance\\FinanceTest::test_roles_without_the_page_cannot_open_it",
+      "Tests\\Feature\\Legacy\\ControlTotalsTest::test_a_changed_record_is_a_difference",
+      "Tests\\Feature\\Legacy\\ControlTotalsTest::test_a_legacy_table_without_importer_or_reason_fails",
+      "Tests\\Feature\\Legacy\\ControlTotalsTest::test_imported_modules_reconcile_and_unmigrated_tables_are_explained",
       "Tests\\Feature\\Legacy\\CrmTaskImportTest::test_imports_tasks_with_their_lead_and_legacy_defaults",
       "Tests\\Feature\\Legacy\\CrmTaskImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
       "Tests\\Feature\\Legacy\\CustomerImportTest::test_import_is_idempotent",
@@ -200,6 +203,7 @@
       "Tests\\Feature\\Legacy\\EsfImportTest::test_bad_rows_change_nothing",
       "Tests\\Feature\\Legacy\\EsfImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\EsfImportTest::test_imports_invoices_lines_in_natural_order_and_links",
+      "Tests\\Feature\\Legacy\\EsfImportTest::test_reimport_rewrites_only_the_changed_invoice",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_import_is_idempotent",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_invalid_legacy_data_changes_nothing",
       "Tests\\Feature\\Legacy\\ExpenseCategoryImportTest::test_only_migrated_modules_can_be_imported",
@@ -301,15 +305,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "0948846f17a5c9b634fb34866d12ff0d0b271210",
+    "target_ref": "abcf10ba215e9f33a68a194cf3c9d0917b0d5b7e",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T20:00:08Z",
-    "run_id": "20261015T195905Z-efaa"
+    "completed_at": "2026-10-15T20:33:43Z",
+    "run_id": "20261015T203240Z-569a"
   },
   "changelog": {
-    "entries": 48,
-    "last_header": "## 2026-10-16 · 20261015T195905Z-efaa",
-    "sha256": "1e12c0acaf7b3cc3ac5c99dc7b334f1d721114bfd2bb0517e245b49401fb3504"
+    "entries": 49,
+    "last_header": "## 2026-10-16 · 20261015T203240Z-569a",
+    "sha256": "38f51a5d8221315deae92d8063bb915f00a9d0bdf835a068a194d8ecd31ac5b3"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
