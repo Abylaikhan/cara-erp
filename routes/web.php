@@ -12,6 +12,7 @@ use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\MrpController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SupplierController;
@@ -90,6 +91,19 @@ Route::middleware('auth')->group(function () {
         Route::put('/tasks/{task}', [CrmTaskController::class, 'update'])->whereNumber('task')->name('tasks.update');
         Route::put('/tasks/{task}/toggle', [CrmTaskController::class, 'toggle'])->whereNumber('task')->name('tasks.toggle');
         Route::delete('/tasks/{task}', [CrmTaskController::class, 'destroy'])->whereNumber('task')->name('tasks.destroy');
+        // «Проекты» (ERP-079): запросы на расчёт нестандартной мебели
+        Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+        Route::put('/projects/{project}', [ProjectController::class, 'update'])->whereNumber('project')->name('projects.update');
+        Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->whereNumber('project')->name('projects.destroy');
+        Route::post('/projects/{project}/executors', [ProjectController::class, 'addExecutor'])->whereNumber('project')->name('projects.executors.store');
+        Route::delete('/projects/{project}/executors/{login}', [ProjectController::class, 'removeExecutor'])->whereNumber('project')->where('login', '[A-Za-z0-9_.@-]+')->name('projects.executors.destroy');
+        Route::post('/projects/{project}/calcs', [ProjectController::class, 'saveCalc'])->whereNumber('project')->name('projects.calcs.store');
+        Route::post('/projects/{project}/calcs/send', [ProjectController::class, 'sendCalc'])->whereNumber('project')->name('projects.calcs.send');
+        Route::post('/projects/{project}/decision', [ProjectController::class, 'decide'])->whereNumber('project')->name('projects.decide');
+        Route::post('/projects/{project}/comments', [ProjectController::class, 'comment'])->whereNumber('project')->name('projects.comments.store');
+        Route::post('/projects/{project}/files', [ProjectController::class, 'upload'])->whereNumber('project')->name('projects.files.store');
+        Route::get('/projects/files/{file}', [ProjectController::class, 'file'])->whereNumber('file')->name('projects.files.show');
+        Route::delete('/projects/files/{file}', [ProjectController::class, 'deleteFile'])->whereNumber('file')->name('projects.files.destroy');
     });
 
     // M02 «Производство», часть 1: журнал производственных позиций (просмотр)

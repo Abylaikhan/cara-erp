@@ -6,9 +6,16 @@ use App\Http\Requests\Crm\LeadRequest;
 use App\Models\CrmTask;
 use App\Models\Lead;
 use App\Models\Order;
+use App\Models\Project;
+use App\Models\ProjectCalc;
+use App\Models\ProjectComment;
+use App\Models\ProjectFile;
+use App\Models\SalesChannel;
 use App\Models\User;
+use App\Policies\ProjectPolicy;
 use App\Services\CrmTaskService;
 use App\Services\LeadService;
+use App\Services\ProjectService;
 use App\Support\ChannelScope;
 use App\Support\Erp;
 use Illuminate\Http\RedirectResponse;
@@ -91,7 +98,89 @@ class CrmController extends Controller
             'channelBound' => ChannelScope::filterFor($request->user()) !== null,
             'today' => now(config('erp.business_timezone'))->format('Y-m-d'),
             'projectsOnly' => $projectsOnly,
+            // Tab «Проекты» (legacy loadProjects/renderProjects): the number of open projects at once, the projects with their
+            // calculations, files and messages when the tab is opened. The customer gets neither cost prices, nor unsent
+            // calculations, nor internal files and messages.
+            'projectsCount' => fn () => ProjectService::visible($request->user())->whereIn('status', Project::OPEN_STATUSES)->count(),
+            'projects' => Inertia::optional(fn () => $this->projects($request->user())),
+            'projectMeta' => fn () => $this->projectMeta($request->user()),
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function projectMeta(User $user): array
+    {
+        $client = ProjectPolicy::isClient($user);
+        $channels = ChannelScope::channelsFor($user);
+
+        return [
+            'client' => $client,
+            'admin' => ProjectPolicy::isAdmin($user),
+            'login' => $user->login,
+            // Legacy SALES_CHANNELS: the customers to choose for a new project (only those the user may see).
+            'channels' => SalesChannel::query()->ordered()->get(['code', 'name', 'channel_group'])
+                ->map(fn (SalesChannel $c) => ['code' => $c->code, 'name' => $c->name, 'group' => $c->channel_group, 'own' => $channels === null || in_array($c->code, $channels, true)])->values(),
+            // Legacy _USERS without a channel: who may be an executor (staff only see this list).
+            'staff' => $client ? [] : User::query()->where('is_active', true)->orderBy('name')->get()
+                ->filter(fn (User $u) => Erp::channelOf($u) === null)
+                ->map(fn (User $u) => ['login' => $u->login, 'name' => $u->name, 'label' => Erp::role($u->role)['label'] ?? ''])->values(),
+        ];
+    }
+
+    /** @return Collection<int, array<string, mixed>> */
+    private function projects(User $user)
+    {
+        $client = ProjectPolicy::isClient($user);
+        $projects = ProjectService::visible($user)->orderByDesc('created_at')->orderByDesc('id')
+            ->with(['calcs' => fn ($q) => $q->orderBy('version'), 'files' => fn ($q) => $q->orderBy('created_at')->orderBy('id'), 'comments' => fn ($q) => $q->orderBy('created_at')->orderBy('id')])
+            ->get();
+        $names = User::query()->whereIn('login', $projects->flatMap(fn (Project $p) => $p->executors)->unique())->pluck('name', 'login');
+        $iso = fn ($t) => $t?->toIso8601String();
+
+        return $projects->map(fn (Project $p) => [
+            'id' => $p->id,
+            'num' => $p->num,
+            'title' => $p->title,
+            'channel' => $p->channel,
+            'status' => $p->status,
+            'customer_name' => $p->customer_name,
+            'description' => $p->description,
+            'due_date' => $p->due_date?->format('Y-m-d'),
+            'executors' => collect($p->executors)->map(fn (string $l) => ['login' => $l, 'name' => $names[$l] ?? $l])->values(),
+            'responsible_name' => $p->responsible_name,
+            'order_num' => $p->order_num,
+            'total_amount' => $p->total_amount,
+            'created_at' => $iso($p->created_at),
+            'updated_at' => $iso($p->updated_at),
+            'lock_version' => $p->lock_version,
+            'calcs' => $p->calcs->filter(fn (ProjectCalc $c) => ! $client || $c->sent_at !== null)->map(fn (ProjectCalc $c) => [
+                'version' => $c->version,
+                'items' => collect($c->items)->map(fn (array $i) => $client ? collect($i)->except('cost')->all() : $i)->values(),
+                'total' => $c->total,
+                'markup_pct' => $client ? null : $c->markup_pct,
+                'sent_at' => $iso($c->sent_at),
+                'created_by_name' => $client ? null : $c->created_by_name,
+            ])->values(),
+            'files' => $p->files->filter(fn (ProjectFile $f) => ! $client || ! $f->internal)->map(fn (ProjectFile $f) => [
+                'id' => $f->id,
+                'side' => $f->side,
+                'internal' => $f->internal,
+                'file_name' => $f->file_name,
+                'image' => $f->isImage(),
+                'size' => $f->size,
+                'uploaded_by_login' => $f->uploaded_by_login,
+                'uploaded_by_name' => $f->uploaded_by_name,
+                'created_at' => $iso($f->created_at),
+            ])->values(),
+            'comments' => $p->comments->filter(fn (ProjectComment $c) => ! $client || ! $c->internal)->map(fn (ProjectComment $c) => [
+                'id' => $c->id,
+                'side' => $c->side,
+                'internal' => $c->internal,
+                'text' => $c->text,
+                'author_name' => $c->author_name ?? $c->author_login,
+                'created_at' => $iso($c->created_at),
+            ])->values(),
+        ])->values();
     }
 
     /** Legacy renderClientsTab: distinct trimmed end clients of the salon orders, «NaT» (an empty cell of an import) aside. */

@@ -3,7 +3,7 @@
 // лидов», «Задачи» and the order boards are migrated (ClientsTab, LeadsTab, FunnelTab, TasksTab, OrderBoards). As in legacy, no
 // tab content is shown until a tab is chosen, and each tab is built when first opened. The lead form of the funnel and the
 // task form are opened from several tabs, so they belong to the page. A dealer account and the head of the shop see only the tab
-// «Проекты» (legacy prjApplyRole, L31725), which is opened at once; the projects themselves come with ERP-079.
+// «Проекты» (legacy prjApplyRole, L31725), which is opened at once; the tab itself is ProjectsTab.
 import { usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
@@ -12,10 +12,12 @@ import FunnelLeadModal from '@/components/crm/FunnelLeadModal.vue';
 import FunnelTab from '@/components/crm/FunnelTab.vue';
 import LeadsTab from '@/components/crm/LeadsTab.vue';
 import OrderBoards from '@/components/crm/OrderBoards.vue';
+import ProjectsTab from '@/components/crm/ProjectsTab.vue';
 import TaskModal from '@/components/crm/TaskModal.vue';
 import TasksTab from '@/components/crm/TasksTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import { convert, ORDERS_LATER, type FunnelStage, type LeadRow, type LeadStatus, type Segment, type TaskRow } from '@/lib/crm';
+import type { ProjectMeta, ProjectRow } from '@/lib/projects';
 import type { SharedProps } from '@/types';
 
 const props = defineProps<{
@@ -35,6 +37,9 @@ const props = defineProps<{
     channelBound: boolean;
     today: string;
     projectsOnly: boolean;
+    projectsCount: number;
+    projects?: ProjectRow[];
+    projectMeta: ProjectMeta;
 }>();
 
 type Tab = 'clients' | 'leads' | 'projects' | 'funnel' | 'orders-kanban-prod' | 'orders-kanban-pay' | 'tasks';
@@ -44,7 +49,9 @@ const shown = ref<Tab | null>(props.projectsOnly ? 'projects' : null);
 const visited = reactive(new Set<Tab>(props.projectsOnly ? ['projects'] : []));
 // Legacy prjApplyRole hides every other tab of the bar.
 const hidden = (tab: Tab) => (props.projectsOnly && tab !== 'projects' ? { display: 'none' } : undefined);
-const PROJECTS_LATER = 'Проекты (запросы на расчёт нестандартной мебели: расчёты, файлы, обсуждение, заказ из проекта) переносятся следующим этапом (ERP-079).';
+const projectsTab = ref<InstanceType<typeof ProjectsTab> | null>(null);
+// Open projects: counted by the server at once, then by the loaded list (legacy loadProjects).
+const projectsShown = computed(() => (props.projects !== undefined && projectsTab.value ? projectsTab.value.openCount : props.projectsCount));
 // .orders-tab is hidden by the legacy stylesheet; the chosen one gets display:block, as legacy does.
 const display = (tab: Tab) => ({ display: shown.value === tab ? 'block' : 'none' });
 function showOrdersTab(tab: Tab): void {
@@ -96,7 +103,7 @@ function convertLeadToOrder(): void {
                 <div id="crm-tab-leads" class="tab" :class="{ active: active === 'leads' }" :style="hidden('leads')" @click="showOrdersTab('leads')">
                     🎯 Лиды (<span id="tab-count-leads">{{ activeLeads }}</span>)
                 </div>
-                <div id="crm-tab-projects" class="tab" :class="{ active: active === 'projects' }" @click="showOrdersTab('projects')">📐 Проекты (<span id="tab-count-projects">0</span>)</div>
+                <div id="crm-tab-projects" class="tab" :class="{ active: active === 'projects' }" @click="showOrdersTab('projects')">📐 Проекты (<span id="tab-count-projects">{{ projectsShown }}</span>)</div>
                 <div class="tab" :class="{ active: active === 'funnel' }" :style="hidden('funnel')" @click="showOrdersTab('funnel')">🎯 Воронка лидов</div>
                 <div class="tab" :class="{ active: active === 'orders-kanban-prod' }" :style="hidden('orders-kanban-prod')" @click="showOrdersTab('orders-kanban-prod')">
                     🏭 По производству
@@ -114,9 +121,7 @@ function convertLeadToOrder(): void {
                 <LeadsTab :leads="props.leads" :statuses="props.statuses" :sources="props.sources" :current-year="props.currentYear" />
             </div>
             <div v-if="visited.has('projects')" id="orders-projects" class="orders-tab" :style="display('projects')">
-                <div class="card">
-                    <div style="font-size: 13px; color: var(--text3); line-height: 1.6">{{ PROJECTS_LATER }}</div>
-                </div>
+                <ProjectsTab ref="projectsTab" :projects="props.projects" :meta="props.projectMeta" :timezone="props.timezone" :active="shown === 'projects'" />
             </div>
             <div v-if="visited.has('funnel')" id="orders-funnel" class="orders-tab" :style="display('funnel')">
                 <FunnelTab

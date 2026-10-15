@@ -29,6 +29,7 @@ export interface SharedProps {
         result: { text: string; color: 'green' | 'red' } | null;
         dialog: { type: 'alert' | 'confirm'; text: string } | null;
         esfPreview: EsfPreview | null;
+        created: number | null;
     };
 }
 

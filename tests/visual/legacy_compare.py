@@ -168,6 +168,12 @@ with sync_playwright() as p:
         for i, shot in ((4, 'prod'), (5, 'pay')):
             page.locator('#page-crm .tabs .tab').nth(i).click(); page.wait_for_timeout(2500)
             page.screenshot(path=str(OUT / f'target-crm-board-{shot}-{theme}.png'))
+        # «Проекты» (c917d37): the list (no projects in legacy) and the new project window.
+        page.locator('#crm-tab-projects').click(); page.wait_for_timeout(1500)
+        page.screenshot(path=str(OUT / f'target-crm-projects-{theme}.png'))
+        page.locator('#orders-projects button', has_text='+ Новый проект').click(); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'target-crm-project-new-{theme}.png'))
+        page.locator('#prjModal .modal-close').click(); page.wait_for_timeout(200)
         board_orders = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/crm', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Crm',
@@ -458,6 +464,17 @@ with sync_playwright() as p:
             }""", [board_orders, tab, idx, tab == 'orders-kanban-prod'])
             page.wait_for_timeout(1200)
             page.screenshot(path=str(OUT / f"legacy-crm-board-{'prod' if tab == 'orders-kanban-prod' else 'pay'}-{theme}.png"))
+        # «Проекты»: legacy loads them from its database (blocked here) — it gets the same empty list.
+        page.evaluate("""() => {
+            loadProjects = async () => { prjData = []; prjCalcs = []; prjFiles = []; prjComments = []; prjErr = '';
+                document.getElementById('tab-count-projects').textContent = 0; };
+            showOrdersTab('projects', document.getElementById('crm-tab-projects'));
+        }""")
+        page.wait_for_timeout(800)
+        page.screenshot(path=str(OUT / f'legacy-crm-projects-{theme}.png'))
+        page.evaluate("prjOpenNew()"); page.wait_for_timeout(300)
+        page.screenshot(path=str(OUT / f'legacy-crm-project-new-{theme}.png'))
+        page.evaluate("prjClose()")
         # Purchases: legacy gets the target's requests; the date is the business date the target shows (ADR-0002, item 40).
         # warehouseData (for «План-факт») is the target's directory given at the warehouse step.
         page.evaluate("""(requests) => {
@@ -570,7 +587,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         page.screenshot(path=str(OUT / f'legacy-money-advances-{theme}.png'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances'):
+        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))
