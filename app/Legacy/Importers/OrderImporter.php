@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\SalesChannel;
@@ -265,7 +266,7 @@ class OrderImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy orders rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy orders', $problems);
         }
     }
 }

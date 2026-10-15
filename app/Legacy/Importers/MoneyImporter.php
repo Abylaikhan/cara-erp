@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\User;
 use App\Support\Audit;
 use Illuminate\Support\Carbon;
@@ -326,7 +327,7 @@ class MoneyImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy money rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy money', $problems);
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\Project;
 use App\Models\ProjectCalc;
 use App\Models\ProjectComment;
@@ -31,7 +32,7 @@ class ProjectImporter
         $calcs = $read('project_calcs');
         $comments = $read('project_comments');
         if ($read('project_files')->isNotEmpty()) {
-            throw new RuntimeException('Legacy project_files rejected, nothing imported: file contents (Supabase Storage) are not copied yet');
+            throw new LegacyRejected('Legacy project_files', ['file contents (Supabase Storage) are not copied yet']);
         }
         $this->validate($projects, $calcs, $comments);
 
@@ -259,7 +260,7 @@ class ProjectImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy projects rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy projects', $problems);
         }
     }
 

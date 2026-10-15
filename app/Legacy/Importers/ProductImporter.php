@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\Product;
 use App\Models\User;
 use App\Support\Audit;
@@ -122,7 +123,7 @@ class ProductImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy products rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy products', $problems);
         }
     }
 }

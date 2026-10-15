@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\Customer;
 use App\Models\SalesChannel;
 use App\Models\User;
@@ -144,7 +145,7 @@ class CustomerImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy customers rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy customers', $problems);
         }
     }
 }

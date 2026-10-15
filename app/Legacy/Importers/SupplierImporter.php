@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\ExpenseCategory;
 use App\Models\Supplier;
 use App\Models\User;
@@ -148,7 +149,7 @@ class SupplierImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy suppliers rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy suppliers', $problems);
         }
     }
 }

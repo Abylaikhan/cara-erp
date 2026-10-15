@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\SalonWorksheetRow;
 use App\Models\User;
 use App\Support\Audit;
@@ -152,7 +153,7 @@ class SalonWorksheetImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy salon worksheet rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy salon worksheet', $problems);
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\Material;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -164,7 +165,7 @@ class MaterialImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy warehouse rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy warehouse', $problems);
         }
     }
 }

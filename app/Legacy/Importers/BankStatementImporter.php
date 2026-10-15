@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\BankStatementRow;
 use App\Models\User;
 use App\Support\Audit;
@@ -146,7 +147,7 @@ class BankStatementImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy bank statements rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy bank statements', $problems);
         }
     }
 }

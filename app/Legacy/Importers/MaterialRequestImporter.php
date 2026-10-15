@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\MaterialRequest;
 use App\Models\User;
 use App\Support\Audit;
@@ -131,7 +132,7 @@ class MaterialRequestImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy material requests rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy material requests', $problems);
         }
     }
 }

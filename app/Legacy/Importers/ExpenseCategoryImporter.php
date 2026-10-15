@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\ExpenseCategory;
 use App\Models\User;
 use App\Support\Audit;
@@ -120,7 +121,7 @@ class ExpenseCategoryImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy expense_categories rejected, nothing imported: '.implode('; ', array_slice(array_unique($problems), 0, 10)));
+            throw new LegacyRejected('Legacy expense_categories', array_values(array_unique($problems)));
         }
     }
 }

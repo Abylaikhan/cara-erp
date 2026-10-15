@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\CrmTask;
 use App\Models\User;
 use App\Support\Audit;
@@ -153,7 +154,7 @@ class CrmTaskImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy tasks rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy tasks', $problems);
         }
     }
 }

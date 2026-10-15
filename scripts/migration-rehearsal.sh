@@ -2,11 +2,14 @@
 # make migration-rehearsal — rehearsal of the legacy migration (ERP-069, ТЗ MIG) on a fresh, temporary database next to the
 # dev one (the dev database is only read: its schema `legacy` with the loaded read-only snapshot is copied over):
 #   1. empty database → all migrations (reference channels and warehouses come with them; no demo seeder);
-#   2. every legacy:import in dependency order, timed (each importer validates the whole set and compares row by row);
-#   3. legacy:control-totals — counts and sums by period, legacy snapshot against the application tables;
-#   4. the same imports again: the business tables must not change (fingerprint before and after; only the audit trail and
+#   2. legacy:references — the references of the snapshot the import cannot resolve or resolve uniquely, and its rule;
+#      legacy:import all --dry-run — the whole import rolled back: the business tables must stay as the migrations left them;
+#   3. every legacy:import in dependency order, timed (each importer validates the whole set and compares row by row; a
+#      refused set leaves every problem in errors-<entity>.txt);
+#   4. ANALYZE, legacy:control-totals — counts and sums by period, legacy snapshot against the application tables;
+#   5. the same imports again: the business tables must not change (fingerprint before and after; only the audit trail and
 #      the import times of legacy_id_map may);
-#   5. the temporary database is dropped (KEEP=1 keeps it for inspection).
+#   6. the temporary database is dropped (KEEP=1 keeps it for inspection).
 # Report and details with sums: .local-audit/rehearsal/<UTC time>/ (git-ignored, owner-only). Non-zero exit on any failure.
 # Usage: scripts/migration-rehearsal.sh [--snapshot ID]
 source "$(dirname "$0")/lib.sh"
@@ -45,6 +48,10 @@ business_fingerprint() {
         | grep -v -e '^table:public\.audit_events	' -e '^table:public\.legacy_id_map	' -e '^sequence:public\.audit_events_id_seq	' \
             -e '^sequence:public\.legacy_id_map_id_seq	' -e '^table:public\.\(sessions\|cache\|cache_locks\|jobs\|failed_jobs\|job_batches\)	'
 }
+# Every table, the audit trail and legacy_id_map included: a dry run must leave no trace at all.
+table_fingerprint() {
+    dc exec -T db psql -X -q -v ON_ERROR_STOP=1 -U "$user" -d "$db" -At -F $'\t' < scripts/sql/db-fingerprint.sql | tr -d '\r' | grep '^table:'
+}
 cleanup() {
     if [ "${KEEP:-0}" = "1" ]; then
         warn "KEEP=1: the database ${db} is kept (drop it with: DROP DATABASE ${db})"
@@ -73,8 +80,13 @@ step "create database" psql_admin -c "CREATE DATABASE ${db}"
 step "copy legacy snapshot" bash -c "set -o pipefail; docker compose exec -T db pg_dump -U '$user' -d '$devdb' -n legacy --no-owner --no-privileges \
     | docker compose exec -T db psql -X -q -v ON_ERROR_STOP=1 -U '$user' -d '$db'"
 step "migrate" artisan migrate --force
+step "references" artisan legacy:references --snapshot="$snapshot" --out="$out/references.json"
+table_fingerprint > "$out/fingerprint-0.tsv"
+step "dry run" artisan legacy:import all --dry-run --snapshot="$snapshot"
+table_fingerprint | cmp -s - "$out/fingerprint-0.tsv" || fail "the dry run left rows behind"
+ok "the dry run wrote nothing"
 for e in $ENTITIES; do
-    step "import ${e}" artisan legacy:import "$e" --snapshot="$snapshot"
+    step "import ${e}" artisan legacy:import "$e" --snapshot="$snapshot" --errors="/var/www/html/${out}/errors-${e}.txt"
 done
 # A bulk load leaves the planner without statistics until autovacuum comes; the cut-over runs ANALYZE before the users do.
 step "analyze" dc exec -T db psql -X -q -v ON_ERROR_STOP=1 -U "$user" -d "$db" -c 'ANALYZE'
@@ -97,6 +109,7 @@ import json, os, sys
 out, snapshot, commit, idempotent = sys.argv[1:5]
 steps = [dict(zip(('step', 'ms', 'status'), l.split('\t'))) for l in open(os.path.join(out, 'steps.tsv'), encoding='utf-8').read().splitlines() if l]
 totals = json.load(open(os.path.join(out, 'control-totals.json'), encoding='utf-8'))
+references = json.load(open(os.path.join(out, 'references.json'), encoding='utf-8'))
 report = {
     'schema': 'promtech.migration-rehearsal/1', 'snapshot': snapshot, 'app_commit': commit,
     'first_run_ms': sum(int(s['ms']) for s in steps if s['step'] == 'migrate' or s['step'].startswith('import ')),
@@ -104,6 +117,9 @@ report = {
     'idempotent': idempotent == 'true',
     'modules': [{k: m[k] for k in ('module', 'tables', 'status', 'legacy_rows', 'target_rows', 'periods')} for m in totals['modules']],
     'not_migrated': totals['not_migrated'],
+    'references': [{k: r[k] for k in ('name', 'references', 'resolved', 'unresolved', 'ambiguous', 'rule')} for r in references['references']],
+    'repeats': [{k: r[k] for k in ('name', 'values', 'rows', 'rule')} for r in references['repeats']],
+    'dry_run': 'wrote nothing',
     'steps': steps,
 }
 report['status'] = 'PASS' if report['idempotent'] and all(m['status'] == 'MATCH' for m in report['modules']) \

@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\Order;
 use App\Models\Realization;
 use App\Models\User;
@@ -139,7 +140,7 @@ class RealizationImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy realizations rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy realizations', $problems);
         }
     }
 }

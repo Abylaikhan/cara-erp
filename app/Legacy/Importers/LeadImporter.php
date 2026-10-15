@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\Lead;
 use App\Models\SalesChannel;
 use App\Models\User;
@@ -140,7 +141,7 @@ class LeadImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy leads rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy leads', $problems);
         }
     }
 }

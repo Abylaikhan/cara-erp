@@ -2,6 +2,7 @@
 
 namespace App\Legacy\Importers;
 
+use App\Legacy\LegacyRejected;
 use App\Models\EsfPaymentLink;
 use App\Models\IncomingInvoice;
 use App\Models\IncomingInvoiceItem;
@@ -282,7 +283,7 @@ class IncomingInvoiceImporter
             }
         }
         if ($problems) {
-            throw new RuntimeException('Legacy ESF rejected, nothing imported: '.implode('; ', array_slice($problems, 0, 10)));
+            throw new LegacyRejected('Legacy ESF', $problems);
         }
     }
 }
