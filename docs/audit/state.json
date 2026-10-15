@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T164307Z-868e",
-    "started_at": "2026-10-15T16:43:07Z",
+    "run_id": "20261015T172131Z-96cf",
+    "started_at": "2026-10-15T17:21:31Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T16:44:06Z",
+    "finished_at": "2026-10-15T17:22:38Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "831e7c9c07fbc0694ad67b46da49bc7b1504b55d",
-    "at": "2026-10-15T16:43:07Z"
+    "target_ref": "bd4213536b2baa8b2fb002a6b85aea1c5b2e256a",
+    "at": "2026-10-15T17:21:31Z"
   },
   "last_reported": {
-    "run_id": "20261015T164307Z-868e",
+    "run_id": "20261015T172131Z-96cf",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "831e7c9c07fbc0694ad67b46da49bc7b1504b55d",
-    "logical_key": "f73362bc3593f11c",
+    "target_ref": "bd4213536b2baa8b2fb002a6b85aea1c5b2e256a",
+    "logical_key": "fb6e727192dbe61a",
     "local_date": "2026-10-15",
-    "completed_at": "2026-10-15T16:44:06Z",
-    "report": "daily/2026-10-15/20261015T164307Z-868e.md",
-    "artifact_sha256": "444f1fe33214aa04e4c8367b74097236bb44e7b478b3fc4dcf52732c2c655caf",
+    "completed_at": "2026-10-15T17:22:38Z",
+    "report": "daily/2026-10-15/20261015T172131Z-96cf.md",
+    "artifact_sha256": "07561475d1d4df6a5226d08e1d65bc0c3ec80920b54335def40261f4cc541073",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -241,6 +241,9 @@
       "Tests\\Feature\\Money\\MoneyJournalTest::test_page_lists_accounts_operations_with_orders_esf_and_the_advance_debt",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_payment_calendar_loads_with_its_tab_in_tenge",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_roles_without_the_page_cannot_open_it",
+      "Tests\\Feature\\Money\\SalonWorksheetTest::test_legacy_rows_are_imported_exactly_and_idempotently",
+      "Tests\\Feature\\Money\\SalonWorksheetTest::test_rows_load_with_the_tab_and_cells_are_saved_like_legacy",
+      "Tests\\Feature\\Money\\SalonWorksheetTest::test_transferred_rows_are_locked_and_clearing_keeps_them",
       "Tests\\Feature\\Mrp\\ProductionJournalTest::test_lines_show_the_effective_status_and_recorded_stages",
       "Tests\\Feature\\Mrp\\ProductionJournalTest::test_only_roles_with_the_page_and_their_channels_see_lines",
       "Tests\\Feature\\Purchases\\MaterialRequestTest::test_manual_request_is_created_with_its_author",
@@ -287,15 +290,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "831e7c9c07fbc0694ad67b46da49bc7b1504b55d",
+    "target_ref": "bd4213536b2baa8b2fb002a6b85aea1c5b2e256a",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T16:44:06Z",
-    "run_id": "20261015T164307Z-868e"
+    "completed_at": "2026-10-15T17:22:38Z",
+    "run_id": "20261015T172131Z-96cf"
   },
   "changelog": {
-    "entries": 39,
-    "last_header": "## 2026-10-15 · 20261015T164307Z-868e",
-    "sha256": "62583e8a27efce81fcd8aed4ea45a16de04bd92dd2b0fc40bfd5ad9a365d3a8b"
+    "entries": 40,
+    "last_header": "## 2026-10-15 · 20261015T172131Z-96cf",
+    "sha256": "80d5869f232957f06d8ff0d49e8ea5c9811461570de1ed485eced77b64080829"
   },
   "accepted_source_ref": {
     "commit": "c917d375777059db4b06cf9aceca47861c7cf56a",
