@@ -51,6 +51,7 @@ class CustomerController extends Controller
             // their «Срок», total and paid share; the page does the counting, as legacy does.
             'dealerOrders' => ChannelScope::apply(Order::query()->where('orders.channel', 'like', 'dealer\_%'), $request->user(), 'orders.channel')
                 ->leftJoinSub(DB::table('order_items')->groupBy('order_id')->selectRaw('order_id, sum(qty * price) AS total'), 'i', 'i.order_id', '=', 'orders.id')
+                ->orderBy('orders.id') // a stable order: without it the rows come in the planner's order
                 ->get(['orders.channel', 'orders.due_date', 'orders.payment_pct', DB::raw('coalesce(i.total, 0) AS total')])
                 ->map(fn (Order $o) => ['channel' => $o->channel, 'date' => $o->due_date?->format('Y-m-d'), 'total' => (float) $o->getAttribute('total'), 'payment' => $o->payment_pct])
                 ->values(),

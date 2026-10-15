@@ -48,7 +48,7 @@ step_dbcheck() {
     dc run --rm app php artisan app:db-check --connection=pgsql_test
 }
 step_backup() {
-    info "Backup → restore-check into a separate database (the database itself is not changed)"
+    info "Backup → restore-check: database, files and the application on the copy (the database itself is not changed)"
     local dir
     dir="$(mktemp -d "${TMPDIR:-/tmp}/promtech-backup.XXXXXX")"
     bash scripts/db-backup.sh --out "$dir/copy"

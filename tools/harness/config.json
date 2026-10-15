@@ -72,7 +72,7 @@
             {
                 "id": "TGT-BACKUP",
                 "step": "backup",
-                "title": "Backup → restore-check в отдельную БД",
+                "title": "Backup → restore-check: БД, файлы и приложение на копии",
                 "required": true
             },
             {

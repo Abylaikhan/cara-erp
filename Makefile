@@ -35,10 +35,10 @@ harness-selftest: ## Self-tests of the audit harness (H-xx scenarios on local fi
 visual-compare: ## Screenshots legacy vs target (login, M14, M07, M08, M06, M03, M05, M10, M04, M09, M02, M12) and % of differing pixels; needs host playwright + Chrome
 	@python3 tests/visual/legacy_compare.py
 
-db-backup: ## Copy of the dev database + manifest (commit, checksums) → .local-audit/backups/ (git-ignored, owner-only)
+db-backup: ## Copy of the dev database and uploaded files + manifest and the app's answers (checksums) → .local-audit/backups/ (owner-only)
 	@bash scripts/db-backup.sh
 
-db-restore-check: ## Restore the latest copy (or BACKUP=dir) into a temporary database and compare schema, rows, checksums
+db-restore-check: ## Restore the latest copy (or BACKUP=dir) in isolation: schema, rows, files, then the app on the copy must answer the same
 	@bash scripts/db-restore-check.sh $(BACKUP)
 
 legacy-copy: ## Read-only copy of the legacy Supabase (GET only) → .local-audit/supabase → local schema `legacy`, verified
