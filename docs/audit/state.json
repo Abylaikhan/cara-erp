@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261016T021544Z-c1e1",
-    "started_at": "2026-10-16T02:15:44Z",
+    "run_id": "20261016T150301Z-39b0",
+    "started_at": "2026-10-16T15:03:01Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-16T02:16:58Z",
+    "finished_at": "2026-10-16T15:05:01Z",
     "exit_code": 0
   },
   "last_observed": {
-    "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "13df4cc3881d5a0b820286b1deed2705de3598cd",
-    "at": "2026-10-16T02:15:44Z"
+    "source_ref": "c699dea962fedadac230659bd8d99efaee64181d",
+    "target_ref": "94ba0f0f4bb3ee95caa5fade06a6afaaf413dfa9",
+    "at": "2026-10-16T15:03:01Z"
   },
   "last_reported": {
-    "run_id": "20261016T021544Z-c1e1",
-    "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "13df4cc3881d5a0b820286b1deed2705de3598cd",
-    "logical_key": "7cf10808b7516dfb",
+    "run_id": "20261016T150301Z-39b0",
+    "source_ref": "c699dea962fedadac230659bd8d99efaee64181d",
+    "source_blob": "fe90a3f66666646b73b62e19d1340a7fc26cc86f",
+    "target_ref": "94ba0f0f4bb3ee95caa5fade06a6afaaf413dfa9",
+    "logical_key": "1735241b986ac7e6",
     "local_date": "2026-10-16",
-    "completed_at": "2026-10-16T02:16:58Z",
-    "report": "daily/2026-10-16/20261016T021544Z-c1e1.md",
-    "artifact_sha256": "880b61868d3ce2615f2229d5a83a5e5073777aa45087f70751c4248bd62ee671",
+    "completed_at": "2026-10-16T15:05:01Z",
+    "report": "daily/2026-10-16/20261016T150301Z-39b0.md",
+    "artifact_sha256": "5791c2f457f7df6fba4b9cb41dac360d0dc9e7f4e3b343ed8b19b569d7a45a9a",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -279,6 +279,7 @@
       "Tests\\Feature\\Reliability\\LargeRegistriesTest::test_money_registries_and_their_tabs_carry_every_row",
       "Tests\\Feature\\Reliability\\LargeRegistriesTest::test_reference_registries_carry_every_row",
       "Tests\\Feature\\Reliability\\LargeRegistriesTest::test_sales_production_and_crm_registries_carry_every_row",
+      "Tests\\Feature\\Reliability\\LargeRegistriesTest::test_the_boundaries_of_the_legacy_limits_are_walked_row_by_row",
       "Tests\\Feature\\Sales\\OrderJournalTest::test_a_dealer_order_realized_to_99_percent_is_completed_by_hand",
       "Tests\\Feature\\Sales\\OrderJournalTest::test_another_channel_cannot_complete_an_order",
       "Tests\\Feature\\Sales\\OrderJournalTest::test_journal_shows_totals_progress_and_dates_of_the_orders",
@@ -321,16 +322,16 @@
     ]
   },
   "last_verified": {
-    "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "13df4cc3881d5a0b820286b1deed2705de3598cd",
+    "source_ref": "c699dea962fedadac230659bd8d99efaee64181d",
+    "target_ref": "94ba0f0f4bb3ee95caa5fade06a6afaaf413dfa9",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-16T02:16:58Z",
-    "run_id": "20261016T021544Z-c1e1"
+    "completed_at": "2026-10-16T15:05:01Z",
+    "run_id": "20261016T150301Z-39b0"
   },
   "changelog": {
-    "entries": 54,
-    "last_header": "## 2026-10-16 · 20261016T021544Z-c1e1",
-    "sha256": "3664c6d47e6fa63e139309a806559f2490e48b976540bf2f046e19840337d7cd"
+    "entries": 55,
+    "last_header": "## 2026-10-16 · 20261016T150301Z-39b0",
+    "sha256": "d98e0f7d5cff90b7613d24f1b02295b076c9f8c5e22cffe3116ff919a3e2bd69"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",

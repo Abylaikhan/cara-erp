@@ -1,0 +1,1297 @@
+{
+  "schema": "promtech.audit-run/1",
+  "run_id": "20261016T150301Z-39b0",
+  "mode": "manual",
+  "started_at": "2026-10-16T15:03:01Z",
+  "finished_at": "2026-10-16T15:05:01Z",
+  "duration_s": 120.0,
+  "local_date": "2026-10-16",
+  "local_time": "20:03",
+  "timezone": "Asia/Almaty",
+  "logical_key": "1735241b986ac7e6",
+  "repeat_of": null,
+  "harness": {
+    "version": "0.1.0",
+    "suite_version": "suite-1+055594",
+    "config_hash": "1745be69be3d",
+    "code_hash": "870ea8e36b88",
+    "inventory_tool": "17c5b35c1b925f97",
+    "python": "3.9.6"
+  },
+  "source": {
+    "repository": "https://github.com/Cara-ERP/promtech-erp",
+    "branch": "main",
+    "path": "index.html",
+    "observed_head": "c699dea962fedadac230659bd8d99efaee64181d",
+    "base_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
+    "blob": "fe90a3f66666646b73b62e19d1340a7fc26cc86f",
+    "sha256": "5920178ff11a1583a05a2202ccceaf309213ca8cb2da1919b07278161b7f88df",
+    "status": "CHANGED",
+    "commits": [
+      {
+        "sha": "c699dea962fedadac230659bd8d99efaee64181d",
+        "authored_at": "2026-10-16T19:33:03+05:00",
+        "committed_at": "2026-10-16T19:33:03+05:00",
+        "subject": "Add files via upload"
+      }
+    ],
+    "commit_count": 1,
+    "watched": [
+      {
+        "path": "Index.html",
+        "blob": "bc477eb7cc8d0ad491a93b70ac2838ef9a339949",
+        "previous_blob": "bc477eb7cc8d0ad491a93b70ac2838ef9a339949",
+        "changed": false
+      },
+      {
+        "path": "indexx.html",
+        "blob": "dcc480053c88efba2239e6dd75d4815494e869f1",
+        "previous_blob": "dcc480053c88efba2239e6dd75d4815494e869f1",
+        "changed": false
+      },
+      {
+        "path": "indrx.html",
+        "blob": "2d304e8d88347781079be34a2e9ee15319aaec55",
+        "previous_blob": "2d304e8d88347781079be34a2e9ee15319aaec55",
+        "changed": false
+      }
+    ],
+    "case_collisions": [
+      [
+        "Index.html",
+        "index.html"
+      ]
+    ],
+    "diff": {
+      "counts": {
+        "function_declarations": {
+          "old": 1193,
+          "new": 1197
+        },
+        "functions_all": {
+          "old": 1220,
+          "new": 1224
+        },
+        "db_calls": {
+          "old": 263,
+          "new": 264
+        }
+      },
+      "functions": {
+        "added": [
+          "posBadge#1",
+          "posNo#1",
+          "swItemNo#1",
+          "swNoBadge#1"
+        ],
+        "removed": [],
+        "changed": [
+          "buildTaskRows#1",
+          "cabCollectTasks#1",
+          "collectWorkLogEntries#1",
+          "exportProdWorksheetExcel#1",
+          "openPwbStageEditor#1",
+          "renderCashTx#1",
+          "renderMrpOrdersJournal#1",
+          "renderOrderModalInfo#1",
+          "renderProdWorksheet#1",
+          "renderShopFloor#1",
+          "renderWaybillAvailableItems#1",
+          "renderWaybillItems#1",
+          "renderWorkshopLoad#1",
+          "requestMaterialFromWorksheet#1",
+          "swAddFreeLine#1",
+          "swAddPickedItems#1",
+          "swLineSet#1",
+          "swLoadOrderItems#1",
+          "swOpenDoc#1",
+          "swPrintDoc#1",
+          "swPrintJournal#1",
+          "swRender#1",
+          "swRenderLines#1",
+          "swSaveDoc#1"
+        ]
+      },
+      "pages": {
+        "added": [],
+        "removed": [],
+        "changed": [
+          "page-money"
+        ],
+        "text_changed": [
+          "page-money"
+        ]
+      },
+      "modals": {
+        "added": [],
+        "removed": [],
+        "changed": [],
+        "text_changed": []
+      },
+      "controls": {
+        "added": [
+          {
+            "group": "page-money",
+            "tag": "th",
+            "line": 6236
+          }
+        ],
+        "removed": [
+          {
+            "group": "page-money",
+            "tag": "th",
+            "line": 6288
+          }
+        ],
+        "changed": []
+      },
+      "db": {
+        "tables_added": [],
+        "tables_removed": [],
+        "calls_changed": {
+          "sales_worksheet": {
+            "old": {
+              "sbFetchAllPages": 1,
+              "sbDelete": 2,
+              "sbInsertMany": 1,
+              "sbPatch": 3
+            },
+            "new": {
+              "sbFetchAllPages": 1,
+              "sbDelete": 2,
+              "sbInsertMany": 2,
+              "sbPatch": 3
+            }
+          }
+        },
+        "dynamic": {
+          "old": 2,
+          "new": 2
+        }
+      },
+      "storage": {
+        "added": [],
+        "removed": []
+      },
+      "resources": {
+        "added": [],
+        "removed": []
+      },
+      "network": {
+        "added": [],
+        "removed": []
+      },
+      "scripts_failed": []
+    },
+    "impact": [
+      {
+        "function": "posBadge#1",
+        "change": "added",
+        "ui_groups": [
+          "editOrderModal",
+          "global",
+          "moneyTxModal",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance",
+          "page-mrp",
+          "page-sales",
+          "paymentModal",
+          "pwbStageModal",
+          "sfStageModal",
+          "swDocModal",
+          "waybillModal"
+        ],
+        "modules": [
+          "M02 Производство",
+          "M09 Продажи",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "posNo#1",
+        "change": "added",
+        "ui_groups": [
+          "page-mrp"
+        ],
+        "modules": [
+          "M02 Производство"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swItemNo#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance",
+          "page-sales",
+          "swDocModal"
+        ],
+        "modules": [
+          "M09 Продажи",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swNoBadge#1",
+        "change": "added",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance",
+          "page-sales",
+          "swDocModal"
+        ],
+        "modules": [
+          "M09 Продажи",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "buildTaskRows#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-mrp"
+        ],
+        "modules": [
+          "M02 Производство"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "cabCollectTasks#1",
+        "change": "changed",
+        "ui_groups": [
+          "global",
+          "page-mycabinet"
+        ],
+        "modules": [
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "collectWorkLogEntries#1",
+        "change": "changed",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance",
+          "page-mrp",
+          "page-mycabinet",
+          "page-wages"
+        ],
+        "modules": [
+          "M02 Производство",
+          "M11 Финансы",
+          "M18 Сдельная оплата",
+          "M22 Мой кабинет"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "exportProdWorksheetExcel#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-mrp"
+        ],
+        "modules": [
+          "M02 Производство"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "openPwbStageEditor#1",
+        "change": "changed",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "renderCashTx#1",
+        "change": "changed",
+        "ui_groups": [
+          "advanceModal",
+          "bankStatementModal",
+          "global",
+          "moneyTxModal",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance",
+          "page-money",
+          "page-suppliers",
+          "salonTransferModal",
+          "supplierCardModal"
+        ],
+        "modules": [
+          "M06 Поставщики",
+          "M11 Финансы",
+          "M12 Деньги"
+        ],
+        "requirement_ids": [
+          "M12.VIEW"
+        ],
+        "test_ids": [
+          "Tests\\Feature\\Money\\MoneyJournalTest"
+        ],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "renderMrpOrdersJournal#1",
+        "change": "changed",
+        "ui_groups": [
+          "editOrderModal",
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance",
+          "page-mrp",
+          "paymentModal",
+          "pwbStageModal",
+          "sfStageModal",
+          "waybillModal"
+        ],
+        "modules": [
+          "M02 Производство",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [
+          "M02.JOURNAL"
+        ],
+        "test_ids": [
+          "Tests\\Feature\\Mrp\\ProductionJournalTest::test_lines_show_the_effective_status_and_recorded_stages",
+          "Tests\\Feature\\Mrp\\ProductionJournalTest::test_only_roles_with_the_page_and_their_channels_see_lines"
+        ],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "renderOrderModalInfo#1",
+        "change": "changed",
+        "ui_groups": [
+          "editOrderModal",
+          "global",
+          "moneyTxModal",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance",
+          "page-mrp",
+          "page-sales",
+          "paymentModal",
+          "sfStageModal",
+          "waybillModal"
+        ],
+        "modules": [
+          "M02 Производство",
+          "M09 Продажи",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "renderProdWorksheet#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-mrp",
+          "pwbStageModal"
+        ],
+        "modules": [
+          "M02 Производство"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "renderShopFloor#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-mrp",
+          "sfStageModal",
+          "waybillModal"
+        ],
+        "modules": [
+          "M02 Производство"
+        ],
+        "requirement_ids": [
+          "M02.SHOPFLOOR"
+        ],
+        "test_ids": [],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "renderWaybillAvailableItems#1",
+        "change": "changed",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "renderWaybillItems#1",
+        "change": "changed",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "renderWorkshopLoad#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-mrp"
+        ],
+        "modules": [
+          "M02 Производство"
+        ],
+        "requirement_ids": [
+          "M02.SHOPFLOOR"
+        ],
+        "test_ids": [],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "requestMaterialFromWorksheet#1",
+        "change": "changed",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swAddFreeLine#1",
+        "change": "changed",
+        "ui_groups": [
+          "swDocModal"
+        ],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swAddPickedItems#1",
+        "change": "changed",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swLineSet#1",
+        "change": "changed",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swLoadOrderItems#1",
+        "change": "changed",
+        "ui_groups": [
+          "swDocModal"
+        ],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swOpenDoc#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-sales"
+        ],
+        "modules": [
+          "M09 Продажи"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swPrintDoc#1",
+        "change": "changed",
+        "ui_groups": [],
+        "modules": [],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swPrintJournal#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-sales"
+        ],
+        "modules": [
+          "M09 Продажи"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swRender#1",
+        "change": "changed",
+        "ui_groups": [
+          "global",
+          "newCustOrderModal",
+          "newOrderModal",
+          "page-finance",
+          "page-sales",
+          "swDocModal"
+        ],
+        "modules": [
+          "M09 Продажи",
+          "M11 Финансы"
+        ],
+        "requirement_ids": [
+          "M09.WORKSHEET"
+        ],
+        "test_ids": [],
+        "mapping": "MAPPED"
+      },
+      {
+        "function": "swRenderLines#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-sales",
+          "swDocModal"
+        ],
+        "modules": [
+          "M09 Продажи"
+        ],
+        "requirement_ids": [],
+        "test_ids": [],
+        "mapping": "UNMAPPED_CHANGE"
+      },
+      {
+        "function": "swSaveDoc#1",
+        "change": "changed",
+        "ui_groups": [
+          "swDocModal"
+        ],
+        "modules": [],
+        "requirement_ids": [
+          "M09.WORKSHEET"
+        ],
+        "test_ids": [],
+        "mapping": "MAPPED"
+      },
+      {
+        "page": "page-money",
+        "change": "page",
+        "modules": [
+          "M12 Деньги"
+        ],
+        "mapping": "UNMAPPED_CHANGE",
+        "requirement_ids": [],
+        "test_ids": [],
+        "ui_groups": [
+          "page-money"
+        ]
+      }
+    ],
+    "numstat": {
+      "added": 60,
+      "removed": 34
+    },
+    "diff_vs_accepted": "функции +4/−0/~24, страницы изменены 1, модальные окна 0",
+    "accepted_ref": {
+      "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
+      "sha256": "54c78441e10a2b7cc78a4ffcfc13aaa7a714a3bb24686d7e99768ee9d4634c80",
+      "matches_observed": false
+    },
+    "bytes": 2338598
+  },
+  "target": {
+    "repository": "https://github.com/Abylaikhan/cara-erp",
+    "ref_requested": "HEAD",
+    "head": "94ba0f0f4bb3ee95caa5fade06a6afaaf413dfa9",
+    "base_ref": "13df4cc3881d5a0b820286b1deed2705de3598cd",
+    "changed_files": [
+      ".github/workflows/daily-audit.yml",
+      "Makefile",
+      "docs/DAILY-CHANGELOG.md",
+      "docs/OPERATIONS.md",
+      "docs/adr/0002-ui-deviations.md",
+      "docs/adr/0025-reliability.md",
+      "docs/adr/0026-browser-acceptance.md",
+      "docs/adr/0027-visual-sizes.md",
+      "docs/agent-state.md",
+      "docs/audit/state.json",
+      "docs/coverage/requirements.csv",
+      "docs/daily/2026-10-16/20261016T021544Z-c1e1.json",
+      "docs/daily/2026-10-16/20261016T021544Z-c1e1.md",
+      "scripts/visual-matrix.sh",
+      "tests/Feature/Reliability/LargeRegistriesTest.php",
+      "tests/Harness/test_harness.py",
+      "tests/e2e/acceptance_modals.py",
+      "tests/visual/legacy_compare.py",
+      "tools/harness/README.md",
+      "tools/harness/publish.py",
+      "tools/harness/run.py",
+      "tools/harness/schemas/run-report.schema.json"
+    ],
+    "tests": {
+      "tests": 268,
+      "passed": 268,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "committed_at": "2026-10-16T19:59:59+05:00",
+    "subject": "Повтор аудита: базовый blob вычисляется по базовому ref записанного запуска",
+    "on_remote_branches": [
+      "origin/HEAD -> origin/main",
+      "origin/main"
+    ],
+    "working_tree_dirty": true
+  },
+  "inventory": {
+    "counts": {
+      "pages": 23,
+      "modals": 67,
+      "controls": 2244,
+      "html_tables": 76,
+      "scripts": 5,
+      "scripts_failed": 0,
+      "function_declarations": 1197,
+      "function_declarations_regex": 1199,
+      "functions_all": 1224,
+      "db_tables": 44,
+      "db_calls": 264,
+      "db_calls_dynamic": 2,
+      "storage_calls": 8
+    }
+  },
+  "checks": [
+    {
+      "id": "SRC-PIN",
+      "title": "Фиксация HEAD источника один раз в начале запуска",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.9,
+      "command": "git ls-remote origin refs/heads/main",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "head": "c699dea962fedadac230659bd8d99efaee64181d"
+        }
+      }
+    },
+    {
+      "id": "SRC-FETCH",
+      "title": "Получение коммитов по SHA (без checkout)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 1.23,
+      "command": "git fetch --no-tags origin <branch> <pinned SHAs>",
+      "exit_code": null,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/source-git.log"
+      ],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "SRC-ACCEPTED",
+      "title": "Целостность принятого эталона: SHA-256 точного пути",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.02,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "blob": "52454ddc153e66f17bd1a629276663af91c082ab"
+        }
+      }
+    },
+    {
+      "id": "SRC-PATH",
+      "title": "Точный путь: blob, размер, git-хеш, SHA-256",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.03,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "blob": "fe90a3f66666646b73b62e19d1340a7fc26cc86f",
+          "bytes": 2338598,
+          "sha256": "5920178ff11a1583a05a2202ccceaf309213ca8cb2da1919b07278161b7f88df"
+        }
+      }
+    },
+    {
+      "id": "SRC-CASE",
+      "title": "Коллизии регистра в дереве (Index.html / index.html)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "обнаружены: Index.html/index.html",
+      "planned": false,
+      "details": {
+        "collisions": [
+          [
+            "Index.html",
+            "index.html"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "SRC-HISTORY",
+      "title": "Непрерывность истории от прошлого отчёта (ancestry)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.03,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "линейно: 1 коммит(ов) с прошлого отчёта",
+      "planned": false
+    },
+    {
+      "id": "SRC-INVENTORY",
+      "title": "Inventory: страницы, модальные окна, элементы, функции (AST), таблицы БД",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.67,
+      "command": "docker run --network none --read-only … node legacy_inventory.mjs",
+      "exit_code": null,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/source-inventory.log"
+      ],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "counts": {
+            "pages": 23,
+            "modals": 67,
+            "controls": 2244,
+            "html_tables": 76,
+            "scripts": 5,
+            "scripts_failed": 0,
+            "function_declarations": 1197,
+            "function_declarations_regex": 1199,
+            "functions_all": 1224,
+            "db_tables": 44,
+            "db_calls": 264,
+            "db_calls_dynamic": 2,
+            "storage_calls": 8
+          }
+        }
+      }
+    },
+    {
+      "id": "SRC-SYNTAX",
+      "title": "Синтаксис всех inline-скриптов (acorn)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "5 скриптов разобраны",
+      "planned": false,
+      "details": {
+        "failed_scripts": []
+      }
+    },
+    {
+      "id": "SRC-DIFF",
+      "title": "Структурный diff и карта влияния на модули",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.06,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "структурный diff построен",
+      "planned": false
+    },
+    {
+      "id": "SRC-WATCHED",
+      "title": "Изменения других HTML (не эталон)",
+      "required": false,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "Index.html, indexx.html, indrx.html",
+      "planned": false
+    },
+    {
+      "id": "TGT-REF",
+      "title": "Фиксация целевого коммита и чистый worktree",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 1.75,
+      "command": "",
+      "exit_code": null,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-worktree.log"
+      ],
+      "scope": "",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "head": "94ba0f0f4bb3ee95caa5fade06a6afaaf413dfa9",
+          "worktree": ".local-audit/target/94ba0f0f4bb3"
+        }
+      }
+    },
+    {
+      "id": "TGT-DEPS",
+      "title": "Установка зависимостей из composer.lock и package-lock.json",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 42.27,
+      "command": "scripts/check.sh deps",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-deps.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-PINT",
+      "title": "Стиль PHP (pint --test)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 7.87,
+      "command": "scripts/check.sh pint",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-pint.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-TYPES",
+      "title": "Типы TypeScript/Vue (vue-tsc)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 4.77,
+      "command": "scripts/check.sh types",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-types.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-BUILD",
+      "title": "Production-сборка (vite build)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 2.28,
+      "command": "scripts/check.sh build",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-build.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-TESTS",
+      "title": "Backend-тесты на изолированной PostgreSQL",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 28.89,
+      "command": "scripts/check.sh tests",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-tests.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "tests": {
+          "tests": 268,
+          "passed": 268,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "id": "TGT-MIGRATE",
+      "title": "Миграции и синтетический seed на чистой PostgreSQL",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 3.82,
+      "command": "scripts/check.sh migrate",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-migrate.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-DB",
+      "title": "Подключение именно к PostgreSQL (dev и test)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 2.92,
+      "command": "scripts/check.sh dbcheck",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-dbcheck.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-BACKUP",
+      "title": "Backup → restore-check: БД, файлы и приложение на копии",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 10.8,
+      "command": "scripts/check.sh backup",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-backup.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-HTTP",
+      "title": "HTTP smoke: /up и /login через nginx",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 6.74,
+      "command": "scripts/check.sh http",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261016T150301Z-39b0/logs/target-http.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TASKS-READ",
+      "title": "Чтение Google Sheets-трекера",
+      "required": false,
+      "stage": "tasks",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "GET sheets.googleapis.com/v4/spreadsheets/<id> (API key)",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "вкладки: Список задач (213 строк), Что нужно от заказчика (36 строк)",
+      "planned": false,
+      "details": {
+        "tabs": [
+          {
+            "title": "Список задач",
+            "rows": 213
+          },
+          {
+            "title": "Что нужно от заказчика",
+            "rows": 36
+          }
+        ]
+      }
+    },
+    {
+      "id": "TASKS-WRITE",
+      "title": "Запись статусов в Google Sheets с read-back",
+      "required": false,
+      "stage": "tasks",
+      "status": "BLOCKED",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "нет service account с доступом «Редактор» (Sheets API не принимает запись по API-ключу)",
+      "planned": false
+    },
+    {
+      "id": "TGT-PHPSTAN",
+      "title": "Статанализ PHP (PHPStan/Larastan)",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-LINT",
+      "title": "Frontend lint",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-VITEST",
+      "title": "Frontend unit-тесты (Vitest)",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-E2E",
+      "title": "Сквозные сценарии Playwright",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-VISUAL",
+      "title": "Визуальное сравнение с эталоном legacy",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "HAR-COVERAGE",
+      "title": "Набор проверок и тестов не сократился без review",
+      "required": true,
+      "stage": "harness",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "проверок 26, тестов 268",
+      "planned": false
+    },
+    {
+      "id": "HAR-JOURNAL",
+      "title": "DAILY-CHANGELOG сохраняет прежние записи",
+      "required": true,
+      "stage": "harness",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "записей 54",
+      "planned": false
+    },
+    {
+      "id": "HAR-SECRETS",
+      "title": "Секреты и маркеры отсутствуют в MD, JSON и логах",
+      "required": true,
+      "stage": "harness",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "логи проверены",
+      "planned": false
+    },
+    {
+      "id": "AI-REVIEW",
+      "title": "Разбор изменений Claude (дополнение, не заменяет проверки)",
+      "required": false,
+      "stage": "ai",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "structured diff, impact map, check results, open findings",
+      "reason": "Нет ключа Anthropic API и согласованного бюджета для автоматического запуска",
+      "planned": false
+    }
+  ],
+  "summary": {
+    "PASS": 24,
+    "FAIL": 0,
+    "BLOCKED": 1,
+    "NOT_RUN": 6,
+    "NOT_APPLICABLE": 0
+  },
+  "execution_status": "PARTIAL",
+  "product_status": "PASS",
+  "source_status": "CHANGED",
+  "findings": {
+    "new": [],
+    "repeated": [],
+    "closed": [],
+    "needs_review": [],
+    "open_total": 0,
+    "items": []
+  },
+  "task_sync_status": {
+    "read": "PASS",
+    "write": "BLOCKED",
+    "tabs": [
+      {
+        "title": "Список задач",
+        "rows": 213
+      },
+      {
+        "title": "Что нужно от заказчика",
+        "rows": 36
+      }
+    ],
+    "pending_events": 0,
+    "delivered": 0,
+    "conflicts": 0
+  },
+  "ai_review": {
+    "status": "NOT_RUN",
+    "reason": "Нет ключа Anthropic API и согласованного бюджета для автоматического запуска"
+  },
+  "previous_attempt": null,
+  "missed_days": [],
+  "not_checked": [
+    "TASKS-WRITE — Запись статусов в Google Sheets с read-back: нет service account с доступом «Редактор» (Sheets API не принимает запись по API-ключу)",
+    "TGT-PHPSTAN — Статанализ PHP (PHPStan/Larastan): запланирована, ещё не реализована",
+    "TGT-LINT — Frontend lint: запланирована, ещё не реализована",
+    "TGT-VITEST — Frontend unit-тесты (Vitest): запланирована, ещё не реализована",
+    "TGT-E2E — Сквозные сценарии Playwright: запланирована, ещё не реализована",
+    "TGT-VISUAL — Визуальное сравнение с эталоном legacy: запланирована, ещё не реализована",
+    "AI-REVIEW — Разбор изменений Claude (дополнение, не заменяет проверки): Нет ключа Anthropic API и согласованного бюджета для автоматического запуска",
+    "Модули ERP M01–M23 ещё не перенесены: бизнес-сценарии, права и инварианты DATA-01 не проверяются.",
+    "Характеризационные пробы legacy (35 исторических наблюдений) в ежедневный набор пока не включены.",
+    "Карта требований docs/coverage/requirements.csv не создана: изменения legacy не связаны с требованиями."
+  ],
+  "exit_code": 0,
+  "publication": {
+    "status": "PUBLISHED"
+  },
+  "actions": [
+    "Ручной разбор 23 изменений legacy без привязки к требованиям (UNMAPPED_CHANGE); карта требований — задача ERP-003.",
+    "Google Sheets: запись недоступна — нужен service account с доступом «Редактор» (вопрос заказчику №1).",
+    "AI-разбор не выполнен: Нет ключа Anthropic API и согласованного бюджета для автоматического запуска."
+  ]
+}
