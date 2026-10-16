@@ -3,13 +3,15 @@ the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Вхо�
 dark and light themes, 1440×900 (another size: VIEWPORT=<width>x<height>).
 
 Legacy runs from the accepted reference in .local-audit/blobs with every network request blocked except Google Fonts —
-it never reaches the legacy backend. Both sides get the same synthetic directory (DatabaseSeeder).
+it never reaches the legacy backend. Both sides show the same rows: legacy gets exactly the data the target renders.
 Requires host python3 with `pip install playwright==1.55.0 pillow` and Google Chrome; the app must be up (make up)
-and seeded. Interim tool until the Dockerised TGT-VISUAL suite exists.
+and seeded. Interim tool until the Dockerised TGT-VISUAL suite exists. Nothing is saved (the plans it asks for are
+not applied), so it runs on the dev application with the copy of the real data.
 
     python3 tests/visual/legacy_compare.py            # → .local-audit/visual/<time>/, prints % of differing pixels
+    make visual-empty                                 # AC-07: the empty states — a throwaway database with the users only
 """
-import datetime, hashlib, json, re, sys
+import collections, datetime, hashlib, json, os, re, sys, time
 from pathlib import Path
 from PIL import Image, ImageChops
 from playwright.sync_api import sync_playwright
@@ -20,14 +22,16 @@ CFG = json.loads((ROOT / 'tools/harness/config.json').read_text())
 # separate decision moves it.
 ACCEPTED = CFG['source']['accepted_ref']['sha256']
 BLOB = next(b for b in sorted((ROOT / '.local-audit/blobs').glob('*.html')) if hashlib.sha256(b.read_bytes()).hexdigest() == ACCEPTED)
-OUT = ROOT / '.local-audit/visual' / (datetime.datetime.now().strftime('%Y%m%dT%H%M%S') + '-' + __import__('os').environ.get('VIEWPORT', '1440x900'))
+OUT = ROOT / '.local-audit/visual' / (datetime.datetime.now().strftime('%Y%m%dT%H%M%S') + '-' + os.environ.get('VIEWPORT', '1440x900')
+                                       + ('-e2e' if os.environ.get('E2E_BASE') else ''))
 OUT.mkdir(parents=True, exist_ok=True)
 LEGACY = BLOB.as_uri()
 ENV = (ROOT / '.env').read_text()
 # AC-04/05: the same comparison at another size of the window (VIEWPORT=1920x1080, 900x900, 899x900, 390x844).
-_vw, _vh = (int(x) for x in __import__('os').environ.get('VIEWPORT', '1440x900').lower().split('x'))
+_vw, _vh = (int(x) for x in os.environ.get('VIEWPORT', '1440x900').lower().split('x'))
 VIEWPORT = {'width': _vw, 'height': _vh}
-TARGET = 'http://localhost:' + (re.search(r'^APP_PORT=(\d+)', ENV, re.M) or [None, '8080'])[1]
+# make e2e passes its instance (E2E_BASE): a throwaway database instead of the dev one — make visual-empty.
+TARGET = os.environ.get('E2E_BASE') or 'http://localhost:' + (re.search(r'^APP_PORT=(\d+)', ENV, re.M) or [None, '8080'])[1]
 DEV_PASSWORD = re.search(r'^DEV_ADMIN_PASSWORD=(.*)$', ENV, re.M).group(1).strip()
 # Both sides must show the same rows: the legacy page receives exactly the directory the target renders.
 def target_categories(page):
@@ -35,10 +39,35 @@ def target_categories(page):
     return [dict(code=c['code'], name=c['name'], parent_code=c['parent_code'], is_fixed=c['is_fixed'], sort_order=c['sort_order'])
             for c in data['props']['categories']]
 
+# make visual-empty (E2E_SEED=users): the target has no business data, and legacy reads an empty database — its requests for
+# rows get an empty list, as from an empty Supabase (a blocked request would leave its loaders failing instead).
+EMPTY = os.environ.get('E2E_SEED') == 'users'
+# The empty states legacy never reaches (its loaders take an empty answer for «not loaded yet» and ask again forever).
+EMPTY_DEVIATIONS = {'sales-journal': 'ADR-0002, item 87', 'finance-cfs': 'ADR-0002, item 88'}
+
+
+# Legacy asks again without end for some empty tables (ADR-0002, items 87, 88). Answered at once, such a loop floods the
+# routing and holds up the other requests of the page. A loop is told from the loads every page makes of what is still
+# empty by its rate: more than LOOP requests of one table within LOOP_S seconds. Its next request is left pending — the
+# screen stays as legacy keeps it (loading) and the loop stops; the other requests are answered.
+LOOP, LOOP_S = 20, 3.0
+_asked: dict = collections.defaultdict(collections.deque)
+
+
 def guard(route):
     url = route.request.url
     if url.startswith('file://') or 'fonts.googleapis.com' in url or 'fonts.gstatic.com' in url:
         return route.continue_()
+    if EMPTY and route.request.method == 'GET' and '/rest/v1/' in url:
+        recent, now = _asked[url.split('/rest/v1/', 1)[1]], time.monotonic()
+        recent.append(now)
+        while now - recent[0] > LOOP_S:
+            recent.popleft()
+        if len(recent) > LOOP:
+            print(f"legacy asks again without end: {url.split('/rest/v1/', 1)[1][:60]} (left pending)", file=sys.stderr)
+            recent.clear()
+            return None
+        return route.fulfill(json=[])
     return route.abort()
 
 def unscroll(page):
@@ -87,11 +116,12 @@ with sync_playwright() as p:
         page.wait_for_url('**/dashboard'); page.goto(TARGET + '/expense_cats', wait_until='networkidle'); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-m14-{theme}.png'))
         cats = target_categories(page)
-        first = sorted((c for c in cats if c['parent_code']), key=lambda c: (c['sort_order'], c['code']))[0]['code']
-        page.locator('#ec-table-wrap').get_by_text(first, exact=True).locator('xpath=ancestor::tr').locator('button').dispatch_event('click')  # no scroll: legacy opens it in place; page.wait_for_timeout(300)
-        target_shot(page, str(OUT / f'target-m14-modal-{theme}.png'))
+        first = next(iter(sorted((c for c in cats if c['parent_code']), key=lambda c: (c['sort_order'], c['code']))), {}).get('code')
+        if first:  # an empty directory has no item to open
+            page.locator('#ec-table-wrap').get_by_text(first, exact=True).locator('xpath=ancestor::tr').locator('button').dispatch_event('click')  # no scroll: legacy opens it in place; page.wait_for_timeout(300)
+            target_shot(page, str(OUT / f'target-m14-modal-{theme}.png'))
+            page.locator('#ec-modal .modal-close, .modal-overlay.open .modal-close').first.click(); page.wait_for_timeout(200)
         # Filters of «Статьи расходов» (search, category, «Только постоянные»): the table text for the same combinations.
-        page.locator('#ec-modal .modal-close, .modal-overlay.open .modal-close').first.click(); page.wait_for_timeout(200)
         first_top = page.evaluate("document.querySelector('#ec-filter-parent option:nth-child(2)')?.value || ''")
         target_ec = []
         for q, parent, fixed in [('', '', False), ('эл', '', False), ('', 'FIRSTTOP', False), ('', '', True), ('а', 'FIRSTTOP', True)]:
@@ -209,7 +239,8 @@ with sync_playwright() as p:
         page.locator('#taskModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#crm-tab-clients').click(); page.wait_for_timeout(2500)
         target_shot(page, str(OUT / f'target-crm-clients-{theme}.png'))
-        first_client = page.evaluate("document.querySelector('#clients-tbody tr td')?.textContent?.trim() || null")
+        # A client row has its card button; an empty list has a row with the message only.
+        first_client = page.evaluate("document.querySelector('#clients-tbody tr button')?.closest('tr').querySelector('td').textContent.trim() || null")
         if first_client:
             page.locator('#clients-tbody tr').first.locator('button').click(); page.wait_for_timeout(300)
             target_shot(page, str(OUT / f'target-crm-client-card-{theme}.png'))
@@ -297,10 +328,11 @@ with sync_playwright() as p:
             return (await r.json()).props.bankRecon;
         }""")
         target_recon = []
-        for i in range(2):
+        for i in range(len(recon['accounts'])):  # none in an empty database
             page.select_option('#recon-account-select', index=i); page.wait_for_timeout(800)
             target_recon.append(page.locator('#recon-tbody').inner_text())
-        page.select_option('#recon-account-select', index=0); page.wait_for_timeout(300)
+        if recon['accounts']:
+            page.select_option('#recon-account-select', index=0); page.wait_for_timeout(300)
         page.locator('#page-money > .tabs .tab').nth(6).click(); page.wait_for_timeout(2500)
         page.evaluate("document.getElementById('pc-chart').style.visibility = 'hidden'")
         target_shot(page, str(OUT / f'target-money-calendar-{theme}.png'))
@@ -388,13 +420,16 @@ with sync_playwright() as p:
         }""", cats)
         page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-m14-{theme}.png'))
-        page.evaluate(f"openExpCatModal('{first}', null, false)"); page.wait_for_timeout(300)
-        unscroll(page); page.screenshot(path=str(OUT / f'legacy-m14-modal-{theme}.png'))
+        if first:
+            page.evaluate(f"openExpCatModal('{first}', null, false)"); page.wait_for_timeout(300)
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-m14-modal-{theme}.png'))
         legacy_ec = []
         for q, parent, fixed in [('', '', False), ('эл', '', False), ('', 'FIRSTTOP', False), ('', '', True), ('а', 'FIRSTTOP', True)]:
             legacy_ec.append(page.evaluate("""([q, parent, fixed]) => {
                 document.getElementById('ec-search').value = q; document.getElementById('ec-filter-parent').value = parent; document.getElementById('ec-show-fixed').checked = fixed;
                 renderExpCats(); return document.getElementById('ec-table-wrap').innerText; }""", [q, first_top if parent else '', fixed]))
+        # An empty directory: legacy adds «Проверьте таблицу expense_categories в Supabase.» (ADR-0002, item 8).
+        legacy_ec = [y.replace('Нет данных. Проверьте таблицу expense_categories в Supabase.', 'Нет данных.') for y in legacy_ec]
         bad = [i for i, (x, y) in enumerate(zip(target_ec, legacy_ec)) if x.split() != y.split()]
         print(f'expense categories filters ({theme}): {len(target_ec)} combinations, ' + ('совпадает' if not bad else f'РАСХОЖДЕНИЕ в {bad}'))
         page.evaluate("""(products) => {
@@ -750,7 +785,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-bankrecon-{theme}.png'))
         legacy_recon = []
-        for k in ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '0265fb65-7812-4bee-b794-71306246edb7'):
+        for k in ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '0265fb65-7812-4bee-b794-71306246edb7')[:len(recon['accounts'])]:
             page.evaluate(f"showBankReconAccount('{k}')"); page.wait_for_timeout(800)
             legacy_recon.append(page.locator('#recon-tbody').inner_text())
         for n, a2, b2 in zip(('Kaspi', 'Halyk'), target_recon, legacy_recon):
@@ -1001,7 +1036,10 @@ with sync_playwright() as p:
             n = len(a2) if isinstance(a2, list) else 1
             print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
+        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
+            if EMPTY and shot in EMPTY_DEVIATIONS:  # pictures kept, not compared: a documented deviation
+                print(f'{shot}-{theme}: not compared — {EMPTY_DEVIATIONS[shot]}')
+                continue
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'viewport': f"{VIEWPORT['width']}x{VIEWPORT['height']}", 'diff_percent': results}, indent=1))

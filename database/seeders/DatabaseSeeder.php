@@ -10,28 +10,17 @@ use App\Models\Material;
 use App\Models\MaterialAlias;
 use App\Models\Product;
 use App\Models\Supplier;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use RuntimeException;
 
 /**
  * Idempotent synthetic development seed. No real employees, clients, legacy logins' passwords or legacy names.
- * One user per legacy role template: login = role key, password = DEV_ADMIN_PASSWORD from .env.
+ * Users: UsersSeeder (one per legacy role template, password = DEV_ADMIN_PASSWORD from .env).
  * Re-running keeps existing records (and their passwords) unchanged.
  */
 class DatabaseSeeder extends Seeder
 {
-    /** Synthetic people: first letters give the avatar initials. */
-    private const NAMES = [
-        'director' => 'Демо Директор', 'manager' => 'Демо Продажи', 'storekeeper' => 'Демо Склад',
-        'foreman' => 'Демо Цех', 'accountant' => 'Демо Бухгалтер', 'hr' => 'Демо Кадры', 'buyer' => 'Демо Закупщик',
-        'salon_armada' => 'Демо Армада', 'salon_nazarbayeva' => 'Демо Назарбаева', 'salon_armada_mgr' => 'Демо Салоны',
-        'dealer_astana' => 'Демо Астана', 'dealer_aktau' => 'Демо Актау', 'dealer_shymkent' => 'Демо Шымкент',
-        'dealer_atyrau' => 'Демо Атырау', 'dealer_aktobe' => 'Демо Актобе',
-    ];
-
     /** Synthetic expense directory (legacy keeps it only in the database — nothing to copy from the HTML). */
     private const CATEGORIES = [
         ['code' => 'general', 'name' => 'Общие расходы', 'sort_order' => 10, 'children' => [
@@ -152,21 +141,7 @@ class DatabaseSeeder extends Seeder
         if (app()->environment('production')) {
             throw new RuntimeException('The synthetic development seed must not run in production.');
         }
-        $password = env('DEV_ADMIN_PASSWORD');
-        if (blank($password)) {
-            throw new RuntimeException('DEV_ADMIN_PASSWORD is not set in .env.');
-        }
-        $hash = Hash::make($password);
-
-        foreach (config('erp.roles') as $role => $template) {
-            User::query()->firstOrCreate(['login' => $role], [
-                'name' => self::NAMES[$role] ?? 'Демо Пользователь',
-                'role' => $role,
-                'channel' => $template['channel'] ?? null,
-                'is_active' => true,
-                'password' => $hash,
-            ]);
-        }
+        $this->callSilent(UsersSeeder::class);
 
         $this->seedProducts();
         $this->seedCustomers();

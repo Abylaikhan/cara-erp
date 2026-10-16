@@ -4,7 +4,7 @@ export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily audit-replay harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal reliability-check e2e test-e2e test-visual
+.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily audit-replay harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal reliability-check e2e test-e2e test-visual visual-empty
 
 help: ## Show available commands
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-20s %s\n", $$1, $$2}'
@@ -40,6 +40,9 @@ visual-compare: ## Screenshots legacy vs target (login, M14, M07, M08, M06, M03,
 
 test-visual: ## Visual comparison at every size of the spec (1440×900, 1920×1080, 900×900, 899×900, 390×844), both themes
 	@bash scripts/visual-matrix.sh
+
+visual-empty: ## Visual comparison of the empty states (AC-07): a throwaway database with the users only, via make e2e
+	@E2E_SEED=users bash scripts/e2e.sh tests/visual/legacy_compare.py
 
 test-e2e: e2e ## Same as make e2e (name of the harness spec)
 

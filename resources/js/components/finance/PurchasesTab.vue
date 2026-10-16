@@ -237,11 +237,13 @@ const mono = `'IBM Plex Mono',monospace`;
         </div>
     </div>
 
-    <template v-if="dash">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px">
-            <div class="card" style="padding: 16px">
-                <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px">🏆 Топ поставщиков по сумме ЭСФ</div>
-                <div id="pur-top-suppliers">
+    <!-- The frames of the cards and of the table are static markup in legacy: while the data are on the way they are shown
+         empty — not «Нет данных», which would claim there are none (AC-07). -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px">
+        <div class="card" style="padding: 16px">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px">🏆 Топ поставщиков по сумме ЭСФ</div>
+            <div id="pur-top-suppliers">
+                <template v-if="dash">
                     <div v-for="[name, d] in dash.top" :key="name" style="margin-bottom: 8px">
                         <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px">
                             <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px" :title="name">{{ name }}</span>
@@ -252,48 +254,54 @@ const mono = `'IBM Plex Mono',monospace`;
                         </div>
                     </div>
                     <div v-if="!dash.top.length" style="color: var(--text3); font-size: 13px">Нет данных</div>
-                </div>
+                </template>
             </div>
-            <div class="card" style="padding: 16px">
-                <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px">📈 Динамика закупок по месяцам</div>
-                <div id="pur-monthly-chart" style="display: flex; align-items: flex-end; gap: 4px; height: 140px">
+        </div>
+        <div class="card" style="padding: 16px">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px">📈 Динамика закупок по месяцам</div>
+            <div id="pur-monthly-chart" style="display: flex; align-items: flex-end; gap: 4px; height: 140px">
+                <template v-if="dash">
                     <div v-for="m in dash.months" :key="m" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px" :title="fmt2(dash.monthData[m])">
                         <div style="font-size: 9px; color: var(--text3)">{{ fmt(dash.monthData[m]) }}</div>
                         <div :style="{ background: 'var(--accent)', borderRadius: '3px 3px 0 0', width: '100%', height: Math.max(4, Math.round((dash.monthData[m] / dash.maxM) * 120)) + 'px' }"></div>
                     </div>
-                </div>
-                <div id="pur-monthly-labels" style="display: flex; gap: 4px; margin-top: 4px; font-size: 10px; color: var(--text3)">
+                </template>
+            </div>
+            <div id="pur-monthly-labels" style="display: flex; gap: 4px; margin-top: 4px; font-size: 10px; color: var(--text3)">
+                <template v-if="dash">
                     <div v-for="m in dash.months" :key="m" style="flex: 1; text-align: center">{{ MONTHS[m.slice(5)] || m.slice(5) }} {{ m.slice(2, 4) }}</div>
-                </div>
+                </template>
             </div>
         </div>
+    </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
-            <div class="card" style="padding: 16px">
-                <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px">💳 Оплата поставщикам (из журнала)</div>
-                <div id="pur-payments-list">
-                    <template v-if="dash.topPaid.length">
-                        <div v-for="[name, sum] in dash.topPaid" :key="name" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px">
-                            <span style="color: var(--text2)">{{ name }}</span>
-                            <span style="font-weight: 600; font-family: monospace; color: var(--green)">{{ fmt2(sum) }}</span>
-                        </div>
-                        <div style="padding-top: 8px; font-size: 12px; color: var(--text3)">Итого: {{ fmt2(dash.totalPaid) }}</div>
-                    </template>
-                    <div v-else style="color: var(--text3); font-size: 13px">Нет оплат за период</div>
-                </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <div class="card" style="padding: 16px">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px">💳 Оплата поставщикам (из журнала)</div>
+            <div id="pur-payments-list">
+                <template v-if="dash && dash.topPaid.length">
+                    <div v-for="[name, sum] in dash.topPaid" :key="name" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px">
+                        <span style="color: var(--text2)">{{ name }}</span>
+                        <span style="font-weight: 600; font-family: monospace; color: var(--green)">{{ fmt2(sum) }}</span>
+                    </div>
+                    <div style="padding-top: 8px; font-size: 12px; color: var(--text3)">Итого: {{ fmt2(dash.totalPaid) }}</div>
+                </template>
+                <div v-else-if="dash" style="color: var(--text3); font-size: 13px">Нет оплат за период</div>
             </div>
-            <div class="card" style="padding: 16px">
-                <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px">📊 Структура по поставщикам</div>
-                <div id="pur-structure">
+        </div>
+        <div class="card" style="padding: 16px">
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px">📊 Структура по поставщикам</div>
+            <div id="pur-structure">
+                <template v-if="dash">
                     <div v-for="[name, d] in dash.top.slice(0, 6)" :key="name" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px">
                         <span style="color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px">{{ name }}</span>
                         <span style="font-family: monospace; color: var(--text3)">{{ Math.round((d.sum / dash.totalSum) * 100) }}% · {{ d.count }} ЭСФ</span>
                     </div>
                     <div v-if="!dash.top.length" style="color: var(--text3); font-size: 13px">Нет данных</div>
-                </div>
+                </template>
             </div>
         </div>
-    </template>
+    </div>
 
     <div class="card" style="padding: 16px; margin-top: 16px">
         <div style="font-weight: 600; font-size: 14px; margin-bottom: 12px">⚖️ Долги и авансы поставщикам</div>
@@ -337,12 +345,12 @@ const mono = `'IBM Plex Mono',monospace`;
                         </td>
                         <td><button class="btn btn-ghost btn-sm" style="font-size: 11px" @click="openSupplierReconciliation(r.name)">👁</button></td>
                     </tr>
-                    <tr v-if="!shownDebts.length">
+                    <tr v-if="props.data !== undefined && !shownDebts.length">
                         <td colspan="8" style="text-align: center; padding: 12px; color: var(--text3)">Нет данных</td>
                     </tr>
                 </tbody>
                 <tfoot id="pur-debts-tfoot">
-                    <tr style="font-weight: 700; background: var(--bg3)">
+                    <tr v-if="props.data !== undefined" style="font-weight: 700; background: var(--bg3)">
                         <td>ИТОГО ({{ shownDebts.length }} поставщиков)</td>
                         <td></td>
                         <td style="text-align: right; font-family: monospace">{{ fmt2(shownDebts.reduce((s, r) => s + r.esf, 0)) }}</td>

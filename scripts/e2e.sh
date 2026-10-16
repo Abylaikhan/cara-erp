@@ -4,7 +4,7 @@
 # Not «php artisan serve»: it drops the process environment and rereads .env, so the instance would use the dev database.
 # Two guards: the instance must show the marker of its environment before any scenario runs, and the dev database (the copy
 # of the real legacy data) must have exactly the same fingerprint after the run. The throwaway database is dropped at the
-# end (KEEP=1 keeps it).
+# end (KEEP=1 keeps it). E2E_SEED=users seeds the users only: a database without business data, for the empty states.
 # Needs host Python with Playwright and Chrome, as make visual-compare. Usage: scripts/e2e.sh [scenario file …]
 source "$(dirname "$0")/lib.sh"
 require_docker
@@ -32,10 +32,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
-info "Throwaway database ${db}: migrations and the synthetic seed"
+seeder=DatabaseSeeder
+[ "${E2E_SEED:-full}" = "users" ] && seeder=UsersSeeder
+info "Throwaway database ${db}: migrations and the synthetic seed (${seeder})"
 psql_admin -c "CREATE DATABASE ${db}"
 dc run --rm --no-deps -T -e DB_DATABASE="$db" app php artisan migrate --force >/dev/null
-dc run --rm --no-deps -T -e DB_DATABASE="$db" app php artisan db:seed --force >/dev/null
+dc run --rm --no-deps -T -e DB_DATABASE="$db" app php artisan db:seed --force --class="Database\\Seeders\\${seeder}" >/dev/null
 info "Application on http://127.0.0.1:${port} (its own process, the throwaway database only)"
 marker="PromTech ERP E2E ${db}"
 dc run -d --no-deps --name "$name" -p "127.0.0.1:${port}:${port}" -w /var/www/html/public -e DB_DATABASE="$db" -e APP_URL="http://127.0.0.1:${port}" \
