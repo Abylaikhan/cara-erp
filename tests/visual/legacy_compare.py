@@ -48,9 +48,17 @@ def unscroll(page):
     page.evaluate("document.querySelectorAll('*').forEach(e => { if ((e.scrollTop || e.scrollLeft) && !e.closest('.modal-overlay')) { e.scrollTop = 0; e.scrollLeft = 0; } }); window.scrollTo(0, 0)")
 
 
+def rest_mouse(page):
+    """Legacy is driven by calls and its pointer never moves; the clicks of the target leave the pointer over a button (hover
+    colours). Before a screenshot of the target the pointer leaves the window, and the hover transition (.15s) ends."""
+    page.mouse.move(-10, -10)
+    page.wait_for_timeout(300)
+
+
 def target_shot(page, path):
-    """A screenshot of the target after the same reset of the scroll positions as legacy (unscroll)."""
+    """A screenshot of the target after the same reset of the scroll positions as legacy (unscroll), the pointer away."""
     unscroll(page)
+    rest_mouse(page)
     page.screenshot(path=path)
 
 def diff(a, b, name):
@@ -189,9 +197,11 @@ with sync_playwright() as p:
         stage_of = lambda l: next(s['key'] for s in crm['funnelStages'] if l['status'] in s['statuses'])
         first_card = next((l['id'] for s in crm['funnelStages'] for l in funnel if stage_of(l) == s['key']), None)  # DOM order: column by column
         if first_card is not None:
-            page.locator('#crm-kanban-board .crm-card-detail-btn').first.click(); page.wait_for_timeout(600)
-            target_shot(page, str(OUT / f'target-crm-popover-{theme}.png'))
-            page.locator('#crm-popover .crm-popover-close').click(); page.wait_for_timeout(200)
+            # The popover is placed by its button when it opens: reset the scroll first and open it without scrolling (a DOM
+            # click; Playwright's click would scroll the board sideways on a narrow window), as legacy opens it by a call.
+            unscroll(page); page.evaluate("document.querySelector('#crm-kanban-board .crm-card-detail-btn').click()"); page.wait_for_timeout(600)
+            rest_mouse(page); page.screenshot(path=str(OUT / f'target-crm-popover-{theme}.png'))
+            page.evaluate("document.querySelector('#crm-popover .crm-popover-close').click()"); page.wait_for_timeout(200)  # off-screen on a narrow window
         page.locator('#page-crm .tab', has_text='Задачи').click(); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-crm-tasks-{theme}.png'))
         page.locator('#orders-tasks button', has_text='+ Новая задача').click(); page.wait_for_timeout(300)
@@ -244,8 +254,8 @@ with sync_playwright() as p:
             page.locator('#sales-tabs .tab').nth(i).click(); page.wait_for_timeout(800)
             target_shot(page, str(OUT / f'target-sales-{shot}-{theme}.png'))
         page.locator('#sales-tabs .tab').nth(4).click(); page.wait_for_timeout(1500)
-        page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)  # the filters fill the first screen
-        page.screenshot(path=str(OUT / f'target-sales-journal-{theme}.png'))  # scrolled to the totals on purpose, as legacy (no reset)
+        unscroll(page); page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)  # the filters fill the first screen
+        rest_mouse(page); page.screenshot(path=str(OUT / f'target-sales-journal-{theme}.png'))  # scrolled to the totals on purpose, as legacy
         realizations = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
@@ -555,10 +565,11 @@ with sync_playwright() as p:
         page.evaluate("closeModal('crmLeadModal')")
         # Lead card: the built-in demo history of legacy is not data (ADR-0002, item 22) and is cleared.
         if first_card is not None:
+            unscroll(page)
             page.evaluate(f"""() => {{ Object.keys(commHistory).forEach(k => delete commHistory[k]);
                 openCrmPopover({first_card}, document.querySelector(".crm-card[data-lead-id='{first_card}'] .crm-card-detail-btn")); }}""")
             page.wait_for_timeout(600)
-            unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-popover-{theme}.png'))
+            page.screenshot(path=str(OUT / f'legacy-crm-popover-{theme}.png'))
             page.evaluate("closeCrmPopover()")
         # Tasks: legacy tasksData gets the target's tasks. A task about a closed lead shows the lead in the target; legacy
         # finds it only when closed leads are loaded, so they are added to leadsData (ADR-0002, item 38).
@@ -653,7 +664,7 @@ with sync_playwright() as p:
             showSalesTab('sales-journal', document.querySelectorAll('#sales-tabs .tab')[4]);
         }""", realizations)
         page.wait_for_timeout(1500)
-        page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)
+        unscroll(page); page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-sales-journal-{theme}.png'))
         # Report: the orders now carry their real lines, characteristics, comment and delivery date.
         page.evaluate("""([orders, report]) => {

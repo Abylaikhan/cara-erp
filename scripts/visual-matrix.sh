@@ -11,6 +11,7 @@ for vp in ${VIEWPORTS:-1440x900 1920x1080 900x900 899x900 390x844}; do
     info "Visual comparison at ${vp}"
     if ! VIEWPORT="$vp" "${PYTHON:-python3}" tests/visual/legacy_compare.py > "$work/$vp.json" 2> "$work/$vp.err"; then
         status=1
+        mkdir -p .local-audit/visual && cp "$work/$vp.err" ".local-audit/visual/failed-${vp}-$(date -u +%Y%m%dT%H%M%SZ).err"
     fi
     python3 - "$work/$vp.json" "$work/$vp.err" <<'PY' || status=1
 import json
@@ -18,7 +19,8 @@ import sys
 
 text = open(sys.argv[1], encoding='utf-8').read()
 if '{' not in text:
-    print('  no result:', open(sys.argv[2], encoding='utf-8').read().strip().splitlines()[-1:] or ['(no error output)'])
+    lines = [line for line in open(sys.argv[2], encoding='utf-8').read().splitlines() if line.strip() and not line.startswith(' ')]
+    print('  no result:', lines[-1] if lines else '(no error output)', '— the full error output is kept in .local-audit/visual/failed-*.err')
     sys.exit(1)
 d = json.loads(text[text.index('{'):])
 v = d['diff_percent']
