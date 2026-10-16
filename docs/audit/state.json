@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261015T222014Z-824e",
-    "started_at": "2026-10-15T22:20:14Z",
+    "run_id": "20261016T021544Z-c1e1",
+    "started_at": "2026-10-16T02:15:44Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-15T22:21:37Z",
+    "finished_at": "2026-10-16T02:16:58Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "72cc71f7308f14955b1b037de78321c49ddea197",
-    "at": "2026-10-15T22:20:14Z"
+    "target_ref": "13df4cc3881d5a0b820286b1deed2705de3598cd",
+    "at": "2026-10-16T02:15:44Z"
   },
   "last_reported": {
-    "run_id": "20261015T222014Z-824e",
+    "run_id": "20261016T021544Z-c1e1",
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
     "source_blob": "52454ddc153e66f17bd1a629276663af91c082ab",
-    "target_ref": "72cc71f7308f14955b1b037de78321c49ddea197",
-    "logical_key": "f7246c12313809f2",
+    "target_ref": "13df4cc3881d5a0b820286b1deed2705de3598cd",
+    "logical_key": "7cf10808b7516dfb",
     "local_date": "2026-10-16",
-    "completed_at": "2026-10-15T22:21:37Z",
-    "report": "daily/2026-10-16/20261015T222014Z-824e.md",
-    "artifact_sha256": "991766028303a85af6a759f7679f8d1ef9387aa74ff7ee57e1706cf783faab77",
+    "completed_at": "2026-10-16T02:16:58Z",
+    "report": "daily/2026-10-16/20261016T021544Z-c1e1.md",
+    "artifact_sha256": "880b61868d3ce2615f2229d5a83a5e5073777aa45087f70751c4248bd62ee671",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -322,15 +322,15 @@
   },
   "last_verified": {
     "source_ref": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
-    "target_ref": "72cc71f7308f14955b1b037de78321c49ddea197",
+    "target_ref": "13df4cc3881d5a0b820286b1deed2705de3598cd",
     "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-15T22:21:37Z",
-    "run_id": "20261015T222014Z-824e"
+    "completed_at": "2026-10-16T02:16:58Z",
+    "run_id": "20261016T021544Z-c1e1"
   },
   "changelog": {
-    "entries": 53,
-    "last_header": "## 2026-10-16 · 20261015T222014Z-824e",
-    "sha256": "c77a63bd3acb2d6cb7cfbeccd8177f158791ea0346b437346b01424c4f6d7ade"
+    "entries": 54,
+    "last_header": "## 2026-10-16 · 20261016T021544Z-c1e1",
+    "sha256": "3664c6d47e6fa63e139309a806559f2490e48b976540bf2f046e19840337d7cd"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
