@@ -1,0 +1,216 @@
+kind,selector,status,reference,note
+# Pages not migrated yet (they render «не перенесено»),,,,
+group,page-channels,NOT_STARTED,ERP-062 (D-11),Центры прибыли
+group,page-hr,NOT_STARTED,ERP-053/054 (D-13),Сотрудники
+group,page-wages,NOT_STARTED,ERP-055 (D-06),Сдельная оплата
+group,page-payroll,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость
+group,page-accruals,NOT_STARTED,ERP-056 (D-06),Начисления ЗП
+group,page-mycabinet,NOT_STARTED,ERP-058,Мой кабинет
+group,page-ai,NOT_STARTED,ERP-065 (D-09),AI-ассистент
+# Modal windows not migrated yet,,,,
+group,aliasFindModal,PENDING_DECISION,D-15,«Сопоставить материал»: открывает только promptAliasFind — её никто не вызывает
+group,whDocModal,NOT_STARTED,ERP-039 (D-04/D-05),Складской документ
+group,whDocViewModal,NOT_STARTED,ERP-039 (D-04/D-05),Просмотр складского документа
+group,normsModal,NOT_STARTED,ERP-028 (D-12),Нормы расхода
+group,goodsReceiptModal,NOT_STARTED,ERP-046 (D-04),Накладная поступления
+group,esfExpenseModal,NOT_STARTED,ERP-048 (D-10),Расход из ЭСФ
+group,pwbStageModal,NOT_STARTED,ERP-041 (D-05/D-06),Этапы и материалы рабочего листа производства
+group,fixedCostModal,PENDING_DECISION,D-15,«Новая статья затрат»: открывает только openFixedCostModal — её никто не вызывает (затраты правятся в таблице BEP)
+group,invoicePreviewModal,NOT_STARTED,ERP-066 (D-07),Печать накладной
+group,orderMarginModal,PENDING_DECISION,D-15,«Маржинальность заказа»: открывает только openOrderMarginModal — её никто не вызывает
+group,marginDetailModal,NOT_STARTED,ERP-060 (D-12),Детализация себестоимости
+group,contractPreviewModal,NOT_STARTED,ERP-066 (D-07),Печать договора
+group,importResultModal,NOT_STARTED,ERP-041/ERP-067,Результат загрузки факта выполнения
+group,orderReportModal,NOT_STARTED,ERP-067,Отчёт по заказам — выгрузка в Excel
+group,newCustOrderModal,NOT_STARTED,ERP-029 (D-02/D-12),Новый заказ покупателя
+group,attrCatalogModal,NOT_STARTED,ERP-027 (D-12),Справочник характеристик — вместе с заказами
+group,techCardModal,NOT_STARTED,ERP-028 (D-12),Технологическая карта
+group,tcTemplateEditorModal,NOT_STARTED,ERP-028 (D-12),Шаблоны технологических карт
+group,tcTemplateModal,NOT_STARTED,ERP-028 (D-12),Технологическая карта по шаблону
+group,sfStageModal,NOT_STARTED,ERP-044 (D-06/D-08),Этап на цеховой доске
+group,waybillModal,NOT_STARTED,ERP-044 (D-08),Сопроводительная накладная цеха
+group,editOrderModal,NOT_STARTED,ERP-030 (D-02/D-12),Карточка заказа
+group,cabEmailModal,NOT_STARTED,ERP-058,Расчётный листок по почте
+group,addPayrollEmployeeModal,PENDING_DECISION,D-15,«Добавить сотрудника в ведомость»: открывает только openAddPayrollEmployeeModal — её никто не вызывает
+group,wagePaymentModal,NOT_STARTED,ERP-057 (D-06),Выплата зарплаты
+group,payrollEntryModal,NOT_STARTED,ERP-057 (D-06),Начисление / удержание
+group,payrollCardModal,NOT_STARTED,ERP-057 (D-06),Лицевой счёт
+group,paymentModal,NOT_STARTED,ERP-032 (D-03),Оплата заказа
+group,moneyTxModal,NOT_STARTED,ERP-031 (D-03/D-11),Денежная операция
+group,salonTransferModal,NOT_STARTED,ERP-051 (D-03),Перенос строк рабочего листа салона
+group,bankStatementModal,NOT_STARTED,ERP-034 (Excel),Импорт банковской выписки
+group,bankAccountModal,NOT_STARTED,ERP-031 (D-11),Расчётный счёт
+group,advanceModal,NOT_STARTED,ERP-035 (D-03),Авансовый отчёт
+group,chOrderModal,PENDING_DECISION,D-15,«Направление продаж»: открывает только openChOrderModal — её никто не вызывает
+group,userModal,NOT_STARTED,ERP-053 (D-13),Пользователь
+group,employeeCardModal,NOT_STARTED,ERP-053 (D-13),Карточка сотрудника
+group,vacationCalcModal,NOT_STARTED,ERP-056 (D-06),Отпускные и больничные
+group,salaryCalcModal,NOT_STARTED,ERP-056 (D-06),Начисление оклада по табелю
+group,accrualModal,NOT_STARTED,ERP-056 (D-06),Начисление ЗП
+group,swDocModal,NOT_STARTED,ERP-049 (D-08),Накладная рабочего листа реализации
+group,addWageModal,NOT_STARTED,ERP-055 (D-06),Выработка сдельщика
+group,addSellerModal,NOT_STARTED,ERP-026 (D-13),Продавец салона
+# Windows and blocks that nothing in legacy opens: carry over or drop — the customer's answer (D-15; old purchases — D-07),,,,
+group,whMoveModal,PENDING_DECISION,D-15,«Приход материала»: окно не открывает ни одна функция legacy
+group,purchaseModal,PENDING_DECISION,D-07,«Новая закупка» старых закупок: окно не открывает ни одна функция legacy
+group,newOrderModal,PENDING_DECISION,D-15,«Новый производственный заказ»: окно не открывает ни одна функция legacy
+group,addSupplierModal,PENDING_DECISION,D-15,«Новый поставщик» (старая форма): не открывается; новый поставщик — карточка поставщика
+group,addClientModal,PENDING_DECISION,D-15,«Привязать клиента»: открывается только из скрытого блока cust-clients
+area,cust-clients,PENDING_DECISION,D-15,Блок «Клиенты» покупателей: ни одна вкладка его не показывает
+area,orders-all-items,PENDING_DECISION,D-15,«Все позиции» продаж: ни одна вкладка его не показывает
+# Tabs of migrated pages that are not migrated yet,,,,
+area,mrp-shopfloor,NOT_STARTED,ERP-044 (D-06/D-08),Производство → цеховая доска
+area,mrp-worksheet,NOT_STARTED,ERP-041 (D-05/D-06),Производство → рабочий лист
+area,mrp-techcards,NOT_STARTED,ERP-028 (D-12),Производство → технологические карты
+area,mrp-workload,NOT_STARTED,ERP-044 (D-08),Производство → загрузка цехов
+area,mrp-worklog,NOT_STARTED,ERP-044 (D-06),Производство → журнал работ
+area,esf-tab-recon,NOT_STARTED,ERP-048 (D-10),ЭСФ → сверка с оплатами
+area,cust-salons,NOT_STARTED,ERP-026 (D-13),Покупатели → салоны и продавцы
+area,orders-restorations,NOT_STARTED,ERP-080 (D-08),Продажи → реставрации
+area,orders-worksheet,NOT_STARTED,ERP-049 (D-08),Продажи → рабочий лист реализации
+area,finance-pl,NOT_STARTED,ERP-060 (D-11/D-12),Финансы → P&L
+area,finance-margin,NOT_STARTED,ERP-028/ERP-060 (D-12),Финансы → маржинальность (по технологическим картам)
+area,finance-bep,NOT_STARTED,ERP-063 (D-11),Финансы → точка безубыточности
+area,finance-osv,NOT_STARTED,ERP-061 (D-11),Финансы → ОСВ
+area,finance-activity,NOT_STARTED,ERP-063 (D-11),Финансы → P&L по видам деятельности
+area,money-fab,NOT_STARTED,ERP-031 (D-03/D-11),Деньги → кнопка новой операции
+area,sr-tab-paysheet,NOT_STARTED,ERP-059 (D-13),Отчёт салонов → платёжная ведомость
+area,sr-tab-history,NOT_STARTED,ERP-059 (D-13),Отчёт салонов → история ЗП
+# Documented differences of the shell (ADR-0002),,,,
+area,login-hints-block,DECIDED,ADR-0002 п. 1,Подсказки с логинами и паролями ролей — не переносятся (AUTH-01)
+area,diag-panel,DECIDED,ADR-0002 п. 2,Отладочная панель «Диагностика загрузки»
+area,login-pin-form,IMPLEMENTED,AUTH-01.PIN,PIN-клавиатура: цифры строит цикл (resources/js/pages/Auth/Login.vue)
+# Controls the target builds otherwise,,,,
+area,wh-wh-filter,IMPLEMENTED,M03.STOCK,Склады фильтра — из справочника складов (9 складов legacy перенесены)
+area,cl-manager,DECIDED,ADR-0010,Менеджеры — пользователи CRM и указанные в лидах; в legacy — образец имён в разметке
+area,cl-source,DECIDED,ADR-0010,Источники воронки — общий справочник источников лидов; в legacy в воронке другие слова
+control,aliasModal|input|alias-edit-id,IMPLEMENTED,ADR-0008,Скрытое поле: какая запись правится — в состоянии формы
+control,leadModal|input|lead-edit-id,IMPLEMENTED,ADR-0010,Скрытое поле: какая запись правится — в состоянии формы
+control,taskModal|input|task-lead-id,IMPLEMENTED,ADR-0010,Скрытое поле: лид задачи — в состоянии формы
+control,expCatModal|input|ec-edit-code,IMPLEMENTED,ADR-0003,Скрытое поле: какая статья правится — в состоянии формы
+# File inputs of imports that come with the Excel library (ERP-034, ERP-067),,,
+control,page-mrp|L2304,NOT_STARTED,ERP-041/ERP-067,Загрузка факта выполнения из Excel
+control,page-money|input|bank-statement-file,NOT_STARTED,ERP-034 (Excel),Выписка банка из Excel
+control,page-money|input|swb-import-file,NOT_STARTED,ERP-067 (Excel),Рабочий лист салона из Excel
+control,page-money|input|recon-import-file,NOT_STARTED,ERP-034 (Excel),Выписка для сверки с банком
+# Functions of parts not migrated yet (the reference names the task),,,,
+function,flashHighlightRow,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,jumpToShopFloor,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,updateShopTabCounts,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,sfCollectRows,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,sfColumnsForItem,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,sfDragStart,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,sfDragOver,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,sfDragLeave,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,sfDrop,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,openSfStageModal,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,openWaybillModal,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,renderWaybillItems,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,renderWaybillAvailableItems,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,addWaybillItem,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,removeWaybillItem,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
+function,initPwbColumnResize,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
+function,onMove,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
+function,onUp,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
+function,savePwbColumnWidths,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
+function,ensureProgressForItem,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
+function,buildPL,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,plFilteredTx,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,classifyProdStatya,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,estimateMaterialCostForPeriod,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,renderPL,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,plRow,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,catRowHtml,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,ddPLRevenue,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,ddPLExpense,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,plChannelByCustomerName,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,topLevelCategoryOf,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,findWarehousePrice,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,calcItemMaterialCost,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,calcItemWageCost,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,calcItemMargin,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,marginPctClass,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,calcOrderMargin,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,openMarginDetail,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,sumPayrollLedgerColumns,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
+function,txPayoutsFor,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
+function,txPayoutsHtml,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
+function,showTxPayouts,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
+function,initAccrualsPage,NOT_STARTED,ERP-056 (D-06),Начисления ЗП
+function,showEmpPayrollHistory,NOT_STARTED,ERP-056 (D-06),Начисления ЗП
+function,openEmployeeCardByName,NOT_STARTED,ERP-053/054 (D-13),Сотрудники и табель
+function,initDynamicPeriods,NOT_STARTED,ERP-053/054 (D-13),Сотрудники и табель
+function,loadStaffFromDB,NOT_STARTED,ERP-053/054 (D-13),Сотрудники и табель
+function,renderOSV,NOT_STARTED,ERP-061 (D-11),ОСВ
+function,ddOSVAccount,NOT_STARTED,ERP-061 (D-11),ОСВ
+function,fcToMonthly,NOT_STARTED,ERP-063 (D-11),Точка безубыточности: постоянные затраты
+function,initFCMonthSelect,NOT_STARTED,ERP-063 (D-11),Точка безубыточности: постоянные затраты
+function,fcAutoSave,NOT_STARTED,ERP-063 (D-11),Точка безубыточности: постоянные затраты
+function,saveAllFixedCosts,NOT_STARTED,ERP-063 (D-11),Точка безубыточности: постоянные затраты
+function,exportARtoExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
+function,exportCFSExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
+function,exportPLtoExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
+function,exportCashCp,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
+function,exportOrderReport,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
+function,exportSalesJournalExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
+function,exportReconcileExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
+function,openPaymentModal,NOT_STARTED,ERP-032 (D-03),Оплата заказа
+function,renderPaymentHistory,NOT_STARTED,ERP-032 (D-03),Оплата заказа
+function,guessSalonExpenseCategory,NOT_STARTED,ERP-051 (D-03),Перенос строк рабочего листа салона в кассу
+function,buildSalonTransferPlan,NOT_STARTED,ERP-051 (D-03),Перенос строк рабочего листа салона в кассу
+function,openSalonTransferModal,NOT_STARTED,ERP-051 (D-03),Перенос строк рабочего листа салона в кассу
+function,transferReconRow,NOT_STARTED,ERP-034 (D-03),Перенос строки выписки в журнал
+function,openAdvanceModal,NOT_STARTED,ERP-035 (D-03),Форма авансового отчёта
+function,advLineCatLabel,NOT_STARTED,ERP-035 (D-03),Форма авансового отчёта
+function,renderAdvLines,NOT_STARTED,ERP-035 (D-03),Форма авансового отчёта
+function,removeAdvLine,NOT_STARTED,ERP-035 (D-03),Форма авансового отчёта
+function,txSalaryMultiUpdate,NOT_STARTED,ERP-031 (D-03/D-11),Форма денежной операции
+function,loadWhDocsFromDB,NOT_STARTED,ERP-039 (D-04/D-05),Складские документы и остатки цехов
+function,getStockByWs,NOT_STARTED,ERP-039 (D-04/D-05),Складские документы и остатки цехов
+function,findAliasByName,NOT_STARTED,ERP-046 (D-04),Сопоставление строк поступления с материалами
+function,mkStage,NOT_STARTED,ERP-028 (D-12),Технологические карты
+function,ldspSheets,NOT_STARTED,ERP-028 (D-12),Технологические карты
+function,renderTemplateEditorModal,NOT_STARTED,ERP-028 (D-12),Технологические карты
+function,switchTemplateTab,NOT_STARTED,ERP-028 (D-12),Технологические карты
+function,switchAttrTab,NOT_STARTED,ERP-027 (D-12),Справочник характеристик — с заказами
+function,openNewOrderModalReset,NOT_STARTED,ERP-029 (D-02/D-12),Форма заказа и заказ из проекта
+function,prjOrdTotal,NOT_STARTED,ERP-029 (D-02/D-12),Форма заказа и заказ из проекта
+function,renderSellerRating,NOT_STARTED,ERP-026 (D-13),Салоны и продавцы
+function,toggleSeller,NOT_STARTED,ERP-026 (D-13),Салоны и продавцы
+function,deleteSalonClient,NOT_STARTED,ERP-026 (D-13),Салоны и продавцы
+function,goToPersonFromSalonClient,NOT_STARTED,ERP-026 (D-13),Салоны и продавцы
+function,_pinState,NOT_STARTED,ERP-053 (D-13),Блокировка PIN после неверных попыток
+function,_pinSave,NOT_STARTED,ERP-053 (D-13),Блокировка PIN после неверных попыток
+function,needsFix,NOT_STARTED,ERP-031…033 (D-03/D-11),Сокращение юрформ меняет операции
+function,initUserPrefsUI,NOT_STARTED,ERP-058,Мой кабинет: настройки
+# The hidden «Клиенты» block of «Покупатели» and its helpers; the old purchases module (stubs),,,,
+function,deleteClient,PENDING_DECISION,D-15,Только для скрытого блока cust-clients (и заменённого renderDealers)
+function,goToPersonFromClient,PENDING_DECISION,D-15,Только для скрытого блока cust-clients (и заменённого renderDealers)
+function,switchToCustTabByKey,PENDING_DECISION,D-15,Только для скрытого блока cust-clients (и заменённого renderDealers)
+function,renderClients,PENDING_DECISION,D-15,Только для скрытого блока cust-clients (и заменённого renderDealers)
+function,populateClientPersonSelect,PENDING_DECISION,D-15,Только для скрытого блока cust-clients (и заменённого renderDealers)
+function,editableSelectCell,PENDING_DECISION,D-15,Только для скрытого блока cust-clients (и заменённого renderDealers)
+function,commitSelect,PENDING_DECISION,D-15,Только для скрытого блока cust-clients (и заменённого renderDealers)
+function,renderPurchKanban,PENDING_DECISION,D-07,Заглушка удалённого в legacy модуля закупок
+function,renderPurchKPIs,PENDING_DECISION,D-07,Заглушка удалённого в legacy модуля закупок
+function,purTotal,PENDING_DECISION,D-07,Заглушка удалённого в legacy модуля закупок
+function,purStatus,PENDING_DECISION,D-07,Заглушка удалённого в legacy модуля закупок
+# Replaced or documented,,,,
+function,diagLog,DECIDED,ADR-0002 п. 2,Отладочная панель не переносится
+function,window.onerror,DECIDED,ADR-0002 пп. 2 и 84,Ошибки на странице — общий обработчик новой версии (ADR-0025)
+function,updateLoading,DECIDED,ADR-0002 п. 89,Окна загрузки нет: страница приходит с данными
+function,buildChart,DECIDED,ADR-0029,"Рисует в элемент revenue-chart, которого нет в разметке: ничего не делает"
+function-re,sb(Insert|InsertMany|Post|Patch|Delete|Upsert),DECIDED,ADR-0029,Записи — через сервер (контроллеры Laravel); браузер не обращается к базе
+# Tables of legacy that are empty in the copy (0 rows): the parts come with their tasks,,,,
+table,fixed_costs,NOT_STARTED,ERP-063 (D-11),0 строк в копии legacy
+table,goods_receipts,NOT_STARTED,ERP-046 (D-04),0 строк в копии legacy
+table,material_name_aliases,NOT_STARTED,ERP-046 (D-04),0 строк в копии legacy
+table,payment_history,NOT_STARTED,ERP-032 (D-03),0 строк в копии legacy
+table,purch_orders,PENDING_DECISION,D-07,0 строк; старые закупки
+table,restoration_files,NOT_STARTED,ERP-080 (D-08),0 строк в копии legacy
+table,restorations,NOT_STARTED,ERP-080 (D-08),0 строк в копии legacy
+table,tech_cards,NOT_STARTED,ERP-028 (D-12),0 строк в копии legacy
+table,wh_documents,NOT_STARTED,ERP-039 (D-04/D-05),0 строк в копии legacy
+network,fetch@attempt,NOT_STARTED,ERP-031 (D-03/D-11),Запись операции с повтором (sbInsertMoneyTxSafe)
+function,exportDrilldownExcel,NOT_STARTED,ERP-067 (Excel),В новой версии кнопка показывает сообщение о выгрузках
+function,r1,NOT_STARTED,ERP-028 (D-12),Округление расчёта технологических карт

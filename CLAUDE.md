@@ -24,6 +24,7 @@
 - Частичная перезагрузка Inertia (`only: [...]`) не приносит общие props: если действие отвечает сообщением (`flash`),
   добавляйте `'flash'` в `only`, иначе сообщение потеряется.
 - Новый раздел: строки в `docs/coverage/requirements.csv` (legacy_locator = имена функций legacy), тесты на PostgreSQL, статус в трекере;
+  затем `make registry` (ADR-0029): «не просмотрено» — 0, решения о неперенесённом — в `docs/coverage/registry-rules.csv`;
   импортёр `legacy:import <таблица>` с построчной SQL-сверкой; текстовые столбцы для сортировки — `COLLATE "en-US-x-icu"` (как в Supabase).
   Если legacy показывает строки без сортировки и в таблице нет поля для порядка — `legacy:natural-order <таблица>` (только GET);
   если сортирует по полю с повторами — `legacy:natural-order <таблица> --order=<поле>.<asc|desc>`.
