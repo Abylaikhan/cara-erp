@@ -13,15 +13,16 @@ use Tests\TestCase;
  * ERP-072, AC-74 «1001 и 5001 запись во всех существенных реестрах»: legacy read most tables with one request, which
  * Supabase cuts at 1000 rows (suppliers, advance reports, expense items, aliases, projects…) or with limit=5000
  * (realizations D-16, project calculations). Here every registry of a migrated page, including the lists sent when a tab
- * is opened, carries all 5001 rows, and the sums the server counts take all of them. 5001 = 5 × 1000 + 1 also catches a
- * lost last chunk of 1000. Each answer must come within BUDGET seconds (pages answer in tenths of a second): a slower one
+ * is opened, carries all 6001 rows, and the sums the server counts take all of them (DATA-01 p. 12 names 5 000 and 6 000;
+ * 6001 = 6 × 1000 + 1 also catches a lost last chunk of 1000). The boundaries 4999/5000/5001 and 5999/6000/6001 are
+ * walked row by row on the registries legacy cut. Each answer must come within BUDGET seconds (pages answer in tenths of a second): a slower one
  * has a step that grows with the square of the rows — the supplier form's expense items had one (36 s).
  */
 class LargeRegistriesTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const N = 5001;
+    private const N = 6001;
 
     private const BUDGET = 5.0;
 
@@ -168,5 +169,29 @@ class LargeRegistriesTest extends TestCase
         $this->assertCount(self::N, $this->props($salonManager, '/crm', 'clientOrders', 'Crm')['clientOrders'], 'the clients of the salons');
         $this->assertCount(self::N, $this->props(User::factory()->role('dealer_astana')->create(), '/reconcile')['orders']);
         $this->assertCount(self::N, $this->props(User::factory()->role('director')->create(), '/customers')['dealerOrders']);
+    }
+
+    public function test_the_boundaries_of_the_legacy_limits_are_walked_row_by_row(): void
+    {
+        $director = User::factory()->role('director')->create();
+        $cash = DB::table('money_accounts')->insertGetId(['name' => 'Касса Демо', 'type' => 'cash', 'currency' => 'KZT', 'opening_balance' => 0, 'sort_order' => 0]);
+        $registries = [
+            // legacy loadRealizationsFromDB: limit=5000 (D-16)
+            'realizations' => [fn (int $i) => ['order_num' => "МО-{$i}", 'doc_date' => '2026-10-01', 'name' => 'Демо изделие', 'qty' => 1, 'revenue' => 1],
+                fn () => count($this->props($director, '/sales', 'realizations', 'Sales')['realizations'])],
+            // legacy: one request for the suppliers (1000)
+            'suppliers' => [fn (int $i) => ['name' => "Демо поставщик {$i}"], fn () => count($this->props($director, '/suppliers')['suppliers'])],
+            // legacy: operations of an account with limit=1000
+            'money_transactions' => [fn (int $i) => ['account_id' => $cash, 'tx_date' => '2026-10-01', 'flow' => 'income', 'amount' => 1],
+                fn () => count($this->props($director, '/money')['transactions'])],
+        ];
+        foreach ($registries as $table => [$row, $count]) {
+            $have = 0;
+            foreach ([4999, 5000, 5001, 5999, 6000, 6001] as $n) {
+                $this->bulk($table, fn (int $i) => $row($have + $i), $n - $have);
+                $have = $n;
+                $this->assertSame($n, $count(), "{$table}: {$n} rows");
+            }
+        }
     }
 }
