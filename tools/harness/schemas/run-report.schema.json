@@ -9,7 +9,7 @@
     "properties": {
         "schema": {"enum": ["promtech.audit-run/1"]},
         "run_id": {"type": "string"},
-        "mode": {"enum": ["daily", "manual", "selftest"]},
+        "mode": {"enum": ["daily", "manual", "selftest", "replay"]},
         "started_at": {"type": "string"},
         "finished_at": {"type": "string"},
         "duration_s": {"type": "number"},

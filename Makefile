@@ -4,10 +4,10 @@ export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal reliability-check e2e
+.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily audit-replay harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal reliability-check e2e test-e2e test-visual
 
 help: ## Show available commands
-	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
+	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-20s %s\n", $$1, $$2}'
 
 setup: ## First install / safe re-run: build, deps from lock files, .env, APP_KEY, migrate, seed, start
 	@scripts/setup.sh
@@ -29,11 +29,19 @@ check: ## Code style, types, build, backend tests on PostgreSQL, DB connection c
 audit-daily: ## Daily audit: pin legacy + target refs, diff, checks, MD/JSON report (exit != 0 on failures)
 	@python3 tools/harness/run.py daily $(if $(TARGET_REF),--target-ref $(TARGET_REF),)
 
+audit-replay: ## Repeat a recorded run (RUN_ID=…) on its source and target refs without publication; compare with the record
+	@python3 tools/harness/run.py replay $(RUN_ID)
+
 harness-selftest: ## Self-tests of the audit harness (H-xx scenarios on local fixtures)
 	@python3 tools/harness/selftest.py
 
 visual-compare: ## Screenshots legacy vs target (login, M14, M07, M08, M06, M03, M05, M10, M04, M09, M02, M12) and % of differing pixels; needs host playwright + Chrome
 	@python3 tests/visual/legacy_compare.py
+
+test-visual: ## Visual comparison at every size of the spec (1440×900, 1920×1080, 900×900, 899×900, 390×844), both themes
+	@bash scripts/visual-matrix.sh
+
+test-e2e: e2e ## Same as make e2e (name of the harness spec)
 
 e2e: ## Browser acceptance scenarios on a throwaway database + separate app instance (synthetic seed; the dev DB is verified unchanged)
 	@bash scripts/e2e.sh

@@ -67,8 +67,11 @@ def harness_hash() -> str:
 
 
 class Audit:
-    def __init__(self, cfg: Dict[str, Any], root: Path, mode: str):
+    def __init__(self, cfg: Dict[str, Any], root: Path, mode: str, replay: Optional[Dict[str, Any]] = None):
         self.cfg, self.root, self.mode = cfg, root, mode
+        # `make audit-replay`: the refs of a recorded run instead of today's; the shared state, journal, reports and
+        # findings are never written — the result is compared with the recorded one.
+        self.replay = replay
         p = cfg['paths']
         self.work = root / p['work']
         self.reports = root / p['reports']
@@ -97,6 +100,18 @@ class Audit:
                 print(trace, file=sys.stderr)
                 return EXIT_HARNESS_ERROR
 
+    def replay_verdict(self, report: Dict[str, Any], run_dir: Path) -> int:
+        result = replay_compare(self.replay['report'], report)
+        write_json(run_dir / 'replay.json', result)
+        same_harness = result['harness_then'].get('suite_version') == result['harness_now'].get('suite_version')
+        print(f"Повтор {self.replay['run_id']} → {report['run_id']}: источник {report['source']['observed_head'][:7]}, "
+              f"целевой код {(report['target']['head'] or '—')[:7]}; сравнено проверок {result['compared_checks']}; "
+              f"{'совпадает' if result['status'] == 'MATCH' else 'РАСХОЖДЕНИЙ ' + str(len(result['differences']))}"
+              + ('' if same_harness else '; набор проверок harness с тех пор изменился') + f"; отчёт {run_dir.relative_to(self.root).as_posix()}")
+        for d in result['differences'][:20]:
+            print('  ' + d)
+        return 0 if result['status'] == 'MATCH' else 1
+
     def hook(self, name: str) -> None:
         """Fault injection for `make harness-selftest` only (requires HARNESS_SELFTEST=1)."""
         if os.environ.get('HARNESS_SELFTEST') != '1':
@@ -122,6 +137,8 @@ class Audit:
         return state
 
     def save_state(self, state: Dict[str, Any]) -> None:
+        if self.replay:
+            return  # a replay is not an attempt of the daily audit
         write_json(self.state_path, state)
 
     def load_redactions(self) -> None:
@@ -177,9 +194,10 @@ class Audit:
         try:
             with timed(pin):
                 repo.ensure()
-                head = repo.ls_remote(scfg['branch'])
+                head = self.replay['source_ref'] if self.replay else repo.ls_remote(scfg['branch'])
             pin.set('PASS', details={'head': head})
-            pin.command = f"git ls-remote origin refs/heads/{scfg['branch']}"
+            pin.command = (f"pinned by the recorded run {self.replay['run_id']}" if self.replay
+                           else f"git ls-remote origin refs/heads/{scfg['branch']}")
             src['observed_head'] = head
             self.hook('after_pin')
             with timed(fetch):
@@ -453,6 +471,9 @@ class Audit:
         self.log_dir.mkdir(parents=True, exist_ok=True)
         run_dir = self.log_dir.parent
         state = self.load_state()
+        if self.replay:  # the bases of the recorded run, not of today's journal
+            state['last_reported'] = {'source_ref': self.replay['source_base_ref'], 'target_ref': self.replay['target_base_ref']}
+            state['last_attempt'] = None
         previous = state.get('last_attempt')
         unfinished = previous if previous and previous.get('status') == 'RUNNING' else None
         state['last_attempt'] = {'run_id': run_id, 'started_at': iso(t0), 'status': 'RUNNING', 'stage': 'start'}
@@ -566,6 +587,8 @@ class Audit:
             self.save_state(state)
             print(f'HAR-SECRETS: обнаружен секрет в {leaked}; публикация остановлена, локальный отчёт: {run_dir}', file=sys.stderr)
             return 1
+        if self.replay:
+            return self.replay_verdict(report, run_dir)
 
         stage('publish')
         self.hook('before_publish')
@@ -612,6 +635,33 @@ class Audit:
               f"источник {report['source_status']}, PASS {report['summary']['PASS']} / FAIL {report['summary']['FAIL']} / "
               f"BLOCKED {report['summary']['BLOCKED']} / NOT_RUN {report['summary']['NOT_RUN']}; отчёт docs/{md_rel}; exit {report['exit_code']}")
         return report['exit_code']
+
+
+# Checks whose result depends on the moment or the journal, not on the refs: the tracker and the model are reached over the
+# network, the harness checks compare with the journal as it is today.
+REPLAY_SKIP = ('HAR-', 'TASK-', 'AI-')
+
+
+def replay_compare(recorded: Dict[str, Any], replayed: Dict[str, Any]) -> Dict[str, Any]:
+    """What a replay must reproduce: the pinned source (head, blob, SHA-256, status, the structural diff) and the status of
+    every check that depends on the refs only."""
+    rs, ps = recorded['source'], replayed['source']
+    differences = [f'source {k}: {rs.get(k)} → {ps.get(k)}' for k in ('observed_head', 'blob', 'sha256', 'status') if rs.get(k) != ps.get(k)]
+    digest = lambda d: sha256_bytes(canonical_json(d or {}).encode())
+    if digest(rs.get('diff')) != digest(ps.get('diff')):
+        differences.append('source diff differs')
+    if recorded['target'].get('head') != replayed['target'].get('head'):
+        differences.append(f"target head: {recorded['target'].get('head')} → {replayed['target'].get('head')}")
+    now = {c['id']: c['status'] for c in replayed['checks']}
+    compared = [c for c in recorded['checks'] if not c['id'].startswith(REPLAY_SKIP) and not c.get('planned')]
+    for c in compared:
+        if c['id'] not in now:
+            differences.append(f"{c['id']}: not run by the harness of today")
+        elif now[c['id']] != c['status']:
+            differences.append(f"{c['id']}: {c['status']} → {now[c['id']]}")
+    return {'recorded_run': recorded['run_id'], 'replay_run': replayed['run_id'], 'compared_checks': len(compared),
+            'harness_then': recorded['harness'], 'harness_now': replayed['harness'], 'differences': differences,
+            'status': 'MATCH' if not differences else 'DIFFERS'}
 
 
 def close_findings(root: Path, ids: List[str], reason: str, evidence: str, actor: str) -> int:
@@ -674,6 +724,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     note.add_argument('--run', required=True, help='run_id the note refers to')
     note.add_argument('--by', required=True, help='author of the note')
     note.add_argument('--root', type=Path, default=REPO_ROOT)
+    replay = sub.add_parser('replay', help='repeat a recorded run on its refs without publication and compare (make audit-replay)')
+    replay.add_argument('run_id')
+    replay.add_argument('--config', type=Path)
+    replay.add_argument('--root', type=Path, default=REPO_ROOT)
     args = ap.parse_args(argv)
     if args.cmd == 'note':
         return add_note(args.root.resolve(), args.text, args.run, args.by)
@@ -684,6 +738,22 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(Path(args.root / cfg['paths']['state']).read_text(encoding='utf-8') if (args.root / cfg['paths']['state']).is_file() else 'нет состояния')
         return 0
     cfg = load_config(args.config, local=args.config is None)
+    if args.cmd == 'replay':
+        root = args.root.resolve()
+        found = [root / cfg['paths']['work'] / 'runs' / args.run_id / 'report.json',
+                 *(root / cfg['paths']['reports']).rglob(f'{args.run_id}.json')]
+        path = next((p for p in found if p.is_file()), None)
+        if path is None:
+            print(f'нет отчёта запуска {args.run_id}', file=sys.stderr)
+            return 2
+        recorded = read_json(path)
+        src, tgt = recorded['source'], recorded['target']
+        if not src.get('observed_head') or not tgt.get('head'):
+            print(f'запуск {args.run_id} не зафиксировал refs источника и целевого кода — повторять нечего', file=sys.stderr)
+            return 2
+        plan = {'run_id': args.run_id, 'report': recorded, 'source_ref': src['observed_head'], 'source_base_ref': src.get('base_ref'),
+                'target_ref': tgt['head'], 'target_base_ref': tgt.get('base_ref')}
+        return Audit(cfg, root, 'replay', plan).run(tgt['head'], False)
     return Audit(cfg, args.root.resolve(), args.mode).run(args.target_ref, args.no_target)
 
 

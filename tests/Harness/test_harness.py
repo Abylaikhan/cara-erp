@@ -193,6 +193,33 @@ class HarnessScenarios(HarnessCase):
         self.assertIn(f'backup/restore-check {backup}', self.changelog())
         self.assertNotIn('не реализован.', md.split('## БД')[1].split('##')[0])
 
+    def test_replay_repeats_a_recorded_run_on_its_refs_without_publishing(self):
+        """make audit-replay (spec ENV-03): the refs of the recorded run, not today's; nothing is published."""
+        self.assertEqual(self.audit(), 0)
+        first = self.report()
+        published = [self.changelog(), self.state(), sorted(p.name for p in (self.root / 'docs/daily').rglob('*'))]
+        self.commit_target({'notes.txt': 'later work\n'}, 'target moves on')
+        self.commit_source({'index.html': HTML_V2}, 'legacy moves on')
+
+        self.assertEqual(run.main(['replay', first['run_id'], '--config', str(self.cfg_path), '--root', str(self.root)]), 0)
+        self.assertEqual([self.changelog(), self.state(), sorted(p.name for p in (self.root / 'docs/daily').rglob('*'))], published,
+                         'a replay publishes nothing and leaves the state')
+        result = json.loads(max((self.root / self.cfg['paths']['work'] / 'runs').glob('*/replay.json'), key=lambda p: p.stat().st_mtime).read_text())
+        self.assertEqual([result['status'], result['recorded_run'], result['differences']], ['MATCH', first['run_id'], []])
+        replayed = json.loads((self.root / self.cfg['paths']['work'] / 'runs' / result['replay_run'] / 'report.json').read_text())
+        self.assertEqual([replayed['mode'], replayed['source']['observed_head'], replayed['target']['head']],
+                         ['replay', first['source']['observed_head'], first['target']['head']], 'pinned on the recorded refs')
+        self.assertGreater(result['compared_checks'], 5)
+
+        # A recorded result the refs do not reproduce is reported, and the exit code says so.
+        report_path = next((self.root / 'docs/daily').rglob(f"{first['run_id']}.json"))
+        (self.root / self.cfg['paths']['work'] / 'runs' / first['run_id'] / 'report.json').unlink()
+        forged = json.loads(report_path.read_text())
+        next(c for c in forged['checks'] if c['id'] == 'TGT-UNIT')['status'] = 'FAIL'
+        report_path.write_text(json.dumps(forged, ensure_ascii=False))
+        self.assertEqual(run.main(['replay', first['run_id'], '--config', str(self.cfg_path), '--root', str(self.root)]), 1)
+        self.assertEqual(run.main(['replay', 'no-such-run', '--config', str(self.cfg_path), '--root', str(self.root)]), 2)
+
     def test_h05_changed_formula_is_mapped_to_module_and_requirement(self):
         self.audit()
         self.commit_target({'docs/coverage/requirements.csv':
