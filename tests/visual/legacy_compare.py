@@ -245,7 +245,7 @@ with sync_playwright() as p:
             target_shot(page, str(OUT / f'target-sales-{shot}-{theme}.png'))
         page.locator('#sales-tabs .tab').nth(4).click(); page.wait_for_timeout(1500)
         page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)  # the filters fill the first screen
-        target_shot(page, str(OUT / f'target-sales-journal-{theme}.png'))
+        page.screenshot(path=str(OUT / f'target-sales-journal-{theme}.png'))  # scrolled to the totals on purpose, as legacy (no reset)
         realizations = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
