@@ -54,7 +54,7 @@ scenarios=("$@")
 [ ${#scenarios[@]} -gt 0 ] || scenarios=(tests/e2e/acceptance_*.py)
 for s in "${scenarios[@]}"; do
     info "Scenarios: ${s}"
-    E2E_BASE="http://127.0.0.1:${port}" "${PYTHON:-python3}" "$s" || status=1
+    E2E_BASE="http://127.0.0.1:${port}" E2E_DB="$db" "${PYTHON:-python3}" "$s" || status=1
 done
 if ! dev_fingerprint | cmp -s - "${TMPDIR:-/tmp}/promtech-e2e-dev-$$.tsv"; then
     rm -f "${TMPDIR:-/tmp}/promtech-e2e-dev-$$.tsv"

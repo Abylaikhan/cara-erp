@@ -11,7 +11,6 @@ AC-20 Задачи по лиду и общие, дата и время, выпо
 from __future__ import annotations
 
 import datetime as dt
-import os
 import re
 import sys
 from pathlib import Path
@@ -19,41 +18,15 @@ from zoneinfo import ZoneInfo
 
 from playwright.sync_api import Page, expect, sync_playwright
 
-ROOT = Path(__file__).resolve().parents[2]
-ENV = (ROOT / '.env').read_text()
-BASE = os.environ.get('E2E_BASE', 'http://127.0.0.1:8091')
-PASSWORD = re.search(r'^DEV_ADMIN_PASSWORD=(.*)$', ENV, re.M).group(1).strip()
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from e2e_lib import BASE, ROOT, check, holds, login, summary  # noqa: E402
+
 TZ = ZoneInfo('Asia/Almaty')
 TODAY = dt.datetime.now(TZ).date()
 NOON = dt.datetime.combine(TODAY, dt.time(12, 0), TZ)
 SHOTS = ROOT / '.local-audit' / 'e2e'
 
-results: list[tuple[str, bool, str]] = []
 answers: list[str] = []  # what to type into the next prompt
-
-
-def check(name: str, ok: bool, detail: str = '') -> None:
-    results.append((name, ok, detail))
-    print(f"{'PASS' if ok else 'FAIL'}  {name}" + (f' — {detail}' if detail and not ok else ''))
-
-
-def holds(name: str, fn) -> None:
-    """A step that asserts with Playwright's expect (waits up to 5 s)."""
-    try:
-        fn()
-        check(name, True)
-    except AssertionError as e:
-        lines = str(e).splitlines()
-        actual = next((l.strip() for l in lines if l.strip().startswith('Actual value')), '')
-        check(name, False, (lines[0][:160] + (' / ' + actual[:80] if actual else '')))
-
-
-def login(page: Page) -> None:
-    page.goto(BASE + '/login', wait_until='networkidle')
-    page.fill('#login-username', 'director')
-    page.fill('#login-password', PASSWORD)
-    page.click('#login-btn')
-    page.wait_for_url(lambda u: '/login' not in u)
 
 
 def crm(page: Page, tab: str) -> None:
@@ -233,9 +206,7 @@ def main() -> int:
                 page.screenshot(path=str(SHOTS / f'{name}-{run}.png'), full_page=True)
         check('нет необработанных ошибок в странице', not errors, repr(errors[:2]))
         browser.close()
-    failed = [r for r in results if not r[1]]
-    print(f'\n{len(results) - len(failed)}/{len(results)} checks passed')
-    return 1 if failed else 0
+    return summary()
 
 
 if __name__ == '__main__':
