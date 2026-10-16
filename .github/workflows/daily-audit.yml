@@ -1,0 +1,100 @@
+# Daily audit (ERP-018, harness spec §7, §9): every day at 07:17 Asia/Almaty (tools/harness/config.json → schedule.cron_utc),
+# by hand (workflow_dispatch), and once whenever this file changes (a real run proves the schedule's job and its rights).
+#
+# - audit: the same `make audit-daily` as on a developer's machine, with a read-only token. The reports, the journal, the
+#   state and the run logs are kept as an artifact whatever the outcome (90 days). No secrets are used: the tracker and
+#   the model are not reachable here and are reported as BLOCKED.
+# - publish: only when the repository variable AUDIT_REPORTS_BRANCH is set (e.g. «audit-reports») — the trusted publisher
+#   with the write token copies docs/daily/, the journal and the state onto that branch and checks that nothing else
+#   changed. Until the variable and the branch rights are set up, publication to Git does not happen (spec: BLOCKED) and
+#   the artifact is the report. The audit never merges, deploys or writes to `main`.
+name: Daily audit
+
+on:
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/daily-audit.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: make audit-daily
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup — images, dependencies from lock files, .env with generated secrets
+        run: make setup
+
+      - name: Audit — legacy and target, checks, report
+        id: audit
+        run: make audit-daily
+
+      - name: Upload reports, journal, state and logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: daily-audit-${{ github.run_id }}
+          path: |
+            docs/daily/
+            docs/DAILY-CHANGELOG.md
+            docs/audit/
+            .local-audit/runs/
+          retention-days: 90
+          if-no-files-found: warn
+
+  publish:
+    name: Publish reports to the reports branch
+    needs: audit
+    if: ${{ always() && needs.audit.result != 'cancelled' && vars.AUDIT_REPORTS_BRANCH != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: daily-audit-${{ github.run_id }}
+          path: artifact
+
+      - name: Check out the reports branch (created empty on the first publication)
+        env:
+          BRANCH: ${{ vars.AUDIT_REPORTS_BRANCH }}
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ github.token }}
+        run: |
+          git init -q reports && cd reports
+          git remote add origin "https://x-access-token:${TOKEN}@github.com/${REPO}.git"
+          if git fetch -q --depth 1 origin "${BRANCH}"; then git checkout -q -b "${BRANCH}" FETCH_HEAD; else git checkout -q --orphan "${BRANCH}"; fi
+
+      - name: Copy only the report paths and verify nothing else changed
+        working-directory: reports
+        run: |
+          mkdir -p docs/daily docs/audit
+          cp -R ../artifact/docs/daily/. docs/daily/
+          cp ../artifact/docs/DAILY-CHANGELOG.md docs/
+          cp ../artifact/docs/audit/state.json ../artifact/docs/audit/findings.json docs/audit/ 2>/dev/null || true
+          git add -A
+          other="$(git diff --cached --name-only | grep -v -e '^docs/daily/' -e '^docs/DAILY-CHANGELOG.md$' -e '^docs/audit/state.json$' -e '^docs/audit/findings.json$' || true)"
+          if [ -n "$other" ]; then echo "refusing to publish paths outside the reports: $other"; exit 1; fi
+
+      - name: Commit and push
+        working-directory: reports
+        env:
+          BRANCH: ${{ vars.AUDIT_REPORTS_BRANCH }}
+        run: |
+          if git diff --cached --quiet; then echo "nothing new to publish"; exit 0; fi
+          git -c user.name="promtech-audit" -c user.email="promtech-audit@users.noreply.github.com" commit -q -m "Отчёт аудита ${GITHUB_RUN_ID}"
+          git push -q origin "HEAD:${BRANCH}"
