@@ -218,15 +218,29 @@ def render_md(r: Dict[str, Any]) -> str:
             lines.append(f"  - [{item['kind']}] {data_text(item['text'], 300)}")
         lines.append('- Рекомендации модели по находкам не применяются автоматически: закрытие только по повторной проверке.')
 
-    lines += ['', '## Визуальные отличия', '', '- Не проверялись: визуальные эталоны legacy ещё не сняты (`TGT-VISUAL` запланирована).',
+    lines += ['', '## Визуальные отличия', '', f'- {VISUAL_NOTE}',
               '', '## БД', '',
-              f"- Миграции и синтетический seed на чистой PostgreSQL: {next((c['status'] for c in r['checks'] if c['id'] == 'TGT-MIGRATE'), 'NOT_RUN')}.",
-              '- Бизнес-инварианты DATA-01: не реализованы — модули ERP ещё не перенесены. Backup/restore-check: не реализован.',
+              f"- Миграции и синтетический seed на чистой PostgreSQL: {check_status(r, 'TGT-MIGRATE')}.",
+              f"- Backup → restore-check (БД, файлы, приложение на копии): {check_status(r, 'TGT-BACKUP')}.",
+              f'- {INVARIANTS_NOTE}',
               '', '## Действия', '']
     lines += [f'- {a}' for a in r['actions']]
     lines += ['', '## Не проверено', '']
     lines += [f'- {x}' for x in r['not_checked']]
     return '\n'.join(lines) + '\n'
+
+
+def check_status(r: Dict[str, Any], check_id: str) -> str:
+    """Status of a check of this run as the report states it; a check that did not run is NOT_RUN, never assumed."""
+    return next((c['status'] for c in r['checks'] if c['id'] == check_id), 'NOT_RUN')
+
+
+# What the run itself does not establish, said as it is (the numbers above come from the checks).
+VISUAL_NOTE = ('В этом запуске не проверялись: визуальная сверка с принятым эталоном выполняется отдельно '
+               '(`make visual-compare`, Chrome на машине исполнителя); проверка `TGT-VISUAL` в аудите запланирована.')
+INVARIANTS_NOTE = ('Бизнес-инварианты DATA-01: часть входит в набор тестов `TGT-TESTS` — права и каналы (п. 10), '
+                   'объёмы больше 5 000 (п. 12), одновременная правка, повтор импорта (п. 9); инварианты проведения денег, '
+                   'склада, производства и реализации — после переноса этих операций.')
 
 
 def render_changelog_entry(r: Dict[str, Any], md_rel: str) -> str:
@@ -245,8 +259,8 @@ def render_changelog_entry(r: Dict[str, Any], md_rel: str) -> str:
         + (f"; без привязки к требованиям: {sum(1 for i in impact if i['mapping'] == 'UNMAPPED_CHANGE')}" if impact else '') + '.',
         f"- Проверки: PASS {sm['PASS']} / FAIL {sm['FAIL']} / BLOCKED {sm['BLOCKED']} / NOT_RUN {sm['NOT_RUN']}; [полный отчёт]({md_rel}).",
         f"- Ошибки: новые {len(fd['new'])}, повторные {len(fd['repeated'])}, исправленные {len(fd['closed'])}, требуют решения {len(fd['needs_review'])}; открыто всего {fd['open_total']}.",
-        '- Визуальные отличия: не проверялись (эталоны не сняты).',
-        f"- БД: миграции/seed {next((c['status'] for c in r['checks'] if c['id'] == 'TGT-MIGRATE'), 'NOT_RUN')}; инварианты и restore-check не реализованы.",
+        '- Визуальные отличия: в аудите не проверяются (отдельно — make visual-compare).',
+        f"- БД: миграции/seed {check_status(r, 'TGT-MIGRATE')}; backup/restore-check {check_status(r, 'TGT-BACKUP')}; инварианты DATA-01 — частично, в TGT-TESTS.",
         f"- Действия: {r['actions'][0]}" + (f' (и ещё {len(r["actions"]) - 1})' if len(r['actions']) > 1 else ''),
         f"- Не проверено: {len(r['not_checked'])} пунктов — см. отчёт.",
     ]

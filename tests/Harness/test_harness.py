@@ -186,6 +186,12 @@ class HarnessScenarios(HarnessCase):
         self.assertTrue(r['not_checked'])
         self.assertIn('INITIAL_BASELINE', self.changelog())
         self.assertEqual(self.state()['last_reported']['source_ref'], self.accepted)
+        # The report states what the checks of this run found, never a fixed text (it once said «restore-check не реализован»).
+        md = next((self.root / 'docs/daily').rglob(f"{r['run_id']}.md")).read_text()
+        backup = next((c['status'] for c in r['checks'] if c['id'] == 'TGT-BACKUP'), 'NOT_RUN')
+        self.assertIn(f'- Backup → restore-check (БД, файлы, приложение на копии): {backup}.', md)
+        self.assertIn(f'backup/restore-check {backup}', self.changelog())
+        self.assertNotIn('не реализован.', md.split('## БД')[1].split('##')[0])
 
     def test_h05_changed_formula_is_mapped_to_module_and_requirement(self):
         self.audit()
