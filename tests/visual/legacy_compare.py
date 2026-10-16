@@ -1,6 +1,6 @@
 """Visual comparison legacy ↔ target (ТЗ UI-03): login, M14 «Статьи расходов», M07 «Каталог», M08 «Покупатели» with
 the dealers tab, M06 «Поставщики», M03 «Склад», M05 «Входящие ЭСФ», M10 CRM «Лиды», «Воронка лидов», «Задачи», M04 «Закупки», M09 «Продажи», M02 «Производство», M12 «Деньги» (and their modals),
-dark and light themes, 1440×900.
+dark and light themes, 1440×900 (another size: VIEWPORT=<width>x<height>).
 
 Legacy runs from the accepted reference in .local-audit/blobs with every network request blocked except Google Fonts —
 it never reaches the legacy backend. Both sides get the same synthetic directory (DatabaseSeeder).
@@ -20,9 +20,13 @@ CFG = json.loads((ROOT / 'tools/harness/config.json').read_text())
 # separate decision moves it.
 ACCEPTED = CFG['source']['accepted_ref']['sha256']
 BLOB = next(b for b in sorted((ROOT / '.local-audit/blobs').glob('*.html')) if hashlib.sha256(b.read_bytes()).hexdigest() == ACCEPTED)
-OUT = ROOT / '.local-audit/visual' / datetime.datetime.now().strftime('%Y%m%dT%H%M%S'); OUT.mkdir(parents=True, exist_ok=True)
+OUT = ROOT / '.local-audit/visual' / (datetime.datetime.now().strftime('%Y%m%dT%H%M%S') + '-' + __import__('os').environ.get('VIEWPORT', '1440x900'))
+OUT.mkdir(parents=True, exist_ok=True)
 LEGACY = BLOB.as_uri()
 ENV = (ROOT / '.env').read_text()
+# AC-04/05: the same comparison at another size of the window (VIEWPORT=1920x1080, 900x900, 899x900, 390x844).
+_vw, _vh = (int(x) for x in __import__('os').environ.get('VIEWPORT', '1440x900').lower().split('x'))
+VIEWPORT = {'width': _vw, 'height': _vh}
 TARGET = 'http://localhost:' + (re.search(r'^APP_PORT=(\d+)', ENV, re.M) or [None, '8080'])[1]
 DEV_PASSWORD = re.search(r'^DEV_ADMIN_PASSWORD=(.*)$', ENV, re.M).group(1).strip()
 # Both sides must show the same rows: the legacy page receives exactly the directory the target renders.
@@ -38,9 +42,16 @@ def guard(route):
     return route.abort()
 
 def unscroll(page):
-    """Legacy keeps one scroll position for all its pages: a long page leaves the next one scrolled. Back to the top, as a user
-    opening the page sees it (modal windows keep theirs)."""
-    page.evaluate("document.querySelectorAll('*').forEach(e => { if (e.scrollTop && !e.closest('.modal-overlay')) e.scrollTop = 0; })")
+    """Legacy keeps one scroll position for all its pages: a long page leaves the next one scrolled. Back to the top and the
+    left edge, as a user opening the page sees it (modal windows keep theirs). Both sides: a click of the target scrolls the
+    clicked tab or button into view — on a narrow window sideways — where legacy is driven by calls that do not scroll."""
+    page.evaluate("document.querySelectorAll('*').forEach(e => { if ((e.scrollTop || e.scrollLeft) && !e.closest('.modal-overlay')) { e.scrollTop = 0; e.scrollLeft = 0; } }); window.scrollTo(0, 0)")
+
+
+def target_shot(page, path):
+    """A screenshot of the target after the same reset of the scroll positions as legacy (unscroll)."""
+    unscroll(page)
+    page.screenshot(path=path)
 
 def diff(a, b, name):
     ia, ib = Image.open(a).convert('RGB'), Image.open(b).convert('RGB')
@@ -59,18 +70,18 @@ with sync_playwright() as p:
     browser = p.chromium.launch(channel='chrome', headless=True)
     for theme in ('dark', 'light'):
         # ---------------- target
-        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
         page = ctx.new_page()
         page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
         page.goto(TARGET + '/login', wait_until='networkidle'); page.evaluate("document.fonts.ready"); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-login-{theme}.png'))
+        target_shot(page, str(OUT / f'target-login-{theme}.png'))
         page.fill('#login-username', 'director'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
         page.wait_for_url('**/dashboard'); page.goto(TARGET + '/expense_cats', wait_until='networkidle'); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-m14-{theme}.png'))
+        target_shot(page, str(OUT / f'target-m14-{theme}.png'))
         cats = target_categories(page)
         first = sorted((c for c in cats if c['parent_code']), key=lambda c: (c['sort_order'], c['code']))[0]['code']
         page.locator('#ec-table-wrap').get_by_text(first, exact=True).locator('xpath=ancestor::tr').locator('button').dispatch_event('click')  # no scroll: legacy opens it in place; page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-m14-modal-{theme}.png'))
+        target_shot(page, str(OUT / f'target-m14-modal-{theme}.png'))
         # Filters of «Статьи расходов» (search, category, «Только постоянные»): the table text for the same combinations.
         page.locator('#ec-modal .modal-close, .modal-overlay.open .modal-close').first.click(); page.wait_for_timeout(200)
         first_top = page.evaluate("document.querySelector('#ec-filter-parent option:nth-child(2)')?.value || ''")
@@ -80,14 +91,14 @@ with sync_playwright() as p:
             if page.is_checked('#ec-show-fixed') != fixed: page.click('#ec-show-fixed')
             page.wait_for_timeout(200); target_ec.append(page.locator('#ec-table-wrap').inner_text())
         page.goto(TARGET + '/catalog', wait_until='networkidle'); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-catalog-{theme}.png'))
+        target_shot(page, str(OUT / f'target-catalog-{theme}.png'))
         products = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['products']
         product_id = products[0]['id'] if products else None
         if product_id is not None:
             page.locator('#catalog-tbody tr').first.locator('button').first.dispatch_event('click'); page.wait_for_timeout(300)
-            page.screenshot(path=str(OUT / f'target-catalog-modal-{theme}.png'))
+            target_shot(page, str(OUT / f'target-catalog-modal-{theme}.png'))
         page.goto(TARGET + '/customers', wait_until='networkidle'); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-customers-{theme}.png'))
+        target_shot(page, str(OUT / f'target-customers-{theme}.png'))
         props = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         persons, dealers = props['persons'], props['dealers']
         # Dealer counts as the target makes them for «Текущий год» (DealersTab: orders of the channel; an order without
@@ -101,17 +112,17 @@ with sync_playwright() as p:
             dealer_stats[d['code']] = {'orders': len(matched), 'turnover': turnover, 'prepay': round(weighted / turnover + 1e-9) if turnover > 0 else 0}
         if persons:
             page.locator('#persons-tbody tr').first.locator('button').dispatch_event('click'); page.wait_for_timeout(300)
-            page.screenshot(path=str(OUT / f'target-customers-modal-{theme}.png'))
+            target_shot(page, str(OUT / f'target-customers-modal-{theme}.png'))
             page.locator('#personModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#cust-tab-dealers').click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-dealers-{theme}.png'))
+        target_shot(page, str(OUT / f'target-dealers-{theme}.png'))
         page.locator('#cust-dealers button', has_text='+ Подробно').click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-dealer-modal-{theme}.png'))
+        target_shot(page, str(OUT / f'target-dealer-modal-{theme}.png'))
         # «Сверки»: the empty state as a picture; the act with a dealer as text — KPIs, footer and rows without the running
         # balance, in any order (legacy sorts «дд.мм.гггг» as text, the target by date — ADR-0002).
         page.locator('#cust-dealers .modal-close, #addDealerModal .modal-close').first.click(); page.wait_for_timeout(200)
         page.locator('#cust-tab-reconcile').click(); page.wait_for_timeout(2000)
-        page.screenshot(path=str(OUT / f'target-cust-reconcile-{theme}.png'))
+        target_shot(page, str(OUT / f'target-cust-reconcile-{theme}.png'))
         rec_orders = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/customers', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Customers',
@@ -121,86 +132,86 @@ with sync_playwright() as p:
         page.select_option('#rec-type', 'dealer'); page.wait_for_timeout(200); page.select_option('#rec-party', 'dealer_astana'); page.wait_for_timeout(800)
         target_rec_act = (page.locator('#rec-kpi').inner_text(), page.locator('#rec-tfoot').inner_text(), page.evaluate("""() => [...document.querySelectorAll('#rec-tbody tr')].map(tr => [...tr.children].slice(0, 5).map(td => td.textContent.replace(/\\s+/g, ' ').trim()).join('|')).sort()"""))
         page.goto(TARGET + '/suppliers', wait_until='networkidle'); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-suppliers-{theme}.png'))
+        target_shot(page, str(OUT / f'target-suppliers-{theme}.png'))
         suppliers = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['suppliers']
         plain = next((i for i, x in enumerate(suppliers) if not x['expense_category_id']), None)  # the card without an expense item
         if plain is not None:
             page.locator('#sup-list-tbody tr').nth(plain).dispatch_event('click'); page.wait_for_timeout(300)
-            page.screenshot(path=str(OUT / f'target-supplier-card-{theme}.png'))
+            target_shot(page, str(OUT / f'target-supplier-card-{theme}.png'))
             page.locator('#supplierCardModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#page-suppliers .tab').nth(1).click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-suppliers-categories-{theme}.png'))
+        target_shot(page, str(OUT / f'target-suppliers-categories-{theme}.png'))
         page.locator('#page-suppliers .tab').nth(2).click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-suppliers-rating-{theme}.png'))
+        target_shot(page, str(OUT / f'target-suppliers-rating-{theme}.png'))
         page.locator('#page-suppliers button', has_text='🔗 Объединить').click(); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-supplier-merge-{theme}.png'))
+        target_shot(page, str(OUT / f'target-supplier-merge-{theme}.png'))
         page.goto(TARGET + '/warehouse', wait_until='networkidle'); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-warehouse-{theme}.png'))
+        target_shot(page, str(OUT / f'target-warehouse-{theme}.png'))
         wh_props = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         materials, aliases = wh_props['materials'], wh_props['aliases']
         for i, shot in ((1, 'categories'), (2, 'workshops'), (3, 'docs'), (4, 'remains'), (7, 'aliases')):
             page.locator('#page-warehouse .tab').nth(i).click(); page.wait_for_timeout(800 if shot == 'remains' else 300)
-            page.screenshot(path=str(OUT / f'target-warehouse-{shot}-{theme}.png'))
+            target_shot(page, str(OUT / f'target-warehouse-{shot}-{theme}.png'))
         page.locator('#page-warehouse button', has_text='+ Материал').click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-warehouse-add-{theme}.png'))
+        target_shot(page, str(OUT / f'target-warehouse-add-{theme}.png'))
         page.locator('#mat-category-grid button').first.click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-warehouse-add-step2-{theme}.png'))  # not compared: documented deviation (ADR-0002, item 27)
+        target_shot(page, str(OUT / f'target-warehouse-add-step2-{theme}.png'))  # not compared: documented deviation (ADR-0002, item 27)
         page.locator('#addMaterialModal .modal-close').click()
         page.goto(TARGET + '/esf', wait_until='networkidle'); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-esf-{theme}.png'))
+        target_shot(page, str(OUT / f'target-esf-{theme}.png'))
         invoices = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['invoices']
         esf_detail = page.evaluate(f"fetch('/esf/{invoices[0]['id']}/detail', {{headers: {{Accept: 'application/json'}}}}).then(r => r.json())") if invoices else None
         if invoices:
             page.locator('#esf-list tbody tr').first.locator('td').nth(1).click(); page.wait_for_timeout(500)
-            page.screenshot(path=str(OUT / f'target-esf-detail-{theme}.png'))
+            target_shot(page, str(OUT / f'target-esf-detail-{theme}.png'))
             page.locator('#esfDetailModal .modal-close').click(); page.wait_for_timeout(200)
         page.set_input_files('#esf-xml-input', str(ROOT / 'tests/Fixtures/esf/two-invoices.xml')); page.wait_for_timeout(1000)
-        page.screenshot(path=str(OUT / f'target-esf-import-{theme}.png'))
+        target_shot(page, str(OUT / f'target-esf-import-{theme}.png'))
         page.goto(TARGET + '/crm', wait_until='networkidle'); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-crm-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-{theme}.png'))
         crm = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         first_lead = page.evaluate("(leads) => (leads.find(l => l.status !== 'won' && l.status !== 'lost' && l.created_at && new Date(l.created_at).getFullYear() === new Date().getFullYear()) || {}).id ?? null", crm['leads'])
         page.locator('#crm-tab-leads').click(); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'target-crm-leads-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-leads-{theme}.png'))
         page.locator('#leads-view-table').click(); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-crm-leads-table-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-leads-table-{theme}.png'))
         page.locator('#leads-view-cards').click(); page.wait_for_timeout(500)
         if first_lead is not None:
             page.locator('#leads-body .card').first.locator('button', has_text='✏️ Изменить').click(); page.wait_for_timeout(300)
-            page.screenshot(path=str(OUT / f'target-crm-lead-modal-{theme}.png'))
+            target_shot(page, str(OUT / f'target-crm-lead-modal-{theme}.png'))
             page.locator('#leadModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#page-crm .tab', has_text='Воронка лидов').click(); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'target-crm-funnel-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-funnel-{theme}.png'))
         page.locator('#orders-funnel button', has_text='+ Новый лид').click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-crm-funnel-modal-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-funnel-modal-{theme}.png'))
         page.locator('#crmLeadModal .modal-close').click(); page.wait_for_timeout(200)
         funnel = [l for l in crm['leads'] if l['status'] in ('qualify', 'proposal', 'negotiation', 'contact', 'meeting')]
         stage_of = lambda l: next(s['key'] for s in crm['funnelStages'] if l['status'] in s['statuses'])
         first_card = next((l['id'] for s in crm['funnelStages'] for l in funnel if stage_of(l) == s['key']), None)  # DOM order: column by column
         if first_card is not None:
             page.locator('#crm-kanban-board .crm-card-detail-btn').first.click(); page.wait_for_timeout(600)
-            page.screenshot(path=str(OUT / f'target-crm-popover-{theme}.png'))
+            target_shot(page, str(OUT / f'target-crm-popover-{theme}.png'))
             page.locator('#crm-popover .crm-popover-close').click(); page.wait_for_timeout(200)
         page.locator('#page-crm .tab', has_text='Задачи').click(); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-crm-tasks-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-tasks-{theme}.png'))
         page.locator('#orders-tasks button', has_text='+ Новая задача').click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-crm-task-modal-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-task-modal-{theme}.png'))
         page.locator('#taskModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#crm-tab-clients').click(); page.wait_for_timeout(2500)
-        page.screenshot(path=str(OUT / f'target-crm-clients-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-clients-{theme}.png'))
         first_client = page.evaluate("document.querySelector('#clients-tbody tr td')?.textContent?.trim() || null")
         if first_client:
             page.locator('#clients-tbody tr').first.locator('button').click(); page.wait_for_timeout(300)
-            page.screenshot(path=str(OUT / f'target-crm-client-card-{theme}.png'))
+            target_shot(page, str(OUT / f'target-crm-client-card-{theme}.png'))
             page.locator('#client-card-modal .modal-close').click(); page.wait_for_timeout(200)
         for i, shot in ((4, 'prod'), (5, 'pay')):
             page.locator('#page-crm .tabs .tab').nth(i).click(); page.wait_for_timeout(2500)
-            page.screenshot(path=str(OUT / f'target-crm-board-{shot}-{theme}.png'))
+            target_shot(page, str(OUT / f'target-crm-board-{shot}-{theme}.png'))
         # «Проекты» (c917d37): the list (no projects in legacy) and the new project window.
         page.locator('#crm-tab-projects').click(); page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'target-crm-projects-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-projects-{theme}.png'))
         page.locator('#orders-projects button', has_text='+ Новый проект').click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-crm-project-new-{theme}.png'))
+        target_shot(page, str(OUT / f'target-crm-project-new-{theme}.png'))
         page.locator('#prjModal .modal-close').click(); page.wait_for_timeout(200)
         board_orders = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
@@ -215,26 +226,26 @@ with sync_playwright() as p:
             return (await r.json()).props.clientOrders;
         }""")
         page.goto(TARGET + '/purchases', wait_until='networkidle'); page.wait_for_timeout(500)
-        page.screenshot(path=str(OUT / f'target-purchases-{theme}.png'))
+        target_shot(page, str(OUT / f'target-purchases-{theme}.png'))
         purchases = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['requests']
         page.locator('#mreq-view-kanban-btn').click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-purchases-kanban-{theme}.png'))
+        target_shot(page, str(OUT / f'target-purchases-kanban-{theme}.png'))
         page.locator('#mreq-view-table-btn').click()
         page.locator('#page-purchases > .tabs .tab').nth(2).click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-purchases-planfact-{theme}.png'))
+        target_shot(page, str(OUT / f'target-purchases-planfact-{theme}.png'))
         page.locator('#page-purchases > .tabs .tab').nth(0).click()
         page.locator('#purch-extra-requests button', has_text='+ Заявка вручную').click(); page.wait_for_timeout(300)
-        page.screenshot(path=str(OUT / f'target-purchases-modal-{theme}.png'))
+        target_shot(page, str(OUT / f'target-purchases-modal-{theme}.png'))
         page.goto(TARGET + '/sales', wait_until='networkidle'); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'target-sales-{theme}.png'))
+        target_shot(page, str(OUT / f'target-sales-{theme}.png'))
         sales = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['orders']
         breakdown = page.evaluate("document.querySelector('#ord-summary-stats span:nth-child(3)')?.textContent || ''")
         for i, shot in ((1, 'queue'), (3, 'done')):
             page.locator('#sales-tabs .tab').nth(i).click(); page.wait_for_timeout(800)
-            page.screenshot(path=str(OUT / f'target-sales-{shot}-{theme}.png'))
+            target_shot(page, str(OUT / f'target-sales-{shot}-{theme}.png'))
         page.locator('#sales-tabs .tab').nth(4).click(); page.wait_for_timeout(1500)
         page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)  # the filters fill the first screen
-        page.screenshot(path=str(OUT / f'target-sales-journal-{theme}.png'))
+        target_shot(page, str(OUT / f'target-sales-journal-{theme}.png'))
         realizations = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
@@ -242,7 +253,7 @@ with sync_playwright() as p:
             return (await r.json()).props.realizations;
         }""")
         page.locator('#sales-tabs .tab').nth(7).click(); page.wait_for_timeout(2000)
-        page.screenshot(path=str(OUT / f'target-sales-report-{theme}.png'))
+        target_shot(page, str(OUT / f'target-sales-report-{theme}.png'))
         report = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
@@ -250,16 +261,16 @@ with sync_playwright() as p:
             return (await r.json()).props.report;
         }""")
         page.goto(TARGET + '/mrp', wait_until='networkidle'); page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'target-mrp-{theme}.png'))
+        target_shot(page, str(OUT / f'target-mrp-{theme}.png'))
         mrp = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['positions']
         page.locator('#mrp-orders > .tabs .tab').nth(1).click(); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'target-mrp-queue-{theme}.png'))
+        target_shot(page, str(OUT / f'target-mrp-queue-{theme}.png'))
         page.goto(TARGET + '/money', wait_until='networkidle'); page.wait_for_timeout(1500)
-        page.screenshot(path=str(OUT / f'target-money-{theme}.png'))
+        target_shot(page, str(OUT / f'target-money-{theme}.png'))
         money = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         for i, shot in ((1, 'bank'), (5, 'all'), (4, 'advances')):
             page.locator('#page-money > .tabs .tab').nth(i).click(); page.wait_for_timeout(1500)
-            page.screenshot(path=str(OUT / f'target-money-{shot}-{theme}.png'))
+            target_shot(page, str(OUT / f'target-money-{shot}-{theme}.png'))
         advances = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/money', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Money',
@@ -268,7 +279,7 @@ with sync_playwright() as p:
         }""")
         # Payment calendar (the chart is drawn differently — legacy needs Chart.js from the internet — and is hidden on both sides).
         page.locator('#page-money > .tabs .tab').nth(3).click(); page.wait_for_timeout(3000)
-        page.screenshot(path=str(OUT / f'target-money-bankrecon-{theme}.png'))
+        target_shot(page, str(OUT / f'target-money-bankrecon-{theme}.png'))
         recon = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/money', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Money',
@@ -282,10 +293,10 @@ with sync_playwright() as p:
         page.select_option('#recon-account-select', index=0); page.wait_for_timeout(300)
         page.locator('#page-money > .tabs .tab').nth(6).click(); page.wait_for_timeout(2500)
         page.evaluate("document.getElementById('pc-chart').style.visibility = 'hidden'")
-        page.screenshot(path=str(OUT / f'target-money-calendar-{theme}.png'))
+        target_shot(page, str(OUT / f'target-money-calendar-{theme}.png'))
         target_calendar = page.locator('#pc-tbody').inner_text()
         page.locator('#page-money > .tabs .tab').nth(2).click(); page.wait_for_timeout(3000)
-        page.screenshot(path=str(OUT / f'target-money-salonwb-{theme}.png'))
+        target_shot(page, str(OUT / f'target-money-salonwb-{theme}.png'))
         target_swb = {}
         for sal in ('armada', 'nazarbayeva'):
             page.locator(f'#swb-tab-{sal}').click(); page.wait_for_timeout(1500)
@@ -305,16 +316,16 @@ with sync_playwright() as p:
             return (await r.json()).props.calendar;
         }""")
         page.goto(TARGET + '/dashboard', wait_until='networkidle'); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'target-dashboard-{theme}.png'))
+        target_shot(page, str(OUT / f'target-dashboard-{theme}.png'))
         dash = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         page.goto(TARGET + '/finance', wait_until='networkidle'); page.wait_for_timeout(500)
         fin = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         page.locator('#finance-tabs .tab').nth(1).click(); page.wait_for_timeout(1200)
-        page.screenshot(path=str(OUT / f'target-finance-ar-{theme}.png'))
+        target_shot(page, str(OUT / f'target-finance-ar-{theme}.png'))
         page.locator('#finance-tabs .tab').nth(5).click(); page.wait_for_timeout(2500)
-        page.screenshot(path=str(OUT / f'target-finance-cfs-{theme}.png'))
+        target_shot(page, str(OUT / f'target-finance-cfs-{theme}.png'))
         page.locator('#finance-tabs .tab').nth(2).click(); page.wait_for_timeout(3000)
-        page.screenshot(path=str(OUT / f'target-finance-purchases-{theme}.png'))
+        target_shot(page, str(OUT / f'target-finance-purchases-{theme}.png'))
         target_debts = page.locator('#pur-debts-tbody').inner_text()
         # Supplier tools: the server's orphans, spellings and the plan of «Импорт из ЭСФ» (apply=0 changes nothing).
         sup_tools = page.evaluate("""async () => {
@@ -341,7 +352,7 @@ with sync_playwright() as p:
         }""")
         ctx.close()
         # ---------------- legacy
-        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
         ctx.route('**/*', guard)
         page = ctx.new_page()
         page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
@@ -808,7 +819,7 @@ with sync_playwright() as p:
         # Payment calendar of legacy: its own page, clock at noon of the target's business date in UTC (legacy takes «today»
         # through UTC — in Almaty a day early, ADR-0002); the same balances, unpaid orders (status «В работе» as the
         # «production» it looks for) and dated operations.
-        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU', timezone_id='UTC')
+        ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU', timezone_id='UTC')
         ctx.route('**/*', guard)
         page = ctx.new_page()
         page.clock.set_fixed_time(calendar['today'] + 'T12:00:00Z')
@@ -867,17 +878,17 @@ with sync_playwright() as p:
             print(f'salon worksheet {sal} ({theme}): rows {len(tc)} / {len(legacy_cells)}, cells ' + ('совпадает' if not bad else f'РАСХОЖДЕНИЙ {bad}') + ', остаток ' + ('совпадает' if tb == page.locator('#swb-current-balance').inner_text() else 'РАСХОЖДЕНИЕ'))
         ctx.close()
         # «Сверка с офисом»: a dealer on both sides; legacy gets the channel's orders, a payment per paid order and the transfers.
-        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
         page = ctx.new_page()
         page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
         page.goto(TARGET + '/login', wait_until='networkidle'); page.fill('#login-username', 'dealer_astana'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
         page.wait_for_url(lambda u: '/login' not in u); page.goto(TARGET + '/reconcile', wait_until='networkidle'); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'target-reconcile-{theme}.png'))
+        target_shot(page, str(OUT / f'target-reconcile-{theme}.png'))
         rec = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         sidebar = page.evaluate("({a: document.getElementById('sidebar-avatar').textContent.trim(), n: document.getElementById('sidebar-username').textContent.trim(), r: document.getElementById('sidebar-role').textContent.trim()})")
         target_rec = page.locator('#page-reconcile').inner_text()
         ctx.close()
-        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
         ctx.route('**/*', guard)
         page = ctx.new_page()
         page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
@@ -905,21 +916,21 @@ with sync_playwright() as p:
         print(f'reconcile page ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
         ctx.close()
         # «Касса салона»: the head of the salons (both cashes), on both sides; legacy gets the same operations per cash.
-        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
         page = ctx.new_page()
         page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
         page.goto(TARGET + '/login', wait_until='networkidle'); page.fill('#login-username', 'salon_armada_mgr'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
         page.wait_for_url(lambda u: '/login' not in u); page.goto(TARGET + '/money_salon', wait_until='networkidle'); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'target-money-salon-{theme}.png'))
+        target_shot(page, str(OUT / f'target-money-salon-{theme}.png'))
         salon = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         sidebar = page.evaluate("({a: document.getElementById('sidebar-avatar').textContent.trim(), n: document.getElementById('sidebar-username').textContent.trim(), r: document.getElementById('sidebar-role').textContent.trim()})")
         target_salon = page.locator('#salon-cash-tbody').inner_text()
         page.goto(TARGET + '/salon_report', wait_until='networkidle'); page.wait_for_timeout(800)
-        page.screenshot(path=str(OUT / f'target-salon-report-{theme}.png'))
+        target_shot(page, str(OUT / f'target-salon-report-{theme}.png'))
         sreport = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         target_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
         ctx.close()
-        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
         ctx.route('**/*', guard)
         page = ctx.new_page()
         page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
@@ -960,7 +971,7 @@ with sync_playwright() as p:
         print(f'salon report ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a == b else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'продавцы', 'заказы'), target_sr, legacy_sr)))
         ctx.close()
         # Supplier tools in legacy: the same suppliers, supplier payments and invoices through its own functions.
-        ctx = browser.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
         ctx.route('**/*', guard)
         page = ctx.new_page()
         page.goto(LEGACY, wait_until='load', timeout=60000); page.wait_for_timeout(1500)
@@ -982,5 +993,5 @@ with sync_playwright() as p:
         for shot in ('login', 'm14', 'm14-modal', 'catalog', 'catalog-modal', 'customers') + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
-print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'diff_percent': results}, indent=1))
+print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'viewport': f"{VIEWPORT['width']}x{VIEWPORT['height']}", 'diff_percent': results}, indent=1))
 sys.exit(1 if any(v > 0.5 for v in results.values()) else 0)
