@@ -211,6 +211,19 @@ class HarnessScenarios(HarnessCase):
                          ['replay', first['source']['observed_head'], first['target']['head']], 'pinned on the recorded refs')
         self.assertGreater(result['compared_checks'], 5)
 
+        # Runs after the first have a base: the replay must rebuild the comparison with it (the base blob is not in the
+        # replayed state, only the refs) — a changed source with its diff, then an unchanged one.
+        for expected in ('CHANGED', 'UNCHANGED'):
+            self.audit()
+            recorded = self.report()
+            self.assertEqual(recorded['source_status'], expected)
+            self.commit_target({'notes.txt': f'work after the {expected} run\n'}, 'target moves on')
+            self.assertEqual(run.main(['replay', recorded['run_id'], '--config', str(self.cfg_path), '--root', str(self.root)]), 0)
+            result = json.loads(max((self.root / self.cfg['paths']['work'] / 'runs').glob('*/replay.json'), key=lambda p: p.stat().st_mtime).read_text())
+            self.assertEqual([result['status'], result['recorded_run'], result['differences']], ['MATCH', recorded['run_id'], []])
+            replayed = json.loads((self.root / self.cfg['paths']['work'] / 'runs' / result['replay_run'] / 'report.json').read_text())
+            self.assertEqual([replayed['source_status'], replayed['source']['diff']], [expected, recorded['source']['diff']])
+
         # A recorded result the refs do not reproduce is reported, and the exit code says so.
         report_path = next((self.root / 'docs/daily').rglob(f"{first['run_id']}.json"))
         (self.root / self.cfg['paths']['work'] / 'runs' / first['run_id'] / 'report.json').unlink()

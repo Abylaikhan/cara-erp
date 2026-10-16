@@ -305,6 +305,10 @@ class Audit:
                 modules = self.cfg.get('modules', {})
                 coverage = compare.load_coverage(self.root / self.cfg['paths']['coverage'])
                 base_blob = last.get('source_blob')
+                if base_blob is None and src['base_ref'] and repo.has_commit(src['base_ref']):
+                    # a replay carries only the refs of the recorded run: the blob of the exact path at its base ref
+                    b_entry = exact_entry(repo.tree(src['base_ref']), scfg['path'])
+                    base_blob = b_entry['sha'] if b_entry else None
                 if src['status'] == 'INITIAL_BASELINE':
                     diff.set('PASS', 'INITIAL_BASELINE: зафиксирован полный inventory')
                 elif base_blob == src['blob'] and src['status'] != 'HISTORY_DIVERGED':
