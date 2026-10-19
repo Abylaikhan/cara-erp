@@ -30,6 +30,7 @@ info "Runtime versions"
 check "php"      dc exec -T app php -r 'echo PHP_VERSION;'
 check "php ext"  dc exec -T app php -r 'foreach (["pdo_pgsql","intl","mbstring","bcmath","zip"] as $e) { if (!extension_loaded($e)) { echo "missing $e"; exit(1);} } echo "pdo_pgsql intl mbstring bcmath zip";'
 check "laravel"  dc exec -T app php artisan --version
+check "devtools off (requests with real data are not recorded)" dc exec -T app php -r 'require "vendor/autoload.php"; $app = require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); if (Inertia\DevTools\DevTools::enabled()) { echo "Inertia DevTools records requests: set INERTIA_DEVTOOLS_ENABLED=false"; exit(1);} echo "off";'
 check "node"     dc exec -T node node --version
 
 info "PostgreSQL"
