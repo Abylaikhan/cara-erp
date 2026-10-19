@@ -1,0 +1,814 @@
+{
+  "schema": "promtech.audit-run/1",
+  "run_id": "20261019T065342Z-ad5a",
+  "mode": "manual",
+  "started_at": "2026-10-19T06:53:42Z",
+  "finished_at": "2026-10-19T06:55:09Z",
+  "duration_s": 87.0,
+  "local_date": "2026-10-19",
+  "local_time": "11:53",
+  "timezone": "Asia/Almaty",
+  "logical_key": "7c99b6f4603873e2",
+  "repeat_of": null,
+  "harness": {
+    "version": "0.1.0",
+    "suite_version": "suite-1+055594",
+    "config_hash": "1745be69be3d",
+    "code_hash": "9eb13eb24a21",
+    "inventory_tool": "17c5b35c1b925f97",
+    "python": "3.9.6"
+  },
+  "source": {
+    "repository": "https://github.com/Cara-ERP/promtech-erp",
+    "branch": "main",
+    "path": "index.html",
+    "observed_head": "830a998c41e7a002921f6225c8cfbf55913bb70b",
+    "base_ref": "420963981aa67b8750a532fdad3aaea782fe1cf1",
+    "blob": "d7c02390283231d129615332427d1f972c66408e",
+    "sha256": "d720e216bc7f46a8de0ac98ad98de18fb231b58ab9d5a78c1740af5349d4ba03",
+    "status": "CHANGED",
+    "commits": [
+      {
+        "sha": "830a998c41e7a002921f6225c8cfbf55913bb70b",
+        "authored_at": "2026-10-19T11:51:39+05:00",
+        "committed_at": "2026-10-19T11:51:39+05:00",
+        "subject": "Add files via upload"
+      }
+    ],
+    "commit_count": 1,
+    "watched": [
+      {
+        "path": "Index.html",
+        "blob": "bc477eb7cc8d0ad491a93b70ac2838ef9a339949",
+        "previous_blob": "bc477eb7cc8d0ad491a93b70ac2838ef9a339949",
+        "changed": false
+      },
+      {
+        "path": "indexx.html",
+        "blob": "dcc480053c88efba2239e6dd75d4815494e869f1",
+        "previous_blob": "dcc480053c88efba2239e6dd75d4815494e869f1",
+        "changed": false
+      },
+      {
+        "path": "indrx.html",
+        "blob": "2d304e8d88347781079be34a2e9ee15319aaec55",
+        "previous_blob": "2d304e8d88347781079be34a2e9ee15319aaec55",
+        "changed": false
+      }
+    ],
+    "case_collisions": [
+      [
+        "Index.html",
+        "index.html"
+      ]
+    ],
+    "diff": {
+      "counts": {},
+      "functions": {
+        "added": [],
+        "removed": [],
+        "changed": [
+          "renderDashboard#1"
+        ]
+      },
+      "pages": {
+        "added": [],
+        "removed": [],
+        "changed": [
+          "page-dashboard"
+        ],
+        "text_changed": [
+          "page-dashboard"
+        ]
+      },
+      "modals": {
+        "added": [],
+        "removed": [],
+        "changed": [],
+        "text_changed": []
+      },
+      "controls": {
+        "added": [],
+        "removed": [],
+        "changed": []
+      },
+      "db": {
+        "tables_added": [],
+        "tables_removed": [],
+        "calls_changed": {},
+        "dynamic": {
+          "old": 2,
+          "new": 2
+        }
+      },
+      "storage": {
+        "added": [],
+        "removed": []
+      },
+      "resources": {
+        "added": [],
+        "removed": []
+      },
+      "network": {
+        "added": [],
+        "removed": []
+      },
+      "scripts_failed": []
+    },
+    "impact": [
+      {
+        "function": "renderDashboard#1",
+        "change": "changed",
+        "ui_groups": [
+          "page-dashboard"
+        ],
+        "modules": [
+          "M01 Дашборд"
+        ],
+        "requirement_ids": [
+          "M01"
+        ],
+        "test_ids": [
+          "Tests\\Feature\\Dashboard\\DashboardTest"
+        ],
+        "mapping": "MAPPED"
+      },
+      {
+        "page": "page-dashboard",
+        "change": "page",
+        "modules": [
+          "M01 Дашборд"
+        ],
+        "mapping": "UNMAPPED_CHANGE",
+        "requirement_ids": [],
+        "test_ids": [],
+        "ui_groups": [
+          "page-dashboard"
+        ]
+      }
+    ],
+    "numstat": {
+      "added": 6,
+      "removed": 4
+    },
+    "diff_vs_accepted": "функции +19/−0/~30, страницы изменены 2, модальные окна 0",
+    "accepted_ref": {
+      "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
+      "sha256": "54c78441e10a2b7cc78a4ffcfc13aaa7a714a3bb24686d7e99768ee9d4634c80",
+      "matches_observed": false
+    },
+    "bytes": 2358471
+  },
+  "target": {
+    "repository": "https://github.com/Abylaikhan/cara-erp",
+    "ref_requested": "HEAD",
+    "head": "918e03c4f9698d552c62d78e55c2f71d897e12cf",
+    "base_ref": "b1f59ce93e5d90061f778a901fa92eb5bb2b0d48",
+    "changed_files": [
+      "CLAUDE.md",
+      "Makefile",
+      "docs/DAILY-CHANGELOG.md",
+      "docs/OPERATIONS.md",
+      "docs/adr/0002-ui-deviations.md",
+      "docs/adr/0030-filters-sorts.md",
+      "docs/agent-state.md",
+      "docs/audit/state.json",
+      "docs/coverage/requirements.csv",
+      "docs/daily/2026-10-19/20261019T044240Z-70d3.json",
+      "docs/daily/2026-10-19/20261019T044240Z-70d3.md",
+      "docs/decisions-request.md",
+      "scripts/data_scan.allow",
+      "scripts/data_scan.py",
+      "tests/visual/filters.py",
+      "tests/visual/legacy_compare.py",
+      "tools/harness/README.md"
+    ],
+    "tests": {
+      "tests": 268,
+      "passed": 268,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "committed_at": "2026-10-19T11:48:06+05:00",
+    "subject": "Фильтры, сортировки, итоги и детализация: сверка с legacy (TEST-AC-08) — make visual-filters",
+    "on_remote_branches": [
+      "origin/HEAD -> origin/main",
+      "origin/main"
+    ],
+    "working_tree_dirty": true
+  },
+  "inventory": {
+    "counts": {
+      "pages": 23,
+      "modals": 67,
+      "controls": 2248,
+      "html_tables": 76,
+      "scripts": 5,
+      "scripts_failed": 0,
+      "function_declarations": 1212,
+      "function_declarations_regex": 1214,
+      "functions_all": 1239,
+      "db_tables": 44,
+      "db_calls": 265,
+      "db_calls_dynamic": 2,
+      "storage_calls": 8
+    }
+  },
+  "checks": [
+    {
+      "id": "SRC-PIN",
+      "title": "Фиксация HEAD источника один раз в начале запуска",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.69,
+      "command": "git ls-remote origin refs/heads/main",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "head": "830a998c41e7a002921f6225c8cfbf55913bb70b"
+        }
+      }
+    },
+    {
+      "id": "SRC-FETCH",
+      "title": "Получение коммитов по SHA (без checkout)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 1.13,
+      "command": "git fetch --no-tags origin <branch> <pinned SHAs>",
+      "exit_code": null,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/source-git.log"
+      ],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "SRC-ACCEPTED",
+      "title": "Целостность принятого эталона: SHA-256 точного пути",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.02,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "blob": "52454ddc153e66f17bd1a629276663af91c082ab"
+        }
+      }
+    },
+    {
+      "id": "SRC-PATH",
+      "title": "Точный путь: blob, размер, git-хеш, SHA-256",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.02,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "blob": "d7c02390283231d129615332427d1f972c66408e",
+          "bytes": 2358471,
+          "sha256": "d720e216bc7f46a8de0ac98ad98de18fb231b58ab9d5a78c1740af5349d4ba03"
+        }
+      }
+    },
+    {
+      "id": "SRC-CASE",
+      "title": "Коллизии регистра в дереве (Index.html / index.html)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "обнаружены: Index.html/index.html",
+      "planned": false,
+      "details": {
+        "collisions": [
+          [
+            "Index.html",
+            "index.html"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "SRC-HISTORY",
+      "title": "Непрерывность истории от прошлого отчёта (ancestry)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.03,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "линейно: 1 коммит(ов) с прошлого отчёта",
+      "planned": false
+    },
+    {
+      "id": "SRC-INVENTORY",
+      "title": "Inventory: страницы, модальные окна, элементы, функции (AST), таблицы БД",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.67,
+      "command": "docker run --network none --read-only … node legacy_inventory.mjs",
+      "exit_code": null,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/source-inventory.log"
+      ],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "counts": {
+            "pages": 23,
+            "modals": 67,
+            "controls": 2248,
+            "html_tables": 76,
+            "scripts": 5,
+            "scripts_failed": 0,
+            "function_declarations": 1212,
+            "function_declarations_regex": 1214,
+            "functions_all": 1239,
+            "db_tables": 44,
+            "db_calls": 265,
+            "db_calls_dynamic": 2,
+            "storage_calls": 8
+          }
+        }
+      }
+    },
+    {
+      "id": "SRC-SYNTAX",
+      "title": "Синтаксис всех inline-скриптов (acorn)",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "5 скриптов разобраны",
+      "planned": false,
+      "details": {
+        "failed_scripts": []
+      }
+    },
+    {
+      "id": "SRC-DIFF",
+      "title": "Структурный diff и карта влияния на модули",
+      "required": true,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.05,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "структурный diff построен",
+      "planned": false
+    },
+    {
+      "id": "SRC-WATCHED",
+      "title": "Изменения других HTML (не эталон)",
+      "required": false,
+      "stage": "source",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "https://github.com/Cara-ERP/promtech-erp index.html",
+      "reason": "Index.html, indexx.html, indrx.html",
+      "planned": false
+    },
+    {
+      "id": "TGT-REF",
+      "title": "Фиксация целевого коммита и чистый worktree",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 1.78,
+      "command": "",
+      "exit_code": null,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-worktree.log"
+      ],
+      "scope": "",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "details": {
+          "head": "918e03c4f9698d552c62d78e55c2f71d897e12cf",
+          "worktree": ".local-audit/target/918e03c4f969"
+        }
+      }
+    },
+    {
+      "id": "TGT-DEPS",
+      "title": "Установка зависимостей из composer.lock и package-lock.json",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 11.5,
+      "command": "scripts/check.sh deps",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-deps.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-PINT",
+      "title": "Стиль PHP (pint --test)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 5.27,
+      "command": "scripts/check.sh pint",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-pint.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-TYPES",
+      "title": "Типы TypeScript/Vue (vue-tsc)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 7.42,
+      "command": "scripts/check.sh types",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-types.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-BUILD",
+      "title": "Production-сборка (vite build)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 4.39,
+      "command": "scripts/check.sh build",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-build.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-TESTS",
+      "title": "Backend-тесты на изолированной PostgreSQL",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 27.16,
+      "command": "scripts/check.sh tests",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-tests.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false,
+      "details": {
+        "tests": {
+          "tests": 268,
+          "passed": 268,
+          "failed": 0,
+          "error": 0,
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "id": "TGT-MIGRATE",
+      "title": "Миграции и синтетический seed на чистой PostgreSQL",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 3.43,
+      "command": "scripts/check.sh migrate",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-migrate.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-DB",
+      "title": "Подключение именно к PostgreSQL (dev и test)",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 2.91,
+      "command": "scripts/check.sh dbcheck",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-dbcheck.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-BACKUP",
+      "title": "Backup → restore-check: БД, файлы и приложение на копии",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 8.75,
+      "command": "scripts/check.sh backup",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-backup.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TGT-HTTP",
+      "title": "HTTP smoke: /up и /login через nginx",
+      "required": true,
+      "stage": "target",
+      "status": "PASS",
+      "duration_s": 6.65,
+      "command": "scripts/check.sh http",
+      "exit_code": 0,
+      "evidence": [
+        ".local-audit/runs/20261019T065342Z-ad5a/logs/target-http.log"
+      ],
+      "scope": "clean worktree of pinned commit",
+      "reason": "",
+      "planned": false
+    },
+    {
+      "id": "TASKS-READ",
+      "title": "Чтение Google Sheets-трекера",
+      "required": false,
+      "stage": "tasks",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "GET sheets.googleapis.com/v4/spreadsheets/<id> (API key)",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "вкладки: Список задач (213 строк), Что нужно от заказчика (36 строк)",
+      "planned": false,
+      "details": {
+        "tabs": [
+          {
+            "title": "Список задач",
+            "rows": 213
+          },
+          {
+            "title": "Что нужно от заказчика",
+            "rows": 36
+          }
+        ]
+      }
+    },
+    {
+      "id": "TASKS-WRITE",
+      "title": "Запись статусов в Google Sheets с read-back",
+      "required": false,
+      "stage": "tasks",
+      "status": "BLOCKED",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "нет service account с доступом «Редактор» (Sheets API не принимает запись по API-ключу)",
+      "planned": false
+    },
+    {
+      "id": "TGT-PHPSTAN",
+      "title": "Статанализ PHP (PHPStan/Larastan)",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-LINT",
+      "title": "Frontend lint",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-VITEST",
+      "title": "Frontend unit-тесты (Vitest)",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-E2E",
+      "title": "Сквозные сценарии Playwright",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "TGT-VISUAL",
+      "title": "Визуальное сравнение с эталоном legacy",
+      "required": false,
+      "stage": "target",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "запланирована, ещё не реализована",
+      "planned": true
+    },
+    {
+      "id": "HAR-COVERAGE",
+      "title": "Набор проверок и тестов не сократился без review",
+      "required": true,
+      "stage": "harness",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "проверок 26, тестов 268",
+      "planned": false
+    },
+    {
+      "id": "HAR-JOURNAL",
+      "title": "DAILY-CHANGELOG сохраняет прежние записи",
+      "required": true,
+      "stage": "harness",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "записей 56",
+      "planned": false
+    },
+    {
+      "id": "HAR-SECRETS",
+      "title": "Секреты и маркеры отсутствуют в MD, JSON и логах",
+      "required": true,
+      "stage": "harness",
+      "status": "PASS",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "",
+      "reason": "логи проверены",
+      "planned": false
+    },
+    {
+      "id": "AI-REVIEW",
+      "title": "Разбор изменений Claude (дополнение, не заменяет проверки)",
+      "required": false,
+      "stage": "ai",
+      "status": "NOT_RUN",
+      "duration_s": 0.0,
+      "command": "",
+      "exit_code": null,
+      "evidence": [],
+      "scope": "structured diff, impact map, check results, open findings",
+      "reason": "Нет ключа Anthropic API и согласованного бюджета для автоматического запуска",
+      "planned": false
+    }
+  ],
+  "summary": {
+    "PASS": 24,
+    "FAIL": 0,
+    "BLOCKED": 1,
+    "NOT_RUN": 6,
+    "NOT_APPLICABLE": 0
+  },
+  "execution_status": "PARTIAL",
+  "product_status": "PASS",
+  "source_status": "CHANGED",
+  "findings": {
+    "new": [],
+    "repeated": [],
+    "closed": [],
+    "needs_review": [],
+    "open_total": 0,
+    "items": []
+  },
+  "task_sync_status": {
+    "read": "PASS",
+    "write": "BLOCKED",
+    "tabs": [
+      {
+        "title": "Список задач",
+        "rows": 213
+      },
+      {
+        "title": "Что нужно от заказчика",
+        "rows": 36
+      }
+    ],
+    "pending_events": 0,
+    "delivered": 0,
+    "conflicts": 0
+  },
+  "ai_review": {
+    "status": "NOT_RUN",
+    "reason": "Нет ключа Anthropic API и согласованного бюджета для автоматического запуска"
+  },
+  "previous_attempt": null,
+  "missed_days": [],
+  "not_checked": [
+    "TASKS-WRITE — Запись статусов в Google Sheets с read-back: нет service account с доступом «Редактор» (Sheets API не принимает запись по API-ключу)",
+    "TGT-PHPSTAN — Статанализ PHP (PHPStan/Larastan): запланирована, ещё не реализована",
+    "TGT-LINT — Frontend lint: запланирована, ещё не реализована",
+    "TGT-VITEST — Frontend unit-тесты (Vitest): запланирована, ещё не реализована",
+    "TGT-E2E — Сквозные сценарии Playwright: запланирована, ещё не реализована",
+    "TGT-VISUAL — Визуальное сравнение с эталоном legacy: запланирована, ещё не реализована",
+    "AI-REVIEW — Разбор изменений Claude (дополнение, не заменяет проверки): Нет ключа Anthropic API и согласованного бюджета для автоматического запуска",
+    "Модули ERP M01–M23 ещё не перенесены: бизнес-сценарии, права и инварианты DATA-01 не проверяются.",
+    "Характеризационные пробы legacy (35 исторических наблюдений) в ежедневный набор пока не включены.",
+    "Карта требований docs/coverage/requirements.csv не создана: изменения legacy не связаны с требованиями."
+  ],
+  "exit_code": 0,
+  "publication": {
+    "status": "PUBLISHED"
+  },
+  "actions": [
+    "Ручной разбор 1 изменений legacy без привязки к требованиям (UNMAPPED_CHANGE); карта требований — задача ERP-003.",
+    "Google Sheets: запись недоступна — нужен service account с доступом «Редактор» (вопрос заказчику №1).",
+    "AI-разбор не выполнен: Нет ключа Anthropic API и согласованного бюджета для автоматического запуска."
+  ]
+}
