@@ -4,7 +4,7 @@ export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily audit-replay harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal reliability-check e2e test-e2e test-visual visual-empty registry
+.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily audit-replay harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal reliability-check e2e test-e2e test-visual visual-empty registry data-scan
 
 help: ## Show available commands
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-20s %s\n", $$1, $$2}'
@@ -34,6 +34,9 @@ audit-replay: ## Repeat a recorded run (RUN_ID=…) on its source and target ref
 
 harness-selftest: ## Self-tests of the audit harness (H-xx scenarios on local fixtures)
 	@python3 tools/harness/selftest.py
+
+data-scan: ## Before a commit: values of the real legacy data in the changed files (masked); non-zero if a new one appears
+	@python3 scripts/data_scan.py
 
 registry: ## Registry traceability (AC-09): a status for every page, window, control and function of the accepted legacy → docs/coverage/registry.md
 	@python3 tools/harness/registry.py
