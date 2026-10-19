@@ -1,0 +1,3 @@
+# make data-scan: reviewed harmless coincidences — SHA-256 of the value, then why. The values themselves are not written here.
+ea69fe17051b2d914f8a5fcf5cb9bb722d89ce5a345224e888ec76ea85c10af2  # a word of the code: SET_INDEX_JS (tests/visual/filters.py), also a product name in the data
+1dc132aa79c22b2e6ca16c048f22a33faadc5581ecb152e955732f2aea05cba0  # six digits inside the FNV-1a prime 0x01000193 (tests/visual/filters.py), also an order number

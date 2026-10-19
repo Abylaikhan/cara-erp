@@ -6,7 +6,9 @@ of that copy (5…300 characters) is looked for in the files changed against HEA
 UI texts of the accepted legacy reference, bare identifiers and short numbers are skipped. A value counts as new when the
 file had no such value at HEAD: the exit code is 1 if there is any.
 
-Nothing of the data is printed: a hit shows the table and column it comes from, its first two characters and its length.
+Nothing of the data is printed: a hit shows the table and column it comes from, its first two characters, its length
+and its SHA-256. A hit that is reviewed and harmless (a word of the code or a probe that happens to be a value of the data
+too) goes into scripts/data_scan.allow as that SHA-256 with the reason — the value itself is never written.
 Usage: python3 scripts/data_scan.py [--all-files]
 """
 from __future__ import annotations
@@ -53,6 +55,12 @@ def legacy_values(reference: str) -> dict:
     return values
 
 
+def allowed() -> set:
+    path = ROOT / 'scripts/data_scan.allow'
+    lines = path.read_text(encoding='utf-8').splitlines() if path.is_file() else []
+    return {line.split()[0] for line in lines if line.strip() and not line.startswith('#')}
+
+
 def changed_files(all_files: bool) -> list:
     if all_files:
         return [f for f in git('ls-files').split('\n') if f]
@@ -64,7 +72,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description='Values of the real legacy data in changed files (masked output).')
     ap.add_argument('--all-files', action='store_true', help='every tracked file, not only the changed ones')
     args = ap.parse_args()
-    values = legacy_values(accepted_reference())
+    allow = allowed()
+    values = {v: s for v, s in legacy_values(accepted_reference()).items() if hashlib.sha256(v.encode()).hexdigest() not in allow}
     files = changed_files(args.all_files)
     new, old = [], 0
     for rel in files:
@@ -81,8 +90,8 @@ def main() -> int:
                 if value in before:
                     old += 1
                 else:
-                    new.append((rel, source, f'{value[:2]}…({len(value)})'))
-    print(f'files {len(files)}, legacy values {len(values)}: new hits {len(new)}, already there before the change {old}')
+                    new.append((rel, source, f'{value[:2]}…({len(value)})', hashlib.sha256(value.encode()).hexdigest()))
+    print(f'files {len(files)}, legacy values {len(values)} ({len(allow)} allowed): new hits {len(new)}, already there before the change {old}')
     for hit in new[:50]:
         print('  NEW', *hit)
     return 1 if new else 0

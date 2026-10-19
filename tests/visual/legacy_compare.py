@@ -53,6 +53,26 @@ EMPTY_DEVIATIONS = {'sales-journal': 'ADR-0002, item 87', 'finance-cfs': 'ADR-00
 LOOP, LOOP_S = 20, 3.0
 _asked: dict = collections.defaultdict(collections.deque)
 
+# AC-08 (FILTERS=1): filters, sorts and their totals of the migrated pages, legacy ↔ target, first theme only
+# (tests/visual/filters.py). Not on the empty database: there is nothing to filter.
+FILTERS = None
+if os.environ.get('FILTERS') == '1' and not EMPTY:
+    sys.path.insert(0, str(ROOT / 'tests/visual'))
+    import filters as _filters
+    from hlib import load_config
+    _inventory, _, _blob = _filters.registry.accepted_inventory(ROOT, load_config(local=False))
+    FILTERS = _filters.Filters(_inventory, _blob)
+
+
+def run_filters(page, side, theme, container, exclude=()):
+    if FILTERS is not None and theme == 'dark':
+        FILTERS.run(page, side, container, exclude)
+
+
+def run_drill(page, side, theme, container):
+    if FILTERS is not None and theme == 'dark':
+        FILTERS.run_drill(page, side, container)
+
 
 def guard(route):
     url = route.request.url
@@ -130,6 +150,7 @@ with sync_playwright() as p:
             page.wait_for_timeout(200); target_ec.append(page.locator('#ec-table-wrap').inner_text())
         page.goto(TARGET + '/catalog', wait_until='networkidle'); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-catalog-{theme}.png'))
+        run_filters(page, 'target', theme, 'page-catalog')
         products = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['products']
         product_id = products[0]['id'] if products else None
         if product_id is not None:
@@ -137,6 +158,7 @@ with sync_playwright() as p:
             target_shot(page, str(OUT / f'target-catalog-modal-{theme}.png'))
         page.goto(TARGET + '/customers', wait_until='networkidle'); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-customers-{theme}.png'))
+        run_filters(page, 'target', theme, 'cust-persons')
         props = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         persons, dealers = props['persons'], props['dealers']
         # Dealer counts as the target makes them for «Текущий год» (DealersTab: orders of the channel; an order without
@@ -171,6 +193,7 @@ with sync_playwright() as p:
         target_rec_act = (page.locator('#rec-kpi').inner_text(), page.locator('#rec-tfoot').inner_text(), page.evaluate("""() => [...document.querySelectorAll('#rec-tbody tr')].map(tr => [...tr.children].slice(0, 5).map(td => td.textContent.replace(/\\s+/g, ' ').trim()).join('|')).sort()"""))
         page.goto(TARGET + '/suppliers', wait_until='networkidle'); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-suppliers-{theme}.png'))
+        run_filters(page, 'target', theme, 'sup-tab-list')
         suppliers = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['suppliers']
         plain = next((i for i, x in enumerate(suppliers) if not x['expense_category_id']), None)  # the card without an expense item
         if plain is not None:
@@ -190,6 +213,8 @@ with sync_playwright() as p:
         for i, shot in ((1, 'categories'), (2, 'workshops'), (3, 'docs'), (4, 'remains'), (7, 'aliases')):
             page.locator('#page-warehouse .tab').nth(i).click(); page.wait_for_timeout(800 if shot == 'remains' else 300)
             target_shot(page, str(OUT / f'target-warehouse-{shot}-{theme}.png'))
+            if shot in ('remains', 'aliases'):
+                run_filters(page, 'target', theme, 'wh-tab-' + shot)
         page.locator('#page-warehouse button', has_text='+ Материал').click(); page.wait_for_timeout(300)
         target_shot(page, str(OUT / f'target-warehouse-add-{theme}.png'))
         page.locator('#mat-category-grid button').first.click(); page.wait_for_timeout(300)
@@ -197,6 +222,7 @@ with sync_playwright() as p:
         page.locator('#addMaterialModal .modal-close').click()
         page.goto(TARGET + '/esf', wait_until='networkidle'); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-esf-{theme}.png'))
+        run_filters(page, 'target', theme, 'esf-tab-list')
         invoices = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['invoices']
         esf_detail = page.evaluate(f"fetch('/esf/{invoices[0]['id']}/detail', {{headers: {{Accept: 'application/json'}}}}).then(r => r.json())") if invoices else None
         if invoices:
@@ -213,6 +239,7 @@ with sync_playwright() as p:
         target_shot(page, str(OUT / f'target-crm-leads-{theme}.png'))
         page.locator('#leads-view-table').click(); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-crm-leads-table-{theme}.png'))
+        run_filters(page, 'target', theme, 'orders-leads')
         page.locator('#leads-view-cards').click(); page.wait_for_timeout(500)
         if first_lead is not None:
             page.locator('#leads-body .card').first.locator('button', has_text='✏️ Изменить').click(); page.wait_for_timeout(300)
@@ -220,6 +247,7 @@ with sync_playwright() as p:
             page.locator('#leadModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#page-crm .tab', has_text='Воронка лидов').click(); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-crm-funnel-{theme}.png'))
+        run_filters(page, 'target', theme, 'orders-funnel')
         page.locator('#orders-funnel button', has_text='+ Новый лид').click(); page.wait_for_timeout(300)
         target_shot(page, str(OUT / f'target-crm-funnel-modal-{theme}.png'))
         page.locator('#crmLeadModal .modal-close').click(); page.wait_for_timeout(200)
@@ -234,11 +262,13 @@ with sync_playwright() as p:
             page.evaluate("document.querySelector('#crm-popover .crm-popover-close').click()"); page.wait_for_timeout(200)  # off-screen on a narrow window
         page.locator('#page-crm .tab', has_text='Задачи').click(); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-crm-tasks-{theme}.png'))
+        run_filters(page, 'target', theme, 'orders-tasks')
         page.locator('#orders-tasks button', has_text='+ Новая задача').click(); page.wait_for_timeout(300)
         target_shot(page, str(OUT / f'target-crm-task-modal-{theme}.png'))
         page.locator('#taskModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#crm-tab-clients').click(); page.wait_for_timeout(2500)
         target_shot(page, str(OUT / f'target-crm-clients-{theme}.png'))
+        run_filters(page, 'target', theme, 'orders-clients')
         # A client row has its card button; an empty list has a row with the message only.
         first_client = page.evaluate("document.querySelector('#clients-tbody tr button')?.closest('tr').querySelector('td').textContent.trim() || null")
         if first_client:
@@ -248,6 +278,7 @@ with sync_playwright() as p:
         for i, shot in ((4, 'prod'), (5, 'pay')):
             page.locator('#page-crm .tabs .tab').nth(i).click(); page.wait_for_timeout(2500)
             target_shot(page, str(OUT / f'target-crm-board-{shot}-{theme}.png'))
+            run_filters(page, 'target', theme, 'orders-orders-kanban-' + shot)
         # «Проекты» (c917d37): the list (no projects in legacy) and the new project window.
         page.locator('#crm-tab-projects').click(); page.wait_for_timeout(1500)
         target_shot(page, str(OUT / f'target-crm-projects-{theme}.png'))
@@ -268,17 +299,20 @@ with sync_playwright() as p:
         }""")
         page.goto(TARGET + '/purchases', wait_until='networkidle'); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-purchases-{theme}.png'))
+        run_filters(page, 'target', theme, 'purch-extra-requests')
         purchases = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['requests']
         page.locator('#mreq-view-kanban-btn').click(); page.wait_for_timeout(300)
         target_shot(page, str(OUT / f'target-purchases-kanban-{theme}.png'))
         page.locator('#mreq-view-table-btn').click()
         page.locator('#page-purchases > .tabs .tab').nth(2).click(); page.wait_for_timeout(300)
         target_shot(page, str(OUT / f'target-purchases-planfact-{theme}.png'))
+        run_filters(page, 'target', theme, 'purch-extra-planfact')
         page.locator('#page-purchases > .tabs .tab').nth(0).click()
         page.locator('#purch-extra-requests button', has_text='+ Заявка вручную').click(); page.wait_for_timeout(300)
         target_shot(page, str(OUT / f'target-purchases-modal-{theme}.png'))
         page.goto(TARGET + '/sales', wait_until='networkidle'); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-sales-{theme}.png'))
+        run_filters(page, 'target', theme, 'orders-all-orders')
         sales = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['orders']
         breakdown = page.evaluate("document.querySelector('#ord-summary-stats span:nth-child(3)')?.textContent || ''")
         for i, shot in ((1, 'queue'), (3, 'done')):
@@ -287,6 +321,7 @@ with sync_playwright() as p:
         page.locator('#sales-tabs .tab').nth(4).click(); page.wait_for_timeout(1500)
         unscroll(page); page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)  # the filters fill the first screen
         rest_mouse(page); page.screenshot(path=str(OUT / f'target-sales-journal-{theme}.png'))  # scrolled to the totals on purpose, as legacy
+        run_filters(page, 'target', theme, 'orders-sales-journal')
         realizations = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
@@ -295,6 +330,7 @@ with sync_playwright() as p:
         }""")
         page.locator('#sales-tabs .tab').nth(7).click(); page.wait_for_timeout(2000)
         target_shot(page, str(OUT / f'target-sales-report-{theme}.png'))
+        run_filters(page, 'target', theme, 'orders-report')
         report = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
@@ -303,15 +339,18 @@ with sync_playwright() as p:
         }""")
         page.goto(TARGET + '/mrp', wait_until='networkidle'); page.wait_for_timeout(1500)
         target_shot(page, str(OUT / f'target-mrp-{theme}.png'))
+        run_filters(page, 'target', theme, 'mrp-orders')
         mrp = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['positions']
         page.locator('#mrp-orders > .tabs .tab').nth(1).click(); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-mrp-queue-{theme}.png'))
         page.goto(TARGET + '/money', wait_until='networkidle'); page.wait_for_timeout(1500)
         target_shot(page, str(OUT / f'target-money-{theme}.png'))
+        run_filters(page, 'target', theme, 'money-tab-cash')
         money = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         for i, shot in ((1, 'bank'), (5, 'all'), (4, 'advances')):
             page.locator('#page-money > .tabs .tab').nth(i).click(); page.wait_for_timeout(1500)
             target_shot(page, str(OUT / f'target-money-{shot}-{theme}.png'))
+            run_filters(page, 'target', theme, 'money-tab-' + shot)
         advances = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/money', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Money',
@@ -336,6 +375,7 @@ with sync_playwright() as p:
         page.locator('#page-money > .tabs .tab').nth(6).click(); page.wait_for_timeout(2500)
         page.evaluate("document.getElementById('pc-chart').style.visibility = 'hidden'")
         target_shot(page, str(OUT / f'target-money-calendar-{theme}.png'))
+        run_filters(page, 'target', theme, 'money-tab-calendar')
         target_calendar = page.locator('#pc-tbody').inner_text()
         page.locator('#page-money > .tabs .tab').nth(2).click(); page.wait_for_timeout(3000)
         target_shot(page, str(OUT / f'target-money-salonwb-{theme}.png'))
@@ -359,15 +399,19 @@ with sync_playwright() as p:
         }""")
         page.goto(TARGET + '/dashboard', wait_until='networkidle'); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-dashboard-{theme}.png'))
+        run_filters(page, 'target', theme, 'page-dashboard')
         dash = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         page.goto(TARGET + '/finance', wait_until='networkidle'); page.wait_for_timeout(500)
         fin = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         page.locator('#finance-tabs .tab').nth(1).click(); page.wait_for_timeout(1200)
         target_shot(page, str(OUT / f'target-finance-ar-{theme}.png'))
+        run_filters(page, 'target', theme, 'finance-ar')
         page.locator('#finance-tabs .tab').nth(5).click(); page.wait_for_timeout(2500)
         target_shot(page, str(OUT / f'target-finance-cfs-{theme}.png'))
+        run_drill(page, 'target', theme, 'finance-cfs')
         page.locator('#finance-tabs .tab').nth(2).click(); page.wait_for_timeout(3000)
         target_shot(page, str(OUT / f'target-finance-purchases-{theme}.png'))
+        run_filters(page, 'target', theme, 'finance-purchases')
         target_debts = page.locator('#pur-debts-tbody').inner_text()
         # Supplier tools: the server's orphans, spellings and the plan of «Импорт из ЭСФ» (apply=0 changes nothing).
         sup_tools = page.evaluate("""async () => {
@@ -443,6 +487,7 @@ with sync_playwright() as p:
         }""", products)
         page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-catalog-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'page-catalog')
         if product_id is not None:
             page.evaluate(f"openProductModal('{product_id}')"); page.wait_for_timeout(300)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-catalog-modal-{theme}.png'))
@@ -461,6 +506,7 @@ with sync_playwright() as p:
         }""", persons)
         page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-customers-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'cust-persons')
         if persons:
             page.evaluate("openPersonModal(1)"); page.wait_for_timeout(300)  # a number: the row onclick passes a string and fails (ADR-0006)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-customers-modal-{theme}.png'))
@@ -503,6 +549,7 @@ with sync_playwright() as p:
         }""", suppliers)
         page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-suppliers-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'sup-tab-list')
         if plain is not None:
             page.evaluate(f"openSupplierCard('{suppliers[plain]['id']}')"); page.wait_for_timeout(500)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-supplier-card-{theme}.png'))
@@ -529,6 +576,8 @@ with sync_playwright() as p:
             idx = {'stocks': 1, 'workshops': 2, 'docs': 3, 'remains': 4, 'aliases': 7}[tab]
             page.evaluate(f"showWhTab('{tab}', document.querySelectorAll('#page-warehouse .tab')[{idx}])"); page.wait_for_timeout(1500 if tab in ('remains', 'aliases') else 300)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-warehouse-{shot}-{theme}.png'))
+            if shot in ('remains', 'aliases'):
+                run_filters(page, 'legacy', theme, 'wh-tab-' + shot)
         page.evaluate("openAddMaterialModal()"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-warehouse-add-{theme}.png'))
         page.evaluate("selectMatCategory('lumber')"); page.wait_for_timeout(300)
@@ -548,6 +597,7 @@ with sync_playwright() as p:
         }""", [invoices, esf_detail])
         page.wait_for_timeout(800)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-esf-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'esf-tab-list')
         if invoices:
             page.evaluate(f"openEsfDetail({invoices[0]['id']})"); page.wait_for_timeout(500)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-esf-detail-{theme}.png'))
@@ -579,6 +629,26 @@ with sync_playwright() as p:
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-leads-{theme}.png'))
         page.evaluate("setLeadsView('table')"); page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-leads-table-{theme}.png'))
+        if FILTERS is not None and theme == 'dark':
+            # «Все статусы», «Выиграли» and «Проиграли» make legacy load the leads again with the closed ones: its request
+            # is answered with the leads the target holds (the open ones when it asks for the active leads only), with the
+            # ids as strings like the rest of this comparison.
+            lead_rows = [{**{k: l.get(k) for k in ('name', 'phone', 'status', 'interest', 'budget', 'source', 'comment', 'manager', 'created_at')},
+                          'id': str(l['id']), 'channel': 'office'} for l in crm['leads']]
+
+            def serve_leads(route):
+                if route.request.method != 'GET':
+                    return route.abort()
+                url = route.request.url
+                rows = [r for r in lead_rows if r['status'] not in ('won', 'lost')] if 'status=neq.won' in url else lead_rows
+                off = int((re.search(r'offset=(\d+)', url) or [0, 0])[1])
+                size = int((re.search(r'limit=(\d+)', url) or [0, len(rows)])[1])
+                route.fulfill(json=rows[off:off + size])
+
+            leads_url = re.compile(r'/rest/v1/leads\?')
+            page.route(leads_url, serve_leads)
+            run_filters(page, 'legacy', theme, 'orders-leads')
+            page.unroute(leads_url, serve_leads)
         page.evaluate("setLeadsView('cards')"); page.wait_for_timeout(500)
         if first_lead is not None:
             page.evaluate(f"openLeadModal('{first_lead}')"); page.wait_for_timeout(300)
@@ -595,6 +665,7 @@ with sync_playwright() as p:
         page.evaluate("(own) => { crmLeads.forEach(l => { l.segment = own[String(l.id)] ?? null; }); renderCrmKanban(); }", {str(l['id']): l['segment'] for l in funnel})
         page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-funnel-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'orders-funnel')
         page.evaluate("openCrmLeadModal(null)"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-funnel-modal-{theme}.png'))
         page.evaluate("closeModal('crmLeadModal')")
@@ -619,10 +690,12 @@ with sync_playwright() as p:
         }""", [crm['tasks'], crm['leads']])
         page.wait_for_timeout(800)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-tasks-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'orders-tasks')
         page.evaluate("openTaskModal(null)"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-task-modal-{theme}.png'))
         page.evaluate("closeModal('taskModal'); showOrdersTab('clients', document.getElementById('crm-tab-clients'))"); page.wait_for_timeout(2500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-clients-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'orders-clients')
         if first_client:
             page.evaluate("(name) => openClientCard(name)", first_client); page.wait_for_timeout(300)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-client-card-{theme}.png'))
@@ -642,6 +715,7 @@ with sync_playwright() as p:
             }""", [board_orders, tab, idx, tab == 'orders-kanban-prod'])
             page.wait_for_timeout(1200)
             page.screenshot(path=str(OUT / f"legacy-crm-board-{'prod' if tab == 'orders-kanban-prod' else 'pay'}-{theme}.png"))
+            run_filters(page, 'legacy', theme, 'orders-' + tab)
         # «Проекты»: legacy loads them from its database (blocked here) — it gets the same empty list.
         page.evaluate("""() => {
             loadProjects = async () => { prjData = []; prjCalcs = []; prjFiles = []; prjComments = []; prjErr = '';
@@ -665,10 +739,12 @@ with sync_playwright() as p:
         }""", purchases)
         page.wait_for_timeout(800)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-purchases-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'purch-extra-requests')
         page.evaluate("setMreqView('kanban')"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-purchases-kanban-{theme}.png'))
         page.evaluate("setMreqView('table'); showPurchExtraTab('planfact', document.querySelectorAll('#page-purchases > .tabs .tab')[2])"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-purchases-planfact-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'purch-extra-planfact')
         page.evaluate("showPurchExtraTab('requests', document.querySelectorAll('#page-purchases > .tabs .tab')[0]); openNewMaterialRequestModal()"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-purchases-modal-{theme}.png'))
         # Sales: legacy ordersData gets the target's orders; one line per order carries the target's total and mean progress,
@@ -687,6 +763,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         page.evaluate("(text) => { const el = document.querySelector('#ord-summary-stats span:nth-child(3)'); if (el) el.textContent = text; }", breakdown)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-sales-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'orders-all-orders')
         for i, (tab, shot) in enumerate((('queue', 'queue'), ('done', 'done'))):
             idx = {'queue': 1, 'done': 3}[tab]
             page.evaluate(f"showSalesTab('{tab}', document.querySelectorAll('#sales-tabs .tab')[{idx}])"); page.wait_for_timeout(1200)
@@ -701,6 +778,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         unscroll(page); page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-sales-journal-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'orders-sales-journal')
         # Report: the orders now carry their real lines, characteristics, comment and delivery date.
         page.evaluate("""([orders, report]) => {
             const lines = {};
@@ -714,6 +792,7 @@ with sync_playwright() as p:
         }""", [sales, report])
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'orders-report')
         # Production journal: legacy gets the order lines with the effective status the server counted (its own rule, applied
         # to the same data) and the stages recorded on the worksheet; nothing is left for it to load.
         page.evaluate("""(positions) => {
@@ -731,6 +810,7 @@ with sync_playwright() as p:
         }""", mrp)
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'mrp-orders')
         page.evaluate("showMrpOrdersFilter('queue', document.querySelectorAll('#mrp-orders > .tabs .tab')[1])"); page.wait_for_timeout(800)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-queue-{theme}.png'))
         # Money: legacy gets the target's accounts (without account numbers, which are not stored — ADR-0002, item 54), the
@@ -749,9 +829,11 @@ with sync_playwright() as p:
         }""", money)
         page.wait_for_timeout(2000)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'money-tab-cash')
         for idx, tab in ((1, 'bank'), (5, 'all')):
             page.evaluate(f"showMoneyTab('{tab}', document.querySelectorAll('#page-money > .tabs .tab')[{idx}])"); page.wait_for_timeout(1500)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-{tab}-{theme}.png'))
+            run_filters(page, 'legacy', theme, 'money-tab-' + tab)
         # Advances: the same reports, with the issuing operation the target links (added without an account, so the totals
         # stay) and «Потрачено» as its lines give it.
         page.evaluate("""(rows) => {
@@ -764,6 +846,7 @@ with sync_playwright() as p:
         }""", advances)
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-advances-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'money-tab-advances')
         # Bank reconciliation: the same statement rows (by legacy account id) and the journal of the day as one income and one expense.
         page.evaluate("""([r, accounts]) => {
             const keys = ['a1b2c3d4-e5f6-7890-abcd-ef1234567890', '0265fb65-7812-4bee-b794-71306246edb7'];
@@ -825,6 +908,7 @@ with sync_playwright() as p:
         }""", [dash, EXPENSE_CODES])
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-dashboard-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'page-dashboard')
         # Finance: the same orders and operations (in tenge), the opening balances of the accounts as legacy balance (its CFS ignores
         # openingBalance — ADR-0002), the current year.
         page.evaluate("""([f, tx]) => {
@@ -841,8 +925,10 @@ with sync_playwright() as p:
         }""", [fin, fin_tx])
         page.wait_for_timeout(1200)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-finance-ar-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'finance-ar')
         page.evaluate("showFinanceTab('cfs', document.querySelectorAll('#finance-tabs .tab')[5])"); page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-finance-cfs-{theme}.png'))
+        run_drill(page, 'legacy', theme, 'finance-cfs')
         # Purchases: the same invoices, payments with a counterparty (in tenge), suppliers and advance lines; the calendar month
         # the target shows (legacy shifts «Текущий месяц» through UTC — ADR-0002). The whole debts table is compared as text.
         page.evaluate("""([d, today]) => {
@@ -851,13 +937,22 @@ with sync_playwright() as p:
             suppliersData = d.suppliers.map(s => ({name: s.name, bin: s.bin || ''}));
             advanceReports = [{date: '', empName: '', lines: []}]; advanceReports = d.advanceLines.map(l => ({date: l.date, empName: l.employee || '', lines: [{type: 'supplier', supplier: l.supplier, amount: +l.amount, desc: l.desc || ''}]}));
             _advancesLoaded = true;
-            const y = +today.slice(0, 4), m = +today.slice(5, 7), last = new Date(Date.UTC(y, m, 0)).getUTCDate();
-            const range = {from: today.slice(0, 8) + '01', to: today.slice(0, 8) + String(last).padStart(2, '0')};
-            getPurDateRange = () => range;
+            // Legacy's own periods in local dates (it takes their ends through UTC, a day early — ADR-0002, item 73);
+            // «Произвольный» as legacy reads it.
+            const own = getPurDateRange, y = +today.slice(0, 4), m = +today.slice(5, 7) - 1, pad = n => String(n).padStart(2, '0');
+            const last = (yy, mm) => new Date(Date.UTC(yy, mm + 1, 0)).getUTCDate();
+            getPurDateRange = () => {
+                const period = document.getElementById('pur-period')?.value || 'month';
+                if (period === 'month') return {from: `${y}-${pad(m + 1)}-01`, to: `${y}-${pad(m + 1)}-${pad(last(y, m))}`};
+                if (period === 'quarter') { const q = Math.floor(m / 3); return {from: `${y}-${pad(q * 3 + 1)}-01`, to: `${y}-${pad(q * 3 + 3)}-${pad(last(y, q * 3 + 2))}`}; }
+                if (period === 'year') return {from: `${y}-01-01`, to: `${y}-12-31`};
+                return own();
+            };
             showFinanceTab('purchases', document.querySelectorAll('#finance-tabs .tab')[2]);
         }""", [fin_pur, dash['today']])
         page.wait_for_timeout(2500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-finance-purchases-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'finance-purchases')
         legacy_debts = page.locator('#pur-debts-tbody').inner_text()
         tl, ll = target_debts.splitlines(), legacy_debts.splitlines()
         print(f'purchases debts table ({theme}): rows {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
@@ -892,6 +987,7 @@ with sync_playwright() as p:
         }""", [calendar, money['accounts'], money['categories']])
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-calendar-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'money-tab-calendar')
         tl, ll = target_calendar.splitlines(), page.locator('#pc-tbody').inner_text().splitlines()
         (OUT / f'calendar-target-{theme}.txt').write_text(target_calendar); (OUT / f'calendar-legacy-{theme}.txt').write_text('\n'.join(ll))
         print(f'payment calendar table ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
@@ -916,12 +1012,19 @@ with sync_playwright() as p:
             page.evaluate("setSalonWbYearFilter('all')"); page.wait_for_timeout(2500)
             legacy_cells = page.evaluate("""() => [...document.querySelectorAll('#swb-tbody tr')].map(tr => [...tr.children].slice(0, 15).map(td => { const i = td.querySelector('input'); return i ? i.value : td.textContent.trim(); }).join('|'))""")
             tc, tb = target_swb[sal]
-            bad = sum(1 for x, y in zip(tc, legacy_cells) if x != y) + abs(len(tc) - len(legacy_cells))
+            bad, quoted = abs(len(tc) - len(legacy_cells)), 0
             for i, (x, y) in enumerate(zip(tc, legacy_cells)):
                 if x != y:
-                    cols = [k for k, (p, q) in enumerate(zip(x.split('|'), y.split('|'))) if p != q]
-                    print(f'  row {i}: columns {cols} differ (values not printed)')
-            print(f'salon worksheet {sal} ({theme}): rows {len(tc)} / {len(legacy_cells)}, cells ' + ('совпадает' if not bad else f'РАСХОЖДЕНИЙ {bad}') + ', остаток ' + ('совпадает' if tb == page.locator('#swb-current-balance').inner_text() else 'РАСХОЖДЕНИЕ'))
+                    pairs = [(k, p_, q_) for k, (p_, q_) in enumerate(zip(x.split('|'), y.split('|'))) if p_ != q_]
+                    # legacy puts the value into the markup unescaped and cuts it at a double quote (ADR-0002, item 75)
+                    if all('"' in p_ and q_ == p_.split('"')[0] for _, p_, q_ in pairs):
+                        quoted += 1
+                        continue
+                    bad += 1
+                    print(f'  row {i}: columns {[k for k, _, _ in pairs]} differ (values not printed)')
+            print(f'salon worksheet {sal} ({theme}): rows {len(tc)} / {len(legacy_cells)}, cells ' + ('совпадает' if not bad else f'РАСХОЖДЕНИЙ {bad}')
+                  + (f' (записанное отличие — текст до кавычки, ADR-0002 п. 75: {quoted})' if quoted else '')
+                  + ', остаток ' + ('совпадает' if tb == page.locator('#swb-current-balance').inner_text() else 'РАСХОЖДЕНИЕ'))
         ctx.close()
         # «Сверка с офисом»: a dealer on both sides; legacy gets the channel's orders, a payment per paid order and the transfers.
         ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
@@ -930,6 +1033,7 @@ with sync_playwright() as p:
         page.goto(TARGET + '/login', wait_until='networkidle'); page.fill('#login-username', 'dealer_astana'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
         page.wait_for_url(lambda u: '/login' not in u); page.goto(TARGET + '/reconcile', wait_until='networkidle'); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-reconcile-{theme}.png'))
+        run_filters(page, 'target', theme, 'page-reconcile')
         rec = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         sidebar = page.evaluate("({a: document.getElementById('sidebar-avatar').textContent.trim(), n: document.getElementById('sidebar-username').textContent.trim(), r: document.getElementById('sidebar-role').textContent.trim()})")
         target_rec = page.locator('#page-reconcile').inner_text()
@@ -958,6 +1062,7 @@ with sync_playwright() as p:
         page.evaluate("showPage('reconcile', [...document.querySelectorAll('.nav-item')].find(n => (n.getAttribute('onclick') || '').includes(\"'reconcile'\")))"); page.wait_for_timeout(1500)
         page.evaluate(inject, [rec, sidebar]); page.evaluate("renderReconcile()"); page.wait_for_timeout(800)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-reconcile-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'page-reconcile')
         tl, ll = target_rec.splitlines(), page.locator('#page-reconcile').inner_text().splitlines()
         print(f'reconcile page ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
         ctx.close()
@@ -968,11 +1073,13 @@ with sync_playwright() as p:
         page.goto(TARGET + '/login', wait_until='networkidle'); page.fill('#login-username', 'salon_armada_mgr'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
         page.wait_for_url(lambda u: '/login' not in u); page.goto(TARGET + '/money_salon', wait_until='networkidle'); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-money-salon-{theme}.png'))
+        run_filters(page, 'target', theme, 'page-money_salon')
         salon = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         sidebar = page.evaluate("({a: document.getElementById('sidebar-avatar').textContent.trim(), n: document.getElementById('sidebar-username').textContent.trim(), r: document.getElementById('sidebar-role').textContent.trim()})")
         target_salon = page.locator('#salon-cash-tbody').inner_text()
         page.goto(TARGET + '/salon_report', wait_until='networkidle'); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-salon-report-{theme}.png'))
+        run_filters(page, 'target', theme, 'sr-tab-current')
         sreport = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         target_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
         ctx.close()
@@ -999,6 +1106,7 @@ with sync_playwright() as p:
         }""", [salon, sidebar])
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-salon-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'page-money_salon')
         tl, ll = target_salon.splitlines(), page.locator('#salon-cash-tbody').inner_text().splitlines()
         print(f'salon cash table ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
         # «Отчёт салонов»: the same salon orders; legacy cannot load the staff (blocked), the target says the salary comes with them.
@@ -1013,6 +1121,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         page.evaluate("renderSalonReport()"); page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-salon-report-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'sr-tab-current')
         legacy_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
         print(f'salon report ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a == b else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'продавцы', 'заказы'), target_sr, legacy_sr)))
         ctx.close()
@@ -1042,5 +1151,10 @@ with sync_playwright() as p:
                 continue
             results[f'{shot}-{theme}'] = diff(OUT / f'legacy-{shot}-{theme}.png', OUT / f'target-{shot}-{theme}.png', f'{shot}-{theme}')
     browser.close()
+filter_failures = 0
+if FILTERS is not None:
+    for line in FILTERS.report():
+        print(line)
+    filter_failures = FILTERS.failed
 print(json.dumps({'output': str(OUT), 'legacy_blob': BLOB.name, 'viewport': f"{VIEWPORT['width']}x{VIEWPORT['height']}", 'diff_percent': results}, indent=1))
-sys.exit(1 if any(v > 0.5 for v in results.values()) else 0)
+sys.exit(1 if any(v > 0.5 for v in results.values()) or filter_failures else 0)
