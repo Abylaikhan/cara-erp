@@ -144,7 +144,10 @@ sys.exit(0 if env["environment"] == "production" and env["debug_mode"] is False 
     if grep -qE '@vite/client|:5173' "$tmp/login"; then fail "the login page loads the Vite dev server"; fi
     if grep -qi '^x-powered-by' "$tmp/login.h"; then fail "the response names the PHP version (X-Powered-By)"; fi
     grep -i '^set-cookie: .*session' "$tmp/login.h" | grep -qi 'httponly' || fail "the session cookie is not HttpOnly"
-    ok "GET /login -> 200: built assets, no X-Powered-By, HttpOnly session cookie"
+    for header in 'x-content-type-options: nosniff' 'x-frame-options: sameorigin' 'referrer-policy: same-origin'; do
+        tr -d '\r' <"$tmp/login.h" | grep -qix "$header" || fail "the response lacks «${header}»"
+    done
+    ok "GET /login -> 200: built assets, no X-Powered-By, HttpOnly session cookie, security headers"
     code="$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' "$base/dashboard")"
     case "$code" in
         "302 "*"/login") ok "a guest is sent to /login" ;;
