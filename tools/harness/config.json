@@ -80,6 +80,12 @@
                 "step": "http",
                 "title": "HTTP smoke: /up и /login через nginx",
                 "required": true
+            },
+            {
+                "id": "TGT-PROD",
+                "step": "prod",
+                "title": "Режим production на временной БД: настройки PHP, отказ сида и импорта, кэши, страницы ошибок, собранные ресурсы, секреты в сборке",
+                "required": true
             }
         ],
         "planned_checks": [

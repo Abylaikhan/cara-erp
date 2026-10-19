@@ -42,6 +42,13 @@ return [
     'debug' => (bool) env('APP_DEBUG', false),
 
     /*
+    | The file whose presence makes the pages load their scripts from the Vite dev server (public/hot by default). Another
+    | path lets a production-mode instance run next to a running dev server (make prod-check, ADR-0031).
+    */
+
+    'vite_hot_file' => env('VITE_HOT_FILE'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------

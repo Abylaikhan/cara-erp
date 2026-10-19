@@ -4,7 +4,7 @@ export HOST_UID := $(shell id -u)
 export HOST_GID := $(shell id -g)
 
 .DEFAULT_GOAL := help
-.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily audit-replay harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal reliability-check e2e test-e2e test-visual visual-empty visual-filters registry data-scan
+.PHONY: help setup up down restart doctor check test build ps logs shell psql audit-daily audit-replay harness-selftest visual-compare legacy-copy legacy-import db-backup db-restore-check migration-rehearsal reliability-check e2e test-e2e test-visual visual-empty visual-filters registry data-scan prod-check
 
 help: ## Show available commands
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-20s %s\n", $$1, $$2}'
@@ -31,6 +31,9 @@ audit-daily: ## Daily audit: pin legacy + target refs, diff, checks, MD/JSON rep
 
 audit-replay: ## Repeat a recorded run (RUN_ID=…) on its source and target refs without publication; compare with the record
 	@python3 tools/harness/run.py replay $(RUN_ID)
+
+prod-check: ## Production mode on a throwaway database: build, caches, refusals, error pages, assets, no secrets in the build (ADR-0031)
+	@bash scripts/check.sh build prod
 
 harness-selftest: ## Self-tests of the audit harness (H-xx scenarios on local fixtures)
 	@python3 tools/harness/selftest.py
