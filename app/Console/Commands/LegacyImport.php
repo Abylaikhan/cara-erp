@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Legacy\Importers\BankStatementImporter;
 use App\Legacy\Importers\CrmTaskImporter;
 use App\Legacy\Importers\CustomerImporter;
+use App\Legacy\Importers\EmployeeImporter;
 use App\Legacy\Importers\ExpenseCategoryImporter;
 use App\Legacy\Importers\IncomingInvoiceImporter;
 use App\Legacy\Importers\LeadImporter;
@@ -13,10 +14,13 @@ use App\Legacy\Importers\MaterialImporter;
 use App\Legacy\Importers\MaterialRequestImporter;
 use App\Legacy\Importers\MoneyImporter;
 use App\Legacy\Importers\OrderImporter;
+use App\Legacy\Importers\PieceWorkImporter;
 use App\Legacy\Importers\ProductImporter;
 use App\Legacy\Importers\ProductionProgressImporter;
 use App\Legacy\Importers\ProjectImporter;
 use App\Legacy\Importers\RealizationImporter;
+use App\Legacy\Importers\SalaryAccrualImporter;
+use App\Legacy\Importers\SalonPayrollImporter;
 use App\Legacy\Importers\SalonWorksheetImporter;
 use App\Legacy\Importers\SupplierImporter;
 use App\Legacy\LegacyRejected;
@@ -32,7 +36,7 @@ use RuntimeException;
  */
 class LegacyImport extends Command
 {
-    protected $signature = 'legacy:import {entity : all | expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects | salon_worksheet | bank_statements}
+    protected $signature = 'legacy:import {entity : all | expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects | salon_worksheet | bank_statements | staff | salary_accruals | wage_items | salon_payroll}
         {--snapshot= : Snapshot id (default: the latest loaded)}
         {--dry-run : Import, verify and roll back: nothing is written}
         {--errors= : File for every problem of a refused set (keep it in .local-audit: it names legacy rows)}';
@@ -58,6 +62,10 @@ class LegacyImport extends Command
         'projects' => ProjectImporter::class, // with their calculations and messages
         'salon_worksheet' => SalonWorksheetImporter::class,
         'bank_statements' => BankStatementImporter::class, // after money: a statement belongs to an account
+        'staff' => EmployeeImporter::class, // with the salary history and the changes of conditions
+        'salary_accruals' => SalaryAccrualImporter::class, // with their earlier versions
+        'wage_items' => PieceWorkImporter::class,
+        'salon_payroll' => SalonPayrollImporter::class,
     ];
 
     public function handle(): int
