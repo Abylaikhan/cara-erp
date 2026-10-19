@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261019T065342Z-ad5a",
-    "started_at": "2026-10-19T06:53:42Z",
+    "run_id": "20261019T070527Z-80c3",
+    "started_at": "2026-10-19T07:05:27Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-19T06:55:09Z",
+    "finished_at": "2026-10-19T07:07:01Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "830a998c41e7a002921f6225c8cfbf55913bb70b",
-    "target_ref": "918e03c4f9698d552c62d78e55c2f71d897e12cf",
-    "at": "2026-10-19T06:53:42Z"
+    "target_ref": "d0c68d2ff3a0feae8b787ba0a53ea419ae95cdbf",
+    "at": "2026-10-19T07:05:27Z"
   },
   "last_reported": {
-    "run_id": "20261019T065342Z-ad5a",
+    "run_id": "20261019T070527Z-80c3",
     "source_ref": "830a998c41e7a002921f6225c8cfbf55913bb70b",
     "source_blob": "d7c02390283231d129615332427d1f972c66408e",
-    "target_ref": "918e03c4f9698d552c62d78e55c2f71d897e12cf",
-    "logical_key": "7c99b6f4603873e2",
+    "target_ref": "d0c68d2ff3a0feae8b787ba0a53ea419ae95cdbf",
+    "logical_key": "f2157e33bf0473e9",
     "local_date": "2026-10-19",
-    "completed_at": "2026-10-19T06:55:09Z",
-    "report": "daily/2026-10-19/20261019T065342Z-ad5a.md",
-    "artifact_sha256": "4924cfd83d58ea3acddd092186fcedab42c11745e6e78a8adcf65ba7ea8eb3a1",
+    "completed_at": "2026-10-19T07:07:01Z",
+    "report": "daily/2026-10-19/20261019T070527Z-80c3.md",
+    "artifact_sha256": "df3b665a83c3d45b2f72296034d0f4bdfa02cb262fca94f4d3de9db8de701f04",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -46,6 +46,7 @@
       "TGT-HTTP",
       "TGT-MIGRATE",
       "TGT-PINT",
+      "TGT-PROD",
       "TGT-REF",
       "TGT-TESTS",
       "TGT-TYPES"
@@ -323,15 +324,15 @@
   },
   "last_verified": {
     "source_ref": "830a998c41e7a002921f6225c8cfbf55913bb70b",
-    "target_ref": "918e03c4f9698d552c62d78e55c2f71d897e12cf",
-    "required_suite_version": "suite-1+055594",
-    "completed_at": "2026-10-19T06:55:09Z",
-    "run_id": "20261019T065342Z-ad5a"
+    "target_ref": "d0c68d2ff3a0feae8b787ba0a53ea419ae95cdbf",
+    "required_suite_version": "suite-1+364b9b",
+    "completed_at": "2026-10-19T07:07:01Z",
+    "run_id": "20261019T070527Z-80c3"
   },
   "changelog": {
-    "entries": 57,
-    "last_header": "## 2026-10-19 · 20261019T065342Z-ad5a",
-    "sha256": "145e00e2198a4f4807317c7bbc4c8fdec154ad3fc4c5687715b44b86c3c11864"
+    "entries": 58,
+    "last_header": "## 2026-10-19 · 20261019T070527Z-80c3",
+    "sha256": "944d38ddb9d11d85de0877d7dda4ab1ea100b51d7bcaaa1fce782de93d0c82fa"
   },
   "accepted_source_ref": {
     "commit": "8d275a12ff826a9646c9abe092fe3c11eee4e81f",
