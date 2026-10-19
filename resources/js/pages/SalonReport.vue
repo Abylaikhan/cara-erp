@@ -2,9 +2,14 @@
 // M21 «Отчёт салонов», part 1 — legacy page-salon_report (L8118–8244), initSalonReport/renderSalonReport/showSalonReportTab
 // (L16283–16610). Tab «Текущий период»: the salon orders of the month by their creation date (orders without a date are always
 // shown), KPIs, the sellers, every order. The month ends on its last calendar day (legacy lost it through UTC). The seller's
-// salary needs the commissions and salaries of «Сотрудники»; the pay sheet and the salary history come with the payroll.
+// salary needs the commissions and salaries of «Сотрудники». Tabs «Платёжная ведомость» and «История ЗП» read the salon payroll
+// (legacy salon_payroll), loaded with the first of them.
 import { router } from '@inertiajs/vue3';
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
+import HistoryTab from '@/components/salon/HistoryTab.vue';
+import PaysheetTab from '@/components/salon/PaysheetTab.vue';
+import type { PayrollLine } from '@/components/salon/payroll';
+import { yearsFrom } from '@/components/salon/payroll';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 
 interface SalonOrder {
@@ -19,10 +24,15 @@ interface SalonOrder {
     status: string;
     total: string;
 }
-const props = defineProps<{ today: string; salonFixed: string | null; orders: SalonOrder[] }>();
+const props = defineProps<{ today: string; salonFixed: string | null; orders: SalonOrder[]; payroll?: PayrollLine[] }>();
 
 const tab = ref<'current' | 'paysheet' | 'history'>('current');
+// The payroll comes with the first of its tabs, as legacy loads it (loadSalonPayroll).
+watch(tab, (t) => {
+    if (t !== 'current' && props.payroll === undefined) router.reload({ only: ['payroll'] });
+});
 const [ty, tm] = props.today.split('-').map(Number);
+const years = yearsFrom(props.today);
 const f = reactive({ month: String(tm), year: String(ty), salon: props.salonFixed ?? '' });
 const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 const fmt = (n: number) => '₸' + Math.round(n).toLocaleString('ru-RU');
@@ -71,10 +81,6 @@ const client = (o: SalonOrder) => {
 const STATUS: Record<string, string> = { queue: '⏳ Очередь', progress: '🔨 В работе', production: '🔨 В работе', ready: '📦 Готов', delivered: '🚚 Доставлен', done: '✅ Завершён', cancelled: '❌ Отменён' };
 const dmy = (iso: string | null) => (iso ? iso.split('-').reverse().join('.') : '—');
 const openOrder = () => window.alert('Форма заказа появится вместе с правкой заказов (ERP-029/030, решения D-02 и D-12).');
-const LATER = {
-    paysheet: 'Платёжная ведомость салонов появится вместе с разделом «Сотрудники» и зарплатой продавцов (ERP-053, ERP-059, решение D-13).',
-    history: 'История ЗП салонов появится вместе с разделом «Сотрудники» и зарплатной ведомостью (ERP-053, ERP-059, решение D-13).',
-};
 </script>
 
 <template>
@@ -95,9 +101,7 @@ const LATER = {
                         <option v-for="(m, i) in MONTHS" :key="m" :value="String(i + 1)">{{ m }}</option>
                     </select>
                     <select id="sr-year" v-model="f.year" style="font-size: 13px">
-                        <option value="2026">2026</option>
-                        <option value="2025">2025</option>
-                        <option value="2024">2024</option>
+                        <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
                     </select>
                     <select id="sr-salon" v-model="f.salon" style="font-size: 13px" :style="props.salonFixed ? { display: 'none' } : undefined">
                         <option value="">Оба салона</option>
@@ -184,10 +188,12 @@ const LATER = {
                 </div>
             </div>
 
-            <div v-for="(text, key) in LATER" :id="'sr-tab-' + key" :key="key" :style="{ display: tab === key ? '' : 'none' }">
-                <div class="card">
-                    <div style="font-size: 13px; color: var(--text3); line-height: 1.6">{{ text }}</div>
-                </div>
+            <div id="sr-tab-paysheet" :style="{ display: tab === 'paysheet' ? '' : 'none' }">
+                <PaysheetTab :payroll="props.payroll" :today="props.today" />
+            </div>
+
+            <div id="sr-tab-history" :style="{ display: tab === 'history' ? '' : 'none' }">
+                <HistoryTab :payroll="props.payroll" :active="tab === 'history'" :today="props.today" />
             </div>
         </div>
     </ErpLayout>

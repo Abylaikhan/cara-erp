@@ -436,6 +436,12 @@ with sync_playwright() as p:
                 'X-Inertia-Partial-Data': 'transactions', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
             return (await r.json()).props.transactions;
         }""")
+        # M20 «Начисления ЗП»: the journal in its default state, and a month with a name search.
+        page.goto(TARGET + '/accruals', wait_until='networkidle'); page.wait_for_timeout(800)
+        target_shot(page, str(OUT / f'target-accruals-{theme}.png'))
+        run_filters(page, 'target', theme, 'page-accruals')
+        accruals = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        target_acc = page.locator('#accruals-tbody').inner_text()
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
@@ -956,6 +962,18 @@ with sync_playwright() as p:
         legacy_debts = page.locator('#pur-debts-tbody').inner_text()
         tl, ll = target_debts.splitlines(), legacy_debts.splitlines()
         print(f'purchases debts table ({theme}): rows {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
+        # «Начисления ЗП»: legacy gets the accruals the target renders (as its own loader keeps them) and fills its month list itself.
+        page.evaluate("""(r) => {
+            _payrollData = {accruals: r.accruals.map(a => ({...a, type: 'salary'})), payments: []};
+            fillPayrollMonthSelects();
+            showPage('accruals', document.querySelector(".nav-item[onclick*=\\"showPage('accruals'\\"]"));
+            renderAccrualsList();
+        }""", accruals)
+        page.wait_for_timeout(1200)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-accruals-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'page-accruals')
+        tl, ll = target_acc.splitlines(), page.locator('#accruals-tbody').inner_text().splitlines()
+        print(f'accruals table ({theme}): rows {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
         ctx.close()
         # Payment calendar of legacy: its own page, clock at noon of the target's business date in UTC (legacy takes «today»
         # through UTC — in Almaty a day early, ADR-0002); the same balances, unpaid orders (status «В работе» as the
@@ -1082,6 +1100,23 @@ with sync_playwright() as p:
         run_filters(page, 'target', theme, 'sr-tab-current')
         sreport = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         target_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
+        # The tabs of the salon payroll: the lines load with the first of them.
+        page.locator('#page-salon_report .tabs .tab').nth(1).click(); page.wait_for_timeout(1500)
+        target_shot(page, str(OUT / f'target-salon-paysheet-{theme}.png'))
+        run_filters(page, 'target', theme, 'sr-tab-paysheet')
+        target_ps = page.locator('#sr-tab-paysheet').inner_text()
+        page.locator('#page-salon_report .tabs .tab').nth(2).click(); page.wait_for_timeout(1000)
+        target_shot(page, str(OUT / f'target-salon-history-{theme}.png'))
+        run_filters(page, 'target', theme, 'sr-tab-history')
+        target_hist = page.locator('#sr-tab-history').inner_text()
+        payroll = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props'].get('payroll')
+        if payroll is None:  # the page was not re-rendered with the lazy prop: ask for it as the tab does
+            payroll = page.evaluate("""async () => {
+                const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+                const r = await fetch('/salon_report', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'SalonReport',
+                    'X-Inertia-Partial-Data': 'payroll', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+                return (await r.json()).props.payroll;
+            }""")
         ctx.close()
         ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
         ctx.route('**/*', guard)
@@ -1124,6 +1159,17 @@ with sync_playwright() as p:
         run_filters(page, 'legacy', theme, 'sr-tab-current')
         legacy_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
         print(f'salon report ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a == b else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'продавцы', 'заказы'), target_sr, legacy_sr)))
+        # Legacy gets the payroll lines the target received, in the same order (its loader asks year.desc,month.desc).
+        page.evaluate("""(rows) => { _salonPayrollData = rows; showSalonReportTab('paysheet', document.querySelectorAll('#page-salon_report .tabs .tab')[1]); }""", payroll)
+        page.wait_for_timeout(1500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-salon-paysheet-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'sr-tab-paysheet')
+        legacy_ps = page.locator('#sr-tab-paysheet').inner_text()
+        page.evaluate("showSalonReportTab('history', document.querySelectorAll('#page-salon_report .tabs .tab')[2])"); page.wait_for_timeout(1500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-salon-history-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'sr-tab-history')
+        legacy_hist = page.locator('#sr-tab-history').inner_text()
+        print(f'salon payroll tabs ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('ведомость', 'история'), (target_ps, target_hist), (legacy_ps, legacy_hist))))
         ctx.close()
         # Supplier tools in legacy: the same suppliers, supplier payments and invoices through its own functions.
         ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
@@ -1145,7 +1191,7 @@ with sync_playwright() as p:
             n = len(a2) if isinstance(a2, list) else 1
             print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases'):
+        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals'):
             if EMPTY and shot in EMPTY_DEVIATIONS:  # pictures kept, not compared: a documented deviation
                 print(f'{shot}-{theme}: not compared — {EMPTY_DEVIATIONS[shot]}')
                 continue

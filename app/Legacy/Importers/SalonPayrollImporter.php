@@ -17,13 +17,13 @@ class SalonPayrollImporter
     /** @return array<string, int|string> */
     public function import(string $snapshotId, ?User $by = null): array
     {
-        $lines = $this->legacyTable($snapshotId, 'salon_payroll', [...SalonPayrollRow::NUMBER_FIELDS, 'year', 'month']);
+        $lines = $this->legacyTable($snapshotId, 'salon_payroll', [...SalonPayrollRow::NUMBER_FIELDS, 'year', 'month'], natural: true);
         $this->validate($lines);
 
         return DB::transaction(function () use ($lines, $snapshotId, $by) {
             $rows = array_map(function (array $r) {
                 $created = Carbon::parse($r['created_at']);
-                $a = ['uuid' => $r['id'], 'employee' => $r['employee'], 'year' => (int) $r['year'], 'month' => (int) $r['month'], 'created_at' => $created, 'updated_at' => $created];
+                $a = ['uuid' => $r['id'], 'employee' => $r['employee'], 'year' => (int) $r['year'], 'month' => (int) $r['month'], 'legacy_position' => $r['position'], 'created_at' => $created, 'updated_at' => $created];
                 foreach (SalonPayrollRow::NUMBER_FIELDS as $f) {
                     $a[$f] = bcadd($r[$f], '0', 12);
                 }

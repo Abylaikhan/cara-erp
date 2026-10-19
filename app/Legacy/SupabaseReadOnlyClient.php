@@ -64,7 +64,11 @@ final class SupabaseReadOnlyClient
         if (! in_array($direction, ['asc', 'desc'], true)) {
             throw new InvalidArgumentException("Invalid order direction: {$direction}");
         }
-        $query = ['select' => '*'] + ($order ? ['order' => "{$order}.{$direction}"] : []);
+        // $order is a column (the direction follows) or a whole list like «year.desc,month.desc», as a legacy page asks for it.
+        if ($order && str_contains($order, '.') && ! preg_match('/^[a-z_][a-z0-9_]*\.(asc|desc)(,[a-z_][a-z0-9_]*\.(asc|desc))*$/', $order)) {
+            throw new InvalidArgumentException("Invalid order: {$order}");
+        }
+        $query = ['select' => '*'] + ($order ? ['order' => str_contains($order, '.') ? $order : "{$order}.{$direction}"] : []);
 
         return $this->get($table, $query, ['Range' => "{$from}-{$to}", 'Prefer' => 'count=none'])->json() ?? [];
     }

@@ -35,7 +35,7 @@ PAGES = {
     'customers': ('Customers', ['reconcileOrders']), 'crm': ('Crm', ['clientOrders', 'boardOrders', 'projects']),
     'finance': ('Finance', ['transactions', 'purchases']), 'money': ('Money', ['advances', 'calendar', 'bankRecon', 'salonRows']),
     'expense_cats': ('ExpenseCats', []), 'money_salon': ('MoneySalon', []), 'reconcile': ('Reconcile', []),
-    'salon_report': ('SalonReport', []),
+    'salon_report': ('SalonReport', []), 'accruals': ('Accruals', []),
 }
 # The director has no salon pages (legacy role template): those are asked as the head of the salons.
 SALON_PAGES = {'money_salon', 'salon_report'}

@@ -23,19 +23,28 @@ trait MirrorsLegacyTable
      * @param  list<string>  $raw
      * @return list<array<string, mixed>>
      */
-    private function legacyTable(string $snapshotId, string $table, array $raw): array
+    private function legacyTable(string $snapshotId, string $table, array $raw, bool $natural = false): array
     {
         $columns = implode('', array_map(fn (string $f, int $i) => ", data->'{$f}' AS r{$i}", $raw, array_keys($raw)));
+        // The order a legacy page lists the rows in (`legacy:natural-order`), as `position`; null when it was not read.
+        $position = $natural && DB::selectOne("SELECT to_regclass('legacy.natural_order') IS NOT NULL AS ok")->ok
+            ? ", (SELECT n.position FROM legacy.natural_order n WHERE n.snapshot_id = legacy.rows.snapshot_id AND n.table_name = legacy.rows.table_name AND n.row_id = legacy.rows.data->>'id') AS position"
+            : ', NULL AS position';
 
-        return array_map(function ($r) use ($raw) {
+        $rows = array_map(function ($r) use ($raw) {
             $data = json_decode($r->data, true, flags: JSON_THROW_ON_ERROR);
             foreach ($raw as $i => $f) {
                 $v = $r->{"r{$i}"};
                 $data[$f] = $v === null || $v === 'null' ? null : $v;
             }
+            $data['position'] = $r->position === null ? null : (int) $r->position;
 
             return $data;
-        }, DB::select("SELECT data{$columns} FROM legacy.rows WHERE snapshot_id = ? AND table_name = ? ORDER BY row_no", [$snapshotId, $table]));
+        }, DB::select("SELECT data{$columns}{$position} FROM legacy.rows WHERE snapshot_id = ? AND table_name = ? ORDER BY row_no", [$snapshotId, $table]));
+        // legacy tables have no field named position; the rows keep the order of the snapshot where it was not read
+        usort($rows, fn (array $a, array $b) => ($a['position'] ?? PHP_INT_MAX) <=> ($b['position'] ?? PHP_INT_MAX));
+
+        return $rows;
     }
 
     /**

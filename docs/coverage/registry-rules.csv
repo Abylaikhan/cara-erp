@@ -4,7 +4,6 @@ group,page-channels,NOT_STARTED,ERP-062 (D-11),Центры прибыли
 group,page-hr,NOT_STARTED,ERP-053/054 (D-13),Сотрудники
 group,page-wages,NOT_STARTED,ERP-055 (D-06),Сдельная оплата
 group,page-payroll,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость
-group,page-accruals,NOT_STARTED,ERP-056 (D-06),Начисления ЗП
 group,page-mycabinet,NOT_STARTED,ERP-058,Мой кабинет
 group,page-ai,NOT_STARTED,ERP-065 (D-09),AI-ассистент
 # Modal windows not migrated yet,,,,
@@ -74,8 +73,6 @@ area,finance-bep,NOT_STARTED,ERP-063 (D-11),Финансы → точка без
 area,finance-osv,NOT_STARTED,ERP-061 (D-11),Финансы → ОСВ
 area,finance-activity,NOT_STARTED,ERP-063 (D-11),Финансы → P&L по видам деятельности
 area,money-fab,NOT_STARTED,ERP-031 (D-03/D-11),Деньги → кнопка новой операции
-area,sr-tab-paysheet,NOT_STARTED,ERP-059 (D-13),Отчёт салонов → платёжная ведомость
-area,sr-tab-history,NOT_STARTED,ERP-059 (D-13),Отчёт салонов → история ЗП
 # Documented differences of the shell (ADR-0002),,,,
 area,login-hints-block,DECIDED,ADR-0002 п. 1,Подсказки с логинами и паролями ролей — не переносятся (AUTH-01)
 area,diag-panel,DECIDED,ADR-0002 п. 2,Отладочная панель «Диагностика загрузки»
@@ -136,7 +133,6 @@ function,sumPayrollLedgerColumns,NOT_STARTED,ERP-057 (D-06),Зарплатная
 function,txPayoutsFor,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
 function,txPayoutsHtml,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
 function,showTxPayouts,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
-function,initAccrualsPage,NOT_STARTED,ERP-056 (D-06),Начисления ЗП
 function,showEmpPayrollHistory,NOT_STARTED,ERP-056 (D-06),Начисления ЗП
 function,openEmployeeCardByName,NOT_STARTED,ERP-053/054 (D-13),Сотрудники и табель
 function,initDynamicPeriods,NOT_STARTED,ERP-053/054 (D-13),Сотрудники и табель
@@ -214,3 +210,12 @@ table,wh_documents,NOT_STARTED,ERP-039 (D-04/D-05),0 строк в копии le
 network,fetch@attempt,NOT_STARTED,ERP-031 (D-03/D-11),Запись операции с повтором (sbInsertMoneyTxSafe)
 function,exportDrilldownExcel,NOT_STARTED,ERP-067 (Excel),В новой версии кнопка показывает сообщение о выгрузках
 function,r1,NOT_STARTED,ERP-028 (D-12),Округление расчёта технологических карт
+function,openVacationCalcModal,NOT_STARTED,ERP-056 (D-06),Отпускные и больничные: расчёт
+function,openSalaryCalcModal,NOT_STARTED,ERP-056 (D-06),Начислить оклад по табелю
+function,openAccrualModal,NOT_STARTED,ERP-056 (D-06),Новое и изменение начисления
+control,page-salon_report|L8142,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8143,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8209,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8210,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8220,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8221,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же

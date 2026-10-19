@@ -37,6 +37,8 @@ class ChannelIsolationTest extends TestCase
         'crm' => ['Crm', ['clientOrders', 'boardOrders', 'projects']],
         'money' => ['Money', ['advances', 'calendar', 'bankRecon', 'salonRows']],
         'customers' => ['Customers', ['reconcileOrders']],
+        // the salon payroll lines carry no channel (legacy shows them to every account of the page): nothing of a channel is in them
+        'salon_report' => ['SalonReport', ['payroll']],
     ];
 
     /** @var array<string, array{lead: int, file: int, order: string}> */

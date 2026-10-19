@@ -17,9 +17,9 @@ page,page-money_salon,,page-money_salon,7064,M15 Касса салона,IMPLEME
 page,page-reconcile,,page-reconcile,7138,M16 Сверка с офисом,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
 page,page-hr,,page-hr,7200,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
 page,page-payroll,,page-payroll,7688,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
-page,page-accruals,,page-accruals,7768,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),
+page,page-accruals,,page-accruals,7768,M20 Начисления ЗП,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
 page,page-wages,,page-wages,8018,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
-page,page-salon_report,,page-salon_report,8120,M21 Отчёт салонов,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
+page,page-salon_report,,page-salon_report,8120,M21 Отчёт салонов,IMPLEMENTED,resources/js/components/salon/HistoryTab.vue,
 page,page-mycabinet,,page-mycabinet,8247,M22 Мой кабинет,NOT_STARTED,ERP-058,
 page,page-ai,,page-ai,8378,M23 AI Ассистент,NOT_STARTED,ERP-065 (D-09),
 modal,aliasModal,,aliasModal,2737,M03 Склад,IMPLEMENTED,resources/js/components/ErpModal.vue,
@@ -1993,34 +1993,34 @@ control,page-payroll|L7756,th,page-payroll,7756,M19 Зарплатная вед�
 control,page-payroll|L7757,th,page-payroll,7757,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Выдано
 control,page-payroll|L7758,th,page-payroll,7758,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Остаток
 control,page-payroll|L7759,th,page-payroll,7759,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
-control,page-accruals|L7774,button,page-accruals,7774,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),🏖 Отпускные / Больничные
-control,page-accruals|L7775,button,page-accruals,7775,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),📊 Начислить оклад
-control,page-accruals|L7776,button,page-accruals,7776,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),+ Начисление
-control,page-accruals|select|accrual-month-filter,select,page-accruals,7781,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Все периоды Ноябрь 2025 Декабрь 2025 Январь 2026 Февраль 2026 Март 2026 Апрель 2
-control,page-accruals|L7782,option,page-accruals,7782,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Все периоды
-control,page-accruals|L7783,option,page-accruals,7783,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Ноябрь 2025
-control,page-accruals|L7784,option,page-accruals,7784,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Декабрь 2025
-control,page-accruals|L7785,option,page-accruals,7785,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Январь 2026
-control,page-accruals|L7786,option,page-accruals,7786,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Февраль 2026
-control,page-accruals|L7787,option,page-accruals,7787,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Март 2026
-control,page-accruals|L7788,option,page-accruals,7788,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Апрель 2026
-control,page-accruals|L7789,option,page-accruals,7789,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Май 2026
-control,page-accruals|L7790,option,page-accruals,7790,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Июнь 2026
-control,page-accruals|L7791,option,page-accruals,7791,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Июль 2026
-control,page-accruals|L7792,option,page-accruals,7792,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Август 2026
-control,page-accruals|input|accrual-search,input,page-accruals,7794,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),
-control,page-accruals|L7797,button,page-accruals,7797,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),🔄
-control,page-accruals|L7805,th,page-accruals,7805,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Сотрудник
-control,page-accruals|L7806,th,page-accruals,7806,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Период
-control,page-accruals|L7807,th,page-accruals,7807,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Оклад
-control,page-accruals|L7808,th,page-accruals,7808,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Сдельная
-control,page-accruals|L7809,th,page-accruals,7809,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Премия
-control,page-accruals|L7810,th,page-accruals,7810,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Отпускные
-control,page-accruals|L7811,th,page-accruals,7811,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Прочие
-control,page-accruals|L7812,th,page-accruals,7812,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Итого нач.
-control,page-accruals|L7813,th,page-accruals,7813,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),Удержано
-control,page-accruals|L7814,th,page-accruals,7814,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),К выдаче
-control,page-accruals|L7815,th,page-accruals,7815,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),
+control,page-accruals|L7774,button,page-accruals,7774,M20 Начисления ЗП,NOT_STARTED,"present, its action comes later — openVacationCalcModal: ERP-056 (D-06)",🏖 Отпускные / Больничные
+control,page-accruals|L7775,button,page-accruals,7775,M20 Начисления ЗП,NOT_STARTED,"present, its action comes later — openSalaryCalcModal: ERP-056 (D-06)",📊 Начислить оклад
+control,page-accruals|L7776,button,page-accruals,7776,M20 Начисления ЗП,NOT_STARTED,"present, its action comes later — openAccrualModal: ERP-056 (D-06)",+ Начисление
+control,page-accruals|select|accrual-month-filter,select,page-accruals,7781,M20 Начисления ЗП,IMPLEMENTED,id,Все периоды Ноябрь 2025 Декабрь 2025 Январь 2026 Февраль 2026 Март 2026 Апрель 2
+control,page-accruals|L7782,option,page-accruals,7782,M20 Начисления ЗП,IMPLEMENTED,label,Все периоды
+control,page-accruals|L7783,option,page-accruals,7783,M20 Начисления ЗП,IMPLEMENTED,label,Ноябрь 2025
+control,page-accruals|L7784,option,page-accruals,7784,M20 Начисления ЗП,IMPLEMENTED,label,Декабрь 2025
+control,page-accruals|L7785,option,page-accruals,7785,M20 Начисления ЗП,IMPLEMENTED,label,Январь 2026
+control,page-accruals|L7786,option,page-accruals,7786,M20 Начисления ЗП,IMPLEMENTED,label,Февраль 2026
+control,page-accruals|L7787,option,page-accruals,7787,M20 Начисления ЗП,IMPLEMENTED,label,Март 2026
+control,page-accruals|L7788,option,page-accruals,7788,M20 Начисления ЗП,IMPLEMENTED,label,Апрель 2026
+control,page-accruals|L7789,option,page-accruals,7789,M20 Начисления ЗП,IMPLEMENTED,label,Май 2026
+control,page-accruals|L7790,option,page-accruals,7790,M20 Начисления ЗП,IMPLEMENTED,label,Июнь 2026
+control,page-accruals|L7791,option,page-accruals,7791,M20 Начисления ЗП,IMPLEMENTED,label,Июль 2026
+control,page-accruals|L7792,option,page-accruals,7792,M20 Начисления ЗП,IMPLEMENTED,label,Август 2026
+control,page-accruals|input|accrual-search,input,page-accruals,7794,M20 Начисления ЗП,IMPLEMENTED,id,
+control,page-accruals|L7797,button,page-accruals,7797,M20 Начисления ЗП,IMPLEMENTED,label,🔄
+control,page-accruals|L7805,th,page-accruals,7805,M20 Начисления ЗП,IMPLEMENTED,label,Сотрудник
+control,page-accruals|L7806,th,page-accruals,7806,M20 Начисления ЗП,IMPLEMENTED,label,Период
+control,page-accruals|L7807,th,page-accruals,7807,M20 Начисления ЗП,IMPLEMENTED,label,Оклад
+control,page-accruals|L7808,th,page-accruals,7808,M20 Начисления ЗП,IMPLEMENTED,label,Сдельная
+control,page-accruals|L7809,th,page-accruals,7809,M20 Начисления ЗП,IMPLEMENTED,label,Премия
+control,page-accruals|L7810,th,page-accruals,7810,M20 Начисления ЗП,IMPLEMENTED,label,Отпускные
+control,page-accruals|L7811,th,page-accruals,7811,M20 Начисления ЗП,IMPLEMENTED,label,Прочие
+control,page-accruals|L7812,th,page-accruals,7812,M20 Начисления ЗП,IMPLEMENTED,label,Итого нач.
+control,page-accruals|L7813,th,page-accruals,7813,M20 Начисления ЗП,IMPLEMENTED,label,Удержано
+control,page-accruals|L7814,th,page-accruals,7814,M20 Начисления ЗП,IMPLEMENTED,label,К выдаче
+control,page-accruals|L7815,th,page-accruals,7815,M20 Начисления ЗП,IMPLEMENTED,an empty column header: its table is compared visually,
 control,vacationCalcModal|L7828,button,vacationCalcModal,7828,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),✕
 control,vacationCalcModal|input|vc-emp,input,vacationCalcModal,7834,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),
 control,vacationCalcModal|select|vc-type,select,vacationCalcModal,7839,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),🏖 Отпускные 🏥 Больничные
@@ -2130,8 +2130,8 @@ control,page-salon_report|L8138#2,option,page-salon_report,8138,M21 Отчёт �
 control,page-salon_report|L8139,option,page-salon_report,8139,M21 Отчёт салонов,IMPLEMENTED,label,Ноябрь
 control,page-salon_report|L8139#2,option,page-salon_report,8139,M21 Отчёт салонов,IMPLEMENTED,label,Декабрь
 control,page-salon_report|select|sr-year,select,page-salon_report,8141,M21 Отчёт салонов,IMPLEMENTED,id,2026 2025 2024
-control,page-salon_report|L8142,option,page-salon_report,8142,M21 Отчёт салонов,IMPLEMENTED,label,2026
-control,page-salon_report|L8143,option,page-salon_report,8143,M21 Отчёт салонов,IMPLEMENTED,label,2025
+control,page-salon_report|L8142,option,page-salon_report,8142,M21 Отчёт салонов,DUPLICATE,ADR-0034,2026
+control,page-salon_report|L8143,option,page-salon_report,8143,M21 Отчёт салонов,DUPLICATE,ADR-0034,2025
 control,page-salon_report|L8144,option,page-salon_report,8144,M21 Отчёт салонов,IMPLEMENTED,label,2024
 control,page-salon_report|select|sr-salon,select,page-salon_report,8146,M21 Отчёт салонов,IMPLEMENTED,id,Оба салона 🏬 Армада 🏪 Назарбаева
 control,page-salon_report|L8147,option,page-salon_report,8147,M21 Отчёт салонов,IMPLEMENTED,label,Оба салона
@@ -2150,42 +2150,42 @@ control,page-salon_report|L8187,th,page-salon_report,8187,M21 Отчёт сал�
 control,page-salon_report|L8188,th,page-salon_report,8188,M21 Отчёт салонов,IMPLEMENTED,label,Сумма
 control,page-salon_report|L8189,th,page-salon_report,8189,M21 Отчёт салонов,IMPLEMENTED,label,Оплачено
 control,page-salon_report|L8190,th,page-salon_report,8190,M21 Отчёт салонов,IMPLEMENTED,label,Статус
-control,page-salon_report|select|sr-ps-month,select,page-salon_report,8200,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Январь Февраль Март Апрель Май Июнь Июль Август Сентябрь Октябрь Ноябрь Декабрь
-control,page-salon_report|L8201,option,page-salon_report,8201,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Январь
-control,page-salon_report|L8201#2,option,page-salon_report,8201,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Февраль
-control,page-salon_report|L8202,option,page-salon_report,8202,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Март
-control,page-salon_report|L8202#2,option,page-salon_report,8202,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Апрель
-control,page-salon_report|L8203,option,page-salon_report,8203,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Май
-control,page-salon_report|L8203#2,option,page-salon_report,8203,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Июнь
-control,page-salon_report|L8204,option,page-salon_report,8204,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Июль
-control,page-salon_report|L8204#2,option,page-salon_report,8204,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Август
-control,page-salon_report|L8205,option,page-salon_report,8205,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Сентябрь
-control,page-salon_report|L8205#2,option,page-salon_report,8205,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Октябрь
-control,page-salon_report|L8206,option,page-salon_report,8206,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Ноябрь
-control,page-salon_report|L8206#2,option,page-salon_report,8206,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Декабрь
-control,page-salon_report|select|sr-ps-year,select,page-salon_report,8208,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),2026 2025
-control,page-salon_report|L8209,option,page-salon_report,8209,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),2026
-control,page-salon_report|L8210,option,page-salon_report,8210,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),2025
-control,page-salon_report|L8212,button,page-salon_report,8212,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Печать
-control,page-salon_report|select|sr-hist-year,select,page-salon_report,8219,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),2026 2025
-control,page-salon_report|L8220,option,page-salon_report,8220,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),2026
-control,page-salon_report|L8221,option,page-salon_report,8221,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),2025
-control,page-salon_report|select|sr-hist-employee,select,page-salon_report,8223,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Все сотрудники
-control,page-salon_report|L8224,option,page-salon_report,8224,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Все сотрудники
-control,page-salon_report|L8232,th,page-salon_report,8232,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Сотрудник
-control,page-salon_report|L8233,th,page-salon_report,8233,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Янв
-control,page-salon_report|L8233#2,th,page-salon_report,8233,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Фев
-control,page-salon_report|L8234,th,page-salon_report,8234,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Мар
-control,page-salon_report|L8234#2,th,page-salon_report,8234,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Апр
-control,page-salon_report|L8235,th,page-salon_report,8235,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Май
-control,page-salon_report|L8235#2,th,page-salon_report,8235,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Июн
-control,page-salon_report|L8236,th,page-salon_report,8236,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Июл
-control,page-salon_report|L8236#2,th,page-salon_report,8236,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Авг
-control,page-salon_report|L8237,th,page-salon_report,8237,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Сен
-control,page-salon_report|L8237#2,th,page-salon_report,8237,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Окт
-control,page-salon_report|L8238,th,page-salon_report,8238,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Ноя
-control,page-salon_report|L8238#2,th,page-salon_report,8238,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Дек
-control,page-salon_report|L8239,th,page-salon_report,8239,M21 Отчёт салонов,NOT_STARTED,ERP-059 (D-13),Итого
+control,page-salon_report|select|sr-ps-month,select,page-salon_report,8200,M21 Отчёт салонов,IMPLEMENTED,id,Январь Февраль Март Апрель Май Июнь Июль Август Сентябрь Октябрь Ноябрь Декабрь
+control,page-salon_report|L8201,option,page-salon_report,8201,M21 Отчёт салонов,IMPLEMENTED,label,Январь
+control,page-salon_report|L8201#2,option,page-salon_report,8201,M21 Отчёт салонов,IMPLEMENTED,label,Февраль
+control,page-salon_report|L8202,option,page-salon_report,8202,M21 Отчёт салонов,IMPLEMENTED,label,Март
+control,page-salon_report|L8202#2,option,page-salon_report,8202,M21 Отчёт салонов,IMPLEMENTED,label,Апрель
+control,page-salon_report|L8203,option,page-salon_report,8203,M21 Отчёт салонов,IMPLEMENTED,label,Май
+control,page-salon_report|L8203#2,option,page-salon_report,8203,M21 Отчёт салонов,IMPLEMENTED,label,Июнь
+control,page-salon_report|L8204,option,page-salon_report,8204,M21 Отчёт салонов,IMPLEMENTED,label,Июль
+control,page-salon_report|L8204#2,option,page-salon_report,8204,M21 Отчёт салонов,IMPLEMENTED,label,Август
+control,page-salon_report|L8205,option,page-salon_report,8205,M21 Отчёт салонов,IMPLEMENTED,label,Сентябрь
+control,page-salon_report|L8205#2,option,page-salon_report,8205,M21 Отчёт салонов,IMPLEMENTED,label,Октябрь
+control,page-salon_report|L8206,option,page-salon_report,8206,M21 Отчёт салонов,IMPLEMENTED,label,Ноябрь
+control,page-salon_report|L8206#2,option,page-salon_report,8206,M21 Отчёт салонов,IMPLEMENTED,label,Декабрь
+control,page-salon_report|select|sr-ps-year,select,page-salon_report,8208,M21 Отчёт салонов,IMPLEMENTED,id,2026 2025
+control,page-salon_report|L8209,option,page-salon_report,8209,M21 Отчёт салонов,DUPLICATE,ADR-0034,2026
+control,page-salon_report|L8210,option,page-salon_report,8210,M21 Отчёт салонов,DUPLICATE,ADR-0034,2025
+control,page-salon_report|L8212,button,page-salon_report,8212,M21 Отчёт салонов,IMPLEMENTED,label,Печать
+control,page-salon_report|select|sr-hist-year,select,page-salon_report,8219,M21 Отчёт салонов,IMPLEMENTED,id,2026 2025
+control,page-salon_report|L8220,option,page-salon_report,8220,M21 Отчёт салонов,DUPLICATE,ADR-0034,2026
+control,page-salon_report|L8221,option,page-salon_report,8221,M21 Отчёт салонов,DUPLICATE,ADR-0034,2025
+control,page-salon_report|select|sr-hist-employee,select,page-salon_report,8223,M21 Отчёт салонов,IMPLEMENTED,id,Все сотрудники
+control,page-salon_report|L8224,option,page-salon_report,8224,M21 Отчёт салонов,IMPLEMENTED,label,Все сотрудники
+control,page-salon_report|L8232,th,page-salon_report,8232,M21 Отчёт салонов,IMPLEMENTED,label,Сотрудник
+control,page-salon_report|L8233,th,page-salon_report,8233,M21 Отчёт салонов,IMPLEMENTED,label,Янв
+control,page-salon_report|L8233#2,th,page-salon_report,8233,M21 Отчёт салонов,IMPLEMENTED,label,Фев
+control,page-salon_report|L8234,th,page-salon_report,8234,M21 Отчёт салонов,IMPLEMENTED,label,Мар
+control,page-salon_report|L8234#2,th,page-salon_report,8234,M21 Отчёт салонов,IMPLEMENTED,label,Апр
+control,page-salon_report|L8235,th,page-salon_report,8235,M21 Отчёт салонов,IMPLEMENTED,label,Май
+control,page-salon_report|L8235#2,th,page-salon_report,8235,M21 Отчёт салонов,IMPLEMENTED,label,Июн
+control,page-salon_report|L8236,th,page-salon_report,8236,M21 Отчёт салонов,IMPLEMENTED,label,Июл
+control,page-salon_report|L8236#2,th,page-salon_report,8236,M21 Отчёт салонов,IMPLEMENTED,label,Авг
+control,page-salon_report|L8237,th,page-salon_report,8237,M21 Отчёт салонов,IMPLEMENTED,label,Сен
+control,page-salon_report|L8237#2,th,page-salon_report,8237,M21 Отчёт салонов,IMPLEMENTED,label,Окт
+control,page-salon_report|L8238,th,page-salon_report,8238,M21 Отчёт салонов,IMPLEMENTED,label,Ноя
+control,page-salon_report|L8238#2,th,page-salon_report,8238,M21 Отчёт салонов,IMPLEMENTED,label,Дек
+control,page-salon_report|L8239,th,page-salon_report,8239,M21 Отчёт салонов,IMPLEMENTED,label,Итого
 control,page-mycabinet|L8253,div,page-mycabinet,8253,M22 Мой кабинет,NOT_STARTED,ERP-058,1
 control,page-mycabinet|L8254,div,page-mycabinet,8254,M22 Мой кабинет,NOT_STARTED,ERP-058,2
 control,page-mycabinet|L8255,div,page-mycabinet,8255,M22 Мой кабинет,NOT_STARTED,ERP-058,3
@@ -2555,21 +2555,21 @@ function,updateEsfExpSubcat#1,,,12852,M05 Входящие ЭСФ,NOT_STARTED,by
 function,saveEsfExpense#1,,,12867,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
 function,acceptItemToWarehouse#1,,,12908,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.EXPENSE_STOCK (DEC-04),
 function,showAccrualHistory#1,,,12953,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
-function,openVacationCalcModal#1,,,12972,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
+function,openVacationCalcModal#1,,,12972,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),
 function,loadVacationCalc#1,,,12987,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
 function,recalcVacation#1,,,13042,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
 function,saveVacationAccrual#1,,,13065,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
-function,openSalaryCalcModal#1,,,13097,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
+function,openSalaryCalcModal#1,,,13097,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),
 function,loadSalaryCalc#1,,,13102,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
 function,updateSalaryCalcRow#1,,,13160,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
 function,recalcSalaries#1,,,13172,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
 function,createSalaryAccruals#1,,,13174,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
-function,initAccrualsPage#1,,,13213,UI оболочка,NOT_STARTED,ERP-056 (D-06),
-function,renderAccrualsList#1,,,13218,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
-function,openAccrualModal#1,,,13259,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
+function,initAccrualsPage#1,,,13213,UI оболочка,IMPLEMENTED,requirement M20.JOURNAL,
+function,renderAccrualsList#1,,,13218,M20 Начисления ЗП,IMPLEMENTED,requirement M20.JOURNAL,
+function,openAccrualModal#1,,,13259,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),
 function,calcAccrualTotal#1,,,13305,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
 function,saveAccrual#1,,,13316,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
-function,initSalaryLedgerPage#1,,,13381,"M19 Зарплатная ведомость, M20 Начисления ЗП",NOT_STARTED,by its controls: ERP-056 (D-06); ERP-057 (D-06),
+function,initSalaryLedgerPage#1,,,13381,"M19 Зарплатная ведомость, M20 Начисления ЗП",IMPLEMENTED,requirement M20.JOURNAL,
 function,togglePayrollCols#1,,,13416,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,openPayrollRowMenu#1,,,13424,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,openEmployeeCardByName#1,,,13466,—,NOT_STARTED,ERP-053/054 (D-13),
@@ -2583,7 +2583,7 @@ function,curYM#1,,,13558,"M17 Сотрудники, M20 Начисления З�
 function,curMonthFirst#1,,,13559,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,curMonthLast#1,,,13560,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,initDynamicPeriods#1,,,13561,—,NOT_STARTED,ERP-053/054 (D-13),
-function,fillPayrollMonthSelects#1,,,13590,"M19 Зарплатная ведомость, M20 Начисления ЗП",NOT_STARTED,by its controls: ERP-056 (D-06); ERP-057 (D-06),
+function,fillPayrollMonthSelects#1,,,13590,"M19 Зарплатная ведомость, M20 Начисления ЗП",IMPLEMENTED,requirement M20.JOURNAL,
 function,onPayrollMonthChange#1,,,13621,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,renderSalaryLedger#1,,,13632,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,exportSalaryLedger#1,,,13879,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
@@ -2649,10 +2649,10 @@ function,openChOrderModal#1,,,16237,—,OBSOLETE,ADR-0029: dead code — called 
 function,saveOrderChannel#1,,,16247,M13 Центры прибыли,PENDING_DECISION,by its controls: D-15,
 function,exportChannelExcel#1,,,16256,M13 Центры прибыли,NOT_STARTED,by its controls: ERP-062 (D-11),
 function,showSalonReportTab#1,,,16283,M21 Отчёт салонов,IMPLEMENTED,requirement M21.CURRENT,
-function,renderPaysheet#1,,,16294,M21 Отчёт салонов,NOT_STARTED,by its controls: ERP-059 (D-13),
-function,printPaysheet#1,,,16355,M21 Отчёт салонов,NOT_STARTED,by its controls: ERP-059 (D-13),
-function,loadSalonPayroll#1,,,16366,M21 Отчёт салонов,NOT_STARTED,by its controls: ERP-059 (D-13),
-function,renderSalonPayrollHistory#1,,,16374,M21 Отчёт салонов,NOT_STARTED,by its controls: ERP-059 (D-13),
+function,renderPaysheet#1,,,16294,M21 Отчёт салонов,IMPLEMENTED,requirement M21.PAYSHEET,
+function,printPaysheet#1,,,16355,M21 Отчёт салонов,IMPLEMENTED,requirement M21.PAYSHEET,
+function,loadSalonPayroll#1,,,16366,M21 Отчёт салонов,IMPLEMENTED,requirement M21.PAYSHEET,
+function,renderSalonPayrollHistory#1,,,16374,M21 Отчёт салонов,IMPLEMENTED,requirement M21.HISTORY,
 function,initSalonReport#1,,,16444,UI оболочка,IMPLEMENTED,requirement M21.CURRENT,
 function,renderSalonReport#1,,,16457,M21 Отчёт салонов,IMPLEMENTED,requirement M21.CURRENT,
 function,showPage#1,,,16611,UI оболочка,IMPLEMENTED,requirement UI-01.SHELL,
@@ -3583,18 +3583,18 @@ table,purch_orders,,,,—,PENDING_DECISION,D-07,
 table,realizations,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/RealizationImporter.php,
 table,restoration_files,,,,—,NOT_STARTED,ERP-080 (D-08),
 table,restorations,,,,—,NOT_STARTED,ERP-080 (D-08),
-table,salary_accruals,,,,—,DECIDED,"legacy:control-totals: зарплата ещё не перенесена (ERP-053, ERP-059, DEC-13)",
-table,salary_accruals_history,,,,—,DECIDED,"legacy:control-totals: зарплата ещё не перенесена (ERP-053, ERP-059, DEC-13)",
+table,salary_accruals,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SalaryAccrualImporter.php,
+table,salary_accruals_history,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SalaryAccrualImporter.php,
 table,sales_worksheet,,,,—,DECIDED,"legacy:control-totals: рабочий лист реализации — с проведением реализации (ERP-049/050, DEC-08)",
-table,salon_payroll,,,,—,DECIDED,"legacy:control-totals: платёжная ведомость салонов — с зарплатой (ERP-053, ERP-059, DEC-13)",
+table,salon_payroll,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SalonPayrollImporter.php,
 table,salon_worksheet,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SalonWorksheetImporter.php,
-table,staff,,,,—,DECIDED,"legacy:control-totals: раздел «Сотрудники» ещё не перенесён (ERP-053, DEC-13)",
-table,staff_changes,,,,—,DECIDED,"legacy:control-totals: раздел «Сотрудники» ещё не перенесён (ERP-053, DEC-13)",
-table,staff_salary_history,,,,—,DECIDED,"legacy:control-totals: раздел «Сотрудники» ещё не перенесён (ERP-053, DEC-13)",
+table,staff,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/EmployeeImporter.php,
+table,staff_changes,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/EmployeeImporter.php,
+table,staff_salary_history,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/EmployeeImporter.php,
 table,suppliers,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SupplierImporter.php,
 table,tasks,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/CrmTaskImporter.php,
 table,tech_cards,,,,—,NOT_STARTED,ERP-028 (D-12),
-table,wage_items,,,,—,DECIDED,"legacy:control-totals: сдельная оплата — с зарплатой (ERP-053, ERP-059, DEC-13)",
+table,wage_items,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/PieceWorkImporter.php,
 table,warehouse,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/MaterialImporter.php,
 table,wh_documents,,,,—,NOT_STARTED,ERP-039 (D-04/D-05),
 storage,localStorage.getItem:pt_pin_lock,,,1631,UI оболочка,NOT_STARTED,as its function _pinState: ERP-053 (D-13),

@@ -11,7 +11,7 @@ use RuntimeException;
  * Natural (insertion) order of a legacy table, read with GET only. Some legacy pages show rows unsorted — e.g. the lines of
  * an ESF in the order they were inserted from the XML — and such tables have no column to sort by, so the snapshot
  * (read in key order) cannot keep it. The order is stored next to the loaded snapshot; the set of rows must be the same.
- * With --order the rows are read in the order a legacy page asks for (e.g. advance reports `order=date.desc`): rows that
+ * With --order the rows are read in the order a legacy page asks for (e.g. advance reports `order=date.desc`, or several columns `year.desc,month.desc`): rows that
  * tie on that column keep the order the legacy database returns them in.
  */
 class LegacyNaturalOrder extends Command
@@ -33,12 +33,13 @@ class LegacyNaturalOrder extends Command
         $client = new SupabaseReadOnlyClient((string) $cfg['supabase']['url'], (string) $cfg['supabase']['key'], (int) $cfg['supabase']['timeout']);
         [$column, $direction] = [null, 'asc'];
         if ($this->option('order')) {
-            if (! preg_match('/^([a-z_][a-z0-9_]*)\.(asc|desc)$/', (string) $this->option('order'), $m)) {
-                $this->error('--order must look like column.asc or column.desc');
+            if (! preg_match('/^[a-z_][a-z0-9_]*\.(asc|desc)(,[a-z_][a-z0-9_]*\.(asc|desc))*$/', (string) $this->option('order'))) {
+                $this->error('--order must look like column.asc or column.desc, several separated by commas');
 
                 return self::INVALID;
             }
-            [, $column, $direction] = $m;
+            // one column keeps its form, a list is passed on as the legacy page writes it
+            [$column, $direction] = str_contains((string) $this->option('order'), ',') ? [(string) $this->option('order'), 'asc'] : explode('.', (string) $this->option('order'));
         }
         $read = function () use ($client, $table, $cfg, $column, $direction): array {
             $ids = [];
