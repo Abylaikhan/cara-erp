@@ -353,7 +353,8 @@ with sync_playwright() as p:
         for v in page.locator('#cash-account-select option').evaluate_all('os => os.map(o => o.value)'):
             page.select_option('#cash-account-select', v); page.wait_for_timeout(400)
             target_cash.append(page.locator('#cash-tbody').inner_text())
-        page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
+        if page.locator('#cash-account-select option').count():  # an empty database has no cash desk
+            page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
         # Period «День» (today) and «Месяц» (the list, the current month, the latest month with operations), then «Всё время».
         def period_states(side_set):
             out = []
@@ -470,6 +471,16 @@ with sync_playwright() as p:
         run_filters(page, 'target', theme, 'page-accruals')
         accruals = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         target_acc = page.locator('#accruals-tbody').inner_text()
+        # M19 «Зарплатная ведомость»: the ledger of the latest month with records and its totals, the journal of payouts.
+        page.goto(TARGET + '/payroll', wait_until='networkidle'); page.wait_for_timeout(1000)
+        target_shot(page, str(OUT / f'target-payroll-{theme}.png'))
+        run_filters(page, 'target', theme, 'page-payroll')
+        payroll = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        target_pr = [page.locator(x).inner_text() for x in ('#payroll-kpi', '#payroll-tbody', '#payroll-tfoot')]
+        page.get_by_role('button', name='💵 Журнал выдач').click(); page.wait_for_timeout(600)
+        target_shot(page, str(OUT / f'target-payroll-payouts-{theme}.png'))
+        target_po = page.locator('#po-tbody').inner_text()
+        page.locator('#payoutsModal .modal-close').click(); page.wait_for_timeout(300)
         # M17 «Сотрудники»: the staffing table, the cards, the table, the card of the first employee.
         page.goto(TARGET + '/hr', wait_until='networkidle'); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-hr-{theme}.png'))
@@ -882,7 +893,8 @@ with sync_playwright() as p:
         for v in page.locator('#cash-account-select option').evaluate_all('os => os.map(o => o.value)'):
             page.select_option('#cash-account-select', v); page.wait_for_timeout(400)
             legacy_cash.append(page.locator('#cash-tbody').inner_text())
-        page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
+        if page.locator('#cash-account-select option').count():  # an empty database has no cash desk
+            page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
         bad = [i for i, (x, y) in enumerate(zip(target_cash, legacy_cash)) if x != y]
         print(f'cash tables ({theme}): {len(target_cash)} / {len(legacy_cash)} касс, ' + ('совпадает' if len(target_cash) == len(legacy_cash) and not bad else f'РАСХОЖДЕНИЕ в {bad}'))
         def legacy_set(step):
@@ -1040,6 +1052,23 @@ with sync_playwright() as p:
         run_filters(page, 'legacy', theme, 'page-accruals')
         tl, ll = target_acc.splitlines(), page.locator('#accruals-tbody').inner_text().splitlines()
         print(f'accruals table ({theme}): rows {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
+        # «Зарплатная ведомость»: the same accruals and payments as its loader keeps them; legacy draws the ledger only after a
+        # filter is changed — it is asked to draw it (ADR-0002).
+        page.evaluate("""(r) => {
+            _payrollData = {accruals: r.accruals.map(a => ({...a, type: 'salary'})), payments: r.payments.map(p => ({...p, type: 'payment'}))};
+            fillPayrollMonthSelects();
+            showPage('payroll', document.querySelector(".nav-item[onclick*=\\"showPage('payroll'\\"]"));
+            renderSalaryLedger();
+        }""", payroll)
+        page.wait_for_timeout(1200)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-payroll-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'page-payroll')
+        legacy_pr = [page.locator(x).inner_text() for x in ('#payroll-kpi', '#payroll-tbody', '#payroll-tfoot')]
+        page.evaluate("showPayouts()"); page.wait_for_timeout(600)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-payroll-payouts-{theme}.png'))
+        legacy_po = page.locator('#po-tbody').inner_text()
+        page.evaluate("closeModal('payoutsModal')")
+        print(f'payroll ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'строки', 'итоги', 'выдачи'), target_pr + [target_po], legacy_pr + [legacy_po])))
         # «Сотрудники»: legacy gets the staff the target renders (as loadStaffFromDB keeps it); its demonstration lists of piece
         # work and of the payroll (wageEmployees, payrollStaff) are emptied — the target does not show them (ADR-0036). Legacy
         # draws the staffing table only when its tab is clicked: it is clicked (ADR-0002).
@@ -1281,7 +1310,7 @@ with sync_playwright() as p:
             n = len(a2) if isinstance(a2, list) else 1
             print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'hr', 'hr-employees', 'hr-table') + (('hr-card',) if hr['employees'] else ()):
+        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'payroll', 'payroll-payouts', 'hr', 'hr-employees', 'hr-table') + (('hr-card',) if hr['employees'] else ()):
             if EMPTY and shot in EMPTY_DEVIATIONS:  # pictures kept, not compared: a documented deviation
                 print(f'{shot}-{theme}: not compared — {EMPTY_DEVIATIONS[shot]}')
                 continue

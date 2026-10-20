@@ -138,6 +138,12 @@ function openEmployeeCard(emp: Employee | null): void {
         firedDate: emp?.fired_date || '',
     });
 }
+// Legacy openEmployeeCardByName (from «Зарплатная ведомость» → «👤 Карточка сотрудника»): /hr?emp=<name> opens the card.
+{
+    const name = new URLSearchParams(window.location.search).get('emp');
+    const emp = name ? props.employees.find((e) => e.name === name) : undefined;
+    if (emp) openEmployeeCard(emp);
+}
 // Legacy openStaffChangesHistory: the conditions of work, newest first, in a message.
 function openStaffChangesHistory(): void {
     if (!card.emp && !card.name) {

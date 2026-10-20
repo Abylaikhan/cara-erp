@@ -16,7 +16,7 @@ page,page-channels,,page-channels,6984,M13 Центры прибыли,NOT_START
 page,page-money_salon,,page-money_salon,7068,M15 Касса салона,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
 page,page-reconcile,,page-reconcile,7142,M16 Сверка с офисом,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
 page,page-hr,,page-hr,7204,M17 Сотрудники,IMPLEMENTED,resources/js/components/ErpModal.vue,
-page,page-payroll,,page-payroll,7692,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
+page,page-payroll,,page-payroll,7692,M19 Зарплатная ведомость,IMPLEMENTED,resources/js/components/ErpModal.vue,
 page,page-accruals,,page-accruals,7772,M20 Начисления ЗП,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
 page,page-wages,,page-wages,8022,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
 page,page-salon_report,,page-salon_report,8124,M21 Отчёт салонов,IMPLEMENTED,resources/js/components/salon/HistoryTab.vue,
@@ -1955,48 +1955,48 @@ control,employeeCardModal|input|emp-fired-date,input,employeeCardModal,7678,M17 
 control,employeeCardModal|button|emp-card-delete,button,employeeCardModal,7682,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),🚪 Уволить
 control,employeeCardModal|L7684,button,employeeCardModal,7684,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Отмена
 control,employeeCardModal|L7685,button,employeeCardModal,7685,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Сохранить
-control,page-payroll|L7699,button,page-payroll,7699,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),💵 Журнал выдач
-control,page-payroll|L7700,button,page-payroll,7700,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),📥 Excel
-control,page-payroll|select|payroll-month,select,page-payroll,7706,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),— Произвольный период — Ноябрь 2025 Декабрь 2025 Январь 2026 Февраль 2026 Март 2
-control,page-payroll|L7707,option,page-payroll,7707,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),— Произвольный период —
-control,page-payroll|L7708,option,page-payroll,7708,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Ноябрь 2025
-control,page-payroll|L7709,option,page-payroll,7709,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Декабрь 2025
-control,page-payroll|L7710,option,page-payroll,7710,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Январь 2026
-control,page-payroll|L7711,option,page-payroll,7711,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Февраль 2026
-control,page-payroll|L7712,option,page-payroll,7712,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Март 2026
-control,page-payroll|L7713,option,page-payroll,7713,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Апрель 2026
-control,page-payroll|L7714,option,page-payroll,7714,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Май 2026
-control,page-payroll|L7715,option,page-payroll,7715,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Июнь 2026
-control,page-payroll|L7716,option,page-payroll,7716,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Июль 2026
-control,page-payroll|L7717,option,page-payroll,7717,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Август 2026
-control,page-payroll|input|payroll-from,input,page-payroll,7720,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
-control,page-payroll|input|payroll-to,input,page-payroll,7722,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
-control,page-payroll|select|payroll-dept,select,page-payroll,7723,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Все Производство / Офис Салоны
-control,page-payroll|L7724,option,page-payroll,7724,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Все
-control,page-payroll|L7725,option,page-payroll,7725,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Производство / Офис
-control,page-payroll|L7726,option,page-payroll,7726,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Салоны
-control,page-payroll|input|payroll-search,input,page-payroll,7728,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
-control,page-payroll|L7729,button,page-payroll,7729,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),🔄
-control,page-payroll|L7740,th,page-payroll,7740,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Сотрудник
-control,page-payroll|L7741,th,page-payroll,7741,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Остаток нач.
-control,page-payroll|L7742,th,page-payroll,7742,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Оклад
-control,page-payroll|L7743,th,page-payroll,7743,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Сдельная
-control,page-payroll|L7744,th,page-payroll,7744,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Премия
-control,page-payroll|L7745,th,page-payroll,7745,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Отпускные
-control,page-payroll|L7746,th,page-payroll,7746,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Займ нач.
-control,page-payroll|L7747,th,page-payroll,7747,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Больничные
-control,page-payroll|L7748,th,page-payroll,7748,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),◀ Итого нач.
-control,page-payroll|L7751,th,page-payroll,7751,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Обед
-control,page-payroll|L7752,th,page-payroll,7752,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Займ погаш.
-control,page-payroll|L7753,th,page-payroll,7753,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),ОПВ
-control,page-payroll|L7754,th,page-payroll,7754,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),ОСМС/СО
-control,page-payroll|L7755,th,page-payroll,7755,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Штрафы
-control,page-payroll|L7756,th,page-payroll,7756,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Прочие
-control,page-payroll|L7757,th,page-payroll,7757,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),◀ Итого удерж.
-control,page-payroll|L7760,th,page-payroll,7760,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),К выдаче
-control,page-payroll|L7761,th,page-payroll,7761,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Выдано
-control,page-payroll|L7762,th,page-payroll,7762,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),Остаток
-control,page-payroll|L7763,th,page-payroll,7763,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
+control,page-payroll|L7699,button,page-payroll,7699,M19 Зарплатная ведомость,IMPLEMENTED,label,💵 Журнал выдач
+control,page-payroll|L7700,button,page-payroll,7700,M19 Зарплатная ведомость,NOT_STARTED,"present, its action comes later — exportSalaryLedger: ERP-067",📥 Excel
+control,page-payroll|select|payroll-month,select,page-payroll,7706,M19 Зарплатная ведомость,IMPLEMENTED,id,— Произвольный период — Ноябрь 2025 Декабрь 2025 Январь 2026 Февраль 2026 Март 2
+control,page-payroll|L7707,option,page-payroll,7707,M19 Зарплатная ведомость,IMPLEMENTED,label,— Произвольный период —
+control,page-payroll|L7708,option,page-payroll,7708,M19 Зарплатная ведомость,IMPLEMENTED,label,Ноябрь 2025
+control,page-payroll|L7709,option,page-payroll,7709,M19 Зарплатная ведомость,IMPLEMENTED,label,Декабрь 2025
+control,page-payroll|L7710,option,page-payroll,7710,M19 Зарплатная ведомость,IMPLEMENTED,label,Январь 2026
+control,page-payroll|L7711,option,page-payroll,7711,M19 Зарплатная ведомость,IMPLEMENTED,label,Февраль 2026
+control,page-payroll|L7712,option,page-payroll,7712,M19 Зарплатная ведомость,IMPLEMENTED,label,Март 2026
+control,page-payroll|L7713,option,page-payroll,7713,M19 Зарплатная ведомость,IMPLEMENTED,label,Апрель 2026
+control,page-payroll|L7714,option,page-payroll,7714,M19 Зарплатная ведомость,IMPLEMENTED,label,Май 2026
+control,page-payroll|L7715,option,page-payroll,7715,M19 Зарплатная ведомость,IMPLEMENTED,label,Июнь 2026
+control,page-payroll|L7716,option,page-payroll,7716,M19 Зарплатная ведомость,IMPLEMENTED,label,Июль 2026
+control,page-payroll|L7717,option,page-payroll,7717,M19 Зарплатная ведомость,IMPLEMENTED,label,Август 2026
+control,page-payroll|input|payroll-from,input,page-payroll,7720,M19 Зарплатная ведомость,IMPLEMENTED,id,
+control,page-payroll|input|payroll-to,input,page-payroll,7722,M19 Зарплатная ведомость,IMPLEMENTED,id,
+control,page-payroll|select|payroll-dept,select,page-payroll,7723,M19 Зарплатная ведомость,IMPLEMENTED,id,Все Производство / Офис Салоны
+control,page-payroll|L7724,option,page-payroll,7724,M19 Зарплатная ведомость,IMPLEMENTED,label,Все
+control,page-payroll|L7725,option,page-payroll,7725,M19 Зарплатная ведомость,IMPLEMENTED,label,Производство / Офис
+control,page-payroll|L7726,option,page-payroll,7726,M19 Зарплатная ведомость,IMPLEMENTED,label,Салоны
+control,page-payroll|input|payroll-search,input,page-payroll,7728,M19 Зарплатная ведомость,NOT_STARTED,"present, its action comes later — renderPayroll: ERP-057 (D-06)",
+control,page-payroll|L7729,button,page-payroll,7729,M19 Зарплатная ведомость,IMPLEMENTED,label,🔄
+control,page-payroll|L7740,th,page-payroll,7740,M19 Зарплатная ведомость,IMPLEMENTED,label,Сотрудник
+control,page-payroll|L7741,th,page-payroll,7741,M19 Зарплатная ведомость,IMPLEMENTED,label,Остаток нач.
+control,page-payroll|L7742,th,page-payroll,7742,M19 Зарплатная ведомость,IMPLEMENTED,label,Оклад
+control,page-payroll|L7743,th,page-payroll,7743,M19 Зарплатная ведомость,IMPLEMENTED,label,Сдельная
+control,page-payroll|L7744,th,page-payroll,7744,M19 Зарплатная ведомость,IMPLEMENTED,label,Премия
+control,page-payroll|L7745,th,page-payroll,7745,M19 Зарплатная ведомость,IMPLEMENTED,label,Отпускные
+control,page-payroll|L7746,th,page-payroll,7746,M19 Зарплатная ведомость,IMPLEMENTED,label,Займ нач.
+control,page-payroll|L7747,th,page-payroll,7747,M19 Зарплатная ведомость,IMPLEMENTED,label,Больничные
+control,page-payroll|L7748,th,page-payroll,7748,M19 Зарплатная ведомость,IMPLEMENTED,label,◀ Итого нач.
+control,page-payroll|L7751,th,page-payroll,7751,M19 Зарплатная ведомость,IMPLEMENTED,label,Обед
+control,page-payroll|L7752,th,page-payroll,7752,M19 Зарплатная ведомость,IMPLEMENTED,label,Займ погаш.
+control,page-payroll|L7753,th,page-payroll,7753,M19 Зарплатная ведомость,IMPLEMENTED,label,ОПВ
+control,page-payroll|L7754,th,page-payroll,7754,M19 Зарплатная ведомость,IMPLEMENTED,label,ОСМС/СО
+control,page-payroll|L7755,th,page-payroll,7755,M19 Зарплатная ведомость,IMPLEMENTED,label,Штрафы
+control,page-payroll|L7756,th,page-payroll,7756,M19 Зарплатная ведомость,IMPLEMENTED,label,Прочие
+control,page-payroll|L7757,th,page-payroll,7757,M19 Зарплатная ведомость,IMPLEMENTED,label,◀ Итого удерж.
+control,page-payroll|L7760,th,page-payroll,7760,M19 Зарплатная ведомость,IMPLEMENTED,label,К выдаче
+control,page-payroll|L7761,th,page-payroll,7761,M19 Зарплатная ведомость,IMPLEMENTED,label,Выдано
+control,page-payroll|L7762,th,page-payroll,7762,M19 Зарплатная ведомость,IMPLEMENTED,label,Остаток
+control,page-payroll|L7763,th,page-payroll,7763,M19 Зарплатная ведомость,IMPLEMENTED,an empty column header: its table is compared visually,
 control,page-accruals|L7778,button,page-accruals,7778,M20 Начисления ЗП,NOT_STARTED,"present, its action comes later — openVacationCalcModal: ERP-056 (D-06)",🏖 Отпускные / Больничные
 control,page-accruals|L7779,button,page-accruals,7779,M20 Начисления ЗП,NOT_STARTED,"present, its action comes later — openSalaryCalcModal: ERP-056 (D-06)",📊 Начислить оклад
 control,page-accruals|L7780,button,page-accruals,7780,M20 Начисления ЗП,NOT_STARTED,"present, its action comes later — openAccrualModal: ERP-056 (D-06)",+ Начисление
@@ -2337,7 +2337,7 @@ control,global|L8662,button,global,8662,UI оболочка,IMPLEMENTED,label,О
 control,global|L8663,button,global,8663,UI оболочка,IMPLEMENTED,label,Сохранить
 control,global|L8671,button,global,8671,UI оболочка,IMPLEMENTED,label,✏️ Редактировать
 control,global|L8672,button,global,8672,UI оболочка,IMPLEMENTED,label,→ Следующий этап
-function,loadAsync#1,,,595,"M05 Входящие ЭСФ, M19 Зарплатная ведомость",NOT_STARTED,"by its controls: ERP-057 (D-06); present, its action comes later — exportEsfGoodsToExcel: requirement M05.EXPENSE_STOCK (DEC-04)",
+function,loadAsync#1,,,595,"M05 Входящие ЭСФ, M19 Зарплатная ведомость",NOT_STARTED,ERP-067,
 function,sbFetch#1,,,621,"M01 Дашборд, M05 Входящие ЭСФ, M06 Поставщики …",IMPLEMENTED,"requirement MIG-01.COPY, OPS-01.LIMITS",
 function,sbFetchAllPages#1,,,635,"M06 Поставщики, M09 Продажи, M11 Финансы …",IMPLEMENTED,"requirement MIG-01.COPY, OPS-01.LIMITS",
 function,sbInsert#1,,,646,"M02 Производство, M03 Склад, M04 Закупки …",DECIDED,ADR-0029,
@@ -2586,24 +2586,24 @@ function,renderAccrualsList#1,,,13427,M20 Начисления ЗП,IMPLEMENTED,
 function,openAccrualModal#1,,,13468,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),
 function,calcAccrualTotal#1,,,13514,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
 function,saveAccrual#1,,,13525,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
-function,initSalaryLedgerPage#1,,,13590,"M19 Зарплатная ведомость, M20 Начисления ЗП",IMPLEMENTED,requirement M20.JOURNAL,
-function,togglePayrollCols#1,,,13625,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,openPayrollRowMenu#1,,,13633,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,initSalaryLedgerPage#1,,,13590,"M19 Зарплатная ведомость, M20 Начисления ЗП",IMPLEMENTED,"requirement M19.LEDGER, M20.JOURNAL",
+function,togglePayrollCols#1,,,13625,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
+function,openPayrollRowMenu#1,,,13633,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
 function,openEmployeeCardByName#1,,,13675,—,NOT_STARTED,ERP-053/054 (D-13),
-function,prPayoutsPeriod#1,,,13685,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,showPayouts#1,,,13692,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,prPayoutRows#1,,,13715,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,renderPayouts#1,,,13725,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,exportPayouts#1,,,13747,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,prPayoutsPeriod#1,,,13685,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
+function,showPayouts#1,,,13692,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
+function,prPayoutRows#1,,,13715,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
+function,renderPayouts#1,,,13725,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
+function,exportPayouts#1,,,13747,M19 Зарплатная ведомость,NOT_STARTED,ERP-067,
 function,showEmpPayrollHistory#1,,,13756,—,NOT_STARTED,ERP-056 (D-06),
 function,curYM#1,,,13767,"M17 Сотрудники, M20 Начисления ЗП",NOT_STARTED,ERP-054 (D-06),
-function,curMonthFirst#1,,,13768,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,curMonthLast#1,,,13769,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,curMonthFirst#1,,,13768,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
+function,curMonthLast#1,,,13769,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 function,initDynamicPeriods#1,,,13770,—,NOT_STARTED,ERP-053/054 (D-13),
-function,fillPayrollMonthSelects#1,,,13799,"M19 Зарплатная ведомость, M20 Начисления ЗП",IMPLEMENTED,requirement M20.JOURNAL,
-function,onPayrollMonthChange#1,,,13830,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,renderSalaryLedger#1,,,13841,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,exportSalaryLedger#1,,,14088,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,fillPayrollMonthSelects#1,,,13799,"M19 Зарплатная ведомость, M20 Начисления ЗП",IMPLEMENTED,"requirement M19.LEDGER, M20.JOURNAL",
+function,onPayrollMonthChange#1,,,13830,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
+function,renderSalaryLedger#1,,,13841,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
+function,exportSalaryLedger#1,,,14088,M19 Зарплатная ведомость,NOT_STARTED,ERP-067,
 function,getUserPrefs#1,,,14133,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
 function,saveUserPref#1,,,14138,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
 function,getUserPref#1,,,14144,"M09 Продажи, M12 Деньги, M15 Касса салона",NOT_STARTED,"by its controls: ERP-030 (D-02/D-12); ERP-031 (D-03/D-11); present, its action comes later — openMoneyTxModal: requirement M12.POSTING (DEC-03)",
@@ -2898,8 +2898,8 @@ function,openEmployeeCard#1,,,22557,M17 Сотрудники,IMPLEMENTED,require
 function,saveEmployeeCard#1,,,22625,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
 function,deleteEmployee#1,,,22728,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,renderTimesheet#1,,,22737,M17 Сотрудники,NOT_STARTED,by its controls: ERP-054 (D-06),
-function,calcIPN#1,,,22977,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,buildPayrollRow#1,,,22983,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,calcIPN#1,,,22977,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
+function,buildPayrollRow#1,,,22983,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 function,showFinanceTab#1,,,23021,M11 Финансы,IMPLEMENTED,requirement M11.AR,
 function,buildActivityPL#1,,,23089,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
 function,renderActivityPL#1,,,23207,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
@@ -2919,29 +2919,29 @@ function,buildCFS#1,,,23855,M11 Финансы,IMPLEMENTED,requirement M11.CFS,
 function,cfsLabel#1,,,23892,M11 Финансы,NOT_STARTED,"by its controls: present, its action comes later — exportCFSExcel: ERP-067 (Excel)",
 function,renderCFS#1,,,23949,M11 Финансы,IMPLEMENTED,"requirement M11.CFS, UI-03.STATES",
 function,exportCFSExcel#1,,,24040,M11 Финансы,NOT_STARTED,ERP-067 (Excel),
-function,renderPayroll#1,,,24069,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,renderHRPayrollKpi#1,,,24160,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,renderHRPayrollTable#1,,,24180,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,setPayrollMonth#1,,,24231,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,openPayrollCard#1,,,24248,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,renderPayroll#1,,,24069,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
+function,renderHRPayrollKpi#1,,,24160,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
+function,renderHRPayrollTable#1,,,24180,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
+function,setPayrollMonth#1,,,24231,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
+function,openPayrollCard#1,,,24248,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 function,exportPayrollCardExcel#1,,,24434,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,exportPayrollCardPdf#1,,,24496,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,openPayrollEntryModal#1,,,24594,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,openPayrollEntryModal#1,,,24594,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 function,togglePECategories#1,,,24610,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,savePayrollEntry#1,,,24619,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,deletePayrollEntry#1,,,24634,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,renderPayrollEntryList#1,,,24642,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,renderHRPayrollEmployerTaxes#1,,,24671,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
-function,renderHRPayrollStructure#1,,,24689,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,renderHRPayrollEmployerTaxes#1,,,24671,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
+function,renderHRPayrollStructure#1,,,24689,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 function,renderPayrollKpi#1,,,24713,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,renderPayrollTable#1,,,24735,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,renderPayrollEmployerTaxes#1,,,24782,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,renderPayrollStructure#1,,,24798,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,openWagePaymentModal#1,,,24821,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,openWagePaymentModal#1,,,24821,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 function,saveWagePayment#1,,,24877,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,openAddPayrollEmployeeModal#1,,,24908,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,savePayrollEmployee#1,,,24916,M19 Зарплатная ведомость,PENDING_DECISION,by its controls: D-15,
-function,exportPayrollToExcel#1,,,24929,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
+function,exportPayrollToExcel#1,,,24929,M19 Зарплатная ведомость,NOT_STARTED,ERP-067,
 function,setDashPeriod#1,,,24960,M01 Дашборд,IMPLEMENTED,requirement M01,
 function,renderDashboard#1,,,24983,M01 Дашборд,IMPLEMENTED,"requirement M01, M01.FOT-CHART",
 function,onPurPeriodChange#1,,,25185,M11 Финансы,IMPLEMENTED,requirement M11.PURCHASES,

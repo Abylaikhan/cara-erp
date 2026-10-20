@@ -16,6 +16,7 @@ use App\Http\Controllers\LeadCommunicationController;
 use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\MrpController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PurchaseController;
@@ -134,6 +135,9 @@ Route::middleware('auth')->group(function () {
     // M17 «Сотрудники», часть 1: штат, карточки и история условий (просмотр)
     Route::get('/hr', [HrController::class, 'index'])->middleware('page:hr')->name('hr.index');
 
+    // M19 «Зарплатная ведомость», часть 1: начисления, удержания и выдачи по сотрудникам (просмотр)
+    Route::get('/payroll', [PayrollController::class, 'index'])->middleware('page:payroll')->name('payroll.index');
+
     // M20 «Начисления ЗП», часть 1: журнал начислений (просмотр)
     Route::get('/accruals', [AccrualController::class, 'index'])->middleware('page:accruals')->name('accruals.index');
 
@@ -183,7 +187,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Pages that are not migrated yet — the menu stays 1:1, the page says so honestly.
-    $migrated = ['dashboard', 'finance', 'money_salon', 'reconcile', 'salon_report', 'expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf', 'crm', 'purchases', 'sales', 'mrp', 'money', 'accruals', 'hr'];
+    $migrated = ['dashboard', 'finance', 'money_salon', 'reconcile', 'salon_report', 'expense_cats', 'catalog', 'customers', 'suppliers', 'warehouse', 'esf', 'crm', 'purchases', 'sales', 'mrp', 'money', 'accruals', 'hr', 'payroll'];
     Route::get('/{page}', [PageController::class, 'notMigrated'])
         ->whereIn('page', array_values(array_diff(array_keys(Erp::pages()), $migrated)))
         ->middleware('page')->name('page');

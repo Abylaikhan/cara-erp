@@ -2,7 +2,6 @@ kind,selector,status,reference,note
 # Pages not migrated yet (they render «не перенесено»),,,,
 group,page-channels,NOT_STARTED,ERP-062 (D-11),Центры прибыли
 group,page-wages,NOT_STARTED,ERP-055 (D-06),Сдельная оплата
-group,page-payroll,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость
 group,page-mycabinet,NOT_STARTED,ERP-058,Мой кабинет
 group,page-ai,NOT_STARTED,ERP-065 (D-09),AI-ассистент
 # Modal windows not migrated yet,,,,
@@ -238,3 +237,20 @@ function,renderSalonCommissionsSettings,NOT_STARTED,ERP-059 (D-06/D-13),Коми
 function,saveStaffFieldDirect,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: правка оклада и процента
 function,showSalaryHistory,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: история окладов
 function,saveStaffField,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: правка оклада и процента
+function,renderPayroll,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,renderHRPayrollKpi,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,renderHRPayrollTable,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,setPayrollMonth,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,openPayrollCard,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,openPayrollEntryModal,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,renderHRPayrollEmployerTaxes,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,renderHRPayrollStructure,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,openWagePaymentModal,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,buildPayrollRow,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,calcIPN,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,curMonthFirst,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,curMonthLast,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,exportPayouts,NOT_STARTED,ERP-067,Выгрузка в Excel
+function,exportSalaryLedger,NOT_STARTED,ERP-067,Выгрузка в Excel
+function,exportPayrollToExcel,NOT_STARTED,ERP-067,Выгрузка в Excel
+function,loadAsync,NOT_STARTED,ERP-067,Выгрузка в Excel

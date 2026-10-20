@@ -44,7 +44,8 @@ const months = computed(() => {
 });
 
 const month = ref('');
-const search = ref('');
+// legacy showEmpPayrollHistory (from «Зарплатная ведомость» → «📋 Операции за период»): /accruals?search=<name>
+const search = ref(new URLSearchParams(window.location.search).get('search') ?? '');
 const fmt = (n: number) => (n ? '₸' + Math.round(n).toLocaleString('ru-RU') : '—');
 
 const rows = computed(() => {

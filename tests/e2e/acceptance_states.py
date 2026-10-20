@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Browser acceptance of the loading states (TEST-AC-07 «Пусто, загрузка, ошибка, много строк») — make e2e, throwaway database.
 
-Twelve tabs bring their data after the page: a partial reload when the tab is opened. Legacy shows its static markup until
+Thirteen tabs bring their data after the page: a partial reload when the tab is opened. Legacy shows its static markup until
 its loader is done — empty frames, and «Загрузка…» where its markup or loader has it (the realization journal, the projects).
 So, for every such tab:
 - while its data are on the way it must not claim there are none («Нет данных», «Нет клиентов», «Пусто» …), and shows the
@@ -117,6 +117,46 @@ def main() -> int:
             page.locator('#page-money > .tabs .tab').nth(4).click()
         check('failed load: opening the tab again loads it', again.value is not None)
         page.wait_for_load_state('networkidle')
+        # «Отчёт салонов» → «Платёжная ведомость» / «История ЗП» (ADR-0034): the head of the salons; the payroll comes with the
+        # first of the two tabs, and comes again when its load failed.
+        salon = browser.new_page(viewport={'width': 1440, 'height': 900}, locale='ru-RU')
+        salon.on('pageerror', lambda e: errors.append(str(e)))
+        salon.on('dialog', lambda d: (dialogs.append(d.message), d.dismiss()))
+        login(salon, 'salon_armada_mgr')
+        sh = Hold(salon)
+        tabs = salon.locator('#page-salon_report .tabs .tab')
+        try:
+            salon.goto(BASE + '/salon_report', wait_until='networkidle')
+            sh.watch('payroll')
+            tabs.nth(1).click()
+            salon.wait_for_timeout(1000)
+            check('payroll: the tab requests its data', sh.seen == 1, f'{sh.seen} requests')
+            check('payroll: while loading, no claim that there are no data', not claims_empty(salon, '#sr-tab-paysheet'), repr(claims_empty(salon, '#sr-tab-paysheet')))
+            sh.release()
+            salon.wait_for_load_state('networkidle')
+            salon.wait_for_timeout(500)
+            sh.watch('payroll')
+            tabs.nth(2).click()
+            salon.wait_for_timeout(500)
+            check('payroll: «История ЗП» uses what came, no second request', sh.seen == 0, f'{sh.seen} requests')
+            sh.release()
+            salon.goto(BASE + '/salon_report', wait_until='networkidle')
+            dialogs.clear()
+            sh.watch('payroll', answer=500)
+            tabs.nth(2).click()
+            salon.wait_for_timeout(1500)
+            check('payroll, failed load: the user is told', any('Данные не загружены' in d for d in dialogs), repr(dialogs[:1]))
+            check('payroll, failed load: no claim that there are no data', not claims_empty(salon, '#sr-tab-history'), repr(claims_empty(salon, '#sr-tab-history')))
+            sh.release()
+            tabs.nth(0).click()
+            salon.wait_for_timeout(300)
+            with salon.expect_request(lambda r: 'payroll' in r.headers.get('x-inertia-partial-data', '').split(','), timeout=5000) as again:
+                tabs.nth(1).click()
+            check('payroll, failed load: opening the tab again loads it', again.value is not None)
+            salon.wait_for_load_state('networkidle')
+        except Exception as e:
+            sh.release()
+            check('payroll: scenario performed', False, f'{type(e).__name__}: {str(e).splitlines()[0][:200]}')
         check('no uncaught error in the page', not errors, repr(errors[:2]))
         browser.close()
     return summary()
