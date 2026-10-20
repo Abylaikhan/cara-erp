@@ -44,6 +44,7 @@ class MrpController extends Controller
                 return [
                     'id' => $i->id,
                     'num' => $num,
+                    'pos' => $i->line_no + 1, // legacy posBadge: the place of the product in its order
                     'name' => $i->name,
                     'category' => $i->category,
                     'qty' => (float) $i->qty,

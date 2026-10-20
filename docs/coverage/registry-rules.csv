@@ -213,9 +213,13 @@ function,r1,NOT_STARTED,ERP-028 (D-12),Округление расчёта те�
 function,openVacationCalcModal,NOT_STARTED,ERP-056 (D-06),Отпускные и больничные: расчёт
 function,openSalaryCalcModal,NOT_STARTED,ERP-056 (D-06),Начислить оклад по табелю
 function,openAccrualModal,NOT_STARTED,ERP-056 (D-06),Новое и изменение начисления
-control,page-salon_report|L8142,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
-control,page-salon_report|L8143,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
-control,page-salon_report|L8209,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
-control,page-salon_report|L8210,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
-control,page-salon_report|L8220,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
-control,page-salon_report|L8221,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8146,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8147,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8213,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8214,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8224,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+control,page-salon_report|L8225,DUPLICATE,ADR-0034,Год в списке: legacy заменяет список годами от текущего до 2024 (initDynamicPeriods); в копии он строится так же
+function,zrOrphanFix,NOT_STARTED,ERP-031…033 (D-03/D-11),Сверка переводов: создание недостающих поступлений (ADR-0002 п. 92)
+function,zrApply,NOT_STARTED,ERP-031…033 (D-03/D-11),Сверка переводов: удаление и создание поступлений кассы ЗП (ADR-0002 п. 92)
+function,txTransferLayout,NOT_STARTED,ERP-031…033 (D-03/D-11),Форма перевода между счетами (ADR-0035)
+function,posNo,NOT_STARTED,ERP-044 (D-06/D-08),№ позиции в загрузке цехов (ADR-0002 п. 53)

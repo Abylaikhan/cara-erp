@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\AdvanceReport;
 use App\Models\MoneyAccount;
 use App\Models\Order;
+use App\Models\SalaryAccrual;
 use App\Models\SalonWorksheetRow;
 use App\Support\ChannelScope;
 use App\Support\Erp;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -163,5 +165,44 @@ class MoneyController extends Controller
                 'expense' => config('erp.money_expense_categories'),
             ],
         ]);
+    }
+
+    /**
+     * «👥 Кому выдано» of a salary expense of the salary cash (legacy txHasPayoutBreakdown/txPayoutsFor, c54cf25): the payroll
+     * payments of its date linked to it — by the operation itself (details.tx_id), by the number of the cash document in its
+     * description, or when the payments of the date add up to its amount. «how» says which; «date» means none is linked.
+     */
+    public function payouts(Request $request, int $transaction): JsonResponse
+    {
+        abort_unless(Erp::canAccess($request->user(), 'money'), 403);
+        $tx = DB::table('money_transactions')->where('id', $transaction)->first(['id', 'tx_date', 'amount', 'description']);
+        abort_if($tx === null, 404);
+        $legacyId = DB::table('legacy_id_map')->where(['source_table' => 'money_tx', 'target_table' => 'money_transactions', 'target_id' => $tx->id])->value('source_key');
+        $all = SalaryAccrual::query()->where('type', 'payment')->whereDate('accrual_date', $tx->tx_date)->orderBy('emp_name')->orderBy('id')
+            ->get(['emp_name', 'comment', 'amount', 'details'])
+            ->map(fn (SalaryAccrual $p) => ['emp_name' => $p->emp_name, 'comment' => $p->comment ?? '', 'amount' => (float) $p->getRawOriginal('amount'),
+                'tx_id' => is_array($d = json_decode((string) $p->details, true)) ? ($d['tx_id'] ?? null) : null]);
+        $sum = fn (Collection $rows) => $rows->sum('amount');
+        $pick = function () use ($all, $legacyId, $tx, $sum): array {
+            $byId = $legacyId !== null ? $all->where('tx_id', $legacyId)->values() : collect();
+            if ($byId->isNotEmpty()) {
+                return [$byId, 'id'];
+            }
+            if (preg_match('/(?:кассы|№|N)\s*(\d+)/iu', (string) $tx->description, $m)) {
+                $byNum = $all->filter(fn ($p) => preg_match('/(^|\D)'.$m[1].'(\D|$)/u', $p['comment']))->values();
+                if ($byNum->isNotEmpty()) {
+                    return [$byNum, 'num'];
+                }
+            }
+            if ($all->isNotEmpty() && abs($sum($all) - (float) $tx->amount) < 1) {
+                return [$all, 'sum'];
+            }
+
+            return [$all, 'date'];
+        };
+        [$rows, $how] = $pick();
+
+        return response()->json(['how' => $how, 'total' => $sum($rows),
+            'rows' => $rows->map(fn ($p) => ['emp_name' => $p['emp_name'], 'comment' => $p['comment'], 'amount' => $p['amount']])->values()]);
     }
 }

@@ -5,12 +5,14 @@
 // (legacy wrote them into the page as text, so the list held only «Все месяцы»). View only: the shop floor, the worksheet,
 // technological cards, workload, the work log and the Excel tasks come with ERP-041…044 (decisions D-05, D-06, D-12).
 import { computed, reactive, ref } from 'vue';
+import PosBadge from '@/components/PosBadge.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import { ORDER_FORM_LATER, PL_MONTH_LABELS, PROGRESS_CLASS, STATUS_BADGE, STATUS_LABELS } from '@/lib/sales';
 
 interface Position {
     id: number;
     num: string;
+    pos: number;
     name: string;
     category: string | null;
     qty: number;
@@ -174,7 +176,7 @@ const stageLabel = (p: Position) => (p.stages && p.stages.length ? p.stages.join
                             >
                                 <td style="font-family: 'IBM Plex Mono', monospace; color: var(--accent)">{{ p.num }}</td>
                                 <td>
-                                    <span style="color: var(--accent); cursor: pointer; border-bottom: 1px dashed var(--accent)" title="Открыть заказ" @click.stop="openOrder">{{ p.name }}</span>
+                                    <span style="color: var(--accent); cursor: pointer; border-bottom: 1px dashed var(--accent)" title="Открыть заказ" @click.stop="openOrder"><PosBadge :n="p.pos" />{{ p.name }}</span>
                                 </td>
                                 <td>
                                     <span v-if="p.category" class="badge badge-purple" style="cursor: pointer" :title="`Открыть в цехе «${p.category}»`" @click.stop="openShop">{{ p.category }}</span>

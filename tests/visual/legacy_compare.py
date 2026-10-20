@@ -347,6 +347,17 @@ with sync_playwright() as p:
         target_shot(page, str(OUT / f'target-money-{theme}.png'))
         run_filters(page, 'target', theme, 'money-tab-cash')
         money = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        # Reference c54cf25: the running balance over the whole history and «👥» only on salary expenses of the salary cash
+        # (the table as text, every cash desk), and «🔁 Сверка переводов» of the salary cash.
+        target_cash = []
+        for v in page.locator('#cash-account-select option').evaluate_all('os => os.map(o => o.value)'):
+            page.select_option('#cash-account-select', v); page.wait_for_timeout(400)
+            target_cash.append(page.locator('#cash-tbody').inner_text())
+        page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
+        page.get_by_role('button', name='🔁 Сверка переводов').click(); page.wait_for_timeout(800)
+        target_shot(page, str(OUT / f'target-money-zprecon-{theme}.png'))
+        target_zr = page.locator('#zr-body').inner_text()
+        page.locator('#zpReconModal .modal-close').click(); page.wait_for_timeout(300)
         for i, shot in ((1, 'bank'), (5, 'all'), (4, 'advances')):
             page.locator('#page-money > .tabs .tab').nth(i).click(); page.wait_for_timeout(1500)
             target_shot(page, str(OUT / f'target-money-{shot}-{theme}.png'))
@@ -836,6 +847,17 @@ with sync_playwright() as p:
         page.wait_for_timeout(2000)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-{theme}.png'))
         run_filters(page, 'legacy', theme, 'money-tab-cash')
+        legacy_cash = []
+        for v in page.locator('#cash-account-select option').evaluate_all('os => os.map(o => o.value)'):
+            page.select_option('#cash-account-select', v); page.wait_for_timeout(400)
+            legacy_cash.append(page.locator('#cash-tbody').inner_text())
+        page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
+        bad = [i for i, (x, y) in enumerate(zip(target_cash, legacy_cash)) if x != y]
+        print(f'cash tables ({theme}): {len(target_cash)} / {len(legacy_cash)} касс, ' + ('совпадает' if len(target_cash) == len(legacy_cash) and not bad else f'РАСХОЖДЕНИЕ в {bad}'))
+        page.evaluate("zrOpen()"); page.wait_for_timeout(800)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-zprecon-{theme}.png'))
+        print(f'zp transfer recon ({theme}): ' + ('совпадает' if target_zr.split() == page.locator('#zr-body').inner_text().split() else 'РАСХОЖДЕНИЕ'))
+        page.evaluate("closeModal('zpReconModal')"); page.wait_for_timeout(300)
         for idx, tab in ((1, 'bank'), (5, 'all')):
             page.evaluate(f"showMoneyTab('{tab}', document.querySelectorAll('#page-money > .tabs .tab')[{idx}])"); page.wait_for_timeout(1500)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-{tab}-{theme}.png'))
@@ -887,6 +909,7 @@ with sync_playwright() as p:
             const cur = d.today.slice(0, 7), last = new Date(+cur.slice(0, 4), +cur.slice(5), 0).getDate();
             const tx = [], add = (date, flow, category, amount, categoryName) => tx.push({date, flow, category, amount: +amount, categoryName, accountId: 'x'});
             Object.entries(d.cashIn).forEach(([m, v]) => add(m + '-15', 'income', 'order_payment', v));
+            const ZP = 'b7e2a1c3-4d5f-6e7a-8b9c-0d1e2f3a4b5c';
             const months = new Set([...Object.keys(d.cashOut), ...Object.keys(d.supplierPaid), ...Object.keys(d.fotPaid), ...Object.keys(d.expenses)]);
             months.forEach(m => {
                 let rest = +(d.cashOut[m] || 0);
@@ -896,9 +919,12 @@ with sync_playwright() as p:
                     if (!['transfer_in', 'transfer_out', 'transfer'].includes(code)) rest -= +v;
                 });
                 else {
-                    add(m + '-15', 'expense', 'supplier', d.supplierPaid[m] || 0); add(m + '-15', 'expense', 'salary', d.fotPaid[m] || 0);
-                    rest -= +(d.supplierPaid[m] || 0) + +(d.fotPaid[m] || 0);
+                    add(m + '-15', 'expense', 'supplier', d.supplierPaid[m] || 0);
+                    rest -= +(d.supplierPaid[m] || 0);
                 }
+                // «Расход денег» of the FOT chart: paid out of «Касса ЗП» (c54cf25) — as an issue of an advance, which no
+                // other figure of the page splits out.
+                if (+(d.fotPaid[m] || 0)) { tx.push({date: m + '-15', flow: 'expense', category: 'advance_out', amount: +d.fotPaid[m], accountId: ZP}); rest -= +d.fotPaid[m]; }
                 add(m + '-15', 'expense', 'advance_out', rest);
             });
             moneyTx = tx; advanceReports = [];
@@ -908,7 +934,7 @@ with sync_playwright() as p:
                 ...Array(d.stockCount - d.critical.length).fill(0).map((_, i) => ({name: 'x' + i, qty: 1, minQty: 0}))];
             const paid = Object.values(d.supplierPaid).reduce((s, v) => s + +v, 0);
             _esfData = {invoices: [{total_with_nds: paid + +d.supplierDebt}]};
-            _payrollData = {accruals: []};
+            _payrollData = {accruals: Object.entries(d.fotAccrued).map(([m, v]) => ({type: 'salary', amount: +v, date: m + '-15'})), payments: []};
             _dashPeriodFrom = cur + '-01'; _dashPeriodTo = cur + '-' + last;
             showPage('dashboard', document.querySelector(".nav-item[onclick*=\\"showPage('dashboard'\\"]"));
         }""", [dash, EXPENSE_CODES])
@@ -1191,7 +1217,7 @@ with sync_playwright() as p:
             n = len(a2) if isinstance(a2, list) else 1
             print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals'):
+        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals'):
             if EMPTY and shot in EMPTY_DEVIATIONS:  # pictures kept, not compared: a documented deviation
                 print(f'{shot}-{theme}: not compared — {EMPTY_DEVIATIONS[shot]}')
                 continue

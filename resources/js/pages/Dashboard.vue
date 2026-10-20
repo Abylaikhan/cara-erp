@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // M01 «Дашборд» — legacy page-dashboard (L2226–2296), setDashPeriod/renderDashboard (L24546–24770). Same KPIs, charts and
 // texts, built from the monthly sums the server counts (DashboardController). Periods are whole calendar months of the
-// business time zone (legacy shifted them by a day through UTC). Salary accruals are not migrated yet: «ФОТ (месяц)» shows
-// «—» and the accrued bars are empty until «Начисления ЗП» (M20) come.
+// business time zone (legacy shifted them by a day through UTC). «ФОТ (месяц)» and the accrued bars read the salary accruals
+// (M20); «Расход денег» is what the salary cash paid out (reference c54cf25).
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
@@ -19,6 +19,7 @@ const props = defineProps<{
     supplierPaid: Sums;
     supplierDebt: string;
     fotPaid: Sums;
+    fotAccrued: Sums;
     expenses: Record<string, Sums>;
     cashIn: Sums;
     cashOut: Sums;
@@ -74,13 +75,15 @@ const revCur = computed(() => sumPeriod(props.revenue));
 const revPrev = computed(() => num(props.revenue[prevM.value]));
 const suppPaid = computed(() => sumPeriod(props.supplierPaid));
 const debt = computed(() => Number(props.supplierDebt));
+const fotCur = computed(() => sumPeriod(props.fotAccrued));
+const fotPrev = computed(() => num(props.fotAccrued[prevM.value]));
 
 // ── Charts ──
 const label = (m: string) => `${M_SHORT[m.slice(5)]} ${m.slice(2, 4)}`;
 const revMonths = computed(() => Object.keys(props.revenue).sort().slice(-8));
 const maxRev = computed(() => Math.max(...revMonths.value.map((m) => num(props.revenue[m])), 1));
-const fotMonths = computed(() => [...new Set(Object.keys(props.fotPaid))].sort().slice(-8));
-const maxFot = computed(() => Math.max(...fotMonths.value.map((m) => num(props.fotPaid[m])), 1));
+const fotMonths = computed(() => [...new Set([...Object.keys(props.fotAccrued), ...Object.keys(props.fotPaid)])].sort().slice(-8));
+const maxFot = computed(() => Math.max(...fotMonths.value.map((m) => Math.max(num(props.fotAccrued[m]), num(props.fotPaid[m]))), 1));
 const cfMonths = computed(() => [...new Set([...Object.keys(props.cashIn), ...Object.keys(props.cashOut)])].sort().slice(-8));
 const maxCf = computed(() => Math.max(...cfMonths.value.map((m) => Math.max(num(props.cashIn[m]), num(props.cashOut[m]))), 1));
 const topExp = computed(() =>
@@ -138,8 +141,13 @@ const bar = (h: number) => Math.max(4, Math.round(h));
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">ФОТ (месяц)</div>
-                    <div id="dash-payroll" class="kpi-value">—</div>
-                    <div id="dash-payroll-sub" class="kpi-change">с переносом начислений ЗП</div>
+                    <div id="dash-payroll" class="kpi-value">{{ fmtK(fotCur) }}</div>
+                    <div id="dash-payroll-sub" class="kpi-change">
+                        <template v-if="fotPrev > 0">
+                            <span v-if="pct(fotCur, fotPrev) > 0" style="color: var(--green)">↑ {{ pct(fotCur, fotPrev) }}%</span>
+                            <span v-else style="color: var(--red)">↓ {{ Math.abs(pct(fotCur, fotPrev)) }}%</span> к прошлому
+                        </template>
+                    </div>
                 </div>
                 <div class="kpi">
                     <div class="kpi-label">Оплачено поставщикам</div>
@@ -192,12 +200,14 @@ const bar = (h: number) => Math.max(4, Math.round(h));
                             v-for="m in fotMonths"
                             :key="m"
                             style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px"
-                            :title="`Начислено: ${fmtK(0)} · Расход денег: ${fmtK(num(props.fotPaid[m]))}`"
+                            :title="`Начислено: ${fmtK(num(props.fotAccrued[m]))} · Расход денег: ${fmtK(num(props.fotPaid[m]))}`"
                         >
                             <div style="display: flex; gap: 2px; align-items: flex-end; width: 100%">
                                 <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0">
-                                    <div style="font-size: 8px; color: var(--text3); white-space: nowrap"></div>
-                                    <div style="background: var(--amber); opacity: 0.85; border-radius: 2px 2px 0 0; width: 100%; height: 4px"></div>
+                                    <div style="font-size: 8px; color: var(--text3); white-space: nowrap">{{ num(props.fotAccrued[m]) ? fmtK(num(props.fotAccrued[m])) : '' }}</div>
+                                    <div
+                                        :style="{ background: 'var(--amber)', opacity: 0.85, borderRadius: '2px 2px 0 0', width: '100%', height: bar((num(props.fotAccrued[m]) / maxFot) * 100) + 'px' }"
+                                    ></div>
                                 </div>
                                 <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0">
                                     <div style="font-size: 8px; color: var(--text3); white-space: nowrap">{{ num(props.fotPaid[m]) ? fmtK(num(props.fotPaid[m])) : '' }}</div>
@@ -212,8 +222,8 @@ const bar = (h: number) => Math.max(4, Math.round(h));
                         <div v-for="m in fotMonths" :key="m" style="flex: 1; text-align: center">{{ label(m) }}</div>
                     </div>
                     <div style="font-size: 11px; color: var(--text3); margin-top: 8px; line-height: 1.5">
-                        <b style="color: var(--amber)">Начислено</b> — по зарплатной ведомости. <b style="color: var(--accent)">Расход денег</b> — кассовые выплаты по статьям, которые идут в
-                        ведомость: «Зарплата», «Оклады производства», «Сдельная производства», «Оклады офиса». Не входят: ЗП салонов, повара, прочее, рекламации и переводы на кассу ЗП.
+                        <b style="color: var(--amber)">Начислено</b> — по зарплатной ведомости. <b style="color: var(--accent)">Расход денег</b> — всё, что выдано из «Кассы ЗП» (включая разовые работы и
+                        выдачи через бригадира, которых нет в начислении). Не входят: «Касса ЗП салонов» и переводы между кассами.
                     </div>
                 </div>
             </div>

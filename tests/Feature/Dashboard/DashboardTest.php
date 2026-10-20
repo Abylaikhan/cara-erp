@@ -31,6 +31,17 @@ class DashboardTest extends TestCase
         $tx($kzt, '2026-10-06', 'income', 'order_payment', '900');
         $tx($kzt, '2026-10-07', 'income', 'transfer_in', '70');
         $tx($kzt, '2026-10-08', 'expense', null, '5');
+        // «Касса ЗП» of legacy: everything it paid out but transfers to other accounts is «Расход денег» of the FOT chart
+        $zp = DB::table('money_accounts')->insertGetId(['name' => 'Касса ЗП Демо', 'type' => 'cash', 'currency' => 'KZT', 'opening_balance' => 0, 'sort_order' => 2]);
+        DB::table('legacy_id_map')->insert(['source_table' => 'money_accounts', 'source_key' => 'b7e2a1c3-4d5f-6e7a-8b9c-0d1e2f3a4b5c', 'target_table' => 'money_accounts', 'target_id' => $zp, 'snapshot_id' => '20260101T000000Z']);
+        $tx($zp, '2031-01-11', 'expense', 'salary_prod_piece', '41.37');
+        $tx($zp, '2031-02-12', 'expense', 'other_out', '7.73');
+        $tx($zp, '2031-02-13', 'expense', 'transfer_out', '1013');
+        $tx($zp, '2031-02-14', 'expense', null, '1.01');
+        foreach ([['2031-01-30', 'salary', '503.123456789012345'], ['2031-02-27', 'salary', '613.987654321098765'], ['2031-02-27', 'salary', '-11.3'], ['2031-02-05', 'payment', '97.3']] as $i => [$date, $type, $amount]) {
+            DB::table('salary_accruals')->insert(['uuid' => sprintf('bbbbbbbb-bbbb-4bbb-8bbb-%012d', $i), 'emp_name' => 'Демо', 'type' => $type, 'accrual_date' => $date,
+                'amount' => $amount, 'deducted' => 0, 'net' => 0, 'created_at' => now(), 'updated_at' => now()]);
+        }
         DB::table('expense_categories')->insert(['code' => 'demo_item', 'name' => 'Демо статья', 'sort_order' => 1]);
         DB::table('advance_reports')->insert(['doc_num' => 'АО-1', 'employee_name' => 'Демо', 'report_date' => '2026-10-10', 'issued' => '5000', 'spent' => '0', 'returned' => '0', 'status' => 'open',
             'lines' => json_encode([['type' => 'expense', 'category' => 'demo_item', 'amount' => 1200.5], ['type' => 'supplier', 'amount' => '300'], ['type' => 'expense', 'category' => 'demo_item', 'amount' => 0.25]])]);
@@ -54,9 +65,10 @@ class DashboardTest extends TestCase
             ->where('critical', [['name' => 'Б-критично', 'qty' => '5.000', 'unit' => 'шт']])
             ->where('supplierPaid', ['2026-09' => '100.30', '2026-10' => '1000.50'])
             ->where('supplierDebt', '899.20')
-            ->where('fotPaid', ['2026-10' => '300.00'])
+            ->where('fotPaid', ['2031-01' => '41.37', '2031-02' => '8.74'])
+            ->where('fotAccrued', ['2031-01' => '503.123456789012345', '2031-02' => '613.987654321098765'])
             ->where('cashIn', ['2026-10' => '900.00'])
-            ->where('cashOut', ['2026-09' => '100.30', '2026-10' => '6355.50'])
+            ->where('cashOut', ['2026-09' => '100.30', '2026-10' => '6355.50', '2031-01' => '41.37', '2031-02' => '8.74'])
             ->where('expenses.2026-10', fn ($e) => collect($e)->all() == ['🏭 Поставщику' => '1000.50', 'salary_prod_piece' => '300.00', '💼 Перевод на кассу ЗП' => '50.00',
                 '↔️ На другой счёт' => '70.00', 'Прочее' => '5.00', 'Демо статья (аванс)' => '1200.75', 'Оплата поставщику (аванс)' => '300.00'])
             ->has('today'));

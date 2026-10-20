@@ -11,7 +11,7 @@ import CalendarTab, { type CalendarData } from '@/components/money/CalendarTab.v
 import CashTab from '@/components/money/CashTab.vue';
 import SalonWorksheetTab, { type SalonRow } from '@/components/money/SalonWorksheetTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
-import { accountStats, fmt, hasPeriod, LATER, period, setMoneyPeriod, type Categories, type MoneyAccount, type MoneyTx } from '@/lib/money';
+import { accountStats, fmt, hasPeriod, LATER, moneyMonths, period, setMoneyPeriod, type Categories, type MoneyAccount, type MoneyTx } from '@/lib/money';
 
 const props = defineProps<{
     accounts: MoneyAccount[];
@@ -43,6 +43,7 @@ function show(t: Tab): void {
 
 // The period of the page (legacy setMoneyPeriod); custom dates are taken as they are typed.
 setMoneyPeriod('all');
+const months = computed(() => moneyMonths(props.transactions));
 const periodBtn = (mode: string) => (period.mode === mode ? { background: 'var(--accent)', color: '#fff' } : undefined);
 const periodLabel = computed(() => {
     if (!period.from) return '';
@@ -51,7 +52,7 @@ const periodLabel = computed(() => {
 });
 function custom(field: 'from' | 'to', value: string): void {
     period[field] = value;
-    period.mode = 'custom';
+    setMoneyPeriod('custom', field === 'from' ? 'from' : undefined);
 }
 
 // ── KPI (legacy renderMoneyKPIs): turnover of the period, or the current balance without one ──
@@ -100,7 +101,27 @@ const add = () => window.alert(LATER.add);
             <!-- Фильтр периода — общий для всех вкладок -->
             <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 14px; padding: 8px 14px; background: var(--bg3); border-radius: 8px; flex-wrap: wrap">
                 <span style="font-size: 13px; color: var(--text2); font-weight: 600">📅 Период:</span>
+                <button id="mp-btn-day" class="btn btn-ghost btn-sm" :style="periodBtn('day')" @click="setMoneyPeriod('day')">День</button>
+                <input
+                    id="mp-day"
+                    :value="period.day"
+                    type="date"
+                    style="font-size: 13px"
+                    :style="{ display: period.mode === 'day' ? '' : 'none' }"
+                    title="Выберите день в календаре"
+                    @change="setMoneyPeriod('day', ($event.target as HTMLInputElement).value)"
+                />
                 <button id="mp-btn-month" class="btn btn-ghost btn-sm" :style="periodBtn('month')" @click="setMoneyPeriod('month')">Месяц</button>
+                <select
+                    id="mp-month"
+                    :value="period.month"
+                    style="font-size: 13px; width: auto"
+                    :style="{ display: period.mode === 'month' ? '' : 'none' }"
+                    title="Выберите месяц"
+                    @change="setMoneyPeriod('month', ($event.target as HTMLSelectElement).value)"
+                >
+                    <option v-for="mo in months" :key="mo.value" :value="mo.value">{{ mo.label }}</option>
+                </select>
                 <button id="mp-btn-quarter" class="btn btn-ghost btn-sm" :style="periodBtn('quarter')" @click="setMoneyPeriod('quarter')">Квартал</button>
                 <button id="mp-btn-year" class="btn btn-ghost btn-sm" :style="periodBtn('year')" @click="setMoneyPeriod('year')">Год</button>
                 <button id="mp-btn-all" class="btn btn-ghost btn-sm" :style="periodBtn('all')" @click="setMoneyPeriod('all')">Всё время</button>

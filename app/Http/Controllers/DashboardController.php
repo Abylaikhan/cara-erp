@@ -16,13 +16,12 @@ use Inertia\Response;
  * M01 «Дашборд» — legacy page-dashboard (L2226–2296), showPage('dashboard') (L16555), setDashPeriod/renderDashboard
  * (L24546–24770). The server sums the migrated data by month in numeric: revenue of the realizations, supplier payments,
  * salary payments, expenses by category (with the lines of the advance reports instead of the advances themselves), money in
- * and out; the page picks the months of the chosen period. Salary accruals (M20) are not migrated yet, so «ФОТ (месяц)» and
- * the accrued bars wait for them (ADR-0002).
+ * and out, the salary accrued (M20) and paid out of the salary cash; the page picks the months of the chosen period.
  */
 class DashboardController extends Controller
 {
-    /** Legacy FOT_EXPENSE_CATS: what the payroll sheet shows (salon salaries are not in it). */
-    private const FOT_CATEGORIES = ['salary', 'salary_prod_fixed', 'salary_prod_piece', 'salary_office_fixed'];
+    /** The salary cash desk of legacy (ZP_CASH_ID, 830a998): «Расход денег» of the FOT chart is what it paid out. */
+    private const ZP_CASH = 'b7e2a1c3-4d5f-6e7a-8b9c-0d1e2f3a4b5c';
 
     /** Transfers between own accounts are neither income nor expense. */
     private const TRANSFERS = ['transfer_in', 'transfer_out', 'transfer'];
@@ -54,7 +53,11 @@ class DashboardController extends Controller
             'supplierPaid' => $supplierPaid,
             // Legacy: all incoming invoices with VAT minus all payments to suppliers.
             'supplierDebt' => bcsub((string) DB::table('incoming_invoices')->sum('total_with_nds'), (string) $supplierPaid->reduce(fn ($s, $v) => bcadd($s, (string) $v, 2), '0'), 2),
-            'fotPaid' => $byMonth($tx()->where('t.flow', 'expense')->whereIn('t.category', self::FOT_CATEGORIES), 't.tx_date', $kzt),
+            // Legacy (830a998): everything paid out of «Касса ЗП» except transfers to other accounts — small one-off jobs and
+            // payments through a foreman too. Accrued: the salary accruals (type salary, amount above zero).
+            'fotPaid' => $byMonth($tx()->where('t.flow', 'expense')->where('t.account_id', DB::table('legacy_id_map')->where(['source_table' => 'money_accounts', 'source_key' => self::ZP_CASH])->value('target_id') ?? 0)
+                ->where(fn ($q) => $q->whereNull('t.category')->orWhere('t.category', '!=', 'transfer_out')), 't.tx_date', 't.amount'),
+            'fotAccrued' => $byMonth(DB::table('salary_accruals')->where('type', 'salary')->where('amount', '>', 0), 'accrual_date', 'amount'),
             'expenses' => $this->expenses($tx(), $kzt),
             'cashIn' => $byMonth($tx()->where('t.flow', 'income')->whereNotIn('t.category', self::TRANSFERS), 't.tx_date', $kzt),
             'cashOut' => $byMonth($tx()->where('t.flow', 'expense')->where(fn ($q) => $q->whereNull('t.category')->orWhereNotIn('t.category', self::TRANSFERS)), 't.tx_date', $kzt),

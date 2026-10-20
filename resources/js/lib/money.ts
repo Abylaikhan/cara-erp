@@ -41,17 +41,44 @@ export function catLabel(categories: Categories, id: string): string {
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 /**
- * The period of the page (legacy setMoneyPeriod). The bounds are local dates; legacy took them through UTC, which in
- * Almaty moved the whole period a day earlier.
+ * The period of the page (legacy setMoneyPeriod, c54cf25). The bounds are local dates, as legacy now takes them (UTC
+ * midnight of the local day). «День» is one chosen day (today at first), «Месяц» a month chosen from the months that have
+ * operations; a custom start later than the end pulls the end to it.
  */
-export const period = reactive({ mode: 'all', from: '', to: '' });
-export function setMoneyPeriod(mode: string): void {
+export const period = reactive({ mode: 'all', from: '', to: '', day: '', month: '' });
+export const MONTH_NAMES = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+/** Legacy mpFillMonths: the current month and every month with an operation, latest first. */
+export function moneyMonths(txs: MoneyTx[]): { value: string; label: string }[] {
+    const now = new Date();
+    const set = new Set([`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`]);
+    txs.forEach((t) => {
+        const m = String(t.date || '').slice(0, 7);
+        if (/^\d{4}-(0[1-9]|1[0-2])$/.test(m)) set.add(m);
+    });
+    return [...set]
+        .sort()
+        .reverse()
+        .map((v) => ({ value: v, label: `${MONTH_NAMES[+v.slice(5) - 1]} ${v.slice(0, 4)}` }));
+}
+export function setMoneyPeriod(mode: string, val?: string): void {
     const now = new Date();
     const y = now.getFullYear();
     const m = now.getMonth();
+    if (mode === 'custom') {
+        if (val === 'from' && period.from && period.to && period.to < period.from) period.to = period.from;
+        period.mode = mode;
+        return;
+    }
     period.mode = mode;
-    if (mode === 'month') Object.assign(period, { from: iso(new Date(y, m, 1)), to: iso(new Date(y, m + 1, 0)) });
-    else if (mode === 'quarter') {
+    if (mode === 'day') {
+        period.day = val || period.day || iso(now);
+        Object.assign(period, { from: period.day, to: period.day });
+    } else if (mode === 'month') {
+        // the choice of the list stays when «Месяц» is pressed again; the current month at first
+        period.month = val || period.month || `${y}-${String(m + 1).padStart(2, '0')}`;
+        const [yy, mm] = period.month.split('-').map(Number);
+        Object.assign(period, { from: iso(new Date(yy, mm - 1, 1)), to: iso(new Date(yy, mm, 0)) });
+    } else if (mode === 'quarter') {
         const q = Math.floor(m / 3);
         Object.assign(period, { from: iso(new Date(y, q * 3, 1)), to: iso(new Date(y, q * 3 + 3, 0)) });
     } else if (mode === 'year') Object.assign(period, { from: `${y}-01-01`, to: `${y}-12-31` });
@@ -83,6 +110,6 @@ export const LATER = {
     add: 'Новые операции и переводы появятся вместе с проведением денег (ERP-031…033, решения D-03 и D-11).',
     account: 'Новые кассы и счета появятся вместе с проведением денег (ERP-031).',
     statement: 'Импорт банковской выписки появится отдельной частью раздела (ERP-034).',
-    payouts: 'Разбивка выдачи по сотрудникам появится вместе с разделом «Сотрудники» (ERP-053, решение D-13).',
+    zpRecon: 'Исправление удаляет и создаёт денежные операции и появится вместе с проведением денег (ERP-031…033, решения D-03 и D-11). Сравнение уже показано.',
     merge: 'Объединение выплат кассы в одну платёжку меняет операции и выплаты зарплатной ведомости и появится вместе с проведением денег и начислениями ЗП (ERP-031…033, ERP-057, решения D-03 и D-11).',
 };

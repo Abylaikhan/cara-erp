@@ -1,9 +1,11 @@
 <script setup lang="ts">
 // Tab «Касса» of «Деньги» — legacy money-tab-cash (L6071–6140), renderCashTx/sortCashTx (L9592, L9677–9805) and «Выдано по
 // сотрудникам» cashCpRows/showCashByCounterparty/cashCpPick (L9629–9672). Same cards, totals, filters, table and running
-// balance; the categories of the filter are those of the chosen cash desk (legacy kept the list of the first one).
+// balance; the categories of the filter are those of the chosen cash desk (legacy kept the list of the first one). Reference
+// c54cf25: the balance over the whole history, «👥 Кому выдано» for salary expenses of the salary cash, «🔁 Сверка переводов».
 import { computed, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
+import ZpReconModal from '@/components/money/ZpReconModal.vue';
 import { accountStats, catLabel, fmt, fmtShort, hasPeriod, inPeriod, LATER, openingOf, type Categories, type MoneyAccount, type MoneyTx } from '@/lib/money';
 
 const props = defineProps<{ accounts: MoneyAccount[]; txs: MoneyTx[]; categories: Categories }>();
@@ -49,15 +51,21 @@ const rows = computed(() => {
         return sort.asc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
     });
 });
-// Legacy shows a running balance only when sorted by date: from the closing balance of the period downwards.
-const running = computed(() => {
-    if (sort.col !== 'date') return null;
-    let run = openBal.value + stats.value.income - stats.value.expense;
-    return rows.value.map((t) => {
-        const v = run;
-        run += t.flow === 'income' ? -t.amount : t.amount;
-        return v;
-    });
+// Running balance (legacy renderCashTx, c699dea): the balance of the cash desk after each operation over its whole history —
+// by date, within a day income before expense, then later-loaded first — so it does not depend on the sort, the filters or
+// the period.
+const balanceAfter = computed(() => {
+    const map = new Map<MoneyTx, number>();
+    let acc = 0;
+    props.txs
+        .map((t, i) => ({ t, i }))
+        .filter((x) => x.t.account === cashId.value)
+        .sort((a, b) => a.t.date.slice(0, 10).localeCompare(b.t.date.slice(0, 10)) || (a.t.flow === 'income' ? 0 : 1) - (b.t.flow === 'income' ? 0 : 1) || b.i - a.i)
+        .forEach((x) => {
+            acc += x.t.flow === 'income' ? x.t.amount : -x.t.amount;
+            map.set(x.t, acc);
+        });
+    return map;
 });
 const sums = computed(() => ({
     in: rows.value.filter((t) => t.flow === 'income').reduce((s, t) => s + t.amount, 0),
@@ -89,6 +97,36 @@ function cashCpPick(name: string): void {
     cp.value = false;
 }
 const later = (text: string) => () => window.alert(text);
+const zr = ref(false);
+// ── «👥 Кому выдано» (legacy txHasPayoutBreakdown/txPayoutsFor/showTxPayouts, c54cf25): only for salary expenses of the salary
+// cash desk (not the salons'); the server finds the payroll payments linked to the expense ──
+function hasPayouts(t: MoneyTx): boolean {
+    if (t.flow !== 'expense') return false;
+    const acc = props.accounts.find((a) => a.id === t.account);
+    if (!acc || acc.type !== 'cash') return false;
+    const nm = (acc.name || '') + ' ' + (acc.bank || '');
+    if (!/зп|зарплат/i.test(nm) || /салон/i.test(nm)) return false;
+    return /^salary/i.test(t.category || '') && t.category !== 'salary_transfer';
+}
+interface Payouts {
+    how: 'id' | 'num' | 'sum' | 'date';
+    total: number;
+    rows: { emp_name: string; comment: string; amount: number }[];
+}
+const pay = reactive<{ open: boolean; tx: MoneyTx | null; res: Payouts | null; error: string }>({ open: false, tx: null, res: null, error: '' });
+async function showTxPayouts(t: MoneyTx): Promise<void> {
+    Object.assign(pay, { open: true, tx: t, res: null, error: '' });
+    try {
+        const r = await fetch(`/money/payouts/${t.id}`, { headers: { Accept: 'application/json' } });
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        if (pay.tx === t) pay.res = (await r.json()) as Payouts;
+    } catch (e) {
+        if (pay.tx === t) pay.error = (e as Error).message;
+    }
+}
+const payRows = computed(() => (pay.res ? [...pay.res.rows].sort((a, b) => String(a.emp_name).localeCompare(String(b.emp_name), 'ru')) : []));
+const payDiff = computed(() => (pay.tx && pay.res ? (pay.tx.amount || 0) - pay.res.total : 0));
+
 </script>
 
 <template>
@@ -151,6 +189,7 @@ const later = (text: string) => () => window.alert(text);
             <option value="all">Все категории</option>
             <option v-for="c in cats" :key="c" :value="c">{{ catLabel(props.categories, c) }}</option>
         </select>
+        <button class="btn btn-ghost btn-sm" title="Сверить переводы из банков в кассу ЗП с поступлениями в кассе по датам" @click="zr = true">🔁 Сверка переводов</button>
         <button class="btn btn-ghost btn-sm" title="Собрать разрозненные выплаты с одной датой и номером в одну платёжку" @click="later(LATER.merge)()">🧩 Объединить платежи</button>
         <button class="btn btn-ghost btn-sm" title="Сколько выдано каждому сотруднику / контрагенту за выбранный период" @click="cp = true">👥 Выдано по сотрудникам</button>
         <span id="cash-filter-count" style="font-size: 12px; color: var(--text3)"
@@ -171,7 +210,12 @@ const later = (text: string) => () => window.alert(text);
                     <th style="cursor: pointer; user-select: none" @click="sortCashTx('ctr')">Контрагент <span>{{ icon('ctr') }}</span></th>
                     <th style="cursor: pointer; user-select: none; text-align: right; color: var(--green)" @click="sortCashTx('income')">Приход <span>{{ icon('income') }}</span></th>
                     <th style="cursor: pointer; user-select: none; text-align: right; color: var(--red)" @click="sortCashTx('expense')">Расход <span>{{ icon('expense') }}</span></th>
-                    <th style="text-align: right">Остаток</th>
+                    <th
+                        style="text-align: right; cursor: help"
+                        title="Остаток кассы после этой операции. Считается по всей истории кассы: приходы − расходы по порядку дат (внутри дня сначала приходы, затем расходы). Не зависит от сортировки и фильтров. У последней операции дня — остаток на конец дня."
+                    >
+                        Остаток после ⓘ
+                    </th>
                     <th></th>
                 </tr>
             </thead>
@@ -179,7 +223,7 @@ const later = (text: string) => () => window.alert(text);
                 <tr v-if="!rows.length">
                     <td colspan="10" style="text-align: center; padding: 16px; color: var(--text3)">Операций нет за период</td>
                 </tr>
-                <tr v-for="(t, i) in rows" :key="t.id">
+                <tr v-for="t in rows" :key="t.id">
                     <td style="font-size: 12px; white-space: nowrap">{{ t.date }}</td>
                     <td>
                         <span class="badge" :class="t.flow === 'income' ? 'badge-green' : 'badge-red'">{{ t.flow === 'income' ? '📥' : '📤' }}</span>
@@ -193,9 +237,9 @@ const later = (text: string) => () => window.alert(text);
                     <td style="font-size: 12px; color: var(--text3)">{{ t.ctr || '—' }}</td>
                     <td style="text-align: right; font-family: 'IBM Plex Mono', monospace; color: var(--green)">{{ t.flow === 'income' ? fmt(t.amount) : '—' }}</td>
                     <td style="text-align: right; font-family: 'IBM Plex Mono', monospace; color: var(--red)">{{ t.flow === 'expense' ? fmt(t.amount) : '—' }}</td>
-                    <td style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--text3)">{{ running ? fmt(running[i]) : '—' }}</td>
+                    <td style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--text3)">{{ balanceAfter.has(t) ? fmt(balanceAfter.get(t)!) : '—' }}</td>
                     <td style="white-space: nowrap">
-                        <button v-if="t.flow === 'expense'" class="btn btn-ghost btn-sm" style="font-size: 11px" title="Кому выдано (разбивка по сотрудникам)" @click="later(LATER.payouts)()">👥</button
+                        <button v-if="hasPayouts(t)" class="btn btn-ghost btn-sm" style="font-size: 11px" title="Кому выдано (разбивка по сотрудникам)" @click="showTxPayouts(t)">👥</button
                         >{{ ' ' }}<button class="btn btn-ghost btn-sm" style="font-size: 11px" @click="later(LATER.edit)()">✏️</button>{{ ' ' }}<button
                             class="btn btn-ghost btn-sm"
                             style="font-size: 11px"
@@ -252,6 +296,53 @@ const later = (text: string) => () => window.alert(text);
         </div>
         <div style="margin-top: 10px; text-align: right">
             <button class="btn btn-ghost btn-sm" @click="later('Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067).')()">📥 Excel</button>
+        </div>
+    </ErpModal>
+
+    <ZpReconModal :open="zr" :accounts="props.accounts" :txs="props.txs" :cash-id="cashId" @close="zr = false" />
+
+    <ErpModal id="txPayModal" :open="pay.open" :modal-style="{ maxWidth: '700px', width: '96vw', maxHeight: '90vh', overflow: 'auto' }" @close="pay.open = false">
+        <div class="modal-header">
+            <div id="txpay-title" class="modal-title">Кому выдано · {{ pay.tx?.date }} · ₸{{ Math.round(pay.tx?.amount ?? 0).toLocaleString('ru-RU') }}</div>
+            <button class="modal-close" @click="pay.open = false">✕</button>
+        </div>
+        <div id="txpay-body">
+            <div v-if="pay.error" style="color: var(--red)">Не удалось загрузить: {{ pay.error }}</div>
+            <div v-else-if="!pay.res" style="padding: 12px; color: var(--text3)">⏳ Загрузка...</div>
+            <template v-else>
+                <div style="font-size: 12px; color: var(--text3); margin-bottom: 8px">{{ pay.tx?.desc || '' }}</div>
+                <div v-if="!pay.res.rows.length || pay.res.how === 'date'" style="padding: 12px; color: var(--text3); font-size: 13px">
+                    К этому расходу выплаты по сотрудникам не привязаны (в ведомости нет выплат с номером или суммой этого документа).
+                </div>
+                <template v-else>
+                    <div v-if="Math.abs(payDiff) >= 1" style="font-size: 12px; color: var(--amber); margin-bottom: 6px">
+                        ⚠️ Выплаты по документу: {{ fmt(pay.res.total) }}, сумма документа: {{ fmt(pay.tx?.amount ?? 0) }} (разница {{ fmt(payDiff) }}).
+                    </div>
+                    <div v-else style="font-size: 12px; color: var(--green); margin-bottom: 6px">✓ Сумма выплат совпадает с документом.</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Сотрудник</th>
+                                <th>Комментарий</th>
+                                <th style="text-align: right">Выдано</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(p, i) in payRows" :key="i">
+                                <td>{{ p.emp_name }}</td>
+                                <td style="font-size: 12px; color: var(--text3)">{{ p.comment || '' }}</td>
+                                <td style="text-align: right; font-family: monospace">{{ fmt(p.amount || 0) }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight: 700; background: var(--bg3)">
+                                <td colspan="2" style="text-align: right">Итого ({{ payRows.length }} чел.):</td>
+                                <td style="text-align: right; font-family: monospace">{{ fmt(pay.res.total || 0) }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </template>
+            </template>
         </div>
     </ErpModal>
 </template>
