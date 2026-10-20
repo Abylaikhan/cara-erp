@@ -354,6 +354,23 @@ with sync_playwright() as p:
             page.select_option('#cash-account-select', v); page.wait_for_timeout(400)
             target_cash.append(page.locator('#cash-tbody').inner_text())
         page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
+        # Period «День» (today) and «Месяц» (the list, the current month, the latest month with operations), then «Всё время».
+        def period_states(side_set):
+            out = []
+            for step in ('day', 'month', 'month-2'):
+                side_set(step); page.wait_for_timeout(500)
+                out.append([page.locator('#mp-period-label').inner_text(), page.locator('#cash-tbody').inner_text(),
+                            '' if step == 'day' else page.locator('#mp-month').evaluate('s => [...s.options].map(o => o.value + "|" + o.text).join(";")')])
+            side_set('all'); page.wait_for_timeout(400)
+            return out
+        def target_set(step):
+            if step == 'day': page.locator('#mp-btn-day').click()
+            elif step == 'month': page.locator('#mp-btn-month').click()
+            elif step == 'month-2':
+                opts = page.locator('#mp-month option').evaluate_all('os => os.map(o => o.value)')
+                page.select_option('#mp-month', opts[min(1, len(opts) - 1)])
+            else: page.locator('#mp-btn-all').click()
+        target_period = period_states(target_set)
         page.get_by_role('button', name='🔁 Сверка переводов').click(); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-money-zprecon-{theme}.png'))
         target_zr = page.locator('#zr-body').inner_text()
@@ -453,6 +470,20 @@ with sync_playwright() as p:
         run_filters(page, 'target', theme, 'page-accruals')
         accruals = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         target_acc = page.locator('#accruals-tbody').inner_text()
+        # M17 «Сотрудники»: the staffing table, the cards, the table, the card of the first employee.
+        page.goto(TARGET + '/hr', wait_until='networkidle'); page.wait_for_timeout(800)
+        target_shot(page, str(OUT / f'target-hr-{theme}.png'))
+        hr = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        target_org = page.locator('#hr-orgchart-body').inner_text()
+        page.locator('#page-hr .tabs .tab').nth(1).click(); page.wait_for_timeout(600)
+        target_shot(page, str(OUT / f'target-hr-employees-{theme}.png'))
+        run_filters(page, 'target', theme, 'hr-tab-employees')
+        page.locator('#hr-view-table').click(); page.wait_for_timeout(500)
+        target_shot(page, str(OUT / f'target-hr-table-{theme}.png'))
+        target_hr_table = page.locator('#hr-staff-tbody').inner_text()
+        if hr['employees']:
+            page.locator('#hr-staff-tbody tr').first.click(); page.wait_for_timeout(500)
+            target_shot(page, str(OUT / f'target-hr-card-{theme}.png'))
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
@@ -854,6 +885,15 @@ with sync_playwright() as p:
         page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
         bad = [i for i, (x, y) in enumerate(zip(target_cash, legacy_cash)) if x != y]
         print(f'cash tables ({theme}): {len(target_cash)} / {len(legacy_cash)} касс, ' + ('совпадает' if len(target_cash) == len(legacy_cash) and not bad else f'РАСХОЖДЕНИЕ в {bad}'))
+        def legacy_set(step):
+            if step == 'day': page.evaluate("setMoneyPeriod('day')")
+            elif step == 'month': page.evaluate("setMoneyPeriod('month')")
+            elif step == 'month-2':
+                page.evaluate("(() => { const s = document.getElementById('mp-month'); const v = s.options[Math.min(1, s.options.length - 1)].value; setMoneyPeriod('month', v); })()")
+            else: page.evaluate("setMoneyPeriod('all')")
+        legacy_period = period_states(legacy_set)
+        for name, x, y in zip(('день', 'месяц', 'другой месяц'), target_period, legacy_period):
+            print(f'money period {name} ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a == b else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('подпись', 'касса', 'список месяцев'), x, y)))
         page.evaluate("zrOpen()"); page.wait_for_timeout(800)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-zprecon-{theme}.png'))
         print(f'zp transfer recon ({theme}): ' + ('совпадает' if target_zr.split() == page.locator('#zr-body').inner_text().split() else 'РАСХОЖДЕНИЕ'))
@@ -1000,6 +1040,30 @@ with sync_playwright() as p:
         run_filters(page, 'legacy', theme, 'page-accruals')
         tl, ll = target_acc.splitlines(), page.locator('#accruals-tbody').inner_text().splitlines()
         print(f'accruals table ({theme}): rows {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
+        # «Сотрудники»: legacy gets the staff the target renders (as loadStaffFromDB keeps it); its demonstration lists of piece
+        # work and of the payroll (wageEmployees, payrollStaff) are emptied — the target does not show them (ADR-0036). Legacy
+        # draws the staffing table only when its tab is clicked: it is clicked (ADR-0002).
+        page.evaluate("""(r) => {
+            employeesData = r.employees.map(e => ({...e, initials: e.name.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(), color: 'rgba(79,142,247,.15)', tc: 'var(--accent)'}));
+            wageEmployees = []; payrollStaff = [];
+            showPage('hr', document.querySelector(".nav-item[onclick*=\\"showPage('hr'\\"]"));
+        }""", hr)
+        page.wait_for_timeout(1200)
+        page.evaluate("showHRTab('orgchart', document.querySelectorAll('#page-hr .tab')[0])"); page.wait_for_timeout(500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-hr-{theme}.png'))
+        legacy_org = page.locator('#hr-orgchart-body').inner_text()
+        page.evaluate("showHRTab('employees', document.querySelectorAll('#page-hr .tab')[1])"); page.wait_for_timeout(600)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-hr-employees-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'hr-tab-employees')
+        page.evaluate("setHRView('table')"); page.wait_for_timeout(500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-hr-table-{theme}.png'))
+        legacy_hr_table = page.locator('#hr-staff-tbody').inner_text()
+        if hr['employees']:
+            page.evaluate("openEmployeeCard(employeesData[0].id)"); page.wait_for_timeout(500)
+            unscroll(page); page.screenshot(path=str(OUT / f'legacy-hr-card-{theme}.png'))
+            page.evaluate("closeModal('employeeCardModal')")
+        print(f'hr ({theme}): штатное расписание ' + ('совпадает' if target_org.split() == legacy_org.split() else 'РАСХОЖДЕНИЕ')
+              + ', таблица ' + ('совпадает' if target_hr_table.splitlines() == legacy_hr_table.splitlines() else 'РАСХОЖДЕНИЕ'))
         ctx.close()
         # Payment calendar of legacy: its own page, clock at noon of the target's business date in UTC (legacy takes «today»
         # through UTC — in Almaty a day early, ADR-0002); the same balances, unpaid orders (status «В работе» as the
@@ -1217,7 +1281,7 @@ with sync_playwright() as p:
             n = len(a2) if isinstance(a2, list) else 1
             print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals'):
+        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'hr', 'hr-employees', 'hr-table') + (('hr-card',) if hr['employees'] else ()):
             if EMPTY and shot in EMPTY_DEVIATIONS:  # pictures kept, not compared: a documented deviation
                 print(f'{shot}-{theme}: not compared — {EMPTY_DEVIATIONS[shot]}')
                 continue

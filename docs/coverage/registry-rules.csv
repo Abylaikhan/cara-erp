@@ -1,7 +1,6 @@
 kind,selector,status,reference,note
 # Pages not migrated yet (they render «не перенесено»),,,,
 group,page-channels,NOT_STARTED,ERP-062 (D-11),Центры прибыли
-group,page-hr,NOT_STARTED,ERP-053/054 (D-13),Сотрудники
 group,page-wages,NOT_STARTED,ERP-055 (D-06),Сдельная оплата
 group,page-payroll,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость
 group,page-mycabinet,NOT_STARTED,ERP-058,Мой кабинет
@@ -223,3 +222,19 @@ function,zrOrphanFix,NOT_STARTED,ERP-031…033 (D-03/D-11),Сверка пере
 function,zrApply,NOT_STARTED,ERP-031…033 (D-03/D-11),Сверка переводов: удаление и создание поступлений кассы ЗП (ADR-0002 п. 92)
 function,txTransferLayout,NOT_STARTED,ERP-031…033 (D-03/D-11),Форма перевода между счетами (ADR-0035)
 function,posNo,NOT_STARTED,ERP-044 (D-06/D-08),№ позиции в загрузке цехов (ADR-0002 п. 53)
+area,hr-tab-wage,NOT_STARTED,ERP-055 (D-06),Сотрудники → сдельная выработка
+area,hr-tab-timesheet,NOT_STARTED,ERP-054 (D-06),Сотрудники → табель
+area,hr-tab-tariffs,NOT_STARTED,ERP-055 (D-06),Сотрудники → тарифы
+area,hr-tab-users,NOT_STARTED,ERP-011 (D-13),Сотрудники → пользователи
+function,curYM,NOT_STARTED,ERP-054 (D-06),Явки месяца по табелю (карточка сотрудника)
+function,renderTariffs,NOT_STARTED,ERP-055 (D-06),Тарифы сдельной оплаты
+function,deleteTariffRow,NOT_STARTED,ERP-055 (D-06),Тарифы сдельной оплаты
+function,renderWageEmployees,NOT_STARTED,ERP-055 (D-06),Сдельная выработка (демонстрационный список legacy)
+function,deleteWageEmployeeRow,NOT_STARTED,ERP-055 (D-06),Сдельная выработка
+function,openStaffDeptModal,NOT_STARTED,ERP-053 (D-13),Изменение штатного расписания
+function,openStaffPositionModal,NOT_STARTED,ERP-053 (D-13),Изменение штатного расписания
+function,usrEmployeeByName,NOT_STARTED,ERP-011 (D-13),Пользователи
+function,renderSalonCommissionsSettings,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов
+function,saveStaffFieldDirect,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: правка оклада и процента
+function,showSalaryHistory,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: история окладов
+function,saveStaffField,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: правка оклада и процента

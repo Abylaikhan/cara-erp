@@ -15,7 +15,7 @@ page,page-expense_cats,,page-expense_cats,6893,M14 Статьи расходов
 page,page-channels,,page-channels,6984,M13 Центры прибыли,NOT_STARTED,ERP-062 (D-11),
 page,page-money_salon,,page-money_salon,7068,M15 Касса салона,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
 page,page-reconcile,,page-reconcile,7142,M16 Сверка с офисом,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
-page,page-hr,,page-hr,7204,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
+page,page-hr,,page-hr,7204,M17 Сотрудники,IMPLEMENTED,resources/js/components/ErpModal.vue,
 page,page-payroll,,page-payroll,7692,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 page,page-accruals,,page-accruals,7772,M20 Начисления ЗП,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
 page,page-wages,,page-wages,8022,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
@@ -1797,81 +1797,81 @@ control,page-reconcile|L7196,th,page-reconcile,7196,M16 Сверка с офис
 control,page-reconcile|L7196#2,th,page-reconcile,7196,M16 Сверка с офисом,IMPLEMENTED,label,Описание
 control,page-reconcile|L7196#3,th,page-reconcile,7196,M16 Сверка с офисом,IMPLEMENTED,label,Тип
 control,page-reconcile|L7197,th,page-reconcile,7197,M16 Сверка с офисом,IMPLEMENTED,label,Сумма
-control,page-hr|L7209,button,page-hr,7209,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),📊 Зарплатная ведомость
-control,page-hr|L7210,button,page-hr,7210,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),+ Сотрудник
-control,page-hr|L7240,div,page-hr,7240,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),🏢 Штатное расписание
-control,page-hr|L7241,div,page-hr,7241,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),👤 Сотрудники
-control,page-hr|L7242,div,page-hr,7242,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),🔨 Сдельная выработка
-control,page-hr|L7243,div,page-hr,7243,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),📊 Зарплатная ведомость
-control,page-hr|L7244,div,page-hr,7244,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),📅 Табель
-control,page-hr|L7245,div,page-hr,7245,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),⚙️ Тарифы
-control,page-hr|div|hr-tab-salon-commissions,div,page-hr,7246,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),💰 Комиссии салонов
-control,page-hr|div|hr-tab-users-btn,div,page-hr,7247,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),🔐 Пользователи
-control,page-hr|L7255,button,page-hr,7255,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),+ Должность
-control,page-hr|L7256,button,page-hr,7256,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),+ Подразделение
-control,page-hr|input|hr-staff-search,input,page-hr,7264,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
-control,page-hr|select|hr-staff-dept,select,page-hr,7266,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Все подразделения Производство АУП
-control,page-hr|L7267,option,page-hr,7267,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Все подразделения
-control,page-hr|L7268,option,page-hr,7268,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Производство
-control,page-hr|L7269,option,page-hr,7269,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),АУП
-control,page-hr|button|hr-view-grid,button,page-hr,7273,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),⊞ Карточки
-control,page-hr|button|hr-view-table,button,page-hr,7275,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),☰ Таблица
-control,page-hr|L7278,button,page-hr,7278,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),+ Сотрудник
-control,page-hr|L7284,th,page-hr,7284,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),ФИО
-control,page-hr|L7284#2,th,page-hr,7284,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Должность
-control,page-hr|L7284#3,th,page-hr,7284,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Подразделение / Вид деятельности
-control,page-hr|L7285,th,page-hr,7285,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Тип
-control,page-hr|L7285#2,th,page-hr,7285,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Оклад
-control,page-hr|L7286,th,page-hr,7286,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Начислено
-control,page-hr|th|hr-pin-th,th,page-hr,7287,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),🔐 PIN
-control,page-hr|L7288,th,page-hr,7288,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Телефон
-control,page-hr|L7288#2,th,page-hr,7288,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),С
-control,page-hr|L7288#3,th,page-hr,7288,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
-control,page-hr|L7299,button,page-hr,7299,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),+ Добавить выработку
-control,page-hr|L7303,th,page-hr,7303,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Сотрудник
-control,page-hr|L7303#2,th,page-hr,7303,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Должность
-control,page-hr|L7303#3,th,page-hr,7303,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Вид деятельности
-control,page-hr|L7304,th,page-hr,7304,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Выработка
-control,page-hr|L7305,th,page-hr,7305,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),План
-control,page-hr|L7306,th,page-hr,7306,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),%
-control,page-hr|L7307,th,page-hr,7307,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Начислено
-control,page-hr|L7307#2,th,page-hr,7307,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
-control,page-hr|select|hr-ts-month,select,page-hr,7322,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Июль 2026 Июнь 2026
-control,page-hr|L7323,option,page-hr,7323,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Июль 2026
-control,page-hr|L7324,option,page-hr,7324,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Июнь 2026
-control,page-hr|input|hr-ts-norm,input,page-hr,7329,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
-control,page-hr|L7336,button,page-hr,7336,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),✓ Отметки
-control,page-hr|L7340,button,page-hr,7340,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),⏱ Часы
-control,page-hr|select|hr-ts-mode,select,page-hr,7345,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),marks hours
-control,page-hr|L7346,option,page-hr,7346,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),marks
-control,page-hr|L7347,option,page-hr,7347,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),hours
-control,page-hr|L7369,button,page-hr,7369,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),+ Добавить операцию
-control,page-hr|L7372,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Операция
-control,page-hr|L7372#2,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Разряд
-control,page-hr|L7372#3,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Ставка ₸/шт
-control,page-hr|L7372#4,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
-control,page-hr|L7380,button,page-hr,7380,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),+ Новый пользователь
-control,page-hr|L7386,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Логин
-control,page-hr|L7386#2,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Имя
-control,page-hr|L7386#3,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Роль
-control,page-hr|L7387,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Разделы
-control,page-hr|L7387#2,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Пароль
-control,page-hr|L7387#3,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Код ЗП
-control,page-hr|L7387#4,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Статус
-control,page-hr|L7387#5,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
-control,page-hr|L7397,button,page-hr,7397,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),🔑 Выдать 6-значные коды
-control,page-hr|input|users-staff-q,input,page-hr,7398,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
-control,page-hr|select|users-staff-filter,select,page-hr,7399,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Все Без кода ЗП Со старым 4-значным кодом Без входа в систему С входом в систему
-control,page-hr|L7400,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Все
-control,page-hr|L7400#2,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Без кода ЗП
-control,page-hr|L7400#3,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Со старым 4-значным кодом
-control,page-hr|L7400#4,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Без входа в систему
-control,page-hr|L7400#5,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),С входом в систему
-control,page-hr|L7405,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Сотрудник
-control,page-hr|L7405#2,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Должность
-control,page-hr|L7405#3,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Код ЗП
-control,page-hr|L7405#4,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),Вход в систему
-control,page-hr|L7405#5,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-053/054 (D-13),
+control,page-hr|L7209,button,page-hr,7209,M17 Сотрудники,IMPLEMENTED,label,📊 Зарплатная ведомость
+control,page-hr|L7210,button,page-hr,7210,M17 Сотрудники,IMPLEMENTED,label,+ Сотрудник
+control,page-hr|L7240,div,page-hr,7240,M17 Сотрудники,IMPLEMENTED,label,🏢 Штатное расписание
+control,page-hr|L7241,div,page-hr,7241,M17 Сотрудники,IMPLEMENTED,label,👤 Сотрудники
+control,page-hr|L7242,div,page-hr,7242,M17 Сотрудники,IMPLEMENTED,label,🔨 Сдельная выработка
+control,page-hr|L7243,div,page-hr,7243,M17 Сотрудники,IMPLEMENTED,label,📊 Зарплатная ведомость
+control,page-hr|L7244,div,page-hr,7244,M17 Сотрудники,IMPLEMENTED,label,📅 Табель
+control,page-hr|L7245,div,page-hr,7245,M17 Сотрудники,IMPLEMENTED,label,⚙️ Тарифы
+control,page-hr|div|hr-tab-salon-commissions,div,page-hr,7246,M17 Сотрудники,IMPLEMENTED,id,💰 Комиссии салонов
+control,page-hr|div|hr-tab-users-btn,div,page-hr,7247,M17 Сотрудники,IMPLEMENTED,id,🔐 Пользователи
+control,page-hr|L7255,button,page-hr,7255,M17 Сотрудники,NOT_STARTED,"present, its action comes later — openStaffPositionModal: ERP-053 (D-13)",+ Должность
+control,page-hr|L7256,button,page-hr,7256,M17 Сотрудники,NOT_STARTED,"present, its action comes later — openStaffDeptModal: ERP-053 (D-13)",+ Подразделение
+control,page-hr|input|hr-staff-search,input,page-hr,7264,M17 Сотрудники,IMPLEMENTED,id,
+control,page-hr|select|hr-staff-dept,select,page-hr,7266,M17 Сотрудники,IMPLEMENTED,id,Все подразделения Производство АУП
+control,page-hr|L7267,option,page-hr,7267,M17 Сотрудники,IMPLEMENTED,label,Все подразделения
+control,page-hr|L7268,option,page-hr,7268,M17 Сотрудники,IMPLEMENTED,label,Производство
+control,page-hr|L7269,option,page-hr,7269,M17 Сотрудники,IMPLEMENTED,label,АУП
+control,page-hr|button|hr-view-grid,button,page-hr,7273,M17 Сотрудники,IMPLEMENTED,id,⊞ Карточки
+control,page-hr|button|hr-view-table,button,page-hr,7275,M17 Сотрудники,IMPLEMENTED,id,☰ Таблица
+control,page-hr|L7278,button,page-hr,7278,M17 Сотрудники,IMPLEMENTED,label,+ Сотрудник
+control,page-hr|L7284,th,page-hr,7284,M17 Сотрудники,IMPLEMENTED,label,ФИО
+control,page-hr|L7284#2,th,page-hr,7284,M17 Сотрудники,IMPLEMENTED,label,Должность
+control,page-hr|L7284#3,th,page-hr,7284,M17 Сотрудники,IMPLEMENTED,label,Подразделение / Вид деятельности
+control,page-hr|L7285,th,page-hr,7285,M17 Сотрудники,IMPLEMENTED,label,Тип
+control,page-hr|L7285#2,th,page-hr,7285,M17 Сотрудники,IMPLEMENTED,label,Оклад
+control,page-hr|L7286,th,page-hr,7286,M17 Сотрудники,IMPLEMENTED,label,Начислено
+control,page-hr|th|hr-pin-th,th,page-hr,7287,M17 Сотрудники,IMPLEMENTED,id,🔐 PIN
+control,page-hr|L7288,th,page-hr,7288,M17 Сотрудники,IMPLEMENTED,label,Телефон
+control,page-hr|L7288#2,th,page-hr,7288,M17 Сотрудники,IMPLEMENTED,label,С
+control,page-hr|L7288#3,th,page-hr,7288,M17 Сотрудники,IMPLEMENTED,an empty column header: its table is compared visually,
+control,page-hr|L7299,button,page-hr,7299,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),+ Добавить выработку
+control,page-hr|L7303,th,page-hr,7303,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Сотрудник
+control,page-hr|L7303#2,th,page-hr,7303,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Должность
+control,page-hr|L7303#3,th,page-hr,7303,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Вид деятельности
+control,page-hr|L7304,th,page-hr,7304,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Выработка
+control,page-hr|L7305,th,page-hr,7305,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),План
+control,page-hr|L7306,th,page-hr,7306,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),%
+control,page-hr|L7307,th,page-hr,7307,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Начислено
+control,page-hr|L7307#2,th,page-hr,7307,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),
+control,page-hr|select|hr-ts-month,select,page-hr,7322,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),Июль 2026 Июнь 2026
+control,page-hr|L7323,option,page-hr,7323,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),Июль 2026
+control,page-hr|L7324,option,page-hr,7324,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),Июнь 2026
+control,page-hr|input|hr-ts-norm,input,page-hr,7329,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),
+control,page-hr|L7336,button,page-hr,7336,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),✓ Отметки
+control,page-hr|L7340,button,page-hr,7340,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),⏱ Часы
+control,page-hr|select|hr-ts-mode,select,page-hr,7345,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),marks hours
+control,page-hr|L7346,option,page-hr,7346,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),marks
+control,page-hr|L7347,option,page-hr,7347,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),hours
+control,page-hr|L7369,button,page-hr,7369,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),+ Добавить операцию
+control,page-hr|L7372,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Операция
+control,page-hr|L7372#2,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Разряд
+control,page-hr|L7372#3,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Ставка ₸/шт
+control,page-hr|L7372#4,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),
+control,page-hr|L7380,button,page-hr,7380,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),+ Новый пользователь
+control,page-hr|L7386,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Логин
+control,page-hr|L7386#2,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Имя
+control,page-hr|L7386#3,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Роль
+control,page-hr|L7387,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Разделы
+control,page-hr|L7387#2,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Пароль
+control,page-hr|L7387#3,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Код ЗП
+control,page-hr|L7387#4,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Статус
+control,page-hr|L7387#5,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),
+control,page-hr|L7397,button,page-hr,7397,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),🔑 Выдать 6-значные коды
+control,page-hr|input|users-staff-q,input,page-hr,7398,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),
+control,page-hr|select|users-staff-filter,select,page-hr,7399,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Все Без кода ЗП Со старым 4-значным кодом Без входа в систему С входом в систему
+control,page-hr|L7400,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Все
+control,page-hr|L7400#2,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Без кода ЗП
+control,page-hr|L7400#3,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Со старым 4-значным кодом
+control,page-hr|L7400#4,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Без входа в систему
+control,page-hr|L7400#5,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),С входом в систему
+control,page-hr|L7405,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Сотрудник
+control,page-hr|L7405#2,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Должность
+control,page-hr|L7405#3,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Код ЗП
+control,page-hr|L7405#4,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Вход в систему
+control,page-hr|L7405#5,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),
 control,userModal|L7416,button,userModal,7416,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),✕
 control,userModal|input|u-login,input,userModal,7421,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
 control,userModal|input|u-password,input,userModal,7426,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
@@ -2596,7 +2596,7 @@ function,prPayoutRows#1,,,13715,M19 Зарплатная ведомость,NOT_
 function,renderPayouts#1,,,13725,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,exportPayouts#1,,,13747,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,showEmpPayrollHistory#1,,,13756,—,NOT_STARTED,ERP-056 (D-06),
-function,curYM#1,,,13767,"M17 Сотрудники, M20 Начисления ЗП",NOT_STARTED,by its controls: ERP-053/054 (D-13); ERP-056 (D-06),
+function,curYM#1,,,13767,"M17 Сотрудники, M20 Начисления ЗП",NOT_STARTED,ERP-054 (D-06),
 function,curMonthFirst#1,,,13768,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,curMonthLast#1,,,13769,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,initDynamicPeriods#1,,,13770,—,NOT_STARTED,ERP-053/054 (D-13),
@@ -2697,9 +2697,9 @@ function,cabPrint#1,,,17342,M22 Мой кабинет,NOT_STARTED,by its control
 function,cabExcel#1,,,17367,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
 function,cabSendEmail#1,,,17386,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
 function,cabLogout#1,,,17402,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
-function,renderTariffs#1,,,17582,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,by its controls: ERP-053/054 (D-13); ERP-055 (D-06),
-function,addTariffRow#1,,,17603,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,by its controls: ERP-053/054 (D-13); ERP-055 (D-06),
-function,deleteTariffRow#1,,,17607,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,by its controls: ERP-053/054 (D-13); ERP-055 (D-06),
+function,renderTariffs#1,,,17582,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,ERP-055 (D-06),
+function,addTariffRow#1,,,17603,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,by its controls: ERP-055 (D-06),
+function,deleteTariffRow#1,,,17607,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,ERP-055 (D-06),
 function,initTechCardsTab#1,,,17621,M02 Производство,NOT_STARTED,requirement M02.SHOPFLOOR (DEC-06),
 function,renderTechCardsPage#1,,,17644,M02 Производство,NOT_STARTED,by its controls: ERP-028 (D-12),
 function,openTCTemplate#1,,,17709,M02 Производство,NOT_STARTED,by its controls: ERP-028 (D-12),
@@ -2712,9 +2712,9 @@ function,renderPieceWages#1,,,17852,M18 Сдельная оплата,NOT_STARTE
 function,updatePieceGoal#1,,,17957,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
 function,showPieceDetail#1,,,17966,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
 function,renderPieceTariffs#1,,,18013,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
-function,renderWageEmployees#1,,,18052,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,by its controls: ERP-053/054 (D-13); ERP-055 (D-06),
+function,renderWageEmployees#1,,,18052,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,ERP-055 (D-06),
 function,addWageEmployeeRow#1,,,18100,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,deleteWageEmployeeRow#1,,,18104,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,by its controls: ERP-053/054 (D-13); ERP-055 (D-06),
+function,deleteWageEmployeeRow#1,,,18104,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,ERP-055 (D-06),
 function,calcWage#1,,,18113,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
 function,saveOrder#1,,,18124,M02 Производство,PENDING_DECISION,by its controls: D-15,
 function,saveWage#1,,,18172,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
@@ -2853,51 +2853,51 @@ function,renderFixedCostsTable#1,,,21322,M11 Финансы,NOT_STARTED,by its c
 function,renderFCBreakdown#1,,,21351,M11 Финансы,NOT_STARTED,by its controls: D-15; ERP-063 (D-11),
 function,renderBEPKpi#1,,,21378,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
 function,renderBEPChart#1,,,21408,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,tsKey#1,,,21571,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,tsEntry#1,,,21572,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
+function,tsKey#1,,,21571,M17 Сотрудники,NOT_STARTED,by its controls: ERP-054 (D-06),
+function,tsEntry#1,,,21572,M17 Сотрудники,NOT_STARTED,by its controls: ERP-054 (D-06),
 function,tsMark#1,,,21573,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
-function,tsSet#1,,,21574,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,tsSetTime#1,,,21578,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,tsHours#1,,,21584,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,renderHRKPIs#1,,,21627,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13); ERP-053/054 (D-13),
-function,setHRView#1,,,21679,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,renderOrgChart#1,,,21691,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,occupiedSlots#1,,,21696,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,openStaffDeptModal#1,,,21777,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,openStaffPositionModal#1,,,21790,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,showHRTab#1,,,21835,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
+function,tsSet#1,,,21574,M17 Сотрудники,NOT_STARTED,by its controls: ERP-054 (D-06),
+function,tsSetTime#1,,,21578,M17 Сотрудники,NOT_STARTED,by its controls: ERP-054 (D-06),
+function,tsHours#1,,,21584,M17 Сотрудники,NOT_STARTED,by its controls: ERP-054 (D-06),
+function,renderHRKPIs#1,,,21627,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
+function,setHRView#1,,,21679,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
+function,renderOrgChart#1,,,21691,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
+function,occupiedSlots#1,,,21696,M17 Сотрудники,IMPLEMENTED,named in resources/js/pages/Hr.vue,
+function,openStaffDeptModal#1,,,21777,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
+function,openStaffPositionModal#1,,,21790,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
+function,showHRTab#1,,,21835,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
 function,loadAppUsers#1,,,21878,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,usrEsc#1,,,21892,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,usrNorm#1,,,21893,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,usrSameName#1,,,21894,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
+function,usrEsc#1,,,21892,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
+function,usrNorm#1,,,21893,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
+function,usrSameName#1,,,21894,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
 function,usrPages#1,,,21899,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,usrEmployeeByName#1,,,21903,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13); ERP-053/054 (D-13),
+function,usrEmployeeByName#1,,,21903,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),
 function,renderUsersTable#1,,,21905,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
 function,renderUsersStaffBlock#1,,,21941,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
 function,usrSetPin#1,,,21965,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
 function,usrReissuePins#1,,,21982,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,usrShowPinList#1,,,21999,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
+function,usrShowPinList#1,,,21999,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
 function,usrPrintPins#1,,,22010,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
 function,genUniquePin#1,,,22017,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
-function,usrTranslit#1,,,22028,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
+function,usrTranslit#1,,,22028,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
 function,usrCreateFor#1,,,22032,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
 function,openUserModal#1,,,22045,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
 function,saveAppUser#1,,,22077,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
 function,toggleUserActive#1,,,22113,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
 function,applyUserRoleTemplate#1,,,22134,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
 function,deleteAppUser#1,,,22150,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
-function,renderSalonCommissionsSettings#1,,,22163,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,saveStaffFieldDirect#1,,,22261,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,showSalaryHistory#1,,,22270,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,saveStaffField#1,,,22315,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
-function,renderHRStaff#1,,,22370,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
+function,renderSalonCommissionsSettings#1,,,22163,M17 Сотрудники,NOT_STARTED,ERP-059 (D-06/D-13),
+function,saveStaffFieldDirect#1,,,22261,M17 Сотрудники,NOT_STARTED,ERP-059 (D-06/D-13),
+function,showSalaryHistory#1,,,22270,M17 Сотрудники,NOT_STARTED,ERP-059 (D-06/D-13),
+function,saveStaffField#1,,,22315,M17 Сотрудники,NOT_STARTED,ERP-059 (D-06/D-13),
+function,renderHRStaff#1,,,22370,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
 function,dismissEmployee#1,,,22485,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
-function,openStaffChangesHistory#1,,,22503,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
+function,openStaffChangesHistory#1,,,22503,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
 function,fillAccrualFromCard#1,,,22520,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
-function,openEmployeeCard#1,,,22557,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
+function,openEmployeeCard#1,,,22557,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
 function,saveEmployeeCard#1,,,22625,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
 function,deleteEmployee#1,,,22728,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,renderTimesheet#1,,,22737,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053/054 (D-13),
+function,renderTimesheet#1,,,22737,M17 Сотрудники,NOT_STARTED,by its controls: ERP-054 (D-06),
 function,calcIPN#1,,,22977,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,buildPayrollRow#1,,,22983,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,showFinanceTab#1,,,23021,M11 Финансы,IMPLEMENTED,requirement M11.AR,
