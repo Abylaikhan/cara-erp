@@ -54,9 +54,7 @@ SKIP = {
     ('page-dashboard', 'dash-month-sel'): 'legacy gets the breakdown of the expenses for the current month only',
 }
 # Parts of a container that are not migrated (the target shows a message): not read.
-EXCLUDE_PARTS = {
-    'sr-tab-current': ['#sr-salary-result'],  # the salary of the sellers comes with «Сотрудники» (ERP-059, D-13)
-}
+EXCLUDE_PARTS: dict = {}
 # Legacy state put back after every case, where undoing the control re-runs legacy logic with a documented difference:
 # the order boards — the month of the page in local dates, as legacy_compare gives it (ADR-0002, п. 51).
 _BOARDS_RESET = ("() => { const now = new Date(); _okDateFrom = localISODate(now.getFullYear(), now.getMonth(), 1);"

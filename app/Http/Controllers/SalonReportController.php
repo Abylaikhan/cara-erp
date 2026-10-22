@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employee;
 use App\Models\Order;
 use App\Models\SalonPayrollRow;
 use App\Support\ChannelScope;
@@ -16,7 +17,7 @@ use Inertia\Response;
  * (L16283–16610): the orders of the salons the account may see (ChannelScope) with their dates, seller, end client, total and
  * paid share; the page counts the month. The tabs «Платёжная ведомость» and «История ЗП» read the lines of the salon payroll
  * (legacy salon_payroll, loadSalonPayroll L16370) the same way for everyone who may open the page; they load with the tab. The
- * seller's salary (commissions and salaries of «Сотрудники») comes with M17 (ERP-053, ERP-059, D-13).
+ * seller's salary is counted as legacy counts it, from the salary and the commission of the seller's card (M17).
  */
 class SalonReportController extends Controller
 {
@@ -24,19 +25,27 @@ class SalonReportController extends Controller
     {
         abort_unless(Erp::canAccess($request->user(), 'salon_report'), 403);
         $filter = ChannelScope::filterFor($request->user());
+        $orders = ChannelScope::apply(Order::query()->where('orders.channel', 'like', 'salon\_%'), $request->user(), 'orders.channel')
+            ->leftJoinSub(DB::table('order_items')->groupBy('order_id')->selectRaw('order_id, sum(qty * price) AS total'), 'i', 'i.order_id', '=', 'orders.id')
+            ->orderByDesc('orders.created_at')->orderByDesc('orders.id')
+            ->get(['orders.num', 'orders.channel', 'orders.customer', 'orders.end_client', 'orders.seller', 'orders.order_date', 'orders.due_date', 'orders.payment_pct', 'orders.status',
+                DB::raw('coalesce(i.total, 0) AS total')]);
 
         return Inertia::render('SalonReport', [
             'today' => now(config('erp.business_timezone'))->format('Y-m-d'),
             // Legacy hides the salon choice from an account of one salon.
             'salonFixed' => $filter !== null && $filter !== ChannelScope::SALONS ? $filter : null,
-            'orders' => ChannelScope::apply(Order::query()->where('orders.channel', 'like', 'salon\_%'), $request->user(), 'orders.channel')
-                ->leftJoinSub(DB::table('order_items')->groupBy('order_id')->selectRaw('order_id, sum(qty * price) AS total'), 'i', 'i.order_id', '=', 'orders.id')
-                ->orderByDesc('orders.created_at')->orderByDesc('orders.id')
-                ->get(['orders.num', 'orders.channel', 'orders.customer', 'orders.end_client', 'orders.seller', 'orders.order_date', 'orders.due_date', 'orders.payment_pct', 'orders.status',
-                    DB::raw('coalesce(i.total, 0) AS total')])
+            'orders' => $orders
                 ->map(fn (Order $o) => ['num' => $o->num, 'channel' => $o->channel, 'customer' => $o->customer, 'end_client' => $o->end_client, 'seller' => $o->seller,
                     'created' => $o->order_date?->format('Y-m-d'), 'date' => $o->due_date?->format('Y-m-d'), 'payment' => $o->payment_pct, 'status' => $o->status,
                     'total' => (string) $o->getAttribute('total')])->values(),
+            // «Расчёт зарплаты продавца» (legacy renderSalonReport): the salary, the commission % and its base (sales or payments)
+            // from the card of the employee whose name is the seller's — only for the sellers of these orders (legacy loaded
+            // the whole staff into the browser).
+            'sellerTerms' => Employee::query()->whereIn('name', $orders->pluck('seller')->filter()->unique()->values())->orderBy('name')
+                ->get(['name', 'salary', 'commission_pct', 'commission_method'])
+                ->map(fn (Employee $e) => ['name' => $e->name, 'salary' => (float) ($e->getRawOriginal('salary') ?? 0), 'pct' => (float) ($e->getRawOriginal('commission_pct') ?? 0),
+                    'method' => $e->getAttribute('commission_method') ?: 'sales'])->values(),
             // legacy loadSalonPayroll: order=year.desc,month.desc (lines of one month in the order legacy returns them)
             'payroll' => Inertia::optional(fn () => SalonPayrollRow::query()->orderByDesc('year')->orderByDesc('month')->orderBy('legacy_position')->orderBy('id')
                 ->get(['employee', 'year', 'month', 'salary', 'commission', 'bonus', 'vacation', 'advance', 'total', 'remainder'])

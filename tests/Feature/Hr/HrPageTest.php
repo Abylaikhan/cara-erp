@@ -24,6 +24,11 @@ class HrPageTest extends TestCase
         $b = $this->employee('dddddddd-dddd-4ddd-8ddd-aaaaaaaaaaa1', 'Борисов Тест', 'aup', 'Бухгалтер');
         $this->employee('dddddddd-dddd-4ddd-8ddd-aaaaaaaaaaa2', 'Антонов Тест', null, 'Столяр');
         $this->employee('dddddddd-dddd-4ddd-8ddd-aaaaaaaaaaa3', 'Вера Салонова', 'office', 'Продавец салона', 'Армада');
+        DB::table('employees')->where('id', $b)->update(['commission_pct' => '1.5', 'commission_method' => 'paid']);
+        DB::table('employee_salary_history')->insert([
+            ['uuid' => 'ffffffff-ffff-4fff-8fff-aaaaaaaaaaa1', 'employee_id' => $b, 'salary' => 100, 'commission_pct' => 1, 'valid_from' => '2031-01-01', 'note' => 'Первый', 'created_at' => now(), 'updated_at' => now()],
+            ['uuid' => 'ffffffff-ffff-4fff-8fff-aaaaaaaaaaa2', 'employee_id' => $b, 'salary' => 200, 'commission_pct' => 1.5, 'valid_from' => '2031-06-01', 'note' => null, 'created_at' => now(), 'updated_at' => now()],
+        ]);
         DB::table('employee_changes')->insert([
             ['uuid' => 'eeeeeeee-eeee-4eee-8eee-aaaaaaaaaaa1', 'employee_id' => $b, 'change_date' => '2031-01-01', 'change_type' => 'hire', 'base_salary' => 100, 'created_at' => now(), 'updated_at' => now()],
             ['uuid' => 'eeeeeeee-eeee-4eee-8eee-aaaaaaaaaaa2', 'employee_id' => $b, 'change_date' => '2031-05-01', 'change_type' => 'salary_change', 'base_salary' => 200, 'created_at' => now(), 'updated_at' => now()],
@@ -37,6 +42,11 @@ class HrPageTest extends TestCase
             ->where('employees.1.salary', 120000.5)
             ->where('employees.1.changes.0.date', '2031-05-01')
             ->where('employees.1.changes.1.type', 'hire')
+            ->where('employees.1.commissionPct', 1.5)
+            ->where('employees.1.commissionMethod', 'paid')
+            ->where('employees.0.commissionMethod', 'sales') // legacy: an empty base is «% от продаж»
+            ->where('employees.1.salaryHistory.0', ['from' => '2031-06-01', 'salary' => 200, 'pct' => 1.5, 'note' => null])
+            ->where('employees.1.salaryHistory.1.note', 'Первый')
             ->where('canSeePin', true)
             ->where('salonManager', false)
             ->missing('employees.0.pin'));

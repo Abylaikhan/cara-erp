@@ -495,6 +495,13 @@ with sync_playwright() as p:
         if hr['employees']:
             page.locator('#hr-staff-tbody tr').first.click(); page.wait_for_timeout(500)
             target_shot(page, str(OUT / f'target-hr-card-{theme}.png'))
+            page.locator('#employeeCardModal .modal-close').click(); page.wait_for_timeout(300)
+        page.locator('#hr-tab-salon-commissions').click(); page.wait_for_timeout(500)
+        target_shot(page, str(OUT / f'target-hr-commissions-{theme}.png'))
+        target_comm = page.locator('#hr-tab-salon_commissions').inner_text()
+        page.locator('#page-hr .tabs .tab').nth(5).click(); page.wait_for_timeout(500)
+        target_shot(page, str(OUT / f'target-hr-tariffs-{theme}.png'))
+        target_tariffs = page.locator('#hr-tab-tariffs').inner_text()
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
@@ -1091,6 +1098,15 @@ with sync_playwright() as p:
             page.evaluate("openEmployeeCard(employeesData[0].id)"); page.wait_for_timeout(500)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-hr-card-{theme}.png'))
             page.evaluate("closeModal('employeeCardModal')")
+        # «Комиссии салонов» as legacy shows them to an account that may not change them («Только просмотр.», ADR-0038).
+        page.evaluate("window._currentUser = 'hr'; showHRTab('salon_commissions', document.getElementById('hr-tab-salon-commissions')); window._currentUser = 'director'")
+        page.wait_for_timeout(500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-hr-commissions-{theme}.png'))
+        legacy_comm = page.locator('#hr-tab-salon_commissions').inner_text()
+        print(f'hr commissions ({theme}): ' + ('совпадает' if target_comm.split() == legacy_comm.split() else 'РАСХОЖДЕНИЕ'))
+        page.evaluate("showHRTab('tariffs', document.querySelectorAll('#page-hr .tab')[5])"); page.wait_for_timeout(500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-hr-tariffs-{theme}.png'))
+        print(f'hr tariffs ({theme}): ' + ('совпадает' if target_tariffs.split() == page.locator('#hr-tab-tariffs').inner_text().split() else 'РАСХОЖДЕНИЕ'))
         print(f'hr ({theme}): штатное расписание ' + ('совпадает' if target_org.split() == legacy_org.split() else 'РАСХОЖДЕНИЕ')
               + ', таблица ' + ('совпадает' if target_hr_table.splitlines() == legacy_hr_table.splitlines() else 'РАСХОЖДЕНИЕ'))
         ctx.close()
@@ -1218,7 +1234,7 @@ with sync_playwright() as p:
         target_shot(page, str(OUT / f'target-salon-report-{theme}.png'))
         run_filters(page, 'target', theme, 'sr-tab-current')
         sreport = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
-        target_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
+        target_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody', '#sr-salary-result')]
         # The tabs of the salon payroll: the lines load with the first of them.
         page.locator('#page-salon_report .tabs .tab').nth(1).click(); page.wait_for_timeout(1500)
         target_shot(page, str(OUT / f'target-salon-paysheet-{theme}.png'))
@@ -1263,12 +1279,13 @@ with sync_playwright() as p:
         run_filters(page, 'legacy', theme, 'page-money_salon')
         tl, ll = target_salon.splitlines(), page.locator('#salon-cash-tbody').inner_text().splitlines()
         print(f'salon cash table ({theme}): lines {len(tl)} / {len(ll)}, ' + ('совпадает' if tl == ll else f'РАСХОЖДЕНИЙ {sum(1 for a, b in zip(tl, ll) if a != b) + abs(len(tl) - len(ll))}'))
-        # «Отчёт салонов»: the same salon orders; legacy cannot load the staff (blocked), the target says the salary comes with them.
+        # «Отчёт салонов»: the same salon orders; legacy gets the cards of the sellers the target received (salary, commission %
+        # and its base) for «Расчёт зарплаты продавца».
         page.evaluate("""(r) => {
             const dmy = d => d ? d.split('-').reverse().join('.') : '';
             ordersData = r.orders.map(o => ({num: o.num, channel: o.channel, customer: o.customer || '', salonClientName: o.end_client || '', seller: o.seller || '',
                 createdDate: dmy(o.created), date: dmy(o.date), payment: o.payment, status: o.status === 'progress' ? 'production' : o.status, items: [{qty: 1, price: +o.total}]}));
-            employeesData = [];
+            employeesData = r.sellerTerms.map(t => ({name: t.name, salary: t.salary, commissionPct: t.pct, commissionMethod: t.method}));
             showPage('salon_report', [...document.querySelectorAll('.nav-item')].find(n => (n.getAttribute('onclick') || '').includes("'salon_report'")));
             ordersData.length || 0;
         }""", sreport)
@@ -1276,8 +1293,8 @@ with sync_playwright() as p:
         page.evaluate("renderSalonReport()"); page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-salon-report-{theme}.png'))
         run_filters(page, 'legacy', theme, 'sr-tab-current')
-        legacy_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody')]
-        print(f'salon report ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a == b else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'продавцы', 'заказы'), target_sr, legacy_sr)))
+        legacy_sr = [page.locator(x).inner_text() for x in ('#sr-kpi', '#sr-sellers-tbody', '#sr-orders-tbody', '#sr-salary-result')]
+        print(f'salon report ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a == b else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'продавцы', 'заказы', 'зарплата продавцов'), target_sr, legacy_sr)))
         # Legacy gets the payroll lines the target received, in the same order (its loader asks year.desc,month.desc).
         page.evaluate("""(rows) => { _salonPayrollData = rows; showSalonReportTab('paysheet', document.querySelectorAll('#page-salon_report .tabs .tab')[1]); }""", payroll)
         page.wait_for_timeout(1500)
@@ -1310,7 +1327,7 @@ with sync_playwright() as p:
             n = len(a2) if isinstance(a2, list) else 1
             print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'payroll', 'payroll-payouts', 'hr', 'hr-employees', 'hr-table') + (('hr-card',) if hr['employees'] else ()):
+        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'payroll', 'payroll-payouts', 'hr', 'hr-employees', 'hr-table', 'hr-commissions', 'hr-tariffs') + (('hr-card',) if hr['employees'] else ()):
             if EMPTY and shot in EMPTY_DEVIATIONS:  # pictures kept, not compared: a documented deviation
                 print(f'{shot}-{theme}: not compared — {EMPTY_DEVIATIONS[shot]}')
                 continue

@@ -1845,11 +1845,11 @@ control,page-hr|L7340,button,page-hr,7340,M17 Сотрудники,NOT_STARTED,E
 control,page-hr|select|hr-ts-mode,select,page-hr,7345,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),marks hours
 control,page-hr|L7346,option,page-hr,7346,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),marks
 control,page-hr|L7347,option,page-hr,7347,M17 Сотрудники,NOT_STARTED,ERP-054 (D-06),hours
-control,page-hr|L7369,button,page-hr,7369,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),+ Добавить операцию
-control,page-hr|L7372,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Операция
-control,page-hr|L7372#2,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Разряд
-control,page-hr|L7372#3,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),Ставка ₸/шт
-control,page-hr|L7372#4,th,page-hr,7372,M17 Сотрудники,NOT_STARTED,ERP-055 (D-06),
+control,page-hr|L7369,button,page-hr,7369,M17 Сотрудники,NOT_STARTED,"present, its action comes later — addTariffRow: ERP-055 (D-06)",+ Добавить операцию
+control,page-hr|L7372,th,page-hr,7372,M17 Сотрудники,IMPLEMENTED,label,Операция
+control,page-hr|L7372#2,th,page-hr,7372,M17 Сотрудники,IMPLEMENTED,label,Разряд
+control,page-hr|L7372#3,th,page-hr,7372,M17 Сотрудники,IMPLEMENTED,label,Ставка ₸/шт
+control,page-hr|L7372#4,th,page-hr,7372,M17 Сотрудники,IMPLEMENTED,an empty column header: its table is compared visually,
 control,page-hr|L7380,button,page-hr,7380,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),+ Новый пользователь
 control,page-hr|L7386,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Логин
 control,page-hr|L7386#2,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Имя
@@ -2673,7 +2673,7 @@ function,printPaysheet#1,,,16591,M21 Отчёт салонов,IMPLEMENTED,requi
 function,loadSalonPayroll#1,,,16602,M21 Отчёт салонов,IMPLEMENTED,requirement M21.PAYSHEET,
 function,renderSalonPayrollHistory#1,,,16610,M21 Отчёт салонов,IMPLEMENTED,requirement M21.HISTORY,
 function,initSalonReport#1,,,16680,UI оболочка,IMPLEMENTED,requirement M21.CURRENT,
-function,renderSalonReport#1,,,16693,M21 Отчёт салонов,IMPLEMENTED,requirement M21.CURRENT,
+function,renderSalonReport#1,,,16693,M21 Отчёт салонов,IMPLEMENTED,"requirement M21.CURRENT, M21.SELLER-SALARY",
 function,showPage#1,,,16847,UI оболочка,IMPLEMENTED,requirement UI-01.SHELL,
 function,showModal#1,,,17103,"M02 Производство, M08 Покупатели, M09 Продажи …",IMPLEMENTED,named in resources/js/components/ErpModal.vue,
 function,closeModal#1,,,17104,"M02 Производство, M03 Склад, M04 Закупки …",IMPLEMENTED,named in resources/js/components/ErpModal.vue,
@@ -2697,8 +2697,8 @@ function,cabPrint#1,,,17342,M22 Мой кабинет,NOT_STARTED,by its control
 function,cabExcel#1,,,17367,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
 function,cabSendEmail#1,,,17386,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
 function,cabLogout#1,,,17402,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
-function,renderTariffs#1,,,17582,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,ERP-055 (D-06),
-function,addTariffRow#1,,,17603,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,by its controls: ERP-055 (D-06),
+function,renderTariffs#1,,,17582,"M17 Сотрудники, M18 Сдельная оплата",IMPLEMENTED,requirement M17.TARIFFS,
+function,addTariffRow#1,,,17603,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,ERP-055 (D-06),
 function,deleteTariffRow#1,,,17607,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,ERP-055 (D-06),
 function,initTechCardsTab#1,,,17621,M02 Производство,NOT_STARTED,requirement M02.SHOPFLOOR (DEC-06),
 function,renderTechCardsPage#1,,,17644,M02 Производство,NOT_STARTED,by its controls: ERP-028 (D-12),
@@ -2886,9 +2886,9 @@ function,saveAppUser#1,,,22077,M17 Сотрудники,NOT_STARTED,requirement 
 function,toggleUserActive#1,,,22113,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
 function,applyUserRoleTemplate#1,,,22134,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
 function,deleteAppUser#1,,,22150,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
-function,renderSalonCommissionsSettings#1,,,22163,M17 Сотрудники,NOT_STARTED,ERP-059 (D-06/D-13),
+function,renderSalonCommissionsSettings#1,,,22163,M17 Сотрудники,IMPLEMENTED,requirement M17.COMMISSIONS,
 function,saveStaffFieldDirect#1,,,22261,M17 Сотрудники,NOT_STARTED,ERP-059 (D-06/D-13),
-function,showSalaryHistory#1,,,22270,M17 Сотрудники,NOT_STARTED,ERP-059 (D-06/D-13),
+function,showSalaryHistory#1,,,22270,M17 Сотрудники,IMPLEMENTED,requirement M17.COMMISSIONS,
 function,saveStaffField#1,,,22315,M17 Сотрудники,NOT_STARTED,ERP-059 (D-06/D-13),
 function,renderHRStaff#1,,,22370,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
 function,dismissEmployee#1,,,22485,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),

@@ -72,6 +72,9 @@ export interface Employee {
     status: string;
     fired_date: string | null;
     changes: EmployeeChangeRow[];
+    commissionPct: number;
+    commissionMethod: string;
+    salaryHistory: { from: string; salary: number; pct: number; note: string | null }[];
 }
 
 /** Legacy initials: the first letters of the first two words. */
@@ -82,3 +85,32 @@ export const initials = (name: string): string =>
         .join('')
         .slice(0, 2)
         .toUpperCase();
+
+/** Legacy tariffData (L17470): the piece rates by operation (₸ per piece), kept in the page's own code; the production stages
+ * take their names from it. */
+export const TARIFFS: { op: string; grade: number; rate: number; workshop: string; stage: string }[] = [
+    { op: 'Раскрой ЛДСП/МДФ', grade: 4, rate: 170, workshop: 'cut', stage: 'machine' },
+    { op: 'Кромление деталей', grade: 3, rate: 95, workshop: 'cut', stage: 'machine' },
+    { op: 'Фрезеровка фасадов', grade: 5, rate: 210, workshop: 'cut', stage: 'machine' },
+    { op: 'Сверление/присадка', grade: 3, rate: 110, workshop: 'cut', stage: 'machine' },
+    { op: 'Раскрой ткани/кожи', grade: 3, rate: 130, workshop: 'cut', stage: 'machine' },
+    { op: 'Шлифовка деталей', grade: 3, rate: 120, workshop: 'grind', stage: 'prep' },
+    { op: 'Шлифовка финишная', grade: 4, rate: 150, workshop: 'grind', stage: 'finish' },
+    { op: 'Грунтовка', grade: 3, rate: 130, workshop: 'paint', stage: 'prep' },
+    { op: 'Окраска/покраска', grade: 4, rate: 180, workshop: 'paint', stage: 'cover' },
+    { op: 'Лакировка', grade: 4, rate: 170, workshop: 'paint', stage: 'finish' },
+    { op: 'Сборка каркаса', grade: 4, rate: 200, workshop: 'assemble', stage: 'machine' },
+    { op: 'Сборка корпуса', grade: 4, rate: 210, workshop: 'assemble', stage: 'machine' },
+    { op: 'Сборка ящиков', grade: 3, rate: 150, workshop: 'assemble', stage: 'machine' },
+    { op: 'Установка фасадов/фурнитуры', grade: 4, rate: 160, workshop: 'assemble', stage: 'finish' },
+    { op: 'Установка механизмов', grade: 4, rate: 190, workshop: 'assemble', stage: 'finish' },
+    { op: 'Финальная сборка', grade: 4, rate: 200, workshop: 'assemble', stage: 'finish' },
+    { op: 'Настил поролона/синтепона', grade: 3, rate: 160, workshop: 'upholstery', stage: 'prep' },
+    { op: 'Обивка сиденья/спинки', grade: 4, rate: 180, workshop: 'upholstery', stage: 'cover' },
+    { op: 'Пошив и крепление чехлов', grade: 5, rate: 280, workshop: 'upholstery', stage: 'cover' },
+    { op: 'Обивка изголовья', grade: 4, rate: 200, workshop: 'upholstery', stage: 'cover' },
+    { op: 'Шпонирование поверхностей', grade: 5, rate: 250, workshop: 'veneer', stage: 'cover' },
+    { op: 'Прессование шпона', grade: 4, rate: 180, workshop: 'veneer', stage: 'machine' },
+    { op: 'Упаковка и маркировка', grade: 2, rate: 80, workshop: 'pack', stage: 'pack' },
+    { op: 'Комплектация заказа', grade: 3, rate: 100, workshop: 'pack', stage: 'pack' },
+];

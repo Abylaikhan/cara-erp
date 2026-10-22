@@ -2,7 +2,7 @@
 // M21 «Отчёт салонов», part 1 — legacy page-salon_report (L8118–8244), initSalonReport/renderSalonReport/showSalonReportTab
 // (L16283–16610). Tab «Текущий период»: the salon orders of the month by their creation date (orders without a date are always
 // shown), KPIs, the sellers, every order. The month ends on its last calendar day (legacy lost it through UTC). The seller's
-// salary needs the commissions and salaries of «Сотрудники». Tabs «Платёжная ведомость» and «История ЗП» read the salon payroll
+// salary is counted from the seller's card (salary, commission % and its base). Tabs «Платёжная ведомость» and «История ЗП» read the salon payroll
 // (legacy salon_payroll), loaded with the first of them.
 import { router } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
@@ -24,7 +24,13 @@ interface SalonOrder {
     status: string;
     total: string;
 }
-const props = defineProps<{ today: string; salonFixed: string | null; orders: SalonOrder[]; payroll?: PayrollLine[] }>();
+const props = defineProps<{
+    today: string;
+    salonFixed: string | null;
+    orders: SalonOrder[];
+    sellerTerms: { name: string; salary: number; pct: number; method: string }[];
+    payroll?: PayrollLine[];
+}>();
 
 const tab = ref<'current' | 'paysheet' | 'history'>('current');
 // The payroll comes with the first of its tabs, as legacy loads it (loadSalonPayroll).
@@ -71,6 +77,19 @@ const report = computed(() => {
         sellers: [...sellers.values()].sort((a, b) => b.sum - a.sum),
     };
 });
+// «Расчёт зарплаты продавца» (legacy renderSalonReport doRender): the salary of the seller's card plus its commission % of the
+// sales or of the payments of the period, rounded; a seller without a card counts 0.
+const salary = computed(() =>
+    report.value.sellers
+        .filter((sl) => sl.name !== '—')
+        .map((sl) => {
+            const t = props.sellerTerms.find((e) => e.name === sl.name);
+            const method = t?.method || 'sales';
+            const base = method === 'paid' ? sl.paid : sl.sum;
+            const commission = Math.round((base * (t?.pct || 0)) / 100);
+            return { name: sl.name, count: sl.count, base, pct: t?.pct || 0, commission, salary: t?.salary || 0, total: (t?.salary || 0) + commission, method };
+        }),
+);
 // Legacy: the end client of the order, «—» when it is only the salon's name.
 const CHANNEL_NAMES = ['Салон Армада', 'Салон Назарбаева', 'salon_armada', 'salon_nazarbayeva'];
 const client = (o: SalonOrder) => {
@@ -116,9 +135,44 @@ const openOrder = () => window.alert('Форма заказа появится �
                         <div id="sr-salary-inputs"><div style="font-size: 12px; color: var(--text3)">% и метод настраиваются в разделе Сотрудники → Комиссии</div></div>
                     </div>
                     <div id="sr-salary-result">
-                        <div v-if="!report.sellers.some((s) => s.name !== '—')" style="color: var(--text3)">Нет продавцов за период</div>
-                        <div v-else style="color: var(--text3); font-size: 13px">
-                            Расчёт ЗП продавцов появится вместе с разделом «Сотрудники»: оклады, проценты и метод комиссии хранятся там (ERP-053, решение D-13).
+                        <div v-if="!salary.length" style="color: var(--text3)">Нет продавцов за период</div>
+                        <div v-else style="overflow-x: auto">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px">
+                                <thead>
+                                    <tr style="background: var(--bg2)">
+                                        <th style="padding: 8px 12px; text-align: left">Продавец</th>
+                                        <th style="padding: 8px 12px; text-align: right">Заказов</th>
+                                        <th style="padding: 8px 12px; text-align: right">База расчёта</th>
+                                        <th style="padding: 8px 12px; text-align: center">%</th>
+                                        <th style="padding: 8px 12px; text-align: right">Комиссия</th>
+                                        <th style="padding: 8px 12px; text-align: right">Оклад</th>
+                                        <th style="padding: 8px 12px; text-align: right; color: var(--green)">💰 Итого ЗП</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="r in salary" :key="r.name" style="border-top: 1px solid var(--border)">
+                                        <td style="padding: 10px 12px; font-weight: 600">
+                                            {{ r.name }}
+                                            <div style="font-size: 10px; color: var(--text3)">{{ r.method === 'paid' ? '% от оплаты' : '% от продаж' }}</div>
+                                        </td>
+                                        <td style="padding: 10px 12px; text-align: right">{{ r.count }}</td>
+                                        <td style="padding: 10px 12px; text-align: right; font-family: monospace">{{ fmt(r.base) }}</td>
+                                        <td style="padding: 10px 12px; text-align: center; color: var(--accent); font-weight: 600">{{ r.pct }}%</td>
+                                        <td style="padding: 10px 12px; text-align: right; font-family: monospace">{{ fmt(r.commission) }}</td>
+                                        <td style="padding: 10px 12px; text-align: right; font-family: monospace; color: var(--text3)">{{ r.salary > 0 ? fmt(r.salary) : '—' }}</td>
+                                        <td style="padding: 10px 12px; text-align: right; font-family: monospace; font-size: 16px; font-weight: 700; color: var(--green)">{{ fmt(r.total) }}</td>
+                                    </tr>
+                                    <tr v-if="salary.length > 1" style="border-top: 2px solid var(--accent)44; background: var(--bg2)">
+                                        <td style="padding: 8px 12px; font-weight: 700" colspan="4">Итого</td>
+                                        <td style="padding: 8px 12px; text-align: right; font-family: monospace; font-weight: 700">{{ fmt(salary.reduce((t, r) => t + r.commission, 0)) }}</td>
+                                        <td style="padding: 8px 12px; text-align: right; font-family: monospace; font-weight: 700">{{ fmt(salary.reduce((t, r) => t + r.salary, 0)) }}</td>
+                                        <td style="padding: 8px 12px; text-align: right; font-family: monospace; font-size: 16px; font-weight: 700; color: var(--green)">
+                                            {{ fmt(salary.reduce((t, r) => t + r.total, 0)) }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div style="font-size: 11px; color: var(--text3); margin-top: 6px">Метод расчёта указан для каждого продавца в разделе Сотрудники → Комиссии</div>
                         </div>
                     </div>
                 </div>

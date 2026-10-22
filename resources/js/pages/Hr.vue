@@ -7,8 +7,9 @@
 // own code (demonstration lists, unconfirmed rates) and wait for those decisions (ADR-0036).
 import { computed, reactive, ref } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
+import SalonCommissionsTab from '@/components/hr/SalonCommissionsTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
-import { initials, STAFF_DEPTS, STAFF_POSITIONS, WORKSHOPS, type Employee } from '@/lib/hr';
+import { initials, STAFF_DEPTS, STAFF_POSITIONS, TARIFFS, WORKSHOPS, type Employee } from '@/lib/hr';
 
 const props = defineProps<{
     today: string;
@@ -25,14 +26,13 @@ const LATER = {
     save: 'Изменение карточки, приём и увольнение сотрудника появятся вместе с решением о пользователях и правилами расчёта зарплаты (ERP-053, ERP-054, решения D-13 и D-06).',
     pin: 'PIN-коды выдаются заново вместе с кабинетом сотрудника (ERP-058, решение D-13); из legacy они не переносятся.',
     structure: 'Изменение штатного расписания появится вместе с разделом «Сотрудники» (ERP-053, решение D-13).',
+    tariffs: 'Изменение тарифов появится вместе со сдельной оплатой (ERP-055, решение D-06).',
 };
 const later = (text: string) => window.alert(text);
 const TAB_LATER: Record<string, string> = {
     wage: 'Сдельная выработка появится вместе с расчётом сдельной оплаты (ERP-055, решение D-06).',
     payroll: 'Зарплатная ведомость появится вместе с правилами расчёта зарплаты (ERP-057, решение D-06).',
     timesheet: 'Табель появится вместе с правилами расчёта зарплаты (ERP-054, решение D-06).',
-    tariffs: 'Тарифы сдельной оплаты появятся вместе со сдельной оплатой (ERP-055, решение D-06).',
-    salon_commissions: 'Комиссии салонов появятся вместе с расчётом зарплаты продавцов (ERP-059, решения D-06 и D-13).',
     users: 'Пользователи и права появятся вместе с решением о пользователях и доступе (ERP-011, решение D-13).',
 };
 
@@ -64,7 +64,7 @@ function showHRTab(id: string, marked: number): void {
 // ── KPI (legacy renderHRKPIs) ──
 const kpi = computed(() => props.counts);
 
-// ── Штатное расписание (legacy renderOrgChart, occupiedSlots): occupied posts by the exact title of the position ──
+// ── Штатное расписание (legacy renderOrgChart, occupiedSlots; «Тарифы» — renderTariffs): occupied posts by the exact title of the position ──
 const occupied = (title: string) => props.employees.filter((e) => e.pos === title);
 const orgchart = computed(() =>
     STAFF_DEPTS.map((dept) => {
@@ -436,6 +436,37 @@ function openStaffChangesHistory(): void {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- ТАРИФЫ (legacy renderTariffs: the list of the page's code; its edits were never saved) -->
+            <div id="hr-tab-tariffs" :style="{ display: state.tab === 'tariffs' ? '' : 'none' }">
+                <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center">
+                    <span style="font-size: 13px; color: var(--text2)">Тарифная сетка — ставки за операцию (₸/шт):</span>
+                    <button class="btn btn-ghost btn-sm" @click="later(LATER.tariffs)">+ Добавить операцию</button>
+                </div>
+                <table class="data-table" style="max-width: 600px">
+                    <thead>
+                        <tr>
+                            <th>Операция</th>
+                            <th>Разряд</th>
+                            <th>Ставка ₸/шт</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tariff-tbody">
+                        <tr v-for="t in TARIFFS" :key="t.op">
+                            <td><span class="editable" @click="later(LATER.tariffs)">{{ t.op }}</span></td>
+                            <td style="font-family: 'IBM Plex Mono', monospace"><span class="editable" @click="later(LATER.tariffs)">{{ t.grade }}</span></td>
+                            <td style="font-family: 'IBM Plex Mono', monospace; color: var(--green)">₸<span class="editable" @click="later(LATER.tariffs)">{{ t.rate }}</span></td>
+                            <td><button class="row-delete-btn" title="Удалить" @click="later(LATER.tariffs)">✕</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- КОМИССИИ САЛОНОВ -->
+            <div id="hr-tab-salon_commissions" :style="{ display: state.tab === 'salon_commissions' ? '' : 'none' }">
+                <SalonCommissionsTab :employees="props.employees" />
             </div>
 
             <!-- Остальные вкладки — с правилами зарплаты и пользователями -->

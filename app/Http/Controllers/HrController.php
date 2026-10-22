@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\EmployeeChange;
+use App\Models\EmployeeSalaryHistory;
 use App\Support\Erp;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,7 +14,8 @@ use Inertia\Response;
  * M17 «Сотрудники», part 1 — legacy page-hr (L7204–7560), loadStaffFromDB (L720), showPage('hr') (L16986), renderHRKPIs/
  * renderOrgChart/showHRTab/renderHRStaff/setHRView/openEmployeeCard/openStaffChangesHistory (L21627–22600): the staff as legacy
  * loads it (legacy staff, by name), the staffing table, the cards and the table of the employees, the card of an employee
- * with its conditions of work and their history. View only: changing a card, hiring and dismissing, the PIN, the payroll
+ * with its conditions of work and their history, the salaries and commissions of the salons' staff with their history
+ * (renderSalonCommissionsSettings/showSalaryHistory). View only: changing a card, hiring and dismissing, the PIN, the payroll
  * figures and the other tabs come with the payroll rules and the users (ERP-053…057, decisions D-06 and D-13).
  * The head of the salons gets only the employees of the salons (legacy filtered them in the browser after loading all).
  */
@@ -27,6 +29,8 @@ class HrController extends Controller
         $salonManager = ($role['is_manager'] ?? false) && ($role['channel'] ?? null) === null;
         $all = Employee::query()->orderBy('name')->orderBy('id')->get();
         $changes = EmployeeChange::query()->orderByDesc('change_date')->orderBy('id')->get()->groupBy('employee_id');
+        // legacy showSalaryHistory: staff_salary_history of the employee, order=valid_from.desc
+        $history = EmployeeSalaryHistory::query()->orderByDesc('valid_from')->orderBy('id')->get()->groupBy('employee_id');
         // Legacy: an empty type is «prod» (loadStaffFromDB s.type||'prod').
         $type = fn (Employee $e) => $e->getAttribute('type') ?: 'prod';
         $shown = $salonManager ? $all->filter(function (Employee $e) {
@@ -62,6 +66,13 @@ class HrController extends Controller
                 'deduction_opv_pct' => $num($e, 'deduction_opv_pct'),
                 'deduction_osms_pct' => $num($e, 'deduction_osms_pct'),
                 'deduction_so_pct' => $num($e, 'deduction_so_pct'),
+                // «Комиссии салонов» (legacy loadStaffFromDB: commission_pct||0, commission_method||'sales')
+                'commissionPct' => $num($e, 'commission_pct') ?? 0,
+                'commissionMethod' => $e->getAttribute('commission_method') ?: 'sales',
+                'salaryHistory' => ($history->get($e->id) ?? collect())->map(fn (EmployeeSalaryHistory $h) => [
+                    'from' => $h->valid_from->format('Y-m-d'), 'salary' => (float) ($h->getRawOriginal('salary') ?? 0),
+                    'pct' => (float) ($h->getRawOriginal('commission_pct') ?? 0), 'note' => $h->note,
+                ])->values(),
                 'status' => $e->getAttribute('status') ?: 'active',
                 'fired_date' => $e->fired_date?->format('Y-m-d'),
                 // legacy openStaffChangesHistory: staff_changes of the employee, newest first
