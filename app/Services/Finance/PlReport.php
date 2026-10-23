@@ -13,8 +13,9 @@ use Illuminate\Support\Facades\DB;
  *
  * - Выручка — the realizations of the period (doc_date).
  * - Прямые материалы — the goods lines of the incoming ESF of the period, but for the material categories legacy treats as
- *   overheads (tools, consumables, other), plus the expense articles «Производственные» named as materials. Legacy fell back to
- *   write-offs and tech cards when there were no ESF: there are neither (D-12), so the fallback is 0.
+ *   overheads (tools, consumables, other), plus the articles «Производственные» named as materials in the advance reports (legacy
+ *   adds those of the money journal only after it has fixed the line: they show in its note). Legacy fell back to write-offs
+ *   and tech cards when there were no ESF: there are neither (D-12), so the fallback is 0.
  * - Зарплата сдельная — column «Сдельная» of the salary ledger of the period; legacy's fallbacks were its demonstration lists.
  * - ОПР — the articles «Производственные» named as overheads.
  * - Оклады АУП — Оклад, Премия, Отпускные, Займ, Больничный of the ledger, else the salary payments of the period.
@@ -135,6 +136,10 @@ class PlReport
             }
         }
 
+        // Legacy fixes «Прямые материалы» here (L26197), before the operations of the money journal add their articles
+        // «Производственные» named as materials: those count in the note of the line, not in its sum — as is (№ 36).
+        $materialsOfAdvances = $prod['materials'];
+
         // ── Expenses of the money journal ──
         $commercial = '0';
         $other = '0';
@@ -180,7 +185,7 @@ class PlReport
         // ── Salary ledger ──
         $ledger = $this->ledger($data['accruals'], $in);
 
-        $materialCost = bcadd($esf, $prod['materials'], 12);
+        $materialCost = bcadd($esf, $materialsOfAdvances, 12);
         $wageCost = $ledger['sdelnaya'];
         $oprCost = $prod['opr'];
         $ledgerAup = array_reduce(['oklad', 'premiya', 'otpusk', 'zaim', 'bolnichn'], fn ($s, $k) => bcadd($s, $ledger[$k], 12), '0');

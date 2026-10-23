@@ -82,12 +82,14 @@ class PlReportTest extends TestCase
 
         $pl = (new PlReport)->build('2031-03-01', '2031-03-31');
 
-        $this->assertSame([100000.5, 23000.0, 20000.0, 7000.0, 1500.0], [$pl['revenue'], $pl['materialCost'], $pl['esfMaterialEstimate'], $pl['wageCost'], $pl['oprCost']]);
+        // «Бук» of the money journal shows in the note of «Прямые материалы» but not in its sum: legacy fixes the line before it
+        // reads the journal (L26197)
+        $this->assertSame([100000.5, 20000.0, 20000.0, 7000.0, 1500.0], [$pl['revenue'], $pl['materialCost'], $pl['esfMaterialEstimate'], $pl['wageCost'], $pl['oprCost']]);
         $this->assertSame([3000.0, 250.0], [$pl['prodToMaterials'], $pl['prodUnclassified']]);
-        $this->assertSame(68500.5, $pl['grossMargin']);
+        $this->assertSame(71500.5, $pl['grossMargin']);
         $this->assertSame([7000.0, 0.0, 1100.0, 1200.0, 300.0, 40.0], [$pl['aupSalary'], $pl['prodTaxes'], $pl['commercialCost'], $pl['otherFixed'], $pl['advCommercialCost'], $pl['advUndetermined']]);
-        $this->assertSame(59200.5, $pl['ebit']);
-        $this->assertEqualsWithDelta(0.685, $pl['grossMarginPct'], 0.0001);
+        $this->assertSame(62200.5, $pl['ebit']);
+        $this->assertEqualsWithDelta(0.715, $pl['grossMarginPct'], 0.0001);
 
         // without ledger the salary payments are the salaries of the staff
         DB::table('salary_accruals')->delete();

@@ -53,6 +53,9 @@ visual-compare: ## Screenshots legacy vs target (login, M14, M07, M08, M06, M03,
 test-visual: ## Visual comparison at every size of the spec (1440×900, 1920×1080, 900×900, 899×900, 390×844), both themes
 	@bash scripts/visual-matrix.sh
 
+pl-compare: ## «Финансы» → «📊 P&L» against legacy on the dev data, figure by figure in whole tenge (PL_YEAR=2026; ADR-0052)
+	@$${PYTHON:-python3} tests/visual/pl_compare.py
+
 visual-filters: ## Visual comparison plus every filter, sort and their totals of the migrated pages, legacy ↔ target (AC-08)
 	@FILTERS=1 $${PYTHON:-python3} tests/visual/legacy_compare.py
 
