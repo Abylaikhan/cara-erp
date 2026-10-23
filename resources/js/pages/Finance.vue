@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // M11 «Финансы», part 1 — legacy page-finance (L5447–5900): header with the order selection, the period filter
 // (setFinancePeriod/fillFinanceMonths/initFinancePeriod, L25925–26035; the current year by default), the tabs (showFinanceTab
-// L22610). «Дебиторка» (ArTab), «Закупки» (PurchasesTab), «ДДС» (CfsTab) and the statement of «P&L» (PlTab, ADR-0052) are
-// migrated; margins, break-even, the trial balance and P&L by activity need technological cards and labour norms (ERP-061…063, D-12).
+// L22610). «Дебиторка» (ArTab), «Закупки» (PurchasesTab), «ДДС» (CfsTab), «P&L» (PlTab, ADR-0052) and «ОСВ» (OsvTab, ADR-0053)
+// are migrated; margins, break-even and P&L by activity come next (ERP-061…063).
 import { computed, ref } from 'vue';
 import ArTab, { type ArRecord } from '@/components/finance/ArTab.vue';
 import CfsTab, { type CfsTx } from '@/components/finance/CfsTab.vue';
+import OsvTab, { type OsvAccount, type OsvData } from '@/components/finance/OsvTab.vue';
 import PlTab, { type PlData, type PlExpenses, type PlMonthly, type PlRevenue, type PlTree, type PlCost } from '@/components/finance/PlTab.vue';
 import PurchasesTab, { type PurchasesData } from '@/components/finance/PurchasesTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
@@ -39,6 +40,8 @@ const props = defineProps<{
     plExpenses?: PlExpenses;
     plRevTree?: PlTree;
     plCost?: PlCost;
+    osv?: OsvData;
+    osvAccount?: OsvAccount;
 }>();
 
 type Tab = 'pl' | 'ar' | 'purchases' | 'margin' | 'bep' | 'cfs' | 'osv' | 'activity';
@@ -46,7 +49,6 @@ const tab = ref<Tab>('pl');
 const LATER: Partial<Record<Tab, string>> = {
     margin: 'Маржинальность считается по технологическим картам и появится вместе с ними (ERP-028, решение D-12).',
     bep: 'Точка безубыточности строится по постоянным затратам и появится вместе с ними (ERP-063, решение D-11).',
-    osv: 'Оборотно-сальдовая ведомость появится вместе с зарплатой и технологическими картами (ERP-061, решение D-11).',
     activity: 'P&L по видам деятельности появится вместе со сдельной оплатой и технологическими картами (ERP-063, решения D-11 и D-12).',
 };
 const excelLater = () => window.alert('Выгрузка P&L в Excel появится вместе с отчётом P&L (ERP-060, решения D-11 и D-12).');
@@ -203,6 +205,9 @@ const arRecords = computed<ArRecord[]>(() => {
                     :to="period.to"
                     :active="tab === 'pl'"
                 />
+            </div>
+            <div id="finance-osv" :style="{ display: tab === 'osv' ? 'block' : 'none' }">
+                <OsvTab :data="props.osv" :account="props.osvAccount" :from="period.from" :to="period.to" :period-label="periodLabel" :active="tab === 'osv'" />
             </div>
             <div id="finance-cfs" :style="{ display: tab === 'cfs' ? 'block' : 'none' }">
                 <CfsTab

@@ -30,7 +30,7 @@ OUT = ROOT / '.local-audit' / 'pl-compare'
 
 LEGACY_JS = r"""(d) => {
     realizationsData = d.realizations; ordersData = d.orders; _cacheLoaded.money = true;
-    moneyTx = d.moneyTx; advanceReports = d.advances; _expenseCats = d.cats; _expenseCatsLoaded = true;
+    moneyTx = d.moneyTx; bankAccounts.length = 0; d.accounts.forEach(a => bankAccounts.push(a)); advanceReports = d.advances; _expenseCats = d.cats; _expenseCatsLoaded = true;
     suppliersData = d.suppliers; esfReconInvoices = d.invoices; _osvEsfLoaded = true; _esfData = {invoices: d.invoices, items: d.items};
     warehouseData = d.warehouse; _payrollData = {accruals: d.accruals, payments: []}; catalogData = d.catalog;
     // the demonstration lists of the page are not data (ADR-0002, item 126)
@@ -49,7 +49,8 @@ YEAR_JS = r"""([year]) => {
     draw(renderExpensesByMonth, 'pl-exp-year');
     draw(renderRevenueByChannelCategory, 'pl-rev-tree-year');
     draw(renderMaterialCostEstimate, 'pl-matcost-year');
-    return {pl, monthly: window._monthlyPLRows, channel: window._plChannelRows, category: window._plCategoryRows,
+    const osv = buildOSV();
+    return {osv: {rows: osv.rows, totals: osv.totals, journal: osv.journal.length}, pl, monthly: window._monthlyPLRows, channel: window._plChannelRows, category: window._plCategoryRows,
         expenses: window._plExpenseCatRows, dividends: window._plExpenseDividends, tree: window._plRevTreeRows, cost: window._matCostRows,
         costHint: document.querySelector('#pl-matcost > div')?.textContent || ''};
 }"""
@@ -119,6 +120,12 @@ def main() -> int:
     ok &= rows_report('дивиденды', [('div', legacy['dividends'] or [0] * 12)], [('div', target['expenses']['dividends'])])
     ok &= rows_report('дерево выручки', flatten(legacy['tree'], ('cats', 'items')), flatten(target['tree'], ('cats', 'items')))
     ok &= rows_report('оценка себестоимости', flatten(legacy['cost'], ('mats',)), flatten(target['cost']['rows'], ('mats',)))
+    cols = ['openDt', 'openKt', 'dtOb', 'ktOb', 'closeDt', 'closeKt']
+    ok &= rows_report('ОСВ', [(r['code'], [r[c] for c in cols]) for r in legacy['osv']['rows']], [(r['code'], [r[c] for c in cols]) for r in target['osv']['rows']])
+    ok &= rows_report('ОСВ итого', [('итого', [legacy['osv']['totals'][c] for c in cols])], [('итого', [target['osv']['totals'][c] for c in cols])])
+    jl, jt = legacy['osv']['journal'], len(target['osv']['journal'])
+    print(f'ОСВ проводки: {jt} / {jl} — ' + ('совпадает' if jl == jt else 'РАСХОЖДЕНИЕ'))
+    ok &= jl == jt
     return 0 if ok else 1
 
 

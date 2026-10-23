@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MoneyAccount;
 use App\Models\Order;
+use App\Services\Finance\OsvReport;
 use App\Services\Finance\PlExpenses;
 use App\Services\Finance\PlReport;
 use App\Services\Finance\PlRevenue;
@@ -66,6 +67,10 @@ class FinanceController extends Controller
             'plRevChannel' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rch_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byChannel($y)]),
             'plExpenses' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_exp_year'), 'years' => $this->plYears(), ...app(PlExpenses::class)->build($y)]),
             'plRevTree' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rtree_year'), 'years' => $this->plYears(), 'rows' => app(PlRevenue::class)->tree($y)]),
+            // «📋 ОСВ» for the period of the page (ADR-0053); the entries of one account for its drill-down
+            'osv' => Inertia::optional(fn () => ['from' => $f = $this->date($request, 'osv_from'), 'to' => $t = $this->date($request, 'osv_to'),
+                ...array_diff_key(app(OsvReport::class)->build($f, $t), ['journal' => 0])]),
+            'osvAccount' => Inertia::optional(fn () => $this->osvAccount($request)),
             'plCost' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_cost_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->costEstimate($y)]),
             'plRevCategory' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rcat_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byCategory($y)]),
             // Tab «Закупки» (legacy renderPurchasesDash, openSupplierReconciliation): incoming invoices, payments with a
@@ -75,12 +80,26 @@ class FinanceController extends Controller
     }
 
     /** @return array<string, mixed> */
+    /** A date of the query (YYYY-MM-DD), else none. */
+    private function date(Request $request, string $key): ?string
+    {
+        return is_string($v = $request->query($key)) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null;
+    }
+
+    /** Legacy ddOSVAccount: the entries of the period with the account on either side. @return array<string, mixed> */
+    private function osvAccount(Request $request): array
+    {
+        $acc = is_string($a = $request->query('osv_account')) && isset(OsvReport::ACCOUNTS[$a]) ? $a : null;
+        $osv = app(OsvReport::class)->build($from = $this->date($request, 'osv_from'), $to = $this->date($request, 'osv_to'));
+
+        return ['account' => $acc, 'from' => $from, 'to' => $to, 'entries' => $acc === null ? [] : array_values(array_filter($osv['journal'], fn ($e) => $e['dt'] === $acc || $e['kt'] === $acc))];
+    }
+
     /** @return array<string, mixed> */
     private function pl(Request $request): array
     {
-        $date = fn (string $k) => is_string($v = $request->query($k)) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null;
-        $from = $date('pl_from');
-        $to = $date('pl_to');
+        $from = $this->date($request, 'pl_from');
+        $to = $this->date($request, 'pl_to');
 
         return ['from' => $from, 'to' => $to, ...app(PlReport::class)->build($from, $to)];
     }

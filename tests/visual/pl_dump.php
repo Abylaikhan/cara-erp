@@ -7,6 +7,7 @@
  */
 
 use App\Models\Supplier;
+use App\Services\Finance\OsvReport;
 use App\Services\Finance\PlExpenses;
 use App\Services\Finance\PlReport;
 use App\Services\Finance\PlRevenue;
@@ -25,11 +26,12 @@ $legacy = [
         ->map(fn ($r) => ['doc_date' => $r->doc_date, 'revenue' => $num($r->revenue), 'order_num' => $r->order_num, 'customer' => $r->customer, 'name' => $r->name]),
     'orders' => DB::table('orders')->orderByDesc('created_at')->orderByDesc('id')->get(['num', 'channel', 'customer', 'status', 'payment_pct'])
         ->map(fn ($o) => ['num' => $o->num, 'channel' => $o->channel, 'customer' => $o->customer, 'status' => $o->status, 'payment' => (int) $o->payment_pct, 'items' => [], 'date' => '', 'createdDate' => '']),
-    'moneyTx' => DB::table('money_transactions')->orderByDesc('tx_date')->orderBy('id')->get(['id', 'tx_date', 'flow', 'category', 'expense_category_id', 'counterparty', 'bin', 'amount'])
-        ->map(fn ($t) => ['id' => $t->id, 'date' => $t->tx_date, 'flow' => $t->flow, 'category' => $t->category, 'subcategory' => $t->expense_category_id ? ($catById[$t->expense_category_id] ?? '') : '',
-            'counterparty' => $t->counterparty ?? '', 'bin' => $t->bin ?? '', 'amount' => $num($t->amount)]),
-    'advances' => DB::table('advance_reports')->orderByDesc('report_date')->orderBy('id')->get(['report_date', 'lines'])
-        ->map(fn ($a) => ['date' => $a->report_date, 'lines' => json_decode((string) $a->lines, true) ?: []]),
+    'moneyTx' => DB::table('money_transactions')->orderByDesc('tx_date')->orderBy('id')->get(['id', 'account_id', 'tx_date', 'flow', 'category', 'expense_category_id', 'counterparty', 'bin', 'amount', 'description', 'order_num'])
+        ->map(fn ($t) => ['id' => $t->id, 'accountId' => (string) $t->account_id, 'date' => $t->tx_date, 'flow' => $t->flow, 'category' => $t->category, 'subcategory' => $t->expense_category_id ? ($catById[$t->expense_category_id] ?? '') : '',
+            'counterparty' => $t->counterparty ?? '', 'bin' => $t->bin ?? '', 'amount' => $num($t->amount), 'desc' => $t->description ?? '', 'orderNum' => $t->order_num ?? '']),
+    'accounts' => DB::table('money_accounts')->orderBy('sort_order')->get(['id', 'type'])->map(fn ($a) => ['id' => (string) $a->id, 'type' => $a->type, 'balance' => 0]),
+    'advances' => DB::table('advance_reports')->orderByDesc('report_date')->orderBy('id')->get(['report_date', 'employee_name', 'lines'])
+        ->map(fn ($a) => ['date' => $a->report_date, 'emp_name' => $a->employee_name, 'lines' => json_decode((string) $a->lines, true) ?: []]),
     'cats' => $cats->map(fn ($c) => ['code' => $c->code, 'name' => $c->name, 'parent_code' => $c->parent_code]),
     'suppliers' => Supplier::query()->active()->orderBy('name')->orderBy('id')->get(['name', 'bin', 'expense_category_id', 'expense_source'])->map(function ($s) use ($catById, $parentOf) {
         $code = $s->expense_category_id ? ($catById[$s->expense_category_id] ?? null) : null;
@@ -37,8 +39,8 @@ $legacy = [
 
         return ['name' => $s->name, 'bin' => $s->bin, 'expense_category' => $parent ?? $code, 'expense_subcategory' => $parent ? $code : null, 'expense_source' => $s->expense_source];
     }),
-    'invoices' => DB::table('incoming_invoices')->orderByDesc('date')->orderBy('id')->get(['id', 'date', 'invoice_type', 'supplier_name', 'supplier_bin', 'total_with_nds'])
-        ->map(fn ($i) => ['id' => $invKey[$i->id] ?? 'inv-'.$i->id, 'date' => $i->date, 'invoice_type' => $i->invoice_type, 'supplier_name' => $i->supplier_name,
+    'invoices' => DB::table('incoming_invoices')->orderByDesc('date')->orderBy('id')->get(['id', 'num', 'date', 'invoice_type', 'supplier_name', 'supplier_bin', 'total_with_nds'])
+        ->map(fn ($i) => ['id' => $invKey[$i->id] ?? 'inv-'.$i->id, 'num' => $i->num, 'date' => $i->date, 'invoice_type' => $i->invoice_type, 'supplier_name' => $i->supplier_name,
             'supplier_bin' => $i->supplier_bin, 'total_with_nds' => $num($i->total_with_nds)]),
     'items' => DB::table('incoming_invoice_items')->orderBy('invoice_id')->orderBy('line_no')->get(['invoice_id', 'description', 'total', 'amount'])
         ->map(fn ($l) => ['invoice_id' => $invKey[$l->invoice_id] ?? 'inv-'.$l->invoice_id, 'description' => $l->description, 'total' => $num($l->total), 'amount' => $num($l->amount)]),
@@ -59,5 +61,6 @@ $target = [
     'tree' => $revenue->tree($year),
     'cost' => $revenue->costEstimate($year),
     'expenses' => (new PlExpenses)->build($year),
+    'osv' => (new OsvReport)->build("{$year}-01-01", "{$year}-12-31"),
 ];
 echo json_encode(['legacy' => $legacy, 'target' => $target], JSON_UNESCAPED_UNICODE);
