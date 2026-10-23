@@ -42,8 +42,9 @@ def target_categories(page):
 # make visual-empty (E2E_SEED=users): the target has no business data, and legacy reads an empty database — its requests for
 # rows get an empty list, as from an empty Supabase (a blocked request would leave its loaders failing instead).
 EMPTY = os.environ.get('E2E_SEED') == 'users'
-# The empty states legacy never reaches (its loaders take an empty answer for «not loaded yet» and ask again forever).
-EMPTY_DEVIATIONS = {'sales-journal': 'ADR-0002, item 87', 'finance-cfs': 'ADR-0002, item 88'}
+# The empty states legacy never reaches (its loaders take an empty answer for «not loaded yet» and ask again forever): the
+# aliases keep «Загрузка алиасов…» with «Загрузить из Supabase», the target says there are none (the whole pane differs).
+EMPTY_DEVIATIONS = {'sales-journal': 'ADR-0002, item 87', 'finance-cfs': 'ADR-0002, item 88', 'warehouse-aliases': 'ADR-0002, item 25'}
 
 
 # Legacy asks again without end for some empty tables (ADR-0002, items 87, 88). Answered at once, such a loop floods the

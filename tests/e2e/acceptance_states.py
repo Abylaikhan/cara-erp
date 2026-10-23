@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Browser acceptance of the loading states (TEST-AC-07 «Пусто, загрузка, ошибка, много строк») — make e2e, throwaway database.
 
-Thirteen tabs bring their data after the page: a partial reload when the tab is opened. Legacy shows its static markup until
+Seventeen tabs bring their data after the page: a partial reload when the tab is opened. Legacy shows its static markup until
 its loader is done — empty frames, and «Загрузка…» where its markup or loader has it (the realization journal, the projects).
 So, for every such tab:
 - while its data are on the way it must not claim there are none («Нет данных», «Нет клиентов», «Пусто» …), and shows the
@@ -22,7 +22,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from e2e_lib import BASE, check, login, summary  # noqa: E402
 
 # What a tab says once its data have come and there are none — never while they are on the way.
-EMPTY = ('Нет данных', 'Нет клиентов', 'Нет заказов', 'Нет операций', 'Нет оплат', 'Пусто')
+EMPTY = ('Нет данных', 'Нет клиентов', 'Нет заказов', 'Нет операций', 'Нет оплат', 'Пусто', 'записей нет', 'Лист пуст', 'Нет проведённых работ',
+         'Нет незавершённых этапов')
 
 # page, the prop of the partial reload, how to open the tab, its container, the placeholder of legacy while loading
 TABS = [
@@ -38,6 +39,11 @@ TABS = [
     ('/money', 'bankRecon', lambda p: p.locator('#page-money > .tabs .tab').nth(3).click(), '#money-tab-bankrecon', None),
     ('/money', 'advances', lambda p: p.locator('#page-money > .tabs .tab').nth(4).click(), '#money-tab-advances', None),
     ('/money', 'calendar', lambda p: p.locator('#page-money > .tabs .tab').nth(6).click(), '#money-tab-calendar', None),
+    # legacy swReload writes «⏳ Загрузка...» until the lines come; the production tabs keep their static frames
+    ('/sales', 'worksheet', lambda p: p.locator('#sw-tab-btn').click(), '#orders-worksheet', 'Загрузка'),
+    ('/mrp', 'worksheet', lambda p: p.locator('#page-mrp > .tabs .tab').nth(2).click(), '#mrp-worksheet', None),
+    ('/mrp', 'work', lambda p: p.locator('#page-mrp > .tabs .tab').nth(4).click(), '#mrp-workload', None),
+    ('/mrp', 'work', lambda p: p.locator('#page-mrp > .tabs .tab').nth(5).click(), '#mrp-worklog', None),
 ]
 
 
