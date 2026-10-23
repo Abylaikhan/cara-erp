@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MoneyAccount;
 use App\Models\Order;
+use App\Services\Finance\PlReport;
 use App\Support\ChannelScope;
 use App\Support\Erp;
 use Illuminate\Http\Request;
@@ -55,6 +56,8 @@ class FinanceController extends Controller
             'txLabels' => collect(config('erp.money_income_categories'))->merge(config('erp.money_expense_categories'))->map(fn (array $c) => $c[0].' '.$c[1]),
             // Tab «ДДС»: every operation in tenge, in the order legacy loads them; sent when the tab is opened.
             'transactions' => Inertia::optional(fn () => $this->transactions()),
+            // «📊 P&L» for the period of the page (ADR-0052): asked again when the period changes
+            'pl' => Inertia::optional(fn () => $this->pl($request)),
             // Tab «Закупки» (legacy renderPurchasesDash, openSupplierReconciliation): incoming invoices, payments with a
             // counterparty (in tenge), suppliers and the supplier lines of the advance reports; sent when the tab is opened.
             'purchases' => Inertia::optional(fn () => $this->purchases()),
@@ -62,6 +65,16 @@ class FinanceController extends Controller
     }
 
     /** @return array<string, mixed> */
+    /** @return array<string, mixed> */
+    private function pl(Request $request): array
+    {
+        $date = fn (string $k) => is_string($v = $request->query($k)) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null;
+        $from = $date('pl_from');
+        $to = $date('pl_to');
+
+        return ['from' => $from, 'to' => $to, ...app(PlReport::class)->build($from, $to)];
+    }
+
     private function purchases(): array
     {
         return [
