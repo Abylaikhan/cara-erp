@@ -6,6 +6,7 @@
 import { computed, ref } from 'vue';
 import ArTab, { type ArRecord } from '@/components/finance/ArTab.vue';
 import CfsTab, { type CfsTx } from '@/components/finance/CfsTab.vue';
+import MarginTab, { type CatMargin } from '@/components/finance/MarginTab.vue';
 import OsvTab, { type OsvAccount, type OsvData } from '@/components/finance/OsvTab.vue';
 import PlTab, { type PlData, type PlExpenses, type PlMonthly, type PlRevenue, type PlTree, type PlCost } from '@/components/finance/PlTab.vue';
 import PurchasesTab, { type PurchasesData } from '@/components/finance/PurchasesTab.vue';
@@ -42,12 +43,12 @@ const props = defineProps<{
     plCost?: PlCost;
     osv?: OsvData;
     osvAccount?: OsvAccount;
+    catMargin?: CatMargin;
 }>();
 
 type Tab = 'pl' | 'ar' | 'purchases' | 'margin' | 'bep' | 'cfs' | 'osv' | 'activity';
 const tab = ref<Tab>('pl');
 const LATER: Partial<Record<Tab, string>> = {
-    margin: 'Маржинальность считается по технологическим картам и появится вместе с ними (ERP-028, решение D-12).',
     bep: 'Точка безубыточности строится по постоянным затратам и появится вместе с ними (ERP-063, решение D-11).',
     activity: 'P&L по видам деятельности появится вместе со сдельной оплатой и технологическими картами (ERP-063, решения D-11 и D-12).',
 };
@@ -205,6 +206,9 @@ const arRecords = computed<ArRecord[]>(() => {
                     :to="period.to"
                     :active="tab === 'pl'"
                 />
+            </div>
+            <div id="finance-margin" :style="{ display: tab === 'margin' ? 'block' : 'none' }">
+                <MarginTab :data="props.catMargin" :active="tab === 'margin'" />
             </div>
             <div id="finance-osv" :style="{ display: tab === 'osv' ? 'block' : 'none' }">
                 <OsvTab :data="props.osv" :account="props.osvAccount" :from="period.from" :to="period.to" :period-label="periodLabel" :active="tab === 'osv'" />

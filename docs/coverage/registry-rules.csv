@@ -55,10 +55,27 @@ area,mrp-shopfloor,NOT_STARTED,ERP-044 (D-06/D-08),Производство → 
 area,mrp-techcards,NOT_STARTED,ERP-028 (D-12),Производство → технологические карты
 area,cust-salons,NOT_STARTED,ERP-026 (D-13),Покупатели → салоны и продавцы
 area,orders-restorations,NOT_STARTED,ERP-080 (D-08),Продажи → реставрации
-area,finance-pl,NOT_STARTED,ERP-060 (D-11/D-12),Финансы → P&L
-area,finance-margin,NOT_STARTED,ERP-028/ERP-060 (D-12),Финансы → маржинальность (по технологическим картам)
+function,renderMarginKpi,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+function,populateMarginFilters,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|input|margin-search,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|select|margin-status-filter,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5730,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5731,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5732,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5733,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|select|margin-channel-filter,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5736,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|select|margin-category-filter,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5739,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5746,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5747,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5748,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5749,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5750,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5751,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5752,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
+control,page-finance|L5753,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
 area,finance-bep,NOT_STARTED,ERP-063 (D-11),Финансы → точка безубыточности
-area,finance-osv,NOT_STARTED,ERP-061 (D-11),Финансы → ОСВ
 area,finance-activity,NOT_STARTED,ERP-063 (D-11),Финансы → P&L по видам деятельности
 area,money-fab,NOT_STARTED,ERP-031 (D-03/D-11),Деньги → кнопка новой операции
 # Documented differences of the shell (ADR-0002),,,,
@@ -94,22 +111,12 @@ function,renderWaybillAvailableItems,NOT_STARTED,ERP-044 (D-06/D-08),Цехов�
 function,addWaybillItem,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
 function,removeWaybillItem,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
 function,ensureProgressForItem,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
-function,buildPL,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,plFilteredTx,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,classifyProdStatya,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,estimateMaterialCostForPeriod,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,renderPL,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,plRow,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,catRowHtml,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,ddPLRevenue,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,ddPLExpense,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,plChannelByCustomerName,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,topLevelCategoryOf,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,findWarehousePrice,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,calcItemMaterialCost,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,calcItemWageCost,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,calcItemMargin,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,marginPctClass,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,calcOrderMargin,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,openMarginDetail,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,sumPayrollLedgerColumns,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции

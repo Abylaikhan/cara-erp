@@ -112,6 +112,23 @@ class PlRevenueTest extends TestCase
         $this->assertSame([1, 5.0, 70.0, 40.0], [$r['unmatchedCount'], $r['unmatchedAmount'], $r['opr'], $r['unallocated']]);
     }
 
+    public function test_the_category_margin_takes_the_materials_of_the_estimate_from_the_revenue(): void
+    {
+        DB::table('products')->insert([['name' => 'Диван демо', 'category' => 'Диваны'], ['name' => 'Стол демо', 'category' => 'Столы']]);
+        $this->realization('2031-01-10', null, null, 'Диван демо', '300');
+        $this->realization('2031-03-12', null, null, 'Стол демо', '600');
+        $this->realization('2031-03-13', null, null, 'Без каталога демо', '9');
+        (new Material(['name' => 'Ткань демо', 'category' => 'Ткань/Обивочные', 'unit' => 'шт', 'price' => 1, 'min_qty' => 0, 'warehouse_code' => 'wh_fabric']))->forceFill(['qty' => 0])->save();
+        $inv = IncomingInvoice::create(['num' => '1', 'date' => '2031-01-20', 'status' => 'DELIVERED', 'invoice_type' => 'goods', 'supplier_name' => 'ТОО Демо', 'total_amount' => 0, 'total_nds' => 0, 'total_with_nds' => 0]);
+        IncomingInvoiceItem::query()->create(['invoice_id' => $inv->id, 'line_no' => 1, 'description' => 'Ткань демо', 'qty' => 1, 'unit_price' => 120, 'amount' => 120, 'nds_rate' => 0, 'nds_amount' => 0, 'total' => 120]);
+
+        $rows = (new PlRevenue)->categoryMargin('2031');
+        // by the revenue of the year; a product not in the catalog has no category; the fabric of January goes to the sofas
+        $this->assertSame([['Столы', 600.0, 0.0, 600.0], ['Диваны', 300.0, 120.0, 180.0]],
+            array_map(fn ($r) => [$r['label'], array_sum($r['revenue']), array_sum($r['materials']), array_sum($r['margin'])], $rows));
+        $this->assertSame([180.0, 0.0], [$rows[1]['margin'][0], $rows[1]['margin'][2]], 'month by month');
+    }
+
     public function test_the_page_gets_each_table_for_its_own_year(): void
     {
         $this->realization('2031-03-01', null, null, 'Стол', '100');

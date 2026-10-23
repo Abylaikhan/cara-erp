@@ -49,10 +49,11 @@ YEAR_JS = r"""([year]) => {
     draw(renderExpensesByMonth, 'pl-exp-year');
     draw(renderRevenueByChannelCategory, 'pl-rev-tree-year');
     draw(renderMaterialCostEstimate, 'pl-matcost-year');
+    draw(renderCategoryMargin, 'margin-category-year');
     const osv = buildOSV();
     return {osv: {rows: osv.rows, totals: osv.totals, journal: osv.journal.length}, pl, monthly: window._monthlyPLRows, channel: window._plChannelRows, category: window._plCategoryRows,
         expenses: window._plExpenseCatRows, dividends: window._plExpenseDividends, tree: window._plRevTreeRows, cost: window._matCostRows,
-        costHint: document.querySelector('#pl-matcost > div')?.textContent || ''};
+        costHint: document.querySelector('#pl-matcost > div')?.textContent || '', catMargin: window._categoryMarginRows};
 }"""
 
 PL_KEYS = ['revenue', 'materialCost', 'wageCost', 'oprCost', 'grossMargin', 'aupSalary', 'prodTaxes', 'commercialCost', 'otherFixed', 'ebit',
@@ -120,6 +121,8 @@ def main() -> int:
     ok &= rows_report('дивиденды', [('div', legacy['dividends'] or [0] * 12)], [('div', target['expenses']['dividends'])])
     ok &= rows_report('дерево выручки', flatten(legacy['tree'], ('cats', 'items')), flatten(target['tree'], ('cats', 'items')))
     ok &= rows_report('оценка себестоимости', flatten(legacy['cost'], ('mats',)), flatten(target['cost']['rows'], ('mats',)))
+    ok &= rows_report('маржинальность по категориям', [(r['label'], r['margin'] + r['revenue']) for r in legacy['catMargin'] or []],
+                      [(r['label'], r['margin'] + r['revenue']) for r in target['catMargin']])
     cols = ['openDt', 'openKt', 'dtOb', 'ktOb', 'closeDt', 'closeKt']
     ok &= rows_report('ОСВ', [(r['code'], [r[c] for c in cols]) for r in legacy['osv']['rows']], [(r['code'], [r[c] for c in cols]) for r in target['osv']['rows']])
     ok &= rows_report('ОСВ итого', [('итого', [legacy['osv']['totals'][c] for c in cols])], [('итого', [target['osv']['totals'][c] for c in cols])])

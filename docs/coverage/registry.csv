@@ -1289,7 +1289,7 @@ control,editOrderModal|L5428,button,editOrderModal,5428,M09 Продажи,NOT_S
 control,editOrderModal|L5436,button,editOrderModal,5436,M09 Продажи,NOT_STARTED,ERP-030 (D-02/D-12),Удалить заказ
 control,editOrderModal|L5438,button,editOrderModal,5438,M09 Продажи,NOT_STARTED,ERP-030 (D-02/D-12),Отмена
 control,editOrderModal|L5439,button,editOrderModal,5439,M09 Продажи,NOT_STARTED,ERP-030 (D-02/D-12),Сохранить изменения
-control,page-finance|select|pl-period,select,page-finance,5455,M11 Финансы,NOT_STARTED,"present, its action comes later — renderPL: ERP-060 (D-11/D-12)",Все заказы Только завершённые В работе + завершённые
+control,page-finance|select|pl-period,select,page-finance,5455,M11 Финансы,IMPLEMENTED,id,Все заказы Только завершённые В работе + завершённые
 control,page-finance|L5456,option,page-finance,5456,M11 Финансы,IMPLEMENTED,label,Все заказы
 control,page-finance|L5457,option,page-finance,5457,M11 Финансы,IMPLEMENTED,label,Только завершённые
 control,page-finance|L5458,option,page-finance,5458,M11 Финансы,IMPLEMENTED,label,В работе + завершённые
@@ -1308,18 +1308,18 @@ control,page-finance|L5488,div,page-finance,5488,M11 Финансы,IMPLEMENTED,
 control,page-finance|L5489,div,page-finance,5489,M11 Финансы,IMPLEMENTED,label,💵 ДДС
 control,page-finance|L5490,div,page-finance,5490,M11 Финансы,IMPLEMENTED,label,📋 ОСВ
 control,page-finance|L5491,div,page-finance,5491,M11 Финансы,IMPLEMENTED,label,📊 P&L по видам
-control,page-finance|select|pl-monthly-year,select,page-finance,5509,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
-control,page-finance|L5510,button,page-finance,5510,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),📥 Excel
-control,page-finance|select|pl-rev-channel-year,select,page-finance,5519,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
-control,page-finance|L5520,button,page-finance,5520,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),📥 Excel
-control,page-finance|select|pl-rev-category-year,select,page-finance,5529,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
-control,page-finance|L5530,button,page-finance,5530,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),📥 Excel
-control,page-finance|select|pl-exp-year,select,page-finance,5539,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
-control,page-finance|L5540,button,page-finance,5540,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),📥 Excel
-control,page-finance|select|pl-rev-tree-year,select,page-finance,5549,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
-control,page-finance|L5550,button,page-finance,5550,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),📥 Excel
-control,page-finance|select|pl-matcost-year,select,page-finance,5559,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
-control,page-finance|L5560,button,page-finance,5560,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),📥 Excel
+control,page-finance|select|pl-monthly-year,select,page-finance,5509,M11 Финансы,IMPLEMENTED,id,
+control,page-finance|L5510,button,page-finance,5510,M11 Финансы,IMPLEMENTED,label,📥 Excel
+control,page-finance|select|pl-rev-channel-year,select,page-finance,5519,M11 Финансы,IMPLEMENTED,id,
+control,page-finance|L5520,button,page-finance,5520,M11 Финансы,IMPLEMENTED,label,📥 Excel
+control,page-finance|select|pl-rev-category-year,select,page-finance,5529,M11 Финансы,IMPLEMENTED,id,
+control,page-finance|L5530,button,page-finance,5530,M11 Финансы,IMPLEMENTED,label,📥 Excel
+control,page-finance|select|pl-exp-year,select,page-finance,5539,M11 Финансы,IMPLEMENTED,id,
+control,page-finance|L5540,button,page-finance,5540,M11 Финансы,IMPLEMENTED,label,📥 Excel
+control,page-finance|select|pl-rev-tree-year,select,page-finance,5549,M11 Финансы,IMPLEMENTED,id,
+control,page-finance|L5550,button,page-finance,5550,M11 Финансы,IMPLEMENTED,label,📥 Excel
+control,page-finance|select|pl-matcost-year,select,page-finance,5559,M11 Финансы,IMPLEMENTED,id,
+control,page-finance|L5560,button,page-finance,5560,M11 Финансы,IMPLEMENTED,label,📥 Excel
 control,page-finance|select|ar-filter,select,page-finance,5586,M11 Финансы,IMPLEMENTED,id,‹скрыто›
 control,page-finance|L5587,option,page-finance,5587,M11 Финансы,IMPLEMENTED,label,Все
 control,page-finance|L5588,option,page-finance,5588,M11 Финансы,IMPLEMENTED,label,Просроченные
@@ -1352,8 +1352,8 @@ control,page-finance|L5701,th,page-finance,5701,M11 Финансы,IMPLEMENTED,l
 control,page-finance|L5702,th,page-finance,5702,M11 Финансы,IMPLEMENTED,label,Аванс
 control,page-finance|L5703,th,page-finance,5703,M11 Финансы,IMPLEMENTED,label,Статус
 control,page-finance|L5704,th,page-finance,5704,M11 Финансы,IMPLEMENTED,an empty column header: its table is compared visually,
-control,page-finance|select|margin-category-year,select,page-finance,5720,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),
-control,page-finance|L5721,button,page-finance,5721,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),📥 Excel
+control,page-finance|select|margin-category-year,select,page-finance,5720,M11 Финансы,IMPLEMENTED,id,
+control,page-finance|L5721,button,page-finance,5721,M11 Финансы,IMPLEMENTED,label,📥 Excel
 control,page-finance|input|margin-search,input,page-finance,5727,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),
 control,page-finance|select|margin-status-filter,select,page-finance,5729,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),Все статусы В очереди В производстве Завершённые
 control,page-finance|L5730,option,page-finance,5730,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),Все статусы
@@ -1392,7 +1392,7 @@ control,page-finance|L5802,th,page-finance,5802,M11 Финансы,NOT_STARTED,E
 control,page-finance|L5803,th,page-finance,5803,M11 Финансы,NOT_STARTED,ERP-063 (D-11),В месяц
 control,page-finance|L5804,th,page-finance,5804,M11 Финансы,NOT_STARTED,ERP-063 (D-11),В год
 control,page-finance|L5840,button,page-finance,5840,M11 Финансы,NOT_STARTED,"present, its action comes later — exportCFSExcel: ERP-067 (Excel)",📥 Excel
-control,page-finance|L5870,button,page-finance,5870,M11 Финансы,NOT_STARTED,ERP-061 (D-11),📥 Excel
+control,page-finance|L5870,button,page-finance,5870,M11 Финансы,IMPLEMENTED,label,📥 Excel
 control,page-finance|L5880,button,page-finance,5880,M11 Финансы,NOT_STARTED,ERP-063 (D-11),🔄 Пересчитать
 control,page-finance|L5881,button,page-finance,5881,M11 Финансы,NOT_STARTED,ERP-063 (D-11),📥 Excel
 control,page-finance|L5893,th,page-finance,5893,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Статья расходов
@@ -2732,7 +2732,7 @@ function,mapStatus#1,,,18313,M06 Поставщики,IMPLEMENTED,named in app/S
 function,normHomoglyphs#1,,,18427,"M06 Поставщики, M11 Финансы, M12 Деньги",IMPLEMENTED,named in resources/js/lib/supplierDuplicates.ts,
 function,normSupNameMerge#1,,,18431,"M06 Поставщики, M11 Финансы, M12 Деньги",IMPLEMENTED,requirement M06.CARD,
 function,findSupplierForName#1,,,18445,"M05 Входящие ЭСФ, M06 Поставщики, M11 Финансы",IMPLEMENTED,requirement M06.CARD,
-function,topLevelCategoryOf#1,,,18462,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
+function,topLevelCategoryOf#1,,,18462,M11 Финансы,IMPLEMENTED,named in app/Services/Finance/PlReport.php,
 function,levenshteinDist#1,,,18474,M06 Поставщики,IMPLEMENTED,named in resources/js/lib/supplierDuplicates.ts,
 function,supNameSimilarity#1,,,18489,M06 Поставщики,IMPLEMENTED,named in resources/js/lib/supplierDuplicates.ts,
 function,findSupplierDuplicateGroups#1,,,18499,M06 Поставщики,IMPLEMENTED,requirement M06.MERGE,
@@ -2827,10 +2827,10 @@ function,calcItemMaterialCost#1,,,20574,"M02 Производство, M09 Пр�
 function,calcItemWageCost#1,,,20651,"M02 Производство, M09 Продажи, M11 Финансы",NOT_STARTED,ERP-060 (D-11/D-12),
 function,calcItemMargin#1,,,20690,"M02 Производство, M09 Продажи, M11 Финансы",NOT_STARTED,ERP-060 (D-11/D-12),
 function,calcOrderMargin#1,,,20714,M09 Продажи,NOT_STARTED,ERP-060 (D-11/D-12),
-function,marginPctClass#1,,,20730,"M02 Производство, M09 Продажи, M11 Финансы",NOT_STARTED,ERP-060 (D-11/D-12),
-function,renderMarginKpi#1,,,20736,M11 Финансы,NOT_STARTED,by its controls: ERP-028/ERP-060 (D-12),
+function,marginPctClass#1,,,20730,"M02 Производство, M09 Продажи, M11 Финансы",IMPLEMENTED,requirement M11.MARGIN,
+function,renderMarginKpi#1,,,20736,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),
 function,marginChannelForOrder#1,,,20761,"M02 Производство, M11 Финансы, M12 Деньги",IMPLEMENTED,requirement M12.CALENDAR,
-function,populateMarginFilters#1,,,20766,M11 Финансы,NOT_STARTED,by its controls: ERP-028/ERP-060 (D-12),
+function,populateMarginFilters#1,,,20766,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),
 function,renderMarginReport#1,,,20782,M11 Финансы,NOT_STARTED,by its controls: ERP-028/ERP-060 (D-12),
 function,openMarginDetail#1,,,20845,"M09 Продажи, M11 Финансы",NOT_STARTED,ERP-060 (D-11/D-12),
 function,fcToMonthly#1,,,20973,M11 Финансы,NOT_STARTED,ERP-063 (D-11),
@@ -2909,7 +2909,7 @@ function,renderWSAllocTable#1,,,23360,M11 Финансы,NOT_STARTED,by its cont
 function,exportActivityExcel#1,,,23380,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
 function,setOSVMonth#1,,,23411,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,buildOSV#1,,,23427,M11 Финансы,IMPLEMENTED,requirement M11.OSV,
-function,post#1,,,23465,M11 Финансы,NOT_STARTED,by its controls: ERP-061 (D-11),
+function,post#1,,,23465,M11 Финансы,IMPLEMENTED,named in app/Http/Controllers/StockDocumentController.php,
 function,parseDMY#1,,,23696,"M02 Производство, M08 Покупатели, M09 Продажи …",IMPLEMENTED,named in app/Console/Commands/LegacyControlTotals.php,
 function,aggregateRows#1,,,23709,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,renderOSV#1,,,23722,M11 Финансы,NOT_STARTED,ERP-061 (D-11),
@@ -2984,9 +2984,9 @@ function,renderPaymentHistory#1,,,25913,M11 Финансы,NOT_STARTED,ERP-032 (
 function,savePayment#1,,,25933,M09 Продажи,NOT_STARTED,by its controls: ERP-032 (D-03),
 function,exportARtoExcel#1,,,25993,M11 Финансы,NOT_STARTED,ERP-067 (Excel),
 function,plFilteredOrders#1,,,26023,M11 Финансы,IMPLEMENTED,requirement M11.AR,
-function,plFilteredTx#1,,,26046,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
-function,buildPL#1,,,26064,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
-function,classifyProdStatya#1,,,26110,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
+function,plFilteredTx#1,,,26046,M11 Финансы,IMPLEMENTED,requirement M11.PL,
+function,buildPL#1,,,26064,M11 Финансы,IMPLEMENTED,requirement M11.PL,
+function,classifyProdStatya#1,,,26110,M11 Финансы,IMPLEMENTED,named in app/Services/Finance/PlReport.php,
 function,isOwnerExpenseCategory#1,,,26123,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,fillFinanceMonths#1,,,26340,M11 Финансы,IMPLEMENTED,requirement M11.AR,
 function,setFinancePeriod#1,,,26365,M11 Финансы,IMPLEMENTED,requirement M11.AR,
@@ -2995,7 +2995,7 @@ function,initFinancePeriod#1,,,26442,UI оболочка,IMPLEMENTED,requirement
 function,plBuildRevenueYearOptions#1,,,26458,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,plRevenueTableHtml#1,,,26470,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,plNormOrderNum#1,,,26502,M11 Финансы,IMPLEMENTED,requirement M11.PL,
-function,plChannelByCustomerName#1,,,26516,"M02 Производство, M11 Финансы, M12 Деньги",NOT_STARTED,ERP-060 (D-11/D-12),
+function,plChannelByCustomerName#1,,,26516,"M02 Производство, M11 Финансы, M12 Деньги",IMPLEMENTED,requirement M11.PL,
 function,plFindOrderForRealization#1,,,26523,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,plChannelForRealization#1,,,26532,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,plNormProductName#1,,,26539,"M09 Продажи, M11 Финансы",IMPLEMENTED,"requirement M09.WORKSHEET, M11.PL",
@@ -3004,35 +3004,35 @@ function,renderRevenueByChannel#1,,,26549,M11 Финансы,IMPLEMENTED,require
 function,renderRevenueByCategory#1,,,26597,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,togglePlRevTree#1,,,26635,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,renderRevenueByChannelCategory#1,,,26640,M11 Финансы,IMPLEMENTED,requirement M11.PL,
-function,ensureChannel#1,,,26656,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
+function,ensureChannel#1,,,26656,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,plRevenueTreeHtml#1,,,26699,M11 Финансы,IMPLEMENTED,requirement M11.PL,
-function,rowHtml#1,,,26707,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
+function,rowHtml#1,,,26707,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,exportRevenueTreeToExcel#1,,,26742,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,getMatCostConfig#1,,,26783,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,materialCategoryForName#1,,,26820,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,sumPayrollLedgerColumns#1,,,26840,M11 Финансы,NOT_STARTED,ERP-057 (D-06),
-function,estimateMaterialCostForPeriod#1,,,26863,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
+function,estimateMaterialCostForPeriod#1,,,26863,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,toggleMatCostRow#1,,,26886,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,renderMonthlyPL#1,,,26892,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,exportMonthlyPLExcel#1,,,26953,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,renderMaterialCostEstimate#1,,,26971,M11 Финансы,IMPLEMENTED,requirement M11.PL,
-function,rowHtml#2,,,27069,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
+function,rowHtml#2,,,27069,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,exportMatCostExcel#1,,,27105,M11 Финансы,IMPLEMENTED,requirement M11.PL,
-function,renderCategoryMargin#1,,,27132,M11 Финансы,NOT_STARTED,by its controls: ERP-028/ERP-060 (D-12),
-function,exportCategoryMarginExcel#1,,,27262,M11 Финансы,NOT_STARTED,by its controls: ERP-028/ERP-060 (D-12),
+function,renderCategoryMargin#1,,,27132,M11 Финансы,IMPLEMENTED,requirement M11.MARGIN,
+function,exportCategoryMarginExcel#1,,,27262,M11 Финансы,IMPLEMENTED,requirement M11.MARGIN,
 function,exportRevenueTableToExcel#1,,,27295,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,exportRevenueByChannelToExcel#1,,,27316,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,exportRevenueByCategoryToExcel#1,,,27319,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,renderExpensesByMonth#1,,,27325,M11 Финансы,IMPLEMENTED,requirement M11.PL,
-function,catLabelFor#1,,,27350,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
-function,ensureCat#1,,,27356,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
-function,addToCat#1,,,27360,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
+function,catLabelFor#1,,,27350,M11 Финансы,IMPLEMENTED,named in app/Services/Finance/PlExpenses.php,
+function,ensureCat#1,,,27356,M11 Финансы,IMPLEMENTED,requirement M11.PL,
+function,addToCat#1,,,27360,M11 Финансы,IMPLEMENTED,named in app/Services/Finance/PlExpenses.php,
 function,plExpenseTreeHtml#1,,,27438,M11 Финансы,IMPLEMENTED,requirement M11.PL,
-function,catRowHtml#1,,,27447,—,NOT_STARTED,ERP-060 (D-11/D-12),
+function,catRowHtml#1,,,27447,—,IMPLEMENTED,requirement M11.PL,
 function,togglePlExpenseCat#1,,,27491,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,exportExpensesByMonthToExcel#1,,,27496,M11 Финансы,IMPLEMENTED,requirement M11.PL,
-function,renderPL#1,,,27527,M11 Финансы,NOT_STARTED,ERP-060 (D-11/D-12),
-function,plRow#1,,,27607,—,NOT_STARTED,ERP-060 (D-11/D-12),
+function,renderPL#1,,,27527,M11 Финансы,IMPLEMENTED,requirement M11.PL,
+function,plRow#1,,,27607,—,IMPLEMENTED,requirement M11.PL,
 function,renderPLStatement#1,,,27624,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,renderPLAR#1,,,27687,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,renderPLFixedSummary#1,,,27713,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,

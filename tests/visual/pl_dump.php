@@ -62,5 +62,6 @@ $target = [
     'cost' => $revenue->costEstimate($year),
     'expenses' => (new PlExpenses)->build($year),
     'osv' => (new OsvReport)->build("{$year}-01-01", "{$year}-12-31"),
+    'catMargin' => $revenue->categoryMargin($year),
 ];
 echo json_encode(['legacy' => $legacy, 'target' => $target], JSON_UNESCAPED_UNICODE);

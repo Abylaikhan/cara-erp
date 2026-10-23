@@ -71,6 +71,8 @@ class FinanceController extends Controller
             'osv' => Inertia::optional(fn () => ['from' => $f = $this->date($request, 'osv_from'), 'to' => $t = $this->date($request, 'osv_to'),
                 ...array_diff_key(app(OsvReport::class)->build($f, $t), ['journal' => 0])]),
             'osvAccount' => Inertia::optional(fn () => $this->osvAccount($request)),
+            // «📈 Маржинальность» → «Маржинальность по категориям» of a year (legacy renderCategoryMargin)
+            'catMargin' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'cm_year'), 'years' => $this->plYears(), 'rows' => app(PlRevenue::class)->categoryMargin($y)]),
             'plCost' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_cost_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->costEstimate($y)]),
             'plRevCategory' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rcat_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byCategory($y)]),
             // Tab «Закупки» (legacy renderPurchasesDash, openSupplierReconciliation): incoming invoices, payments with a

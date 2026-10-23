@@ -196,6 +196,86 @@ class PlRevenue
     }
 
     /**
+     * Legacy renderCategoryMargin (L27132–27260): by category of product and month — the revenue, the materials of the goods ESF
+     * spread as in the cost estimate (unknown and overhead categories left out), and the piece wages and overheads of the month of
+     * «📊 P&L» spread by the share of the category in the revenue of the month; margin = revenue − materials − labour.
+     *
+     * @return list<array{label: string, revenue: list<float>, materials: list<float>, labor: list<float>, margin: list<float>}>
+     */
+    public function categoryMargin(string $year): array
+    {
+        $eligibility = $this->eligibility();
+        $categoryOf = $this->categoryResolver();
+        $revenue = [];
+        $order = [];
+        foreach ($this->realizations($year) as $r) {
+            $cat = $categoryOf($r->name);
+            if ($cat !== null) {
+                $m = (int) substr((string) $r->doc_date, 5, 2) - 1;
+                $revenue[$m][$cat] = bcadd($revenue[$m][$cat] ?? '0', (string) ($r->revenue ?? '0'), 2);
+            }
+        }
+        ksort($revenue);
+        foreach ($revenue as $cats) {
+            foreach (array_keys($cats) as $c) {
+                $order[$c] = true; // legacy: the categories in the order they appear, month by month
+            }
+        }
+        $matCategoryOf = PlReport::materialCategoryResolver();
+        $byMonthMat = [];
+        $lines = DB::table('incoming_invoice_items as i')->join('incoming_invoices as v', 'v.id', '=', 'i.invoice_id')->where('v.invoice_type', 'goods')
+            ->where('v.date', '>=', "{$year}-01-01")->where('v.date', '<=', "{$year}-12-31")->orderByDesc('v.date')->orderBy('i.id')->get(['v.date', 'i.description', 'i.total', 'i.amount']);
+        foreach ($lines as $l) {
+            $amt = bccomp((string) $l->total, '0', 2) !== 0 ? (string) $l->total : (string) $l->amount;
+            $mat = $matCategoryOf((string) $l->description);
+            if (bccomp($amt, '0', 2) !== 0 && $mat !== null) {
+                $m = (int) substr((string) $l->date, 5, 2) - 1;
+                $byMonthMat[$m][$mat] = bcadd($byMonthMat[$m][$mat] ?? '0', $amt, 2);
+            }
+        }
+        $materials = [];
+        foreach ($byMonthMat as $m => $mats) {
+            foreach ($mats as $mat => $amt) {
+                $with = array_values(array_filter($eligibility[$mat] ?? [], fn ($c) => bccomp($revenue[$m][$c] ?? '0', '0', 2) > 0));
+                if ($with === []) {
+                    continue;
+                }
+                $total = array_reduce($with, fn ($s, $c) => bcadd($s, $revenue[$m][$c], 2), '0');
+                foreach ($with as $prod) {
+                    $materials[$m][$prod] = bcadd($materials[$m][$prod] ?? '0', bcdiv(bcmul($amt, $revenue[$m][$prod], 12), $total, 12), 12);
+                }
+            }
+        }
+        $report = new PlReport;
+        $laborOpr = [];
+        for ($m = 0; $m < 12; $m++) {
+            $ym = sprintf('%s-%02d', $year, $m + 1);
+            $pl = $report->build("{$ym}-01", $ym.'-'.date('t', (int) strtotime("{$ym}-01")));
+            $laborOpr[$m] = bcadd((string) $pl['wageCost'], (string) $pl['oprCost'], 12);
+        }
+        $rows = [];
+        foreach (array_keys($order) as $cat) {
+            $row = ['label' => (string) $cat, 'revenue' => [], 'materials' => [], 'labor' => [], 'margin' => []];
+            for ($m = 0; $m < 12; $m++) {
+                $rev = $revenue[$m][$cat] ?? '0';
+                $mat = $materials[$m][$cat] ?? '0';
+                $totalRev = array_reduce($revenue[$m] ?? [], fn ($s, $v) => bcadd($s, $v, 2), '0');
+                $labor = bccomp($totalRev, '0', 2) > 0 ? bcdiv(bcmul($laborOpr[$m], $rev, 12), $totalRev, 12) : '0';
+                $row['revenue'][] = $rev;
+                $row['materials'][] = $mat;
+                $row['labor'][] = $labor;
+                $row['margin'][] = bcsub(bcsub($rev, $mat, 12), $labor, 12);
+            }
+            $rows[] = $row;
+        }
+        $sum = fn (array $v) => array_reduce($v, fn ($s, $x) => bcadd($s, $x, 12), '0');
+        usort($rows, fn ($a, $b) => bccomp($sum($b['revenue']), $sum($a['revenue']), 12));
+
+        return array_map(fn ($r) => ['label' => $r['label'], 'revenue' => array_map('floatval', $r['revenue']), 'materials' => array_map('floatval', $r['materials']),
+            'labor' => array_map('floatval', $r['labor']), 'margin' => array_map('floatval', $r['margin'])], $rows);
+    }
+
+    /**
      * Legacy getMatCostConfig (L26783): the categories of product that may use each category of material; null — overheads.
      * The categories of finished products are those of the warehouse of finished goods.
      *
