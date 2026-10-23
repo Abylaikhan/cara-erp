@@ -168,11 +168,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/money', [MoneyController::class, 'index'])->middleware('page:money')->name('money.index');
     Route::get('/money/payouts/{transaction}', [MoneyController::class, 'payouts'])->whereNumber('transaction')->middleware('page:money')->name('money.payouts');
     Route::post('/money/bank-recon/clear', [BankReconController::class, 'clear'])->middleware('page:money')->name('money.bank-recon.clear');
+    Route::post('/money/bank-recon/import', [BankReconController::class, 'import'])->middleware(['page:money', 'throttle:20,1'])->name('money.bank-recon.import');
     Route::middleware('page:warehouse')->prefix('warehouse/documents')->name('warehouse.documents.')->controller(StockDocumentController::class)->group(function () {
         Route::post('/', 'store')->name('store');
         Route::put('/{document}', 'update')->whereNumber('document')->name('update');
         Route::post('/{document}/post', 'post')->whereNumber('document')->name('post');
     });
+    Route::post('/esf/items/{item}/to-warehouse', [StockDocumentController::class, 'fromEsf'])->whereNumber('item')->middleware('page:esf')->name('esf.items.to-warehouse');
     Route::post('/esf/links', [EsfLinkController::class, 'store'])->middleware(['page:esf', 'throttle:60,1'])->name('esf.links.store');
     Route::delete('/esf/links/{link}', [EsfLinkController::class, 'destroy'])->whereNumber('link')->middleware('page:esf')->name('esf.links.destroy');
     Route::middleware('page:money')->prefix('money/accounts')->name('money.accounts.')->controller(MoneyAccountController::class)->group(function () {

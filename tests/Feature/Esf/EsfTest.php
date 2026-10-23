@@ -134,8 +134,8 @@ class EsfTest extends TestCase
             ->has('materialWarehouses', 5));
 
         $this->getJson("/esf/{$new->id}/detail")->assertOk()
-            ->assertJsonPath('items.0.match', ['material' => 'ЛДСП Демо 16мм', 'via' => 'direct'])
-            ->assertJsonPath('items.1.match', ['material' => 'Плита белая', 'via' => 'alias'])
+            ->assertJsonPath('items.0.match.material', 'ЛДСП Демо 16мм')->assertJsonPath('items.0.match.via', 'direct')
+            ->assertJsonPath('items.1.match.material', 'Плита белая')->assertJsonPath('items.1.match.via', 'alias')
             ->assertJsonPath('items.2.match', null);
 
         $this->from('/esf')->put("/esf/{$new->id}/type", ['invoice_type' => 'goods'])->assertSessionHasNoErrors();

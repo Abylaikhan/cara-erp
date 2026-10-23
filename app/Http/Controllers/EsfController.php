@@ -68,17 +68,19 @@ class EsfController extends Controller
     {
         Gate::authorize('viewAny', IncomingInvoice::class);
         $inv = IncomingInvoice::query()->with('items')->findOrFail($invoice);
-        $materials = Material::query()->active()->orderBy('name')->orderBy('id')->pluck('name');
+        $materials = Material::query()->active()->orderBy('name')->orderBy('id')->get(['id', 'name', 'qty']);
         $byLower = [];
-        foreach ($materials as $name) {
-            $byLower[mb_strtolower($name)] ??= $name;
+        foreach ($materials as $m) {
+            $byLower[mb_strtolower($m->name)] ??= $m;
         }
-        $names = $materials->flip();
+        $names = $materials->keyBy('name');
         $aliases = MaterialAlias::query()->orderBy('id')->get(['material_name', 'alias_name']);
+        $received = DB::table('stock_document_lines')->join('stock_documents', 'stock_documents.id', '=', 'stock_document_lines.document_id')
+            ->whereIn('stock_document_lines.esf_item_id', $inv->items->pluck('id'))->pluck('stock_documents.num', 'stock_document_lines.esf_item_id');
         $match = function (string $description) use ($byLower, $names, $aliases): ?array {
             $d = mb_strtolower($description);
             if (isset($byLower[$d])) {
-                return ['material' => $byLower[$d], 'via' => 'direct'];
+                return ['material' => $byLower[$d]->name, 'via' => 'direct', 'id' => $byLower[$d]->id, 'qty' => (float) $byLower[$d]->qty];
             }
             $alias = $aliases->first(function (MaterialAlias $a) use ($d) {
                 $an = mb_strtolower($a->alias_name);
@@ -86,7 +88,9 @@ class EsfController extends Controller
                 return $an === $d || str_contains($d, $an) || str_contains($an, $d);
             });
 
-            return $alias !== null && isset($names[$alias->material_name]) ? ['material' => $alias->material_name, 'via' => 'alias'] : null;
+            $m = $alias !== null ? $names->get($alias->material_name) : null;
+
+            return $m !== null ? ['material' => $m->name, 'via' => 'alias', 'id' => $m->id, 'qty' => (float) $m->qty] : null;
         };
 
         return response()->json([
@@ -111,6 +115,8 @@ class EsfController extends Controller
                 'nds_amount' => (float) $it->nds_amount,
                 'total' => (float) $it->total,
                 'match' => $match($it->description),
+                // ADR-0049: the receipt that already took this line in
+                'received' => $received[$it->id] ?? null,
             ])->values(),
         ]);
     }

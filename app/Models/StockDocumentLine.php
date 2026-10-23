@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $document_id
  * @property int $line_no
  * @property int $material_id
+ * @property int|null $esf_item_id
  * @property string $qty
  * @property string $unit
  * @property string $price
@@ -21,7 +22,7 @@ class StockDocumentLine extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['document_id', 'line_no', 'material_id', 'qty', 'unit', 'price', 'amount'];
+    protected $fillable = ['document_id', 'line_no', 'material_id', 'esf_item_id', 'qty', 'unit', 'price', 'amount'];
 
     protected function casts(): array
     {

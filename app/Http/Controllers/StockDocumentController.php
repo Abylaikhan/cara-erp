@@ -36,6 +36,21 @@ class StockDocumentController extends Controller
         return back()->with('alert', "Документ {$doc->num} проведён ✅");
     }
 
+    /** «Входящие ЭСФ» → «📦 Принять» / «📦 На склад» (ADR-0049, part 2). */
+    public function fromEsf(Request $request, int $item): RedirectResponse
+    {
+        abort_unless(Erp::canAccess($request->user(), 'esf'), 403);
+        $data = $request->validate([
+            'material_id' => ['nullable', 'integer'],
+            'warehouse' => ['required', 'string', 'max:64'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'unit' => ['nullable', 'string', 'max:16'],
+        ]);
+        $doc = $this->service->receiveEsfItem($item, isset($data['material_id']) ? (int) $data['material_id'] : null, $data['warehouse'], $data['name'] ?? null, $data['unit'] ?? null, $request->user());
+
+        return back()->with('result', ['received' => ['num' => $doc->num, 'qty' => (float) $doc->lines()->value('qty')]]);
+    }
+
     /** @return array{date: string, num: ?string, supplier: ?string, esf_ref: ?string, note: ?string, lines: list<array{material_id: int, qty: string, price: string}>} */
     private function data(StockReceiptRequest $request): array
     {

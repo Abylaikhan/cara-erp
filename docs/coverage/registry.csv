@@ -468,7 +468,7 @@ control,goodsReceiptModal|L3109#7,th,goodsReceiptModal,3109,M04 Закупки,N
 control,goodsReceiptModal|L3113,button,goodsReceiptModal,3113,M04 Закупки,NOT_STARTED,ERP-046 (D-04),Отмена
 control,goodsReceiptModal|L3114,button,goodsReceiptModal,3114,M04 Закупки,NOT_STARTED,ERP-046 (D-04),💾 Сохранить накладную
 control,page-esf|L3126,button,page-esf,3126,M05 Входящие ЭСФ,IMPLEMENTED,label,🔄
-control,page-esf|L3127,button,page-esf,3127,M05 Входящие ЭСФ,NOT_STARTED,"present, its action comes later — exportEsfGoodsToExcel: requirement M05.EXPENSE_STOCK (DEC-04)",📥 Товары в Excel
+control,page-esf|L3127,button,page-esf,3127,M05 Входящие ЭСФ,IMPLEMENTED,label,📥 Товары в Excel
 control,page-esf|L3128,button,page-esf,3128,M05 Входящие ЭСФ,IMPLEMENTED,label,📤 Импорт ЭСФ (XML)
 control,page-esf|input|esf-xml-input,input,page-esf,3129,M05 Входящие ЭСФ,IMPLEMENTED,id,
 control,page-esf|div|esf-tab-btn-list,div,page-esf,3133,M05 Входящие ЭСФ,IMPLEMENTED,id,📋 Список ЭСФ
@@ -1550,8 +1550,8 @@ control,page-money|L6327,th,page-money,6327,M12 Деньги,IMPLEMENTED,label,�
 control,page-money|L6327#2,th,page-money,6327,M12 Деньги,IMPLEMENTED,an empty column header: its table is compared visually,
 control,page-money|div|swb-scrollbar-sticky,div,page-money,6332,M12 Деньги,IMPLEMENTED,id,
 control,page-money|select|recon-account-select,select,page-money,6341,M12 Деньги,IMPLEMENTED,id,
-control,page-money|L6342,button,page-money,6342,M12 Деньги,NOT_STARTED,clicks recon-import-file: ERP-034 (Excel),📥 Загрузить выписку
-control,page-money|input|recon-import-file,input,page-money,6343,M12 Деньги,NOT_STARTED,ERP-034 (Excel),
+control,page-money|L6342,button,page-money,6342,M12 Деньги,IMPLEMENTED,label,📥 Загрузить выписку
+control,page-money|input|recon-import-file,input,page-money,6343,M12 Деньги,IMPLEMENTED,id,
 control,page-money|L6344,button,page-money,6344,M12 Деньги,IMPLEMENTED,label,🗑 Очистить
 control,page-money|L6353,th,page-money,6353,M12 Деньги,IMPLEMENTED,label,Дата
 control,page-money|L6354,th,page-money,6354,M12 Деньги,IMPLEMENTED,label,Приход (выписка)
@@ -2413,9 +2413,9 @@ function,confirmSalonTransfer#1,,,9292,M12 Деньги,NOT_STARTED,by its contr
 function,set#1,,,9344,"M01 Дашборд, M02 Производство, M12 Деньги …",IMPLEMENTED,named in app/Console/Commands/LegacyImport.php,
 function,loadBankReconFromDB#1,,,9356,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON,
 function,showBankReconAccount#1,,,9369,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON,
-function,parseBankStatementForRecon#1,,,9381,M12 Деньги,NOT_STARTED,by its controls: ERP-034 (Excel),
+function,parseBankStatementForRecon#1,,,9381,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON_IMPORT,
 function,clearBankReconSheet#1,,,9428,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON,
-function,handleBankReconImport#1,,,9444,M12 Деньги,NOT_STARTED,by its controls: ERP-034 (Excel),
+function,handleBankReconImport#1,,,9444,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON_IMPORT,
 function,renderBankRecon#1,,,9526,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON,
 function,openReconDayModal#1,,,9564,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON,
 function,transferReconRow#1,,,9587,M12 Деньги,NOT_STARTED,ERP-034 (D-03),
@@ -2562,15 +2562,15 @@ function,renderEsfXmlImportPreview#1,,,12622,M05 Входящие ЭСФ,IMPLEME
 function,findDupByFields#1,,,12630,M05 Входящие ЭСФ,IMPLEMENTED,named in app/Services/Esf/EsfImportService.php,
 function,confirmEsfXmlImport#1,,,12669,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.IMPORT,
 function,renderEsfList#1,,,12725,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.LIST,
-function,exportEsfGoodsToExcel#1,,,12834,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.EXPENSE_STOCK (DEC-04),
-function,guessWh#1,,,12857,M05 Входящие ЭСФ,NOT_STARTED,"by its controls: present, its action comes later — exportEsfGoodsToExcel: requirement M05.EXPENSE_STOCK (DEC-04)",
+function,exportEsfGoodsToExcel#1,,,12834,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.GOODS_EXPORT,
+function,guessWh#1,,,12857,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.GOODS_EXPORT,
 function,setEsfType#1,,,12922,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.LIST,
 function,openEsfDetail#1,,,12933,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.DETAIL,
 function,findMaterial#1,,,12942,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.DETAIL,
 function,createExpenseFromEsf#1,,,13015,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.EXPENSE_STOCK (DEC-04),
 function,updateEsfExpSubcat#1,,,13061,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
 function,saveEsfExpense#1,,,13076,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,acceptItemToWarehouse#1,,,13117,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.EXPENSE_STOCK (DEC-04),
+function,acceptItemToWarehouse#1,,,13117,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.TO_STOCK,
 function,showAccrualHistory#1,,,13162,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
 function,openVacationCalcModal#1,,,13181,M20 Начисления ЗП,NOT_STARTED,ERP-056 (D-06),
 function,loadVacationCalc#1,,,13196,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
@@ -2615,10 +2615,10 @@ function,updateTxCounterparty#1,,,14470,M12 Деньги,NOT_STARTED,by its cont
 function,fillAdvanceReturnAmount#1,,,14476,M12 Деньги,NOT_STARTED,by its controls: ERP-031 (D-03/D-11),
 function,sbInsertMoneyTxSafe#1,,,14491,M12 Деньги,NOT_STARTED,by its controls: ERP-031 (D-03/D-11); ERP-034 (Excel); ERP-051 (D-03),
 function,sbPatchMoneyTxSafe#1,,,14511,M12 Деньги,NOT_STARTED,by its controls: ERP-031 (D-03/D-11),
-function,parseRuNumber#1,,,14533,M12 Деньги,NOT_STARTED,by its controls: ERP-034 (Excel); ERP-067 (Excel),
-function,parseStatementDate#1,,,14556,M12 Деньги,NOT_STARTED,by its controls: ERP-034 (Excel),
-function,detectBankFormat#1,,,14568,M12 Деньги,NOT_STARTED,by its controls: ERP-034 (Excel),
-function,extractNameAndBin#1,,,14575,M12 Деньги,NOT_STARTED,by its controls: ERP-034 (Excel),
+function,parseRuNumber#1,,,14533,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON_IMPORT,
+function,parseStatementDate#1,,,14556,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON_IMPORT,
+function,detectBankFormat#1,,,14568,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON_IMPORT,
+function,extractNameAndBin#1,,,14575,M12 Деньги,IMPLEMENTED,requirement M12.BANKRECON_IMPORT,
 function,handleBankStatementFile#1,,,14593,M12 Деньги,NOT_STARTED,requirement M12.POSTING (DEC-03),
 function,txCategoryOptionsHtml#1,,,14741,M12 Деньги,NOT_STARTED,by its controls: ERP-034 (Excel),
 function,renderBankStatementPreview#1,,,14746,M12 Деньги,NOT_STARTED,by its controls: ERP-034 (Excel),

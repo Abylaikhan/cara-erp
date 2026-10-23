@@ -1,13 +1,15 @@
 <script setup lang="ts">
 // Tab «Сверка с банком» of «Деньги» — legacy money-tab-bankrecon (L6333–6352), reconDayModal (L6636), showBankReconAccount/
 // renderBankRecon/openReconDayModal/clearBankReconSheet (L9346–9600). The statement of Kaspi or Halyk against the journal of the
-// account day by day (newest first), mismatches marked, the operations of a day. Loading a statement from Excel (ERP-034,
-// ERP-067) and «Перенести в журнал» (posting, ERP-031…033, D-03, D-11) say when they come.
-import { router } from '@inertiajs/vue3';
+// account day by day (newest first), mismatches marked, the operations of a day. «📥 Загрузить выписку» sends the Excel file to the
+// server, which reads it as legacy handleBankReconImport and adds the new rows (ADR-0050); «Перенести в журнал» (posting,
+// ERP-031…033, D-03, D-11) says when it comes.
+import { router, usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
 import type { MoneyAccount } from '@/lib/money';
 import { fmtCurrency } from '@/lib/sales';
+import type { SharedProps } from '@/types';
 
 export interface BankRecon {
     accounts: number[];
@@ -56,7 +58,31 @@ const days = computed(() => {
 
 const day = reactive({ open: false, date: '' });
 const dayRows = computed(() => (props.data?.rows ?? []).filter((r) => r.account === account.value && r.date === day.date));
-const importLater = () => window.alert('Загрузка банковской выписки из Excel появится вместе с импортом выписок (ERP-034, ERP-067).');
+// Legacy handleBankReconImport: the file of the hidden input; the account of the bank of the file becomes the shown one.
+const page = usePage<SharedProps>();
+const fileInput = ref<HTMLInputElement | null>(null);
+function handleBankReconImport(e: Event): void {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    router.post(
+        '/money/bank-recon/import',
+        { file },
+        {
+            forceFormData: true,
+            preserveScroll: true,
+            preserveState: true,
+            only: ['bankRecon', 'flash'],
+            onSuccess: () => {
+                const acc = (page.props.flash.result as unknown as { bankReconAccount?: number } | null)?.bankReconAccount;
+                if (acc) account.value = acc;
+                if (page.props.flash.alert) window.alert(page.props.flash.alert);
+            },
+            onError: (err) => window.alert(Object.values(err)[0] || 'Ошибка импорта'),
+            onFinish: () => (input.value = ''),
+        },
+    );
+}
 const transferLater = () => window.alert('Перенос операции выписки в журнал появится вместе с проведением денег (ERP-031…033, решения D-03 и D-11).');
 function clearBankReconSheet(): void {
     const n = (props.data?.rows ?? []).filter((r) => r.account === account.value && !r.transferred).length;
@@ -72,7 +98,8 @@ const mono = `'IBM Plex Mono',monospace`;
         <select id="recon-account-select" v-model="account" style="font-size: 13px">
             <option v-for="o in options" :key="o.id" :value="o.id">{{ o.a?.icon || '' }} {{ o.a?.name }}</option>
         </select>
-        <button class="btn btn-ghost btn-sm" @click="importLater">📥 Загрузить выписку</button>
+        <button class="btn btn-ghost btn-sm" @click="fileInput?.click()">📥 Загрузить выписку</button>
+        <input id="recon-import-file" ref="fileInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleBankReconImport" />
         <button class="btn btn-ghost btn-sm" style="color: var(--red)" @click="clearBankReconSheet">🗑 Очистить</button>
     </div>
     <div style="font-size: 11px; color: var(--text3); margin-bottom: 10px">

@@ -77,7 +77,6 @@ control,expCatModal|input|ec-edit-code,IMPLEMENTED,ADR-0003,Скрытое по�
 control,page-mrp|L2304,NOT_STARTED,ERP-041/ERP-067,Загрузка факта выполнения из Excel
 control,page-money|input|bank-statement-file,NOT_STARTED,ERP-034 (Excel),Выписка банка из Excel
 control,page-money|input|swb-import-file,NOT_STARTED,ERP-067 (Excel),Рабочий лист салона из Excel
-control,page-money|input|recon-import-file,NOT_STARTED,ERP-034 (Excel),Выписка для сверки с банком
 # Functions of parts not migrated yet (the reference names the task),,,,
 function,flashHighlightRow,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
 function,jumpToShopFloor,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная

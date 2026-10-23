@@ -26,6 +26,11 @@ class BankStatementImporter
         $txIds = DB::table('legacy_id_map')->where('source_table', 'money_tx')->pluck('target_id', 'source_key');
         $this->validate($rows->all(), $accounts->all());
 
+        // Rows loaded here from a statement (ADR-0050) are not in legacy: the import would delete them.
+        if (DB::table('audit_events')->where('action', 'bank_statement.imported')->exists()) {
+            throw new RuntimeException('Выписки уже загружали в новой системе (журнал аудита, bank_statement.imported): перенос сверки с банком из legacy их удалит и остановлен (ADR-0050).');
+        }
+
         return DB::transaction(function () use ($rows, $accounts, $txIds, $snapshotId, $by) {
             $stats = ['legacy_rows' => $rows->count(), 'created' => 0, 'updated' => 0, 'unchanged' => 0];
             $existing = BankStatementRow::query()->lockForUpdate()->get()->keyBy('uuid');

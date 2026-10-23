@@ -2,8 +2,8 @@
 // M05 «Входящие ЭСФ» — legacy page-esf (L3056–3238), esfDetailModal (L3179), esfXmlImportModal: initEsfPage, renderEsfList,
 // filterEsfUnreconciled, setEsfType, openEsfDetail, handleEsfXmlFiles/renderEsfXmlImportPreview/confirmEsfXmlImport
 // (L11926–12560). Same markup, texts and calculations; XML is parsed and imported by the server. «Сверка с оплатами» is
-// EsfReconTab (saving links waits for D-10, ADR-0043); «Создать расход», «Принять на склад» and the Excel export wait for
-// other modules (docs/adr/0009-esf.md).
+// EsfReconTab (ADR-0043, ADR-0048); «📦 Принять» / «📦 На склад» take a line in with a posted receipt (ADR-0049); «Создать
+// расход» waits for the money module (docs/adr/0009-esf.md).
 import { router, usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
@@ -47,7 +47,8 @@ interface Detail {
         nds_rate: number;
         nds_amount: number;
         total: number;
-        match: { material: string; via: string } | null;
+        match: { material: string; via: string; id: number; qty: number } | null;
+        received: string | null;
     }[];
 }
 
@@ -180,9 +181,41 @@ async function exportGoods(): Promise<void> {
     window.alert(`✅ Выгружено ${r.headers.get('X-Export-Rows')} позиций из ${r.headers.get('X-Export-Invoices')} ЭСФ`);
 }
 const createExpense = later('Расход из ЭСФ появится вместе с проведением денежных операций (ERP-031…033, решения D-03 и D-11).');
-const acceptToWarehouse = later(
-    'Приём строки ЭСФ на склад появится вместе со складскими документами: остаток двигает документ прихода (решения D-04, D-05).',
-);
+// Legacy acceptItemToWarehouse: the chosen warehouse of the line; to a matched material after a confirmation, else a new
+// material named in two prompts. The server posts a receipt with this line (ADR-0049); a line is taken in once.
+const lineWarehouse = reactive<Record<number, string>>({});
+const whOf = (it: Detail['items'][number]) => props.materialWarehouses.find((w) => w.code === (lineWarehouse[it.id] ?? props.materialWarehouses[0]?.code));
+function acceptItemToWarehouse(it: Detail['items'][number]): void {
+    const ws = whOf(it);
+    if (!detail.value || !ws) return;
+    let data: Record<string, string | number>;
+    let done: () => string;
+    if (it.match) {
+        const newQty = it.match.qty + it.qty;
+        if (!window.confirm(`Добавить ${it.qty} ед. к "${it.match.material}" (${ws.icon} ${ws.name})?\nБудет: ${newQty} ед.`)) return;
+        data = { material_id: it.match.id, warehouse: ws.code };
+        const name = it.match.material;
+        done = () => `✅ Остаток обновлён: ${name} → ${newQty} ед.`;
+    } else {
+        const name = window.prompt(`Название материала (${ws.icon} ${ws.name}):`, it.description);
+        if (!name) return;
+        const unit = window.prompt('Единица измерения:', 'шт') || 'шт';
+        data = { warehouse: ws.code, name, unit };
+        done = () => `✅ "${name}" → ${ws.icon} ${ws.name}: ${it.qty} ${unit}`;
+    }
+    const id = detail.value.id;
+    router.post(`/esf/items/${it.id}/to-warehouse`, data, {
+        preserveScroll: true,
+        preserveState: true,
+        only: ['flash'],
+        onSuccess: async () => {
+            window.alert(done());
+            const response = await fetch(`/esf/${id}/detail`, { headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+            if (response.ok && detail.value?.id === id) detail.value = (await response.json()) as Detail;
+        },
+        onError: (e) => window.alert('Ошибка: ' + (Object.values(e)[0] || '')),
+    });
+}
 </script>
 
 <template>
@@ -363,12 +396,26 @@ const acceptToWarehouse = later(
                             <td style="text-align: right; font-family: monospace; font-weight: 600">{{ fmt(it.total) }}</td>
                             <td>
                                 <div v-if="it.match" style="font-size: 11px; color: var(--green)">✅ {{ it.match.material }}</div>
-                                <select style="font-size: 10px; width: 100%" :style="it.match ? 'margin-top:2px' : ''">
-                                    <option v-for="w in props.materialWarehouses" :key="w.code" :value="w.code">{{ w.icon }} {{ w.name }}</option>
-                                </select>
-                                <button class="btn btn-ghost btn-sm" style="margin-top: 2px; width: 100%" :style="{ fontSize: it.match ? '10px' : '11px' }" @click="acceptToWarehouse">
-                                    {{ it.match ? '📦 Принять' : '📦 На склад' }}
-                                </button>
+                                <div v-if="it.received" style="font-size: 11px; color: var(--text3)">📦 Принято: {{ it.received }}</div>
+                                <template v-else>
+                                    <select
+                                        :id="`ws-sel-${it.id}`"
+                                        :value="lineWarehouse[it.id] ?? props.materialWarehouses[0]?.code"
+                                        style="font-size: 10px; width: 100%"
+                                        :style="it.match ? 'margin-top:2px' : ''"
+                                        @change="lineWarehouse[it.id] = ($event.target as HTMLSelectElement).value"
+                                    >
+                                        <option v-for="w in props.materialWarehouses" :key="w.code" :value="w.code">{{ w.icon }} {{ w.name }}</option>
+                                    </select>
+                                    <button
+                                        class="btn btn-ghost btn-sm"
+                                        style="margin-top: 2px; width: 100%"
+                                        :style="{ fontSize: it.match ? '10px' : '11px' }"
+                                        @click="acceptItemToWarehouse(it)"
+                                    >
+                                        {{ it.match ? '📦 Принять' : '📦 На склад' }}
+                                    </button>
+                                </template>
                             </td>
                         </tr>
                     </tbody>

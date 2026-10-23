@@ -6,12 +6,14 @@
 № 52 Частичная оплата ЭСФ: a payment smaller than the invoices covers part of the larger one, the smaller one stays
      unlinked; the link survives a reload (ADR-0048).
 № 45 Приход на склад: a draft keeps the stock; posted from its window it adds the quantity once, with a movement
-     (ADR-0049).
+     (ADR-0049). A line of an ESF is taken in once with «📦 Принять».
+№ 65 Выписка Excel: a synthetic Kaspi statement adds its rows to «Сверка с банком», a second upload adds nothing (ADR-0050).
 """
 from __future__ import annotations
 
 import datetime as dt
 import sys
+import tempfile
 from pathlib import Path
 
 from playwright.sync_api import Page, expect, sync_playwright
@@ -87,6 +89,53 @@ def stock_receipt(page: Page, run: str) -> None:
     holds('№ 45: документ в списке — «Проведён»', lambda: expect(page.locator('#wh-docs-tbody tr', has_text=num)).to_contain_text('Проведён'))
 
 
+def esf_to_stock(page: Page, run: str) -> None:
+    before = sql("SELECT qty FROM materials WHERE name = 'ЛДСП Демо 16мм белый'")[0][0]
+    alerts: list[str] = []
+    page.on('dialog', lambda d: alerts.append(d.message))
+    page.goto(BASE + '/esf', wait_until='networkidle')
+    page.locator('tbody tr', has_text='ТОО «Демо Плита»').filter(has=page.get_by_role('cell', name='1', exact=True)).first.click()
+    line = page.locator('#esfDetailModal tbody tr', has_text='ЛДСП Демо 16мм белый')
+    line.get_by_role('button', name='📦 Принять').click()
+    holds('№ 45: у принятой строки — «📦 Принято: ПН-…»', lambda: expect(line).to_contain_text('📦 Принято: ПН-'))
+    check('№ 45: legacy-сообщение «Остаток обновлён»', any('Остаток обновлён' in m for m in alerts), repr(alerts[-2:]))
+    rows = sql(f"SELECT m.qty - {before}, count(l.id) FROM materials m JOIN stock_document_lines l ON l.material_id = m.id AND l.esf_item_id IS NOT NULL WHERE m.name = 'ЛДСП Демо 16мм белый' GROUP BY m.qty")
+    check('№ 45: строка ЭСФ принята один раз (+10)', rows == [['10.000', '1']], repr(rows))
+
+
+def statement_upload(page: Page, run: str) -> None:
+    from openpyxl import Workbook
+    acc = sql(f"INSERT INTO money_accounts (name, type, currency, opening_balance, sort_order, created_at, updated_at) VALUES ('Е2Е Kaspi {run}', 'bank', 'KZT', 0, 91, now(), now()) RETURNING id")[0][0]
+    sql(f"INSERT INTO legacy_id_map (source_table, source_key, target_table, target_id, snapshot_id) VALUES ('money_accounts', 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'money_accounts', {acc}, 'e2e') ON CONFLICT DO NOTHING")
+    acc = sql("SELECT target_id FROM legacy_id_map WHERE source_table = 'money_accounts' AND source_key = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'")[0][0]
+    wb = Workbook()
+    for row in (['№ документа', 'Дата операции', 'Дебет', 'Кредит', 'Наименование бенефициара / отправителя денег', 'Назначение платежа', 'КНП'],
+                [f'Е2Е-{run}-1', '07.08.2031', '1 500,25', '', 'ТОО Е2Е\nИИН/БИН 000000000099', 'Оплата е2е', '710'],
+                [f'Е2Е-{run}-2', '08.08.2031', '', '2000', 'ИП Е2Е', 'Поступление е2е', '190']):
+        wb.active.append(row)
+    path = Path(tempfile.mkdtemp()) / 'kaspi.xlsx'
+    wb.save(path)
+    alerts: list[str] = []
+    page.on('dialog', lambda d: alerts.append(d.message))
+    page.goto(BASE + '/money', wait_until='networkidle')
+    page.locator('#page-money > .tabs .tab', has_text='Сверка с банком').click()
+    page.wait_for_selector('#recon-account-select')
+    page.set_input_files('#recon-import-file', str(path))
+    for _ in range(50):
+        if any('Готово!' in m for m in alerts):
+            break
+        page.wait_for_timeout(100)
+    check('№ 65: «Готово! Добавлено новых операций: 2»', any('Добавлено новых операций: 2' in m for m in alerts), repr(alerts[-2:]))
+    rows = sql(f"SELECT flow, amount FROM bank_statement_rows WHERE account_id = {acc} AND doc_num LIKE 'Е2Е-{run}-%' ORDER BY doc_num")
+    check('№ 65: строки выписки в сверке счёта Kaspi', rows == [['expense', '1500.25'], ['income', '2000.00']], repr(rows))
+    page.set_input_files('#recon-import-file', str(path))
+    for _ in range(50):
+        if any('новых не найдено' in m for m in alerts):
+            break
+        page.wait_for_timeout(100)
+    check('№ 65: повторная загрузка — «новых не найдено»', any('новых не найдено' in m for m in alerts), repr(alerts[-2:]))
+
+
 def main() -> int:
     run = dt.datetime.now().strftime('%H%M%S')
     SHOTS.mkdir(parents=True, exist_ok=True)
@@ -97,7 +146,7 @@ def main() -> int:
         errors: list[str] = []
         page.on('pageerror', lambda e: errors.append(str(e)))
         login(page)
-        for name, scenario in (('№ 37', opening_balance), ('№ 52', partial_payment), ('№ 45', stock_receipt)):
+        for name, scenario in (('№ 37', opening_balance), ('№ 52', partial_payment), ('№ 45', stock_receipt), ('№ 45 ЭСФ', esf_to_stock), ('№ 65 выписка', statement_upload)):
             try:
                 scenario(page, run)
             except Exception as e:  # a step that could not even be performed

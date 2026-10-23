@@ -2,11 +2,15 @@
 
 namespace App\Services\Warehouse;
 
+use App\Models\IncomingInvoice;
+use App\Models\IncomingInvoiceItem;
 use App\Models\Material;
+use App\Models\MaterialAlias;
 use App\Models\StockDocument;
 use App\Models\StockDocumentLine;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -70,6 +74,60 @@ class StockDocumentService
             if ($post) {
                 $this->postLocked($doc, $by);
             }
+
+            return $doc->refresh();
+        });
+    }
+
+    /**
+     * «Входящие ЭСФ» → «📦 Принять» (to the material the line matches) or «📦 На склад» (a new material named by the user,
+     * with the line's text as its alias) — legacy acceptItemToWarehouse (L13117). Legacy changed the stock of the material
+     * directly; here it is a posted receipt of today with the supplier and the ESF as its basis, one line taken in once. As in
+     * legacy the material moves to the chosen warehouse; a new one gets that warehouse's first category.
+     */
+    public function receiveEsfItem(int $itemId, ?int $materialId, string $warehouseCode, ?string $name, ?string $unit, User $by): StockDocument
+    {
+        return DB::transaction(function () use ($itemId, $materialId, $warehouseCode, $name, $unit, $by) {
+            $item = IncomingInvoiceItem::query()->lockForUpdate()->find($itemId) ?? throw ValidationException::withMessages(['item' => 'Строка ЭСФ не найдена — обновите страницу.']);
+            $taken = StockDocumentLine::query()->where('esf_item_id', $item->id)->first();
+            if ($taken) {
+                throw ValidationException::withMessages(['item' => 'Строка ЭСФ уже принята на склад документом '.StockDocument::query()->whereKey($taken->document_id)->value('num')]);
+            }
+            if (bccomp((string) $item->qty, '0', 3) <= 0 || bccomp((string) $item->unit_price, '0', 2) < 0) {
+                throw ValidationException::withMessages(['item' => 'В строке ЭСФ нет количества или цена меньше нуля — принять нечего']);
+            }
+            $warehouse = Warehouse::query()->where('code', $warehouseCode)->where('type', 'material')->first() ?? throw ValidationException::withMessages(['warehouse' => 'Склад не найден — обновите страницу.']);
+            $inv = IncomingInvoice::query()->findOrFail($item->invoice_id);
+            if ($materialId !== null) {
+                $material = Material::query()->active()->lockForUpdate()->find($materialId) ?? throw ValidationException::withMessages(['material' => 'Материал не найден — обновите страницу.']);
+                if ($material->warehouse_code !== $warehouse->code) {
+                    $material->forceFill(['warehouse_code' => $warehouse->code, 'lock_version' => $material->lock_version + 1])->save();
+                }
+            } else {
+                $name = trim((string) $name);
+                if ($name === '') {
+                    throw ValidationException::withMessages(['name' => 'Укажите название материала']);
+                }
+                if (Material::query()->active()->whereRaw('lower(name) = lower(?)', [$name])->exists()) {
+                    throw ValidationException::withMessages(['name' => "Материал «{$name}» уже есть на складе"]);
+                }
+                $material = new Material(['name' => $name, 'category' => $warehouse->categories[0] ?? 'Прочее', 'unit' => trim((string) $unit) ?: 'шт',
+                    'price' => bcadd((string) $item->unit_price, '0', 2), 'min_qty' => 0, 'supplier_name' => $inv->supplier_name, 'warehouse_code' => $warehouse->code]);
+                $material->forceFill(['qty' => '0', 'created_by_id' => $by->id, 'created_by_name' => $by->name])->save();
+                Audit::record('material.created', 'material', $material->id, ['name' => $material->name, 'from_esf_item' => $item->id], $by);
+                if ($name !== $item->description && ! MaterialAlias::query()->where('material_name', $name)->where('alias_name', $item->description)->exists()) {
+                    MaterialAlias::query()->create(['material_name' => $name, 'alias_name' => $item->description, 'category' => 'esf']);
+                }
+            }
+            $doc = StockDocument::query()->create(['doc_type' => 'receipt', 'num' => self::nextNumber('receipt'), 'doc_date' => now(config('erp.business_timezone'))->format('Y-m-d'),
+                'status' => 'draft', 'supplier_name' => $inv->supplier_name, 'supplier_id' => $inv->supplier_id, 'esf_ref' => mb_substr('ЭСФ №'.$inv->num, 0, 64),
+                'note' => mb_substr((string) $item->description, 0, 1000), 'created_by_id' => $by->id, 'created_by_name' => $by->name]);
+            $qty = bcadd((string) $item->qty, '0', 3);
+            $price = bcadd((string) $item->unit_price, '0', 2);
+            StockDocumentLine::query()->create(['document_id' => $doc->id, 'line_no' => 1, 'material_id' => $material->id, 'esf_item_id' => $item->id, 'qty' => $qty,
+                'unit' => $material->unit, 'price' => $price, 'amount' => bcadd(bcmul($qty, $price, 5), '0.005', 2)]);
+            Audit::record('stock_document.created', 'stock_document', $doc->id, ['num' => $doc->num, 'lines' => 1, 'esf_item' => $item->id], $by);
+            $this->postLocked($doc, $by);
 
             return $doc->refresh();
         });
