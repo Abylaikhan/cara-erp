@@ -33,7 +33,7 @@ class ChannelIsolationTest extends TestCase
     /** Lists sent when a tab is opened: page → [component, props]. Kept complete by the test below. */
     private const LAZY = [
         'sales' => ['Sales', ['realizations', 'report', 'worksheet']],
-        'finance' => ['Finance', ['transactions', 'purchases', 'pl']],
+        'finance' => ['Finance', ['transactions', 'purchases', 'pl', 'plMonthly']],
         'crm' => ['Crm', ['clientOrders', 'boardOrders', 'projects']],
         'money' => ['Money', ['advances', 'calendar', 'bankRecon', 'salonRows']],
         'customers' => ['Customers', ['reconcileOrders']],

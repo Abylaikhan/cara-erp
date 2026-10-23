@@ -94,6 +94,27 @@ class PlReportTest extends TestCase
         $this->assertSame([0.0, 9999.0], [(new PlReport)->build('2031-03-01', '2031-03-31')['wageCost'], (new PlReport)->build('2031-03-01', '2031-03-31')['aupSalary']]);
     }
 
+    public function test_month_by_month_a_month_to_come_is_not_counted(): void
+    {
+        DB::table('realizations')->insert([['doc_date' => '2031-01-31', 'name' => 'Демо', 'qty' => 1, 'revenue' => '100'], ['doc_date' => '2031-02-01', 'name' => 'Демо', 'qty' => 1, 'revenue' => '250'],
+            ['doc_date' => '2030-12-31', 'name' => 'Демо', 'qty' => 1, 'revenue' => '7']]);
+        $this->tx('2031-02-10', 'household', '40', 'rent');
+        $report = new PlReport;
+        $this->assertSame(['2031', '2030'], $report->years());
+        $months = $report->monthly('2031', '2031-02');
+        $this->assertSame([100.0, 250.0], [$months[0]['revenue'], $months[1]['revenue']]);
+        $this->assertSame([0.0, 40.0, 210.0], [$months[0]['otherFixed'], $months[1]['otherFixed'], $months[1]['ebit']]);
+        $this->assertSame(array_fill(0, 10, null), array_slice($months, 2), 'March to December have not come');
+
+        $this->travelTo('2032-01-15 12:00:00'); // every month of 2030 and 2031 has come
+        $this->actingAs(User::factory()->role('accountant')->create());
+        $version = $this->get('/finance')->viewData('page')['version'];
+        $r = $this->get('/finance?pl_year=2030', ['X-Inertia' => 'true', 'X-Inertia-Version' => $version, 'X-Inertia-Partial-Component' => 'Finance', 'X-Inertia-Partial-Data' => 'plMonthly']);
+        $this->assertSame(['2030', ['2031', '2030'], 7.0], [$r->json('props.plMonthly.year'), $r->json('props.plMonthly.years'), (float) $r->json('props.plMonthly.months.11.revenue')]);
+        $r = $this->get('/finance?pl_year=1999', ['X-Inertia' => 'true', 'X-Inertia-Version' => $version, 'X-Inertia-Partial-Component' => 'Finance', 'X-Inertia-Partial-Data' => 'plMonthly']);
+        $this->assertSame('2031', $r->json('props.plMonthly.year'), 'a year without realizations: the current year (2032) has none either — the newest one');
+    }
+
     public function test_the_page_gets_the_statement_of_its_period_only_when_asked(): void
     {
         DB::table('realizations')->insert(['doc_date' => '2031-03-05', 'name' => 'Демо', 'qty' => 1, 'revenue' => '10']);

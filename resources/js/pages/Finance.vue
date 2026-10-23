@@ -6,7 +6,7 @@
 import { computed, ref } from 'vue';
 import ArTab, { type ArRecord } from '@/components/finance/ArTab.vue';
 import CfsTab, { type CfsTx } from '@/components/finance/CfsTab.vue';
-import PlTab, { type PlData } from '@/components/finance/PlTab.vue';
+import PlTab, { type PlData, type PlMonthly } from '@/components/finance/PlTab.vue';
 import PurchasesTab, { type PurchasesData } from '@/components/finance/PurchasesTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 
@@ -33,6 +33,7 @@ const props = defineProps<{
     transactions?: CfsTx[];
     purchases?: PurchasesData;
     pl?: PlData;
+    plMonthly?: PlMonthly;
 }>();
 
 type Tab = 'pl' | 'ar' | 'purchases' | 'margin' | 'bep' | 'cfs' | 'osv' | 'activity';
@@ -185,7 +186,7 @@ const arRecords = computed<ArRecord[]>(() => {
                 <PurchasesTab :data="props.purchases" :today="props.today" :active="tab === 'purchases'" />
             </div>
             <div id="finance-pl" :style="{ display: tab === 'pl' ? 'block' : 'none' }">
-                <PlTab :data="props.pl" :from="period.from" :to="period.to" :active="tab === 'pl'" />
+                <PlTab :data="props.pl" :monthly="props.plMonthly" :from="period.from" :to="period.to" :active="tab === 'pl'" />
             </div>
             <div id="finance-cfs" :style="{ display: tab === 'cfs' ? 'block' : 'none' }">
                 <CfsTab

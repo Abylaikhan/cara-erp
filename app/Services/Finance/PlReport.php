@@ -35,27 +35,72 @@ class PlReport
     /** @var array<string, array{name: string, parent: ?string}> code → name and parent code */
     private array $cats = [];
 
+    /** @var array<string, mixed>|null the rows the statement reads, loaded once for any number of periods */
+    private ?array $data = null;
+
+    private function load(): array
+    {
+        if ($this->data !== null) {
+            return $this->data;
+        }
+        $this->cats = DB::table('expense_categories as c')->leftJoin('expense_categories as p', 'p.id', '=', 'c.parent_id')->where('c.active', true)
+            ->get(['c.code', 'c.name', 'p.code as parent'])->mapWithKeys(fn ($c) => [$c->code => ['name' => $c->name, 'parent' => $c->parent]])->all();
+
+        return $this->data = [
+            'suppliers' => Supplier::query()->active()->orderBy('name')->orderBy('id')->get(['id', 'name', 'bin', 'expense_category_id']),
+            'catById' => DB::table('expense_categories')->pluck('code', 'id'),
+            'realizations' => DB::table('realizations')->get(['doc_date', 'revenue']),
+            'invType' => DB::table('legacy_id_map as m')->join('incoming_invoices as i', 'i.id', '=', 'm.target_id')->where('m.source_table', 'incoming_invoices')->pluck('i.invoice_type', 'm.source_key'),
+            'advances' => DB::table('advance_reports')->get(['report_date', 'lines'])->map(fn ($a) => [$a->report_date, json_decode((string) $a->lines, true) ?: []]),
+            'txs' => DB::table('money_transactions')->where('flow', 'expense')->get(['tx_date', 'category', 'expense_category_id', 'counterparty', 'bin', 'amount']),
+            'esf' => $this->esfLines(),
+            'accruals' => DB::table('salary_accruals')->where('type', 'salary')->get(['accrual_date', 'amount', 'details']),
+        ];
+    }
+
+    /** The years of the realizations, newest first (legacy plBuildRevenueYearOptions). @return list<string> */
+    public function years(): array
+    {
+        return $this->load()['realizations']->map(fn ($r) => substr((string) $r->doc_date, 0, 4))->filter()->unique()->sortDesc()->values()->all();
+    }
+
+    /**
+     * Legacy renderMonthlyPL: the statement of each month of the year; a month that has not come yet is not counted (null).
+     *
+     * @return list<array<string, float|bool>|null>
+     */
+    public function monthly(string $year, string $todayYm): array
+    {
+        $out = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $ym = sprintf('%s-%02d', $year, $m);
+            $out[] = $ym > $todayYm ? null : $this->build("{$ym}-01", $ym.'-'.date('t', (int) strtotime("{$ym}-01")));
+        }
+
+        return $out;
+    }
+
     /** @return array<string, float|bool> */
     public function build(?string $from, ?string $to): array
     {
-        $this->cats = DB::table('expense_categories as c')->leftJoin('expense_categories as p', 'p.id', '=', 'c.parent_id')->where('c.active', true)
-            ->get(['c.code', 'c.name', 'p.code as parent'])->mapWithKeys(fn ($c) => [$c->code => ['name' => $c->name, 'parent' => $c->parent]])->all();
+        $data = $this->load();
         $in = fn (?string $d) => ! $d || ((! $from || $d >= $from) && (! $to || $d <= $to));
-        $suppliers = Supplier::query()->active()->orderBy('name')->orderBy('id')->get(['id', 'name', 'bin', 'expense_category_id']);
-        $catById = DB::table('expense_categories')->pluck('code', 'id');
+        $suppliers = $data['suppliers'];
+        $catById = $data['catById'];
 
         // ── Выручка ──
-        $revenue = DB::table('realizations')->get(['doc_date', 'revenue'])->filter(fn ($r) => $in($r->doc_date))->reduce(fn ($s, $r) => bcadd($s, (string) ($r->revenue ?? '0'), 2), '0');
+        $revenue = $data['realizations']->filter(fn ($r) => $in($r->doc_date))->reduce(fn ($s, $r) => bcadd($s, (string) ($r->revenue ?? '0'), 2), '0');
 
         // ── Advance reports, line by line (legacy: the issue of an advance is not an expense) ──
-        $invType = DB::table('legacy_id_map as m')->join('incoming_invoices as i', 'i.id', '=', 'm.target_id')->where('m.source_table', 'incoming_invoices')->pluck('i.invoice_type', 'm.source_key');
+        $invType = $data['invType'];
         $adv = ['commercial' => '0', 'other' => '0', 'undetermined' => '0'];
         $prod = ['materials' => '0', 'opr' => '0', 'unclassified' => '0'];
-        foreach (DB::table('advance_reports')->get(['report_date', 'lines']) as $a) {
+        foreach ($data['advances'] as [$date, $lines]) {
+            $a = (object) ['report_date' => $date, 'lines' => $lines];
             if (! $in($a->report_date)) {
                 continue;
             }
-            foreach (json_decode((string) $a->lines, true) ?: [] as $l) {
+            foreach ($a->lines as $l) {
                 $amt = is_numeric($l['amount'] ?? null) ? (string) $l['amount'] : '0';
                 if (! is_array($l) || bccomp($amt, '0', 12) === 0 || ($l['type'] ?? '') === 'material') {
                     continue;
@@ -95,7 +140,7 @@ class PlReport
         $other = '0';
         $salaryTx = '0';
         $anySalaryTx = false;
-        $txs = DB::table('money_transactions')->where('flow', 'expense')->get(['tx_date', 'category', 'expense_category_id', 'counterparty', 'bin', 'amount'])->filter(fn ($t) => $in($t->tx_date));
+        $txs = $data['txs']->filter(fn ($t) => $in($t->tx_date));
         foreach ($txs as $t) {
             $amt = (string) $t->amount;
             $sub = $t->expense_category_id !== null ? ($catById[$t->expense_category_id] ?? null) : null;
@@ -131,9 +176,9 @@ class PlReport
         }
 
         // ── Materials by the ESF of the period ──
-        $esf = $this->esfMaterials($in);
+        $esf = array_reduce($data['esf'], fn ($s, $l) => $in($l[0]) ? bcadd($s, $l[1], 2) : $s, '0');
         // ── Salary ledger ──
-        $ledger = $this->ledger($in);
+        $ledger = $this->ledger($data['accruals'], $in);
 
         $materialCost = bcadd($esf, $prod['materials'], 12);
         $wageCost = $ledger['sdelnaya'];
@@ -202,8 +247,13 @@ class PlReport
         return $parent !== null ? [$parent, $code] : [$code, null];
     }
 
-    /** Legacy estimateMaterialCostForPeriod: goods ESF lines of the period, but those of overhead material categories. */
-    private function esfMaterials(callable $in): string
+    /**
+     * Legacy estimateMaterialCostForPeriod: the goods ESF lines that count as materials (not those of overhead material
+     * categories), with the date of their invoice.
+     *
+     * @return list<array{?string, string}>
+     */
+    private function esfLines(): array
     {
         $materials = DB::table('materials as m')->join('warehouses as w', 'w.code', '=', 'm.warehouse_code')->where('w.type', 'material')->where('m.active', true)
             ->orderBy('m.name')->orderBy('m.id')->get(['m.name', 'm.category'])->map(fn ($m) => [mb_strtolower(trim($m->name)), $m->category]);
@@ -223,33 +273,31 @@ class PlReport
 
             return $cache[$n];
         };
-        $total = '0';
+        $out = [];
         $lines = DB::table('incoming_invoice_items as i')->join('incoming_invoices as v', 'v.id', '=', 'i.invoice_id')->where('v.invoice_type', 'goods')
             ->get(['v.date', 'i.description', 'i.total', 'i.amount']);
         foreach ($lines as $l) {
-            if (! $in($l->date)) {
-                continue;
-            }
             $amt = bccomp((string) $l->total, '0', 2) !== 0 ? (string) $l->total : (string) $l->amount;
             if (bccomp($amt, '0', 2) === 0 || in_array($category((string) $l->description), self::OVERHEAD_MATERIALS, true)) {
                 continue;
             }
-            $total = bcadd($total, $amt, 2);
+            $out[] = [$l->date, $amt];
         }
 
-        return $total;
+        return $out;
     }
 
     /**
      * Legacy sumPayrollLedgerColumns: the accruals of the period by the kinds of their details; an accrual without details is
      * «Оклад».
      *
+     * @param  Collection<int, object>  $accruals
      * @return array<string, string>
      */
-    private function ledger(callable $in): array
+    private function ledger(Collection $accruals, callable $in): array
     {
         $res = ['sdelnaya' => '0', 'oklad' => '0', 'premiya' => '0', 'otpusk' => '0', 'bolnichn' => '0', 'zaim' => '0'];
-        foreach (DB::table('salary_accruals')->where('type', 'salary')->get(['accrual_date', 'amount', 'details']) as $a) {
+        foreach ($accruals as $a) {
             if (! $in($a->accrual_date)) {
                 continue;
             }

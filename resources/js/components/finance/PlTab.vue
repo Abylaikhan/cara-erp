@@ -1,11 +1,13 @@
 <script setup lang="ts">
 // Tab «📊 P&L» of «Финансы» — legacy finance-pl (L5495–5575), renderPL/buildPL (L26064–26330, L27527–27606). The KPI row, the
-// statement «Отчёт о прибылях и убытках» with the source of each line, and «Постоянные затраты / мес», for the period of the page;
-// the server counts them (ADR-0052). The monthly statement, revenue by channel and category, expenses by article, the revenue
-// tree and the cost estimate by category come next — their cards say so (ADR-0002, item 126).
+// statement «Отчёт о прибылях и убытках» with the source of each line, «Постоянные затраты / мес» for the period of the page, and
+// the statement month by month of a year (renderMonthlyPL/exportMonthlyPLExcel); the server counts them (ADR-0052). Revenue by
+// channel and category, expenses by article, the revenue tree and the cost estimate by category come next — their cards say so
+// (ADR-0002, item 126).
 import { router } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 import { fmtCurrency } from '@/lib/sales';
+import { downloadXlsx } from '@/lib/xlsx';
 
 export interface PlData {
     from: string | null;
@@ -30,7 +32,12 @@ export interface PlData {
     payrollLedgerSdelnaya: number;
     payrollLedgerAup: number;
 }
-const props = defineProps<{ data: PlData | undefined; from: string | null; to: string | null; active: boolean }>();
+export interface PlMonthly {
+    year: string;
+    years: string[];
+    months: (PlData | null)[];
+}
+const props = defineProps<{ data: PlData | undefined; monthly: PlMonthly | undefined; from: string | null; to: string | null; active: boolean }>();
 
 // The statement of the period of the page: loaded when the tab is shown and again when the period changes.
 watch(
@@ -39,6 +46,13 @@ watch(
         if (!active) return;
         if (props.data && props.data.from === from && props.data.to === to) return;
         router.reload({ only: ['pl'], data: { pl_from: from ?? '', pl_to: to ?? '' } });
+    },
+    { immediate: true },
+);
+watch(
+    () => props.active,
+    (active) => {
+        if (active && props.monthly === undefined) router.reload({ only: ['plMonthly'] });
     },
     { immediate: true },
 );
@@ -92,11 +106,46 @@ const rows = computed<Row[]>(() => {
         { label: '= EBIT (операционная прибыль)', value: p.ebit, bold: true, sep: true, big: true },
     ];
 });
+// ── Помесячно (legacy renderMonthlyPL): the lines of the statement for each month; a month to come is «—» ──
+const MONTHS = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+const LINES: { key: keyof PlData; label: string; sign: number; bold?: boolean; sep?: boolean }[] = [
+    { key: 'revenue', label: '📦 Выручка от продаж', sign: 1, bold: true },
+    { key: 'materialCost', label: '  − Прямые материалы', sign: -1 },
+    { key: 'wageCost', label: '  − Зарплата сдельная', sign: -1 },
+    { key: 'oprCost', label: '  − ОПР', sign: -1 },
+    { key: 'grossMargin', label: '= Маржинальная прибыль', sign: 1, bold: true, sep: true },
+    { key: 'aupSalary', label: '  − Оклады АУП (с налогами)', sign: -1 },
+    { key: 'prodTaxes', label: '  − Налоги на сдельщиков', sign: -1 },
+    { key: 'commercialCost', label: '  − Коммерческие расходы', sign: -1 },
+    { key: 'otherFixed', label: '  − Аренда, ком. услуги, прочее', sign: -1 },
+    { key: 'ebit', label: '= EBIT (операционная прибыль)', sign: 1, bold: true, sep: true },
+];
+const monthlyRows = computed(() =>
+    LINES.map((ln) => {
+        const monthly = (props.monthly?.months ?? []).map((m) => (m === null ? null : ln.sign * (Number(m[ln.key]) || 0)));
+        return { ...ln, monthly, total: monthly.reduce<number>((s, v) => s + (v || 0), 0) };
+    }),
+);
+const fmt2 = (n: number | null) => (n ? '₸' + Math.round(n).toLocaleString('ru-RU') : '—');
+function setMonthlyYear(year: string): void {
+    router.reload({ only: ['plMonthly'], data: { pl_year: year } });
+}
+// Legacy exportMonthlyPLExcel: a month to come is 0 in the file
+function exportMonthlyPLExcel(): void {
+    const year = props.monthly?.year;
+    if (!year) return void window.alert('Нет данных для выгрузки.');
+    const rows: (string | number)[][] = [
+        ['Отчёт о прибылях и убытках помесячно — ' + year],
+        [],
+        ['Статья', ...MONTHS, 'Итого за год'],
+        ...monthlyRows.value.map((r) => [r.label, ...r.monthly.map((v) => Math.round(v ?? 0)), Math.round(r.monthly.reduce<number>((s, v) => s + (v ?? 0), 0))]),
+    ];
+    void downloadXlsx('finance', `PromTech_PnL_pomesyachno_${year}.xlsx`, [{ name: String(year), rows, cols: [32, ...Array(12).fill(12), 14] }]);
+}
 const cell = (r: Row) => (r.bold ? 'font-weight:700' : '') + (r.big ? ';font-size:14px' : '');
 const LATER = 'Появится следующим шагом переноса P&L (ERP-060, ответ бухгалтера № 36).';
 const later = () => window.alert(LATER);
 const SUBREPORTS = [
-    { title: 'Отчёт о прибылях и убытках — помесячно', select: 'pl-monthly-year', body: 'pl-monthly' },
     { title: 'Выручка по направлениям', select: 'pl-rev-channel-year', body: 'pl-rev-by-channel' },
     { title: 'Выручка по категориям продукции', select: 'pl-rev-category-year', body: 'pl-rev-by-category' },
     { title: 'Расходы по категориям и статьям', select: 'pl-exp-year', body: 'pl-exp-by-month' },
@@ -137,6 +186,46 @@ const SUBREPORTS = [
                             </td>
                             <td style="text-align: right; font-size: 11px; color: var(--accent); padding: 6px 4px">{{ pct(Math.abs(r.value)) }}</td>
                             <td style="font-size: 11px; color: var(--text3); padding: 6px 4px">{{ r.note || '' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card" style="grid-column: 1/3">
+            <div class="card-header">
+                <span class="card-title">Отчёт о прибылях и убытках — помесячно</span>
+                <div style="display: flex; gap: 6px; align-items: center">
+                    <select
+                        id="pl-monthly-year"
+                        :value="props.monthly?.year"
+                        style="font-size: 12px; width: auto"
+                        @change="setMonthlyYear(($event.target as HTMLSelectElement).value)"
+                    >
+                        <option v-for="y in props.monthly?.years ?? []" :key="y" :value="y">{{ y }}</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" @click="exportMonthlyPLExcel">📥 Excel</button>
+                </div>
+            </div>
+            <div id="pl-monthly" style="overflow-x: auto">
+                <table v-if="props.monthly" class="data-table" style="font-size: 11px; white-space: nowrap">
+                    <thead>
+                        <tr>
+                            <th>Статья</th>
+                            <th v-for="m in MONTHS" :key="m" style="text-align: right">{{ m }}</th>
+                            <th style="text-align: right; color: var(--accent)">Итого за год</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="r in monthlyRows" :key="r.key" :style="(r.bold ? 'font-weight:700;' : '') + (r.sep ? 'border-top:2px solid var(--border);' : '')">
+                            <td>{{ r.label }}</td>
+                            <td
+                                v-for="(v, i) in r.monthly"
+                                :key="i"
+                                :style="`text-align:right;font-family:'IBM Plex Mono',monospace;color:${v !== null && v < 0 ? 'var(--red)' : r.bold ? 'var(--green)' : 'inherit'}`"
+                            >
+                                {{ fmt2(v) }}
+                            </td>
+                            <td style="text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 700; color: var(--accent)">{{ fmt2(r.total) }}</td>
                         </tr>
                     </tbody>
                 </table>

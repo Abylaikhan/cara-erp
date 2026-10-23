@@ -58,6 +58,8 @@ class FinanceController extends Controller
             'transactions' => Inertia::optional(fn () => $this->transactions()),
             // «📊 P&L» for the period of the page (ADR-0052): asked again when the period changes
             'pl' => Inertia::optional(fn () => $this->pl($request)),
+            // «Отчёт о прибылях и убытках — помесячно» of a year (legacy renderMonthlyPL)
+            'plMonthly' => Inertia::optional(fn () => $this->plMonthly($request)),
             // Tab «Закупки» (legacy renderPurchasesDash, openSupplierReconciliation): incoming invoices, payments with a
             // counterparty (in tenge), suppliers and the supplier lines of the advance reports; sent when the tab is opened.
             'purchases' => Inertia::optional(fn () => $this->purchases()),
@@ -73,6 +75,19 @@ class FinanceController extends Controller
         $to = $date('pl_to');
 
         return ['from' => $from, 'to' => $to, ...app(PlReport::class)->build($from, $to)];
+    }
+
+    /** @return array<string, mixed> */
+    private function plMonthly(Request $request): array
+    {
+        $report = app(PlReport::class);
+        $years = $report->years();
+        $today = now(config('erp.business_timezone'));
+        $asked = is_string($y = $request->query('pl_year')) ? $y : '';
+        // legacy: the year chosen before, else the current year, else the newest with realizations
+        $year = in_array($asked, $years, true) ? $asked : (in_array($today->format('Y'), $years, true) ? $today->format('Y') : ($years[0] ?? $today->format('Y')));
+
+        return ['year' => $year, 'years' => $years ?: [$today->format('Y')], 'months' => $report->monthly($year, $today->format('Y-m'))];
     }
 
     private function purchases(): array
