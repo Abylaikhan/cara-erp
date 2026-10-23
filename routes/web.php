@@ -28,6 +28,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SalonCashController;
 use App\Http\Controllers\SalonReportController;
 use App\Http\Controllers\SalonWorksheetController;
+use App\Http\Controllers\StaffStructureController;
 use App\Http\Controllers\StockDocumentController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserAccountController;
@@ -146,6 +147,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/hr', [HrController::class, 'index'])->middleware('page:hr')->name('hr.index');
     // «Сотрудники» → «Пользователи» (D-13): учётные записи — директор и HR
     Route::post('/hr/users', [UserAccountController::class, 'store'])->middleware('page:hr')->name('hr.users.store');
+    Route::middleware('page:hr')->prefix('hr/structure')->name('hr.structure.')->controller(StaffStructureController::class)->group(function () {
+        Route::post('/departments', 'storeDepartment')->name('departments.store');
+        Route::put('/departments/{department}', 'updateDepartment')->whereNumber('department')->name('departments.update');
+        Route::post('/positions', 'storePosition')->name('positions.store');
+        Route::put('/positions/{position}', 'updatePosition')->whereNumber('position')->name('positions.update');
+    });
     Route::put('/hr/users/{user}', [UserAccountController::class, 'update'])->whereNumber('user')->middleware('page:hr')->name('hr.users.update');
     Route::patch('/hr/users/{user}/active', [UserAccountController::class, 'active'])->whereNumber('user')->middleware('page:hr')->name('hr.users.active');
 

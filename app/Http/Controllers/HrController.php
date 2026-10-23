@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\EmployeeChange;
 use App\Models\EmployeeSalaryHistory;
+use App\Models\StaffDepartment;
+use App\Models\StaffPosition;
 use App\Models\User;
 use App\Services\UserAccountService;
 use App\Support\Erp;
@@ -61,6 +63,13 @@ class HrController extends Controller
             'canSeeCommissions' => $canSeeCommissions,
             'canDismiss' => in_array($user->role, ['director', 'hr'], true) || $salonManager,
             'canOpenPayroll' => Erp::canAccess($user, 'payroll'),
+            // «Штатное расписание» (ADR-0051): the directory, for those who see the tab
+            'canEditStructure' => ! $salonManager,
+            'staffDepts' => $salonManager ? [] : StaffDepartment::query()->orderBy('sort_order')->orderBy('id')->get()
+                ->map(fn (StaffDepartment $d) => ['id' => $d->id, 'name' => $d->name, 'icon' => $d->icon, 'lock_version' => $d->lock_version])->values(),
+            'staffPositions' => $salonManager ? [] : StaffPosition::query()->orderBy('sort_order')->orderBy('id')->get()
+                ->map(fn (StaffPosition $p) => ['id' => $p->id, 'deptId' => $p->department_id, 'title' => $p->title, 'grade' => $p->grade, 'salaryMin' => $p->salary_min,
+                    'salaryMax' => $p->salary_max, 'slots' => $p->slots, 'wageType' => $p->wage_type, 'lock_version' => $p->lock_version])->values(),
             'employees' => $shown->map(fn (Employee $e) => [
                 'id' => $e->uuid,
                 'name' => $e->name,

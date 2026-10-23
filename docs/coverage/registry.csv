@@ -1807,8 +1807,8 @@ control,page-hr|L7244,div,page-hr,7244,M17 Сотрудники,IMPLEMENTED,labe
 control,page-hr|L7245,div,page-hr,7245,M17 Сотрудники,IMPLEMENTED,label,⚙️ Тарифы
 control,page-hr|div|hr-tab-salon-commissions,div,page-hr,7246,M17 Сотрудники,IMPLEMENTED,id,💰 Комиссии салонов
 control,page-hr|div|hr-tab-users-btn,div,page-hr,7247,M17 Сотрудники,IMPLEMENTED,id,🔐 Пользователи
-control,page-hr|L7255,button,page-hr,7255,M17 Сотрудники,NOT_STARTED,"present, its action comes later — openStaffPositionModal: ERP-053 (D-13)",+ Должность
-control,page-hr|L7256,button,page-hr,7256,M17 Сотрудники,NOT_STARTED,"present, its action comes later — openStaffDeptModal: ERP-053 (D-13)",+ Подразделение
+control,page-hr|L7255,button,page-hr,7255,M17 Сотрудники,IMPLEMENTED,label,+ Должность
+control,page-hr|L7256,button,page-hr,7256,M17 Сотрудники,IMPLEMENTED,label,+ Подразделение
 control,page-hr|input|hr-staff-search,input,page-hr,7264,M17 Сотрудники,IMPLEMENTED,id,
 control,page-hr|select|hr-staff-dept,select,page-hr,7266,M17 Сотрудники,IMPLEMENTED,id,Все подразделения Производство АУП
 control,page-hr|L7267,option,page-hr,7267,M17 Сотрудники,IMPLEMENTED,label,Все подразделения
@@ -2863,8 +2863,8 @@ function,renderHRKPIs#1,,,21627,M17 Сотрудники,IMPLEMENTED,requirement
 function,setHRView#1,,,21679,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
 function,renderOrgChart#1,,,21691,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
 function,occupiedSlots#1,,,21696,M17 Сотрудники,IMPLEMENTED,named in resources/js/pages/Hr.vue,
-function,openStaffDeptModal#1,,,21777,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
-function,openStaffPositionModal#1,,,21790,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
+function,openStaffDeptModal#1,,,21777,M17 Сотрудники,IMPLEMENTED,requirement M17.STRUCTURE,
+function,openStaffPositionModal#1,,,21790,M17 Сотрудники,IMPLEMENTED,requirement M17.STRUCTURE,
 function,showHRTab#1,,,21835,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
 function,loadAppUsers#1,,,21878,—,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
 function,usrEsc#1,,,21892,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,

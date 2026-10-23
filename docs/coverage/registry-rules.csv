@@ -212,8 +212,6 @@ function,curYM,NOT_STARTED,ERP-054 (D-06),Явки месяца по табел�
 function,deleteTariffRow,NOT_STARTED,ERP-055 (D-06),Изменение тарифов (ADR-0038)
 function,renderWageEmployees,DECIDED,ADR-0002 п. 120,Сдельная выработка вкладки «Сотрудники» — вкладка убрана (№ 77)
 function,deleteWageEmployeeRow,DECIDED,ADR-0002 п. 120,Сдельная выработка вкладки «Сотрудники» — вкладка убрана (№ 77)
-function,openStaffDeptModal,NOT_STARTED,ERP-053 (D-13),Изменение штатного расписания
-function,openStaffPositionModal,NOT_STARTED,ERP-053 (D-13),Изменение штатного расписания
 function,usrEmployeeByName,NOT_STARTED,ERP-011 (D-13),Пользователи
 function,saveStaffFieldDirect,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: правка оклада и процента
 function,saveStaffField,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: правка оклада и процента

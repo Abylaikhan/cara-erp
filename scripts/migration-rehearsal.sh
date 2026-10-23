@@ -25,7 +25,7 @@ while [ $# -gt 0 ]; do
 done
 
 # The order of legacy:import (its IMPORTERS list): each importer finds what it refers to through legacy_id_map.
-ENTITIES="app_users expense_categories products customers suppliers warehouse material_aliases incoming_invoices leads tasks material_requests orders realizations production_progress money projects salon_worksheet bank_statements staff salary_accruals wage_items salon_payroll sales_worksheet production_worksheet"
+ENTITIES="app_users expense_categories products customers suppliers warehouse material_aliases incoming_invoices leads tasks material_requests orders realizations production_progress money projects salon_worksheet bank_statements staff staff_structure salary_accruals wage_items salon_payroll sales_worksheet production_worksheet"
 
 dc up -d --wait db app >/dev/null
 user="$(dc exec -T db printenv POSTGRES_USER | tr -d '\r')"

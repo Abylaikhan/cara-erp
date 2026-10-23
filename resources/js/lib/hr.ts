@@ -1,39 +1,25 @@
-// M17 «Сотрудники» — what the page of legacy keeps in its own code (L21647–21676, L27867): the staffing table (departments and
-// positions with their salary range and number of posts) and the kinds of activity («цеха») of an employee.
+// M17 «Сотрудники» — what the page of legacy keeps in its own code (L21647–21676, L27867): the kinds of activity («цеха») of an
+// employee. The staffing table (departments and positions) is a directory on the server since № 76 (ADR-0051).
 
-export const STAFF_DEPTS = [
-    { id: 'dept_prod', name: 'Производство', icon: '🏭' },
-    { id: 'dept_aup', name: 'Административно-управленческий персонал (АУП)', icon: '🏢' },
-    { id: 'dept_sales', name: 'Отдел продаж', icon: '📊' },
-    { id: 'dept_store', name: 'Склад', icon: '📦' },
-];
-
+/** A department of the staffing table (legacy staffDepts; a directory since № 76 — ADR-0051). */
+export interface StaffDept {
+    id: number;
+    name: string;
+    icon: string;
+    lock_version: number;
+}
+/** A position of the staffing table (legacy staffPositions). */
 export interface StaffPosition {
     id: number;
-    deptId: string;
+    deptId: number;
     title: string;
     grade: string;
     salaryMin: number;
     salaryMax: number;
     slots: number;
     wageType: 'salary' | 'piecework';
+    lock_version: number;
 }
-export const STAFF_POSITIONS: StaffPosition[] = [
-    { id: 1, deptId: 'dept_prod', title: 'Директор производства', grade: 'АУП', salaryMin: 300000, salaryMax: 400000, slots: 1, wageType: 'salary' },
-    { id: 2, deptId: 'dept_prod', title: 'Начальник цеха', grade: 'АУП', salaryMin: 200000, salaryMax: 250000, slots: 1, wageType: 'salary' },
-    { id: 3, deptId: 'dept_prod', title: 'Столяр 5 разряд', grade: '5р', salaryMin: 0, salaryMax: 0, slots: 2, wageType: 'piecework' },
-    { id: 4, deptId: 'dept_prod', title: 'Столяр 4 разряд', grade: '4р', salaryMin: 0, salaryMax: 0, slots: 3, wageType: 'piecework' },
-    { id: 5, deptId: 'dept_prod', title: 'Сборщик 5 разряд', grade: '5р', salaryMin: 0, salaryMax: 0, slots: 2, wageType: 'piecework' },
-    { id: 6, deptId: 'dept_prod', title: 'Сборщик 4 разряд', grade: '4р', salaryMin: 0, salaryMax: 0, slots: 2, wageType: 'piecework' },
-    { id: 7, deptId: 'dept_prod', title: 'Обивщик 5 разряд', grade: '5р', salaryMin: 0, salaryMax: 0, slots: 1, wageType: 'piecework' },
-    { id: 8, deptId: 'dept_prod', title: 'Маляр 4 разряд', grade: '4р', salaryMin: 0, salaryMax: 0, slots: 1, wageType: 'piecework' },
-    { id: 9, deptId: 'dept_aup', title: 'Директор', grade: 'АУП', salaryMin: 350000, salaryMax: 350000, slots: 1, wageType: 'salary' },
-    { id: 10, deptId: 'dept_aup', title: 'Главный бухгалтер', grade: 'АУП', salaryMin: 180000, salaryMax: 220000, slots: 1, wageType: 'salary' },
-    { id: 11, deptId: 'dept_aup', title: 'Бухгалтер', grade: 'АУП', salaryMin: 130000, salaryMax: 160000, slots: 1, wageType: 'salary' },
-    { id: 12, deptId: 'dept_sales', title: 'Руководитель продаж', grade: 'АУП', salaryMin: 200000, salaryMax: 250000, slots: 1, wageType: 'salary' },
-    { id: 13, deptId: 'dept_sales', title: 'Менеджер по продажам', grade: 'ИТР', salaryMin: 120000, salaryMax: 150000, slots: 2, wageType: 'salary' },
-    { id: 14, deptId: 'dept_store', title: 'Кладовщик', grade: 'ИТР', salaryMin: 100000, salaryMax: 130000, slots: 1, wageType: 'salary' },
-];
 
 export const WORKSHOPS = [
     { id: 'act_chair', name: 'Стул', icon: '🪑' },

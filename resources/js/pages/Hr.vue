@@ -11,7 +11,7 @@ import ErpModal from '@/components/ErpModal.vue';
 import SalonCommissionsTab from '@/components/hr/SalonCommissionsTab.vue';
 import UsersTab, { type Account } from '@/components/hr/UsersTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
-import { initials, STAFF_DEPTS, STAFF_POSITIONS, TARIFFS, WORKSHOPS, type Employee } from '@/lib/hr';
+import { initials, TARIFFS, WORKSHOPS, type Employee, type StaffDept, type StaffPosition } from '@/lib/hr';
 
 const props = defineProps<{
     today: string;
@@ -22,6 +22,9 @@ const props = defineProps<{
     canSeeCommissions: boolean;
     canDismiss: boolean;
     canOpenPayroll: boolean;
+    canEditStructure: boolean;
+    staffDepts: StaffDept[];
+    staffPositions: StaffPosition[];
     employees: Employee[];
     accounts: Account[];
     roleTemplates: Record<string, { label: string; channel: string; pages: string[] }>;
@@ -30,7 +33,6 @@ const props = defineProps<{
 const LATER = {
     save: 'Изменение карточки, приём и увольнение сотрудника появятся вместе с решением о пользователях и правилами расчёта зарплаты (ERP-053, ERP-054, решения D-13 и D-06).',
     pin: 'PIN-коды выдаются заново вместе с кабинетом сотрудника (ERP-058, решение D-13); из legacy они не переносятся.',
-    structure: 'Изменение штатного расписания появится вместе с разделом «Сотрудники» (ERP-053, решение D-13).',
     tariffs: 'Изменение тарифов появится вместе со сдельной оплатой (ERP-055, решение D-06).',
 };
 const later = (text: string) => window.alert(text);
@@ -67,14 +69,34 @@ const kpi = computed(() => props.counts);
 // ── Штатное расписание (legacy renderOrgChart, occupiedSlots; «Тарифы» — renderTariffs): occupied posts by the exact title of the position ──
 const occupied = (title: string) => props.employees.filter((e) => e.pos === title);
 const orgchart = computed(() =>
-    STAFF_DEPTS.map((dept) => {
-        const positions = STAFF_POSITIONS.filter((p) => p.deptId === dept.id).map((p) => ({ ...p, occ: occupied(p.title) }));
+    props.staffDepts.map((dept) => {
+        const positions = props.staffPositions.filter((p) => p.deptId === dept.id).map((p) => ({ ...p, occ: occupied(p.title) }));
         const totalSlots = positions.reduce((s, p) => s + p.slots, 0);
         const totalOccupied = positions.reduce((s, p) => s + p.occ.length, 0);
         return { dept, positions, totalSlots, totalOccupied, totalVacant: totalSlots - totalOccupied, fotMin: positions.reduce((s, p) => s + p.salaryMin * p.slots, 0) };
     }).filter((d) => d.positions.length),
 );
 const ru = (n: number) => n.toLocaleString('ru-RU');
+// Legacy openStaffDeptModal / openStaffPositionModal: the same prompts; the server saves (№ 76 — ADR-0051).
+const structureOptions = { preserveScroll: true, preserveState: true, onError: (e: Record<string, string>) => window.alert(Object.values(e)[0] || 'Ошибка') };
+function openStaffDeptModal(dept: StaffDept | null): void {
+    const name = window.prompt('Название подразделения:', dept?.name || '');
+    if (!name) return;
+    const icon = window.prompt('Иконка:', dept?.icon || '🏢');
+    const data = { name, icon: icon || '🏢', lock_version: dept?.lock_version ?? 0 };
+    if (dept) router.put(`/hr/structure/departments/${dept.id}`, data, structureOptions);
+    else router.post('/hr/structure/departments', data, structureOptions);
+}
+function openStaffPositionModal(pos: StaffPosition | null): void {
+    const title = window.prompt(`Должность${pos ? ' (редактирование)' : ''}:\n\nВведите название:`, pos?.title || '');
+    if (title === null) return;
+    const slots = parseInt(window.prompt('Количество ставок:', String(pos?.slots || 1)) ?? '') || 1;
+    const salaryMin = parseInt(window.prompt('Оклад минимальный (0 для сдельной):', String(pos?.salaryMin || 0)) ?? '') || 0;
+    const salaryMax = parseInt(window.prompt('Оклад максимальный:', String(pos?.salaryMax || salaryMin)) ?? '') || salaryMin;
+    const data = { title, slots, salary_min: salaryMin, salary_max: salaryMax, lock_version: pos?.lock_version ?? 0 };
+    if (pos) router.put(`/hr/structure/positions/${pos.id}`, data, structureOptions);
+    else router.post('/hr/structure/positions', data, structureOptions);
+}
 
 // ── Сотрудники (legacy renderHRStaff, setHRView) ──
 const f = reactive({ search: '', dept: 'all' });
@@ -218,8 +240,8 @@ function openStaffChangesHistory(): void {
                 <div style="display: flex; gap: 10px; margin-bottom: 14px; align-items: center">
                     <span style="font-size: 13px; color: var(--text2)">Структура компании: подразделения, должности, ставки</span>
                     <div style="flex: 1"></div>
-                    <button class="btn btn-ghost btn-sm" @click="later(LATER.structure)">+ Должность</button>
-                    <button class="btn btn-ghost btn-sm" @click="later(LATER.structure)">+ Подразделение</button>
+                    <button class="btn btn-ghost btn-sm" @click="openStaffPositionModal(null)">+ Должность</button>
+                    <button class="btn btn-ghost btn-sm" @click="openStaffDeptModal(null)">+ Подразделение</button>
                 </div>
                 <div id="hr-orgchart-body">
                     <div v-for="d in orgchart" :key="d.dept.id" class="card" style="margin-bottom: 16px; padding: 0; overflow: hidden">
@@ -239,7 +261,7 @@ function openStaffChangesHistory(): void {
                                 <div style="color: var(--text3)">ФОТ (мин)</div>
                                 <div style="font-weight: 600">₸{{ ru(d.fotMin) }}</div>
                             </div>
-                            <button class="btn btn-ghost btn-sm" style="font-size: 11px" @click="later(LATER.structure)">✏️</button>
+                            <button class="btn btn-ghost btn-sm" style="font-size: 11px" @click="openStaffDeptModal(d.dept)">✏️</button>
                         </div>
                         <table class="data-table" style="margin: 0">
                             <thead>
@@ -301,7 +323,7 @@ function openStaffChangesHistory(): void {
                                         <span v-else style="color: var(--text3); font-size: 11px">— вакансия —</span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-ghost btn-sm" style="font-size: 11px" @click="later(LATER.structure)">✏️</button>
+                                        <button class="btn btn-ghost btn-sm" style="font-size: 11px" @click="openStaffPositionModal(p)">✏️</button>
                                     </td>
                                 </tr>
                             </tbody>

@@ -1433,11 +1433,16 @@ with sync_playwright() as p:
         print(f'payroll ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'строки', 'итоги', 'выдачи'), target_pr + [target_po], legacy_pr + [legacy_po])))
         # «Сотрудники»: legacy gets the staff the target renders (as loadStaffFromDB keeps it); its demonstration lists of piece
         # work and of the payroll (wageEmployees, payrollStaff) are emptied — the target does not show them (ADR-0036). Legacy
-        # draws the staffing table only when its tab is clicked: it is clicked (ADR-0002). Its tabs «Сдельная выработка» and
+        # draws the staffing table only when its tab is clicked: it is clicked (ADR-0002); its departments and positions are the
+        # target's. Its tabs «Сдельная выработка» and
         # «Зарплатная ведомость» are left out by the customer's answer (№ 77, ADR-0002, item 120).
         page.evaluate("""(r) => {
             employeesData = r.employees.map(e => ({...e, initials: e.name.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(), color: 'rgba(79,142,247,.15)', tc: 'var(--accent)'}));
             wageEmployees = []; payrollStaff = [];
+            // the staffing table of the target (a directory since № 76, ADR-0051)
+            staffDepts = (r.staffDepts || []).map(d => ({id: String(d.id), name: d.name, icon: d.icon}));
+            staffPositions = (r.staffPositions || []).map(p => ({id: p.id, deptId: String(p.deptId), title: p.title, grade: p.grade, salaryMin: p.salaryMin,
+                salaryMax: p.salaryMax, slots: p.slots, wageType: p.wageType}));
             document.querySelectorAll("#page-hr .tabs .tab[onclick*=\\"'wage'\\"], #page-hr .tabs .tab[onclick*=\\"'payroll'\\"]").forEach(t => t.remove());
             showPage('hr', document.querySelector(".nav-item[onclick*=\\"showPage('hr'\\"]"));
         }""", hr)
