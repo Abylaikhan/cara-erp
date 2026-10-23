@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261023T150935Z-5d85",
-    "started_at": "2026-10-23T15:09:35Z",
+    "run_id": "20261023T152607Z-0d4f",
+    "started_at": "2026-10-23T15:26:07Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-23T15:11:07Z",
+    "finished_at": "2026-10-23T15:27:41Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "450fc0cc807d4460d70b8bb14ed165ef47754e56",
-    "at": "2026-10-23T15:09:35Z"
+    "target_ref": "d4351eef1b0aae336694057110f5445a34bc7995",
+    "at": "2026-10-23T15:26:07Z"
   },
   "last_reported": {
-    "run_id": "20261023T150935Z-5d85",
+    "run_id": "20261023T152607Z-0d4f",
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
     "source_blob": "8777f7bbfbf1e409ab285f4b3c0968056418d78a",
-    "target_ref": "450fc0cc807d4460d70b8bb14ed165ef47754e56",
-    "logical_key": "7987f7de79ba6ab7",
+    "target_ref": "d4351eef1b0aae336694057110f5445a34bc7995",
+    "logical_key": "bfd61982ba5d2351",
     "local_date": "2026-10-23",
-    "completed_at": "2026-10-23T15:11:07Z",
-    "report": "daily/2026-10-23/20261023T150935Z-5d85.md",
-    "artifact_sha256": "0aad2f654b70e7b26205d185493f7b3d49fedd8e7243adbcd13634f47c038edf",
+    "completed_at": "2026-10-23T15:27:41Z",
+    "report": "daily/2026-10-23/20261023T152607Z-0d4f.md",
+    "artifact_sha256": "a32fd6873ca9f34ec29f4365cd35feeafad6db51b7b1458a47240f6236ee03bc",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -215,6 +215,9 @@
       "Tests\\Feature\\Hr\\HrPageTest::test_the_head_of_the_salons_gets_the_salons_people_and_the_full_counts",
       "Tests\\Feature\\Hr\\HrPageTest::test_the_payroll_button_opens_the_page_only_for_those_who_may_open_it",
       "Tests\\Feature\\Hr\\HrPageTest::test_the_staff_with_counts_and_history",
+      "Tests\\Feature\\Hr\\StaffStructureTest::test_departments_and_positions_are_saved_as_legacy_asks_for_them",
+      "Tests\\Feature\\Hr\\StaffStructureTest::test_the_head_of_the_salons_neither_sees_nor_changes_the_structure",
+      "Tests\\Feature\\Hr\\StaffStructureTest::test_the_structure_is_carried_over_from_the_code_of_legacy_and_what_was_changed_here_stays",
       "Tests\\Feature\\Hr\\UserAccountTest::test_a_new_account_signs_in_with_its_pages_and_channel",
       "Tests\\Feature\\Hr\\UserAccountTest::test_blocking_follows_legacy_and_ends_access",
       "Tests\\Feature\\Hr\\UserAccountTest::test_editing_keeps_the_pages_the_form_does_not_offer_and_changes_the_password_only_when_typed",
@@ -392,15 +395,15 @@
   },
   "last_verified": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "450fc0cc807d4460d70b8bb14ed165ef47754e56",
+    "target_ref": "d4351eef1b0aae336694057110f5445a34bc7995",
     "required_suite_version": "suite-1+364b9b",
-    "completed_at": "2026-10-23T15:11:07Z",
-    "run_id": "20261023T150935Z-5d85"
+    "completed_at": "2026-10-23T15:27:41Z",
+    "run_id": "20261023T152607Z-0d4f"
   },
   "changelog": {
-    "entries": 62,
-    "last_header": "## 2026-10-23 · 20261023T150935Z-5d85",
-    "sha256": "19516b1838695ce6eee7e4a2e17b556dc6ce2e652a7c510e97efb5326232cb78"
+    "entries": 63,
+    "last_header": "## 2026-10-23 · 20261023T152607Z-0d4f",
+    "sha256": "84d770368215c2570e3952be5ef13c3baa9692e55355e2260586c80c23059680"
   },
   "accepted_source_ref": {
     "commit": "c54cf25639e3398139fa5a07003b035bf5e7090c",

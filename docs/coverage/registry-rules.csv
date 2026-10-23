@@ -217,8 +217,8 @@ function,saveStaffFieldDirect,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии �
 function,saveStaffField,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: правка оклада и процента
 function,renderPayroll,DECIDED,ADR-0002 п. 120,Расчётная ведомость вкладки «Сотрудники» — вкладка убрана (№ 77); налоги не считаются (№ 50)
 function,renderHRPayrollKpi,DECIDED,ADR-0002 п. 120,Расчётная ведомость вкладки «Сотрудники» — вкладка убрана (№ 77); налоги не считаются (№ 50)
-function,renderHRPayrollTable,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
-function,setPayrollMonth,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,renderHRPayrollTable,DECIDED,ADR-0002 п. 120,Расчётная ведомость вкладки «Сотрудники» — вкладка убрана (№ 77); налоги не считаются (№ 50)
+function,setPayrollMonth,DECIDED,ADR-0002 п. 120,Расчётная ведомость вкладки «Сотрудники» — вкладка убрана (№ 77)
 function,openPayrollCard,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
 function,openPayrollEntryModal,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
 function,renderHRPayrollEmployerTaxes,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
@@ -249,3 +249,5 @@ control,whDocModal|L2855,NOT_STARTED,ERP-039 (D-04/D-05),Списание: на 
 control,whDocModal|L2856,NOT_STARTED,ERP-039 (D-04/D-05),Списание: на ОПР
 control,whDocModal|select|whdoc-order,NOT_STARTED,ERP-039 (D-04/D-05),Списание: заказ
 control,page-payroll|input|payroll-search,DECIDED,ADR-0002 п. 99,Поиск фильтрует ведомость; legacy вызывал из него расчёт вкладки «Сотрудники» (renderPayroll) и ничего не фильтровал
+function,generateInvoicePayment,DECIDED,open-questions № 55,«Счёт на оплату» не делается: ответ бухгалтера 23.10 (в legacy — «в разработке»)
+function,generateAct,DECIDED,open-questions № 55,«Акт выполненных работ» не делается: ответ бухгалтера 23.10 (в legacy — «в разработке»)
