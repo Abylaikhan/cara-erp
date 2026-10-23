@@ -25,7 +25,6 @@ class LegacyControlTotals extends Command
 
     /** Legacy tables no importer reads yet, and why. */
     private const NOT_MIGRATED = [
-        'app_users' => 'учётные записи заводятся заново, пароли и PIN не копируются; разделы пользователей — ERP-053, DEC-13',
     ];
 
     public function handle(): int
@@ -230,6 +229,12 @@ class LegacyControlTotals extends Command
             ['M02 Рабочий лист производства', 'production_worksheet',
                 "SELECT coalesce({$almaty("data->>'added_at'")}, '—') p, count(*) n, count(DISTINCT data->>'order_num') orders {$from('production_worksheet')} GROUP BY 1",
                 "SELECT coalesce(to_char(added_at AT TIME ZONE 'Asia/Almaty', 'YYYY-MM'), '—'), count(*), count(DISTINCT order_num) FROM production_worksheet_rows GROUP BY 1"],
+            // D-13: the records of app_users laid over the accounts of the built-in roles (active, with pages of their own).
+            ['Пользователи (D-13)', 'app_users',
+                "SELECT 'записи' p, count(*) n, count(*) FILTER (WHERE (data->>'active')::boolean IS DISTINCT FROM false OR lower(trim(data->>'login')) = 'director') active,
+                    count(*) FILTER (WHERE jsonb_typeof(data->'pages') = 'array' AND jsonb_array_length(data->'pages') > 0) with_pages {$from('app_users')} GROUP BY 1",
+                "SELECT 'записи', count(*), count(*) FILTER (WHERE u.is_active), count(*) FILTER (WHERE u.pages IS NOT NULL) FROM legacy_id_map m JOIN users u ON u.id = m.target_id
+                    WHERE m.source_table = 'app_users' HAVING count(*) > 0", ],
             ['M10 Проекты', 'projects, project_calcs, project_comments, project_files',
                 "SELECT table_name p, count(*) n FROM legacy.rows WHERE snapshot_id = {$s} AND table_name IN ('projects', 'project_calcs', 'project_comments', 'project_files') GROUP BY 1",
                 "SELECT 'projects', count(*) FROM projects HAVING count(*) > 0 UNION ALL SELECT 'project_calcs', count(*) FROM project_calcs HAVING count(*) > 0

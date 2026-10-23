@@ -63,7 +63,7 @@ class LoginTest extends TestCase
     public function test_pin_sign_in_is_not_available_until_employees_are_migrated(): void
     {
         $this->from('/login')->post('/login/pin', ['pin' => '1234'])
-            ->assertSessionHasErrors(['pin' => 'Вход по PIN появится после переноса раздела «Сотрудники»']);
+            ->assertSessionHasErrors(['pin' => 'Вход по PIN появится вместе с кабинетом сотрудника: PIN-коды выдаются заново (ERP-058, решение D-13)']);
         $this->assertGuest();
     }
 

@@ -8,6 +8,7 @@
 import { router } from '@inertiajs/vue3';
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import PosBadge from '@/components/PosBadge.vue';
+import { downloadXlsx, isoToday } from '@/lib/xlsx';
 import { PIECE_WORKSHOPS } from './work';
 
 export interface PwbRow {
@@ -21,6 +22,7 @@ export interface PwbRow {
     shipIso: string | null;
     name: string;
     category: string | null;
+    qty: number;
     chars: string;
     stages: { stage: string; workshop: string; posted: boolean; started: boolean; assignees: string[] }[];
     materials: string[];
@@ -42,7 +44,35 @@ watch(
 const LATER = 'Строки рабочего листа добавляются и удаляются вместе с проведением этапов и списанием материалов (ERP-041…043, решения D-05 и D-06).';
 const later = () => window.alert(LATER);
 const editLater = () => window.alert('Этапы, исполнители и материалы позиции записываются вместе с проведением этапов (ERP-042, решения D-05 и D-06).');
-const exportLater = () => window.alert('Выгрузка рабочего листа в Excel появится вместе с остальными выгрузками (ERP-067).');
+// Legacy exportProdWorksheetExcel (L36004), ADR-0044: every line on the worksheet (not only the filtered ones).
+function exportProdWorksheetExcel(): void {
+    const name = (id: string) => PIECE_WORKSHOPS.find((w) => w.id === id)?.name || id;
+    void downloadXlsx('mrp', `PromTech_Proizvodstvo_${isoToday()}.xlsx`, [
+        {
+            name: 'Рабочий лист',
+            rows: [
+                ['Рабочий лист производства — ' + new Date().toLocaleDateString('ru-RU')],
+                [],
+                ['Ключ (не менять)', 'Заказ', 'Дата заказа', 'Дата отправки', 'Товар', 'Характеристики', 'Кол-во', 'Цех', 'Этапы (текущие)', 'Исполнители', 'Материалы', 'Статус'],
+                ...rows.value.map((r) => [
+                    r.key,
+                    r.num,
+                    r.date || '',
+                    r.ship || '',
+                    '№' + r.pos + ' ' + r.name,
+                    r.chars,
+                    r.qty || 1, // legacy loadOrdersFromDB: qty||1
+                    workshopsOf(r).map(name).join('; '),
+                    r.stages.map((s) => s.stage).join('; '),
+                    execsOf(r).join('; '),
+                    r.materials.map((m) => (m === '?' ? '' : m)).join('; '),
+                    r.completed || r.stages.some((s) => s.posted) ? 'есть проводки' : 'черновик',
+                ]),
+            ],
+            cols: [14, 10, 12, 12, 26, 26, 8, 16, 30, 24, 24, 16],
+        },
+    ]);
+}
 const importLater = () => window.alert('Загрузка рабочего листа из Excel появится вместе с проведением этапов (ERP-041) и выгрузками (ERP-067).');
 
 // Legacy PL_CHANNEL_LABELS (L26448).
@@ -180,7 +210,7 @@ const SHADED = new Set([5, 6, 7]);
         <button class="btn btn-ghost btn-sm" @click="later">+ Заказ</button>
         <span style="flex: 1"></span>
         <button class="btn btn-ghost btn-sm" @click="importLater">📤 Импорт Excel</button>
-        <button class="btn btn-ghost btn-sm" @click="exportLater">📥 Экспорт Excel</button>
+        <button class="btn btn-ghost btn-sm" @click="exportProdWorksheetExcel">📥 Экспорт Excel</button>
         <button class="btn btn-ghost btn-sm" @click="deleteSelected">✕ Удалить отмеченные</button>
         <button class="btn btn-ghost btn-sm" @click="later">🗑 Очистить лист</button>
     </div>

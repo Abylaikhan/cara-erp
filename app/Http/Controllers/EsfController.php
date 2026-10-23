@@ -8,6 +8,8 @@ use App\Models\Material;
 use App\Models\MaterialAlias;
 use App\Models\Warehouse;
 use App\Services\Esf\EsfImportService;
+use App\Services\Esf\EsfReconData;
+use App\Services\Excel\XlsxFromRows;
 use App\Support\Audit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -20,10 +22,14 @@ use Inertia\Response;
 
 /**
  * M05 «Входящие ЭСФ» — legacy page-esf (L3056–3238): initEsfPage, renderEsfList, setEsfType, openEsfDetail,
- * handleEsfXmlFiles/renderEsfXmlImportPreview/confirmEsfXmlImport. «Сверка с оплатами» waits for «Деньги» (ERP-048, D-10).
+ * handleEsfXmlFiles/renderEsfXmlImportPreview/confirmEsfXmlImport. «Сверка с оплатами» is shown (EsfReconData, ADR-0043); saving
+ * links waits for D-10 (ERP-048).
  */
 class EsfController extends Controller
 {
+    /** Legacy exportEsfGoodsToExcel RULES wh_main: hardware, fasteners, tools. */
+    private const MAIN_KEYS = ['шуруп', 'болт', 'гайка', 'винт', 'заглушка', 'шайба', 'корпус', 'minifix', 'tandem', 'blumotion', 'замок', 'направляющ', 'петля', 'ручка', 'фурнитур', 'муфта', 'втулка', 'кабел', 'электр', 'щетки', 'makita', 'инструмент', 'механизм', 'подпятник', 'рамка', 'пакет', 'стрейч', 'пленка'];
+
     private const MAX_FILES = 50;
 
     private const MAX_FILE_KB = 5120;
@@ -52,6 +58,8 @@ class EsfController extends Controller
                     'linked' => (float) ($linked[$i->id] ?? 0),
                 ])->values(),
             'materialWarehouses' => Warehouse::query()->ordered()->where('type', 'material')->get(['code', 'name', 'icon'])->values(),
+            // Tab «Сверка с оплатами» (legacy initEsfRecon): the payments, advance reports and links, loaded with the tab.
+            'recon' => Inertia::optional(fn () => app(EsfReconData::class)->get()),
         ]);
     }
 
@@ -158,5 +166,69 @@ class EsfController extends Controller
         $text = 'Импортировано: '.$result['created'].($result['failed'] ? ', ошибок: '.count($result['failed'])."\n\n".implode("\n", $result['failed']) : '');
 
         return back()->with('dialog', ['type' => 'alert', 'text' => $text]);
+    }
+
+    /**
+     * Legacy exportEsfGoodsToExcel (L12832): every line of the goods invoices with the warehouse its description suggests, and the
+     * list of the warehouses; the user fills in the warehouse. Legacy read the lines in the order of its table; here — by the
+     * time the invoices were loaded, then the line (ADR-0002, item 119). The last column holds the line's id in this system.
+     */
+    public function exportGoods(XlsxFromRows $builder): \Symfony\Component\HttpFoundation\Response
+    {
+        Gate::authorize('viewAny', IncomingInvoice::class);
+        $rules = [
+            'wh_paint' => ['грунт', 'лак', 'краска', 'отвердитель', 'растворитель', 'ral', 'полиуретан', 'патина', 'ведро', 'скотч', 'тара', 'штуцер', 'акрилов'],
+            'wh_fabric' => ['велюр', 'ткань', 'обивочный', 'букле', 'поролон', 'набивка', 'кожа', 'флок'],
+            'wh_plates' => ['фанера', 'лдсп', 'мдф', 'шпон', 'двп', 'плита', 'панель', 'стекло', 'зеркало'],
+            'wh_wood' => ['брус', 'доска', 'рейка', 'пиломатер', 'бревно', 'балка', 'сосна', 'дуб'],
+            'wh_main' => self::MAIN_KEYS,
+        ];
+        $names = ['wh_paint' => '🎨 Склад краски', 'wh_fabric' => '🧵 Склад тканей', 'wh_plates' => '🪵 Склад плитных материалов', 'wh_wood' => '🌲 Склад леса',
+            'wh_main' => '🏭 Основной склад', 'service' => '🔧 Услуга (не на склад)', '' => '❓ Не определён'];
+        $guess = function (?string $desc) use ($rules): string {
+            $d = mb_strtolower((string) $desc);
+            foreach ($rules as $wh => $keys) {
+                foreach ($keys as $k) {
+                    if (str_contains($d, $k)) {
+                        return $wh;
+                    }
+                }
+            }
+
+            return '';
+        };
+        $invoices = IncomingInvoice::query()->where('invoice_type', 'goods')->orderBy('created_at')->orderBy('id')->get(['id', 'date', 'num', 'supplier_name'])->keyBy('id');
+        $items = DB::table('incoming_invoice_items as i')->join('incoming_invoices as v', 'v.id', '=', 'i.invoice_id')->where('v.invoice_type', 'goods')
+            ->orderBy('v.created_at')->orderBy('v.id')->orderBy('i.line_no')->get(['i.id', 'i.invoice_id', 'i.description', 'i.qty', 'i.unit_price', 'i.total']);
+        $num = fn ($v) => $v === null ? 0 : (float) $v;
+        $rows = $items->map(function ($it) use ($invoices, $guess, $names, $num) {
+            $inv = $invoices[$it->invoice_id];
+
+            return [$inv->date?->format('Y-m-d') ?? '', $inv->num ?? '', $inv->supplier_name ?? '', $it->description ?? '', $num($it->qty), $num($it->unit_price), $num($it->total),
+                $names[$guess($it->description)] ?? '❓ Не определён', $it->id];
+        })->all();
+        $bytes = $builder->build([
+            ['name' => 'Товары из ЭСФ', 'rows' => [['Дата', '№ ЭСФ', 'Поставщик', 'Наименование товара', 'Кол-во', 'Цена', 'Сумма', 'СКЛАД (заполните)', 'item_id'], ...$rows],
+                'cols' => [12, 16, 30, 50, 8, 10, 12, 28, 38]],
+            ['name' => 'Склады', 'rows' => [
+                ['ID склада', 'Название', 'Примечание'],
+                ['wh_paint', '🎨 Склад краски', 'Лаки, краски, грунты, растворители'],
+                ['wh_fabric', '🧵 Склад тканей', 'Ткань, велюр, букле, поролон'],
+                ['wh_plates', '🪵 Склад плитных материалов', 'Фанера, МДФ, ЛДСП, ДВП, стекло'],
+                ['wh_wood', '🌲 Склад леса', 'Брус, доска, рейка, пиломатериалы'],
+                ['wh_main', '🏭 Основной склад', 'Фурнитура, крепёж, инструменты'],
+                ['service', '🔧 Услуга (не на склад)', 'Услуги — не заносятся на склад'],
+                ['', '❓ Не определён', 'Нужно заполнить вручную'],
+            ]],
+        ]);
+        Audit::record('export.xlsx', 'page', 'esf', ['filename' => 'ЭСФ_товары_склады.xlsx', 'rows' => count($rows)], request()->user());
+
+        return response($bytes, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"esf_goods.xlsx\"; filename*=UTF-8''".rawurlencode('ЭСФ_товары_склады.xlsx'),
+            'Cache-Control' => 'no-store',
+            'X-Export-Rows' => (string) count($rows),
+            'X-Export-Invoices' => (string) $invoices->count(),
+        ]);
     }
 }

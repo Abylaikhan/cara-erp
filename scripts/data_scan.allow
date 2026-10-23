@@ -5,3 +5,7 @@ ea69fe17051b2d914f8a5fcf5cb9bb722d89ce5a345224e888ec76ea85c10af2  # a word of th
 cb377837061e51a8a2c5bbf5a4df59256f6901ca120dad7e718c0d23ea5f70cc  # a date of the harness's own audit runs (docs/daily, DAILY-CHANGELOG, audit state), also an order item date
 06e45b4dfbddf8fce396407ebb876b0307f800f43cb9104ccad6df07b3bcca0c  # a date of the harness's own audit runs (docs/daily, DAILY-CHANGELOG, audit state), also an order item date
 9a5028763b8b5525e18ac9a5a598a4d9994aa77acdcb1e81aac966d11bfa5a5c  # a date of the harness's own audit runs (docs/daily, DAILY-CHANGELOG, audit state), also an order item date
+5eac617ef9522a25a2476c55f36d2c1be23a5ec57d1f3db6d46645bc4ee83816  # a release date of a package in composer.lock (PhpSpreadsheet, ADR-0044), also a bank statement date
+5596a3f0868988597f892c4b1019d3eaf03be89337d8e1b913933ce92ba1f684  # a release date of a package in composer.lock (PhpSpreadsheet, ADR-0044), also a bank statement date
+5bc56dcf4ed57f743dda41d3834e4c29d6468386b9dfecbe890b9ea862bbf66b  # a release date of a package in composer.lock (PhpSpreadsheet, ADR-0044), also a bank statement date
+4b0098d8cc1ad2943f774f7a18483972e7c432bcea5e06ecf2c077bdae0bba4e  # a release date of a package in composer.lock (PhpSpreadsheet, ADR-0044), also a salon payment date

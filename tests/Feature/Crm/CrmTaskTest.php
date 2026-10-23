@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\CrmTaskService;
 use App\Services\LeadService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -119,5 +120,25 @@ class CrmTaskTest extends TestCase
         $this->put("/crm/tasks/{$task->id}/toggle", ['lock_version' => 1])->assertForbidden();
         $this->delete("/crm/tasks/{$task->id}", ['lock_version' => 1])->assertForbidden();
         $this->assertSame(['open', true, 1], [$task->fresh()->status, $task->fresh()->active, CrmTask::count()]);
+    }
+
+    public function test_the_task_form_offers_the_salon_staff_as_legacy_does(): void
+    {
+        $employee = fn (string $uuid, string $name, string $pos, string $comment) => DB::table('employees')->insert(['uuid' => $uuid, 'name' => $name,
+            'position' => $pos, 'comment' => $comment, 'active' => true, 'created_at' => now(), 'updated_at' => now()]);
+        $employee('dddddddd-dddd-4ddd-8ddd-bbbbbbbbbbb1', 'Яковлев Тест', 'Столяр', '');
+        $employee('dddddddd-dddd-4ddd-8ddd-bbbbbbbbbbb2', 'Борисова Тест', 'Продавец', 'Армада');
+        $employee('dddddddd-dddd-4ddd-8ddd-bbbbbbbbbbb3', 'Алексеев Тест', 'Менеджер по продажам', '');
+        $employee('dddddddd-dddd-4ddd-8ddd-bbbbbbbbbbb4', 'Власова Тест', 'Администратор салона', 'Назарбаева, вечер');
+
+        // legacy fillSellers: position «Менеджер…» or «…салон…», or a salon in the comment; by name
+        $this->actingAs($this->manager)->get('/crm')->assertInertia(fn (Assert $page) => $page->where('taskManagers', [
+            ['name' => 'Алексеев Тест', 'pos' => 'Менеджер по продажам', 'comment' => ''],
+            ['name' => 'Борисова Тест', 'pos' => 'Продавец', 'comment' => 'Армада'],
+            ['name' => 'Власова Тест', 'pos' => 'Администратор салона', 'comment' => 'Назарбаева, вечер'],
+        ]));
+        // no salon staff — the whole staff
+        DB::table('employees')->where('name', '<>', 'Яковлев Тест')->delete();
+        $this->get('/crm')->assertInertia(fn (Assert $page) => $page->where('taskManagers', [['name' => 'Яковлев Тест', 'pos' => 'Столяр', 'comment' => '']]));
     }
 }

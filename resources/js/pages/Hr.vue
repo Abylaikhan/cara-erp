@@ -8,6 +8,7 @@
 import { computed, reactive, ref } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
 import SalonCommissionsTab from '@/components/hr/SalonCommissionsTab.vue';
+import UsersTab, { type Account } from '@/components/hr/UsersTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import { initials, STAFF_DEPTS, STAFF_POSITIONS, TARIFFS, WORKSHOPS, type Employee } from '@/lib/hr';
 
@@ -20,6 +21,8 @@ const props = defineProps<{
     canSeeCommissions: boolean;
     canDismiss: boolean;
     employees: Employee[];
+    accounts: Account[];
+    roleTemplates: Record<string, { label: string; channel: string; pages: string[] }>;
 }>();
 
 const LATER = {
@@ -33,7 +36,6 @@ const TAB_LATER: Record<string, string> = {
     wage: 'Сдельная выработка появится вместе с расчётом сдельной оплаты (ERP-055, решение D-06).',
     payroll: 'Зарплатная ведомость появится вместе с правилами расчёта зарплаты (ERP-057, решение D-06).',
     timesheet: 'Табель появится вместе с правилами расчёта зарплаты (ERP-054, решение D-06).',
-    users: 'Пользователи и права появятся вместе с решением о пользователях и доступе (ERP-011, решение D-13).',
 };
 
 // ── Tabs (legacy showHRTab; the head of the salons sees «Сотрудники» and «Комиссии» only, and starts on «Сотрудники») ──
@@ -469,7 +471,12 @@ function openStaffChangesHistory(): void {
                 <SalonCommissionsTab :employees="props.employees" />
             </div>
 
-            <!-- Остальные вкладки — с правилами зарплаты и пользователями -->
+            <!-- ПОЛЬЗОВАТЕЛИ (D-13, ADR-0046) -->
+            <div id="hr-tab-users" :style="{ display: state.tab === 'users' ? '' : 'none' }">
+                <UsersTab v-if="props.canManageUsers" :accounts="props.accounts" :employees="props.employees" :templates="props.roleTemplates" />
+            </div>
+
+            <!-- Остальные вкладки — с правилами зарплаты -->
             <div v-for="(text, id) in TAB_LATER" :id="'hr-tab-' + id" :key="id" :style="{ display: state.tab === id ? '' : 'none' }">
                 <div class="card">
                     <div style="font-size: 13px; color: var(--text3); line-height: 1.6">{{ text }}</div>

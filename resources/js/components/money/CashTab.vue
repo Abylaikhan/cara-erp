@@ -6,6 +6,7 @@
 import { computed, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
 import ZpReconModal from '@/components/money/ZpReconModal.vue';
+import { downloadXlsx } from '@/lib/xlsx';
 import { accountStats, catLabel, fmt, fmtShort, hasPeriod, inPeriod, LATER, openingOf, type Categories, type MoneyAccount, type MoneyTx } from '@/lib/money';
 
 const props = defineProps<{ accounts: MoneyAccount[]; txs: MoneyTx[]; categories: Categories }>();
@@ -88,6 +89,12 @@ const cpRows = computed(() => {
         });
     return Object.values(by).sort((a, b) => b.out - a.out || a.name.localeCompare(b.name, 'ru'));
 });
+// Legacy exportCashCp (L9820), ADR-0044.
+function exportCashCp(): void {
+    void downloadXlsx('money', 'Касса_свод_по_контрагентам.xlsx', [
+        { name: 'Свод', rows: [['Контрагент', 'Операций', 'Последняя', 'Выдано', 'Возврат/приход'], ...cpRows.value.map((r) => [r.name, r.n, r.last, r.out, r.inc])], cols: [38, 10, 12, 14, 16] },
+    ]);
+}
 const cashName = computed(() => {
     const a = cash.value.find((x) => x.id === cashId.value);
     return a ? `${a.icon || '💵'} ${a.name}` : 'касса';
@@ -295,7 +302,7 @@ const payDiff = computed(() => (pay.tx && pay.res ? (pay.tx.amount || 0) - pay.r
             </table>
         </div>
         <div style="margin-top: 10px; text-align: right">
-            <button class="btn btn-ghost btn-sm" @click="later('Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067).')()">📥 Excel</button>
+            <button class="btn btn-ghost btn-sm" @click="exportCashCp">📥 Excel</button>
         </div>
     </ErpModal>
 

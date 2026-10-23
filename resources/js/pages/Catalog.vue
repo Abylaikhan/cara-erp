@@ -129,8 +129,8 @@ function deleteProduct(): void {
 }
 
 function addProductToOrder(): void {
-    // Legacy opens the new order form here; orders (M09) are not migrated yet.
-    window.alert('Создание заказа появится после переноса раздела «Продажи»');
+    // Legacy opens the new order form here; creating orders waits for the decisions on the saved price and content.
+    window.alert('Создание заказа появится после решений по сохраняемой цене и составу заказа (D-02, D-12).');
 }
 </script>
 

@@ -63,7 +63,7 @@ class LoginController extends Controller
             ]);
         }
         RateLimiter::hit($key, 60);
-        throw ValidationException::withMessages(['pin' => 'Вход по PIN появится после переноса раздела «Сотрудники»']);
+        throw ValidationException::withMessages(['pin' => 'Вход по PIN появится вместе с кабинетом сотрудника: PIN-коды выдаются заново (ERP-058, решение D-13)']);
     }
 
     public function destroy(Request $request): RedirectResponse

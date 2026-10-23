@@ -112,6 +112,92 @@ def settle_scroll(page, limit_ms=4000):
         last = now
 
 
+# Excel exports (ADR-0044): legacy builds the file with SheetJS, which the sandbox does not load; a stand-in records what it was
+# asked to write (sheets, rows, column widths, file name). The target sends the same to /export/xlsx: the request is recorded and
+# answered with nothing. Both are compared value by value.
+XLSX_SHIM = """() => { window.__xlsx = null; window.XLSX = {utils: {aoa_to_sheet: aoa => ({__aoa: aoa}), book_new: () => ({sheets: []}),
+    book_append_sheet: (wb, ws, name) => wb.sheets.push({name, rows: ws.__aoa, cols: (ws['!cols'] || []).map(c => c ? c.wch : null)})},
+    writeFile: (wb, filename) => { window.__xlsx = {filename, sheets: wb.sheets}; }}; }"""
+
+
+def capture_target_exports(page):
+    """Record the export requests of the target page; answer them with an empty file."""
+    sent = []
+    page.route('**/export/xlsx', lambda route: (sent.append(route.request.post_data_json), route.fulfill(status=200, body=b'')))
+    return sent
+
+
+def same_export(target, legacy, skip_rows=(), skip_name=False, unordered_from=None, drop_last_col=False, drop_cols=()):
+    """The same file name and, sheet by sheet, the same name, rows (values as JSON) and widths. Options for documented
+    differences: rows left out (skip_rows), the name, rows compared as a set from a row on, without their last cell or
+    without the columns given (drop_cols, 0-based)."""
+    if not target or not legacy:
+        return not target and not legacy  # nothing to export on both sides («Нет данных для выгрузки.»)
+
+    def norm(sheets):
+        out = []
+        for s in sheets:
+            rows = [[None if v == '' else v for v in r] for i, r in enumerate(s['rows']) if i not in skip_rows]
+            while rows and rows[-1] == []:
+                rows.pop()
+            if drop_last_col:
+                rows = [r[:-1] for r in rows]
+            if drop_cols:
+                rows = [[v for c, v in enumerate(r) if c not in drop_cols] for r in rows]
+            if unordered_from is not None:
+                rows = rows[:unordered_from] + sorted(rows[unordered_from:], key=lambda r: json.dumps(r, ensure_ascii=False, sort_keys=True))
+            out.append({'name': s['name'], 'rows': rows, 'cols': [c for c in (s.get('cols') or [])]})
+        return out
+    return (skip_name or target['filename'] == legacy['filename']) and norm(target['sheets']) == norm(legacy['sheets'])
+
+
+def target_export(page, exports, text='Excel', scope='body'):
+    """Click the visible export button of the target (within a window when given) and return what it sent (None if nothing)."""
+    before = len(exports)
+    page.locator(f'{scope} button:visible', has_text=text).first.click(); page.wait_for_timeout(800)
+    return exports[-1] if len(exports) > before else None
+
+
+def legacy_export(page, call):
+    """Run a legacy export with the SheetJS stand-in (its alerts silenced for the call) and return what it would write."""
+    page.evaluate(XLSX_SHIM)
+    page.evaluate("(c) => { const a = window.alert; window.alert = () => {}; try { (0, eval)(c); } finally { window.alert = a; } }", call)
+    return page.evaluate('window.__xlsx')
+
+
+def export_note(name, theme, target, legacy, **kw):
+    same = same_export(target, legacy, **kw)
+    print(f'excel {name} ({theme}): ' + ('совпадает' if same else 'РАСХОЖДЕНИЕ ' + export_where(target, legacy)))
+    if not same:  # both sides for the analysis, next to the shots (.local-audit, outside Git: real data)
+        (OUT / f'export-{name.replace(" ", "-")}-{theme}.json').write_text(json.dumps({'target': target, 'legacy': legacy}, ensure_ascii=False))
+
+
+def export_where(target, legacy):
+    """Where two exports part — positions and value types only, never the values (the log may be shared)."""
+    if not target or not legacy:
+        return f'(выгрузка: цель {bool(target)}, legacy {bool(legacy)})'
+    out = [] if target['filename'] == legacy['filename'] else ['имя файла']
+    ts, ls = target['sheets'], legacy['sheets']
+    if len(ts) != len(ls):
+        return f'(листов {len(ts)} / {len(ls)})'
+    for si, (t, l) in enumerate(zip(ts, ls)):
+        if t['name'] != l['name']:
+            out.append(f'лист {si + 1}: имя')
+        if (t.get('cols') or []) != (l.get('cols') or []):
+            out.append(f'лист {si + 1}: ширины')
+        tr, lr = t['rows'], l['rows']
+        if len(tr) != len(lr):
+            out.append(f'лист {si + 1}: строк {len(tr)} / {len(lr)}')
+        cells = [(r, c, type(a).__name__, type(b).__name__) for r in range(min(len(tr), len(lr)))
+                 for c in range(max(len(tr[r]), len(lr[r])))
+                 for a, b in [((tr[r] + [None] * 99)[c], (lr[r] + [None] * 99)[c])] if (None if a == '' else a) != (None if b == '' else b)]
+        if cells:
+            kinds = sorted({f'{a}/{b}' + (' (число ≈)' if a in ('int', 'float') and b in ('int', 'float') and abs((tr[r] + [0] * 99)[c] - (lr[r] + [0] * 99)[c]) < 0.01 else '')
+                            for r, c, a, b in cells})
+            out.append(f'лист {si + 1}: ячеек {len(cells)}, первые ' + ', '.join(f'R{r + 1}C{c + 1}' for r, c, _, _ in cells[:6]) + '; типы ' + ', '.join(kinds[:5]))
+    return '(' + '; '.join(out) + ')'
+
+
 def rest_mouse(page):
     """Legacy is driven by calls and its pointer never moves; the clicks of the target leave the pointer over a button (hover
     colours). Before a screenshot of the target the pointer leaves the window, and the hover transition (.15s) ends."""
@@ -144,11 +230,18 @@ with sync_playwright() as p:
         # ---------------- target
         ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
         page = ctx.new_page()
+        exports = capture_target_exports(page)
         page.add_init_script(f"localStorage.setItem('erp_theme', '{theme}')")
         page.goto(TARGET + '/login', wait_until='networkidle'); page.evaluate("document.fonts.ready"); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-login-{theme}.png'))
         page.fill('#login-username', 'director'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
-        page.wait_for_url('**/dashboard'); page.goto(TARGET + '/expense_cats', wait_until='networkidle'); page.wait_for_timeout(500)
+        page.wait_for_url('**/dashboard')
+        # The card of the signed-in account (name, initials, colour, role label — from the legacy accounts, D-13): legacy shows the
+        # same card for the same account.
+        # read from a full load: after the client-side visit the embedded page data are still those of the login screen
+        page.goto(TARGET + '/dashboard', wait_until='networkidle')
+        me = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['auth']['user']
+        page.goto(TARGET + '/expense_cats', wait_until='networkidle'); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-m14-{theme}.png'))
         cats = target_categories(page)
         first = next(iter(sorted((c for c in cats if c['parent_code']), key=lambda c: (c['sort_order'], c['code']))), {}).get('code')
@@ -205,6 +298,7 @@ with sync_playwright() as p:
             return (await r.json()).props.reconcileOrders;
         }""")
         page.select_option('#rec-type', 'dealer'); page.wait_for_timeout(200); page.select_option('#rec-party', 'dealer_astana'); page.wait_for_timeout(800)
+        rec_export = target_export(page, exports)
         target_rec_act = (page.locator('#rec-kpi').inner_text(), page.locator('#rec-tfoot').inner_text(), page.evaluate("""() => [...document.querySelectorAll('#rec-tbody tr')].map(tr => [...tr.children].slice(0, 5).map(td => td.textContent.replace(/\\s+/g, ' ').trim()).join('|')).sort()"""))
         page.goto(TARGET + '/suppliers', wait_until='networkidle'); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-suppliers-{theme}.png'))
@@ -246,6 +340,25 @@ with sync_playwright() as p:
             page.locator('#esfDetailModal .modal-close').click(); page.wait_for_timeout(200)
         page.set_input_files('#esf-xml-input', str(ROOT / 'tests/Fixtures/esf/two-invoices.xml')); page.wait_for_timeout(1000)
         target_shot(page, str(OUT / f'target-esf-import-{theme}.png'))
+        # «Сверка с оплатами»: the payments, advance reports and links come with the tab; then the first payment is chosen and
+        # the links to advance reports are checked.
+        page.locator('#esfXmlImportModal .modal-close').click(); page.wait_for_timeout(300)
+        page.locator('#esf-tab-btn-recon').click(); page.wait_for_timeout(2500)
+        target_shot(page, str(OUT / f'target-esf-recon-{theme}.png'))
+        run_filters(page, 'target', theme, 'esf-tab-recon')
+        esf_recon = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/esf', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Esf',
+                'X-Inertia-Partial-Data': 'recon', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.recon;
+        }""")
+        recon_parts = ('#esf-recon-kpis', '#esf-recon-payments-body', '#esf-recon-esf-body', '#esf-recon-pool-info', '#esf-recon-active-info', '#esf-recon-sum-info')
+        esf_recon_t = [page.locator(x).inner_text() for x in recon_parts]
+        if page.locator('#esf-recon-payments-body input').count():
+            page.locator('#esf-recon-payments-body input').first.check(); page.wait_for_timeout(500)
+        esf_recon_t_pick = [page.locator(x).inner_text() for x in recon_parts]
+        page.locator('#esf-tab-recon button', has_text='Проверить связи с авансовыми отчётами').click(); page.wait_for_timeout(300)
+        esf_recon_t_audit = [page.locator(x).inner_text() for x in ('#esf-recon-audit-result', '#esf-recon-audit-body')]
         page.goto(TARGET + '/crm', wait_until='networkidle'); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-crm-{theme}.png'))
         crm = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
@@ -280,6 +393,7 @@ with sync_playwright() as p:
         run_filters(page, 'target', theme, 'orders-tasks')
         page.locator('#orders-tasks button', has_text='+ Новая задача').click(); page.wait_for_timeout(300)
         target_shot(page, str(OUT / f'target-crm-task-modal-{theme}.png'))
+        target_task_mgrs = page.locator('#task-manager option').evaluate_all('os => os.map(o => o.value + "|" + o.textContent.trim())')
         page.locator('#taskModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#crm-tab-clients').click(); page.wait_for_timeout(2500)
         target_shot(page, str(OUT / f'target-crm-clients-{theme}.png'))
@@ -337,6 +451,7 @@ with sync_playwright() as p:
         unscroll(page); page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)  # the filters fill the first screen
         rest_mouse(page); page.screenshot(path=str(OUT / f'target-sales-journal-{theme}.png'))  # scrolled to the totals on purpose, as legacy
         run_filters(page, 'target', theme, 'orders-sales-journal')
+        sj_export = target_export(page, exports)
         realizations = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
@@ -386,10 +501,19 @@ with sync_playwright() as p:
                 'X-Inertia-Partial-Data': 'work', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
             return (await r.json()).props.work;
         }""")
+        # «📥 Excel» of the work log, for the month of the latest posted stage (the current month may have none).
+        wl_month = max([st['postedDate'] for it in mrp_work['items'] for st in it['stages'] if st['posted'] and st['postedDate']] or [''])[:7]
+        if wl_month:
+            page.select_option('#wl-year', wl_month[:4]); page.select_option('#wl-month', str(int(wl_month[5:7]))); page.wait_for_timeout(300)
+        before = len(exports)
+        page.on('dialog', lambda d: d.dismiss())
+        page.locator('#mrp-worklog button', has_text='Excel').click(); page.wait_for_timeout(800)
+        target_wl_export = exports[-1] if len(exports) > before else None
         # «Рабочий лист производства»: the lines on it, loaded with the tab.
         page.locator('#page-mrp > .tabs .tab').nth(2).click(); page.wait_for_timeout(1500)
         target_shot(page, str(OUT / f'target-mrp-worksheet-{theme}.png'))
         run_filters(page, 'target', theme, 'mrp-worksheet')
+        pwb_export = target_export(page, exports, 'Экспорт Excel')
         target_pwb = page.locator('#pwb-tbody').inner_text()
         mrp_pwb = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
@@ -409,6 +533,10 @@ with sync_playwright() as p:
             target_cash.append(page.locator('#cash-tbody').inner_text())
         if page.locator('#cash-account-select option').count():  # an empty database has no cash desk
             page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
+        # «👥 Выдано по сотрудникам» → «📥 Excel» of the first cash desk
+        page.locator('button:visible', has_text='Выдано по сотрудникам').first.click(); page.wait_for_timeout(500)
+        cashcp_export = target_export(page, exports, scope='#cashCpModal')
+        page.locator('#cashCpModal .modal-close').click(); page.wait_for_timeout(200)
         # Period «День» (today) and «Месяц» (the list, the current month, the latest month with operations), then «Всё время».
         def period_states(side_set):
             out = []
@@ -489,9 +617,14 @@ with sync_playwright() as p:
         page.locator('#finance-tabs .tab').nth(1).click(); page.wait_for_timeout(1200)
         target_shot(page, str(OUT / f'target-finance-ar-{theme}.png'))
         run_filters(page, 'target', theme, 'finance-ar')
+        ar_export = target_export(page, exports, scope='#finance-ar')
         page.locator('#finance-tabs .tab').nth(5).click(); page.wait_for_timeout(2500)
         target_shot(page, str(OUT / f'target-finance-cfs-{theme}.png'))
         run_drill(page, 'target', theme, 'finance-cfs')
+        cfs_export = target_export(page, exports, scope='#finance-cfs')
+        page.locator('#finance-cfs tr[title="Нажмите для детализации"]').first.click(); page.wait_for_timeout(600)
+        dd_export = target_export(page, exports, scope='#drilldownModal')
+        page.locator('#drilldownModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#finance-tabs .tab').nth(2).click(); page.wait_for_timeout(3000)
         target_shot(page, str(OUT / f'target-finance-purchases-{theme}.png'))
         run_filters(page, 'target', theme, 'finance-purchases')
@@ -531,9 +664,11 @@ with sync_playwright() as p:
         run_filters(page, 'target', theme, 'page-payroll')
         payroll = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
         target_pr = [page.locator(x).inner_text() for x in ('#payroll-kpi', '#payroll-tbody', '#payroll-tfoot')]
+        ledger_export = target_export(page, exports)
         page.get_by_role('button', name='💵 Журнал выдач').click(); page.wait_for_timeout(600)
         target_shot(page, str(OUT / f'target-payroll-payouts-{theme}.png'))
         target_po = page.locator('#po-tbody').inner_text()
+        payouts_export = target_export(page, exports, scope='#payoutsModal')
         page.locator('#payoutsModal .modal-close').click(); page.wait_for_timeout(300)
         # M17 «Сотрудники»: the staffing table, the cards, the table, the card of the first employee.
         page.goto(TARGET + '/hr', wait_until='networkidle'); page.wait_for_timeout(800)
@@ -598,6 +733,10 @@ with sync_playwright() as p:
             document.getElementById('topbar-title').textContent = 'Статьи расходов';
             renderExpCats();
         }""", cats)
+        page.evaluate("""(u) => {
+            const av = document.getElementById('sidebar-avatar'); av.textContent = u.initials; av.style.background = u.color + '33'; av.style.color = u.color;
+            document.getElementById('sidebar-username').textContent = u.name; document.getElementById('sidebar-role').textContent = u.roleLabel;
+        }""", me)
         page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-m14-{theme}.png'))
         if first:
@@ -668,6 +807,8 @@ with sync_playwright() as p:
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-cust-reconcile-{theme}.png'))
         page.evaluate("document.getElementById('rec-type').value = 'dealer'; renderCounterpartyReconcile(); document.getElementById('rec-party').value = 'dealer_astana'; renderCounterpartyReconcile()")
         page.wait_for_timeout(500)
+        # the act is sorted as text by legacy, by date here (ADR-0002): its rows compare as a set, without the running balance
+        export_note('reconcile act', theme, rec_export, legacy_export(page, 'exportReconcileExcel()'), unordered_from=1, drop_last_col=True)
         legacy_rec_act = (page.locator('#rec-kpi').inner_text(), page.locator('#rec-tfoot').inner_text(), page.evaluate("""() => [...document.querySelectorAll('#rec-tbody tr')].map(tr => [...tr.children].slice(0, 5).map(td => td.textContent.replace(/\\s+/g, ' ').trim()).join('|')).sort()"""))
         print(f'customers reconcile act ({theme}): KPI ' + ('совпадает' if target_rec_act[0] == legacy_rec_act[0] else 'РАСХОЖДЕНИЕ') + ', итог ' + ('совпадает' if target_rec_act[1] == legacy_rec_act[1] else 'РАСХОЖДЕНИЕ')
               + f', строк {len(target_rec_act[2])} / {len(legacy_rec_act[2])} ' + ('совпадает' if target_rec_act[2] == legacy_rec_act[2] else 'РАСХОЖДЕНИЕ'))
@@ -742,6 +883,38 @@ with sync_playwright() as p:
         page.evaluate("(x) => { _esfXmlParsed = parseEsfXmlText(x, 'two-invoices.xml'); renderEsfXmlImportPreview(); document.getElementById('esfXmlImportModal').classList.add('open'); }", fixture)
         page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-esf-import-{theme}.png'))
+        # «Сверка с оплатами»: legacy gets the same invoices, expense operations, advance reports (their lines name the invoices
+        # they hold) and links, keyed by ids as text as its own ids are; it draws the tab as its loader does when the data come.
+        page.evaluate("""([invoices, r]) => {
+            closeModal('esfXmlImportModal');
+            window._esfLinksBefore = esfLinksData;
+            esfReconInvoices = invoices.map(i => ({...i, id: String(i.id)}));
+            esfReconMoneyTx = r.payments.map(t => ({id: String(t.id), date: t.date, counterparty: t.counterparty, amount: t.amount, flow: 'expense'}));
+            esfReconAdvances = r.advances.map(a => ({id: String(a.id), date: a.date, emp_name: a.emp_name, issued: a.issued, status: a.status,
+                lines: a.lineInvoices.map(id => ({esfInvoiceId: String(id)}))}));
+            esfLinksData = r.links.map((l, k) => ({id: k + 1, esf_invoice_id: String(l.invoice), source_type: l.type, source_id: l.source === null ? null : String(l.source), amount: l.amount}));
+            esfLinksLoaded = true; esfReconLoaded = true;
+            showEsfTab('recon');
+            document.getElementById('esf-recon-status').style.display = 'none';
+            document.getElementById('esf-recon-kpis').style.display = 'grid';
+            document.getElementById('esf-recon-main').style.display = 'block';
+        }""", [invoices, esf_recon])
+        page.wait_for_timeout(800)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-esf-recon-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'esf-tab-recon')
+        esf_recon_l = [page.locator(x).inner_text() for x in recon_parts]
+        if page.locator('#esf-recon-payments-body input').count():
+            page.locator('#esf-recon-payments-body input').first.check(); page.wait_for_timeout(500)
+        esf_recon_l_pick = [page.locator(x).inner_text() for x in recon_parts]
+        page.evaluate("esfReconAuditAdvanceLinks()"); page.wait_for_timeout(300)
+        esf_recon_l_audit = [page.locator(x).inner_text() for x in ('#esf-recon-audit-result', '#esf-recon-audit-body')]
+        print(f'esf recon ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ') for n, a, b in zip(
+            ('KPI', 'платежи', 'ЭСФ', 'отметки', 'выбор', 'сумма', 'KPI после выбора', 'платежи после выбора', 'ЭСФ платежа', 'отметки после выбора', 'платёж', 'сумма платежа', 'проверка связей', 'список связей'),
+            esf_recon_t + esf_recon_t_pick + esf_recon_t_audit, esf_recon_l + esf_recon_l_pick + esf_recon_l_audit)))
+        # the later pages (finance, purchases) read esfLinksData: they get back the links of the list step — with the full set of
+        # links legacy's nested loops there run for hours
+        # and esfReconInvoices: «Финансы» take the invoices of P&L from it (empty before, as legacy's own load finds no server)
+        page.evaluate("showEsfTab('list'); esfLinksData = window._esfLinksBefore; esfReconInvoices = []; esfReconMoneyTx = []; esfReconAdvances = []; esfReconLoaded = false")
         # CRM: legacy leadsData gets the target's open leads, mapped as its loader maps them (it loads won and lost ones only
         # for those filters). The funnel request is answered inside the browser with the target's funnel leads. CRM_STAGES,
         # which legacy never defines, gets the target's columns, and the segment legacy forces to «Новый» is set back to the
@@ -827,8 +1000,14 @@ with sync_playwright() as p:
         page.wait_for_timeout(800)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-tasks-{theme}.png'))
         run_filters(page, 'legacy', theme, 'orders-tasks')
+        # The task form lists the salon staff of «Сотрудники»: legacy gets the staff the target offers (with their positions and
+        # comments) and filters and labels them itself.
+        page.evaluate("(staff) => { window._empBefore = employeesData; employeesData = staff.map(e => ({name: e.name, pos: e.pos, comment: e.comment})); }", crm['taskManagers'])
         page.evaluate("openTaskModal(null)"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-task-modal-{theme}.png'))
+        legacy_task_mgrs = page.locator('#task-manager option').evaluate_all('os => os.map(o => o.value + "|" + o.textContent.trim())')
+        page.evaluate("employeesData = window._empBefore")  # the later pages get their own staff
+        print(f'crm task managers ({theme}): {len(target_task_mgrs) - 1} — ' + ('совпадает' if target_task_mgrs == legacy_task_mgrs else 'РАСХОЖДЕНИЕ'))
         page.evaluate("closeModal('taskModal'); showOrdersTab('clients', document.getElementById('crm-tab-clients'))"); page.wait_for_timeout(2500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-crm-clients-{theme}.png'))
         run_filters(page, 'legacy', theme, 'orders-clients')
@@ -915,6 +1094,7 @@ with sync_playwright() as p:
         unscroll(page); page.evaluate("document.getElementById('sj-totals').scrollIntoView()"); page.wait_for_timeout(300)
         page.screenshot(path=str(OUT / f'legacy-sales-journal-{theme}.png'))
         run_filters(page, 'legacy', theme, 'orders-sales-journal')
+        export_note('sales journal', theme, sj_export, legacy_export(page, 'exportSalesJournalExcel()'))
         # Report: the orders now carry their real lines, characteristics, comment and delivery date.
         page.evaluate("""([orders, report]) => {
             const lines = {};
@@ -980,8 +1160,17 @@ with sync_playwright() as p:
         page.evaluate("showMrpTab('worklog', document.querySelectorAll('#page-mrp > .tabs .tab')[5])"); page.wait_for_timeout(800)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-worklog-{theme}.png'))
         run_filters(page, 'legacy', theme, 'mrp-worklog')
+        legacy_wlog = page.locator('#wl-tbody').inner_text()  # before the export step changes the month
+        # The same month: legacy's month list holds no months (ADR-0002, item 103), the month is put in for the export.
+        page.evaluate(XLSX_SHIM)
+        page.evaluate("""(m) => {
+            if (m) { const sel = document.getElementById('wl-month'); sel.add(new Option(m.slice(5), String(+m.slice(5, 7)))); sel.value = String(+m.slice(5, 7));
+                document.getElementById('wl-year').value = m.slice(0, 4); renderWorkLog(); }
+            window.alert = () => {}; exportWorkLogExcel();
+        }""", wl_month)
+        print(f'mrp worklog excel ({theme}): ' + ('совпадает' if same_export(target_wl_export, page.evaluate('window.__xlsx')) else 'РАСХОЖДЕНИЕ'))
         print(f'mrp workload/worklog ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ')
-              for n, a, b in zip(('цеха', 'позиции', 'журнал работ'), target_wload + [target_wlog], legacy_wload + [page.locator('#wl-tbody').inner_text()])))
+              for n, a, b in zip(('цеха', 'позиции', 'журнал работ'), target_wload + [target_wlog], legacy_wload + [legacy_wlog])))
         # «Рабочий лист производства»: legacy gets the same lines (prodWbRows, in the same order), their orders' channel and dates,
         # the characteristics as one value (the server joins the values as legacy itemCharacteristicsText does; the test covers
         # it), what is recorded for them and the staff. Its own loads (warehouse, payroll) find no server.
@@ -1002,6 +1191,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-worksheet-{theme}.png'))
         run_filters(page, 'legacy', theme, 'mrp-worksheet')
+        export_note('production worksheet', theme, pwb_export, legacy_export(page, 'exportProdWorksheetExcel()'))
         print(f'mrp worksheet ({theme}): строки ' + ('совпадает' if target_pwb.split() == page.locator('#pwb-tbody').inner_text().split() else 'РАСХОЖДЕНИЕ'))
         page.evaluate("[...window._pwbSaved].reverse().forEach(([o, f, it, attrs]) => { Object.assign(o, f); it.attributes = attrs; })")
         # Money: legacy gets the target's accounts (without account numbers, which are not stored — ADR-0002, item 54), the
@@ -1027,6 +1217,7 @@ with sync_playwright() as p:
             legacy_cash.append(page.locator('#cash-tbody').inner_text())
         if page.locator('#cash-account-select option').count():  # an empty database has no cash desk
             page.select_option('#cash-account-select', index=0); page.wait_for_timeout(300)
+        export_note('cash by counterparty', theme, cashcp_export, legacy_export(page, 'exportCashCp()'))
         bad = [i for i, (x, y) in enumerate(zip(target_cash, legacy_cash)) if x != y]
         print(f'cash tables ({theme}): {len(target_cash)} / {len(legacy_cash)} касс, ' + ('совпадает' if len(target_cash) == len(legacy_cash) and not bad else f'РАСХОЖДЕНИЕ в {bad}'))
         def legacy_set(step):
@@ -1142,9 +1333,18 @@ with sync_playwright() as p:
         page.wait_for_timeout(1200)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-finance-ar-{theme}.png'))
         run_filters(page, 'legacy', theme, 'finance-ar')
+        # legacy dates the report and the file by its fixed demo date (ADR-0002, item 117) and does not read a due date
+        # ГГГГ-ММ-ДД (item 69): every order «Срок не задан», so the overdue days, the status and the order they sort in differ
+        export_note('receivables', theme, ar_export, legacy_export(page, 'exportARtoExcel()'), skip_rows=(1,), skip_name=True,
+                    unordered_from=3, drop_cols=(8, 9))
         page.evaluate("showFinanceTab('cfs', document.querySelectorAll('#finance-tabs .tab')[5])"); page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-finance-cfs-{theme}.png'))
         run_drill(page, 'legacy', theme, 'finance-cfs')
+        # legacy takes the ends of the period through UTC, a day early (ADR-0002, item 73): the period line and the file name
+        export_note('cash flow', theme, cfs_export, legacy_export(page, 'exportCFSExcel()'), skip_rows=(1,), skip_name=True)
+        page.evaluate("document.querySelector('#finance-cfs tr[onclick*=\"ddCFS\"]')?.click()"); page.wait_for_timeout(600)
+        export_note('details', theme, dd_export, legacy_export(page, 'exportDrilldownExcel()'))
+        page.evaluate("closeModal('drilldownModal')")
         # Purchases: the same invoices, payments with a counterparty (in tenge), suppliers and advance lines; the calendar month
         # the target shows (legacy shifts «Текущий месяц» through UTC — ADR-0002). The whole debts table is compared as text.
         page.evaluate("""([d, today]) => {
@@ -1196,9 +1396,11 @@ with sync_playwright() as p:
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-payroll-{theme}.png'))
         run_filters(page, 'legacy', theme, 'page-payroll')
         legacy_pr = [page.locator(x).inner_text() for x in ('#payroll-kpi', '#payroll-tbody', '#payroll-tfoot')]
+        export_note('payroll ledger', theme, ledger_export, legacy_export(page, 'exportSalaryLedger()'))
         page.evaluate("showPayouts()"); page.wait_for_timeout(600)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-payroll-payouts-{theme}.png'))
         legacy_po = page.locator('#po-tbody').inner_text()
+        export_note('payouts', theme, payouts_export, legacy_export(page, 'exportPayouts()'))
         page.evaluate("closeModal('payoutsModal')")
         print(f'payroll ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'строки', 'итоги', 'выдачи'), target_pr + [target_po], legacy_pr + [legacy_po])))
         # «Сотрудники»: legacy gets the staff the target renders (as loadStaffFromDB keeps it); its demonstration lists of piece
@@ -1295,6 +1497,10 @@ with sync_playwright() as p:
             showMoneyTab('calendar', document.querySelectorAll('#page-money > .tabs .tab')[6]);
             document.getElementById('pc-chart').style.visibility = 'hidden';
         }""", [calendar, money['accounts'], money['categories']])
+        page.evaluate("""(u) => {
+            const av = document.getElementById('sidebar-avatar'); av.textContent = u.initials; av.style.background = u.color + '33'; av.style.color = u.color;
+            document.getElementById('sidebar-username').textContent = u.name; document.getElementById('sidebar-role').textContent = u.roleLabel;
+        }""", me)
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-calendar-{theme}.png'))
         run_filters(page, 'legacy', theme, 'money-tab-calendar')
@@ -1484,7 +1690,7 @@ with sync_playwright() as p:
             n = len(a2) if isinstance(a2, list) else 1
             print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'sales-worksheet', 'mrp', 'mrp-queue', 'mrp-worksheet', 'mrp-workload', 'mrp-worklog', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'payroll', 'payroll-payouts', 'hr', 'hr-employees', 'hr-table', 'hr-commissions', 'hr-tariffs', 'wages') + (('hr-card',) if hr['employees'] else ()) + (('wages-detail',) if wages['staff'] else ()):
+        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'esf-recon', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'sales-worksheet', 'mrp', 'mrp-queue', 'mrp-worksheet', 'mrp-workload', 'mrp-worklog', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'payroll', 'payroll-payouts', 'hr', 'hr-employees', 'hr-table', 'hr-commissions', 'hr-tariffs', 'wages') + (('hr-card',) if hr['employees'] else ()) + (('wages-detail',) if wages['staff'] else ()):
             if EMPTY and shot in EMPTY_DEVIATIONS:  # pictures kept, not compared: a documented deviation
                 print(f'{shot}-{theme}: not compared — {EMPTY_DEVIATIONS[shot]}')
                 continue

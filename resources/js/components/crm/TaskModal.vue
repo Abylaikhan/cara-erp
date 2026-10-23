@@ -1,14 +1,14 @@
 <script setup lang="ts">
 // Task form — legacy taskModal (L4744–4794), openTaskModal/filterTaskLeadList/selectTaskLead/clearTaskLead/saveTask/deleteTask
-// (L29647–29826). Same fields and texts; saved by the server. The managers are the CRM users and the names already used
-// (legacy listed the salon staff of «Сотрудники», which is not migrated yet). A new task is dated «today» in the business
-// time zone.
+// (L29647–29826). Same fields and texts; saved by the server. The managers are the salon staff of «Сотрудники», labelled as
+// legacy does; a task's manager who is not among them stays chosen (legacy erased such a manager on saving). A new task is
+// dated «today» in the business time zone.
 import { router } from '@inertiajs/vue3';
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
 import { businessNow, TASK_RELOAD, type LeadRow, type TaskRow } from '@/lib/crm';
 
-const props = defineProps<{ leads: LeadRow[]; managers: string[]; timezone: string }>();
+const props = defineProps<{ leads: LeadRow[]; managers: { name: string; pos: string; comment: string }[]; timezone: string }>();
 
 const m = reactive({
     open: false,
@@ -27,6 +27,11 @@ const m = reactive({
     busy: false,
 });
 const selected = computed(() => (m.leadId === null ? null : (props.leads.find((l) => l.id === m.leadId) ?? null)));
+// Legacy fillSellers: «name (comment)», else «name (position)»; the manager of an edited task is kept when not in the list.
+const managerOptions = computed(() => {
+    const list = props.managers.map((e) => ({ name: e.name, label: e.name + (e.comment ? ' (' + e.comment + ')' : e.pos ? ' (' + e.pos + ')' : '') }));
+    return m.manager && !list.some((o) => o.name === m.manager) ? [...list, { name: m.manager, label: m.manager }] : list;
+});
 
 function openTaskModal(task: TaskRow | null, prefillLeadId: number | null = null): void {
     const leadId = task ? task.lead_id : prefillLeadId;
@@ -132,7 +137,7 @@ defineExpose({ openTaskModal });
                 <label class="label">Ответственный менеджер</label>
                 <select id="task-manager" v-model="m.manager">
                     <option value="">— выберите —</option>
-                    <option v-for="name in props.managers" :key="name" :value="name">{{ name }}</option>
+                    <option v-for="o in managerOptions" :key="o.name" :value="o.name">{{ o.label }}</option>
                 </select>
             </div>
             <div>

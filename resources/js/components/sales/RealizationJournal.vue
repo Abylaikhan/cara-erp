@@ -3,6 +3,7 @@
 // setSjMonthYear (L30830–31096). Same filters, totals, table and footer; the lines are loaded when the tab is first opened.
 // «Все даты» shows every date (legacy put the current month back right away), the year list holds the years of the
 // realizations (legacy read a field they do not have and listed only the current year).
+import { downloadXlsx, ruToday, tableCells } from '@/lib/xlsx';
 import { router } from '@inertiajs/vue3';
 import { computed, reactive, watch } from 'vue';
 import { localISODate, markOrderDone, ORDER_FORM_LATER, PL_MONTH_LABELS, SJ_CHANNELS, sjStatus, type OrderRow, type RealizationRow } from '@/lib/sales';
@@ -83,7 +84,17 @@ const rows = computed(() => {
 const totalSum = computed(() => rows.value.reduce((s, r) => s + r.total, 0));
 const totalPaid = computed(() => rows.value.reduce((s, r) => s + r.paid, 0));
 
-const exportLater = () => window.alert('Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067): для .xlsx нужна библиотека, новые зависимости ставятся отдельной задачей.');
+// Legacy exportSalesJournalExcel (L32806), ADR-0044: the lines of the table as they stand on the screen.
+function exportSalesJournalExcel(): void {
+    const rows = tableCells('#sj-tbody').filter((cells) => cells.length >= 12);
+    void downloadXlsx('sales', 'Журнал_реализации_' + ruToday() + '.xlsx', [
+        {
+            name: 'Журнал реализации',
+            rows: [['№', 'Дата', 'Заказ', 'Покупатель', 'Канал', 'Товар', 'Кол-во', 'Цена', 'Сумма', '% оплаты', 'Оплачено', 'Статус'], ...rows],
+            cols: [5, 12, 10, 30, 12, 40, 8, 14, 14, 10, 14, 12],
+        },
+    ]);
+}
 const openOrder = () => window.alert(ORDER_FORM_LATER);
 const print = () => window.print();
 </script>
@@ -118,7 +129,7 @@ const print = () => window.print();
             <option value="unpaid">❌ Не оплачен</option>
         </select>
         <input id="sj-search" v-model="f.search" type="search" placeholder="🔍 Заказ, покупатель, товар..." style="font-size: 13px; flex: 1; min-width: 160px" />
-        <button class="btn btn-ghost btn-sm" @click="exportLater">📥 Excel</button>
+        <button class="btn btn-ghost btn-sm" @click="exportSalesJournalExcel">📥 Excel</button>
         <button class="btn btn-ghost btn-sm" @click="print">🖨 Печать</button>
     </div>
     <div id="sj-totals" style="font-size: 12px; color: var(--text3); margin-bottom: 8px">

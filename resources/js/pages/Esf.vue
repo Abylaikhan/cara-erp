@@ -1,11 +1,13 @@
 <script setup lang="ts">
 // M05 «Входящие ЭСФ» — legacy page-esf (L3056–3238), esfDetailModal (L3179), esfXmlImportModal: initEsfPage, renderEsfList,
 // filterEsfUnreconciled, setEsfType, openEsfDetail, handleEsfXmlFiles/renderEsfXmlImportPreview/confirmEsfXmlImport
-// (L11926–12560). Same markup, texts and calculations; XML is parsed and imported by the server. «Сверка с оплатами»,
-// «Создать расход», «Принять на склад» and the Excel export wait for other modules (docs/adr/0009-esf.md).
+// (L11926–12560). Same markup, texts and calculations; XML is parsed and imported by the server. «Сверка с оплатами» is
+// EsfReconTab (saving links waits for D-10, ADR-0043); «Создать расход», «Принять на склад» and the Excel export wait for
+// other modules (docs/adr/0009-esf.md).
 import { router, usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
+import EsfReconTab, { type ReconData } from '@/components/esf/EsfReconTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import type { EsfPreview, SharedProps } from '@/types';
 
@@ -49,7 +51,7 @@ interface Detail {
     }[];
 }
 
-const props = defineProps<{ invoices: Invoice[]; materialWarehouses: { code: string; name: string; icon: string }[] }>();
+const props = defineProps<{ invoices: Invoice[]; materialWarehouses: { code: string; name: string; icon: string }[]; recon?: ReconData }>();
 const page = usePage<SharedProps>();
 
 const fmt = (n: number) => '₸' + Math.round(n).toLocaleString('ru-RU');
@@ -156,8 +158,28 @@ watch(
 
 // ── Functions that need other modules ──
 const later = (text: string) => () => window.alert(text);
-const exportGoods = later('Выгрузка товаров ЭСФ в Excel появится вместе с остальными выгрузками (ERP-067).');
-const createExpense = later('Расход из ЭСФ появится после переноса раздела «Деньги».');
+// Legacy exportEsfGoodsToExcel (L12832), ADR-0044: the server reads every goods line and builds the file.
+async function exportGoods(): Promise<void> {
+    let r: Response;
+    try {
+        r = await fetch('/esf/export-goods', { credentials: 'same-origin', headers: { Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' } });
+    } catch {
+        window.alert('Нет связи с сервером.\n\nФайл не сформирован. Проверьте соединение и повторите.');
+        return;
+    }
+    if (!r.ok) {
+        window.alert(`Файл не сформирован (HTTP ${r.status}).`);
+        return;
+    }
+    const url = URL.createObjectURL(await r.blob());
+    const a = Object.assign(document.createElement('a'), { href: url, download: 'ЭСФ_товары_склады.xlsx' });
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    window.alert(`✅ Выгружено ${r.headers.get('X-Export-Rows')} позиций из ${r.headers.get('X-Export-Invoices')} ЭСФ`);
+}
+const createExpense = later('Расход из ЭСФ появится вместе с проведением денежных операций (ERP-031…033, решения D-03 и D-11).');
 const acceptToWarehouse = later(
     'Приём строки ЭСФ на склад появится вместе со складскими документами: остаток двигает документ прихода (решения D-04, D-05).',
 );
@@ -284,12 +306,8 @@ const acceptToWarehouse = later(
                 </div>
             </div>
 
-            <!-- СВЕРКА ЭСФ С ОПЛАТАМИ: payments and advance reports are in «Деньги», not migrated yet -->
             <div v-show="tab === 'recon'" id="esf-tab-recon">
-                <div id="esf-recon-status" style="padding: 20px; color: var(--text3); font-size: 13px">
-                    Сверка ЭСФ с оплатами появится после переноса раздела «Деньги»: она связывает ЭСФ с платежами расчётного счёта, кассы и
-                    авансовыми отчётами (решение D-10). Сделанные в legacy связи перенесены: колонка «Сверка» списка показывает их.
-                </div>
+                <EsfReconTab :invoices="props.invoices" :data="props.recon" :active="tab === 'recon'" />
             </div>
         </div>
 

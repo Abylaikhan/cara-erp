@@ -9,6 +9,7 @@ import { router } from '@inertiajs/vue3';
 import { computed, reactive } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
+import { downloadXlsx } from '@/lib/xlsx';
 
 interface Line {
     type?: string;
@@ -33,7 +34,6 @@ const props = defineProps<{ today: string; accruals: Accrual[]; payments: Paymen
 
 const LATER = {
     accrual: 'Начисление появится вместе с правилами расчёта зарплаты (ERP-056, решение D-06).',
-    excel: 'Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067).',
 };
 const later = (text: string) => window.alert(text);
 const MN = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
@@ -175,6 +175,35 @@ const poByEmp = computed(() => {
     return Object.entries(by).sort((a, b) => a[0].localeCompare(b[0], 'ru'));
 });
 const poTotal = computed(() => poRows.value.reduce((t, p) => t + (+p.amount || 0), 0));
+
+// ── Excel (ADR-0044): legacy exportSalaryLedger (L14088) and exportPayouts (L13747) ──
+function exportSalaryLedger(): void {
+    const rows = ledger.value.rows;
+    if (!rows.length) {
+        window.alert('Сначала откройте ведомость');
+        return;
+    }
+    const n = (v: number) => (v ? Math.round(v) : 0);
+    const headers = ['Сотрудник', 'Остаток нач.', 'Оклад', 'Сдельная', 'Премия', 'Отпускные', 'Займ нач.', 'Больничные', 'Итого нач.', 'Обед', 'Займ погаш.', 'ОПВ', 'ОСМС/СО',
+        'Штрафы', 'Прочие', 'Итого удерж.', 'К выдаче', 'Выдано', 'Остаток'];
+    const data: (string | number)[][] = rows.map((r) => [r.a.emp_name, ...([r.nachalo, r.oklad, r.sdel, r.premiya, r.otpusk, r.zaimN, r.boln, r.acc, r.obed, r.zaimP, r.opv, r.osms, r.shtraf,
+        r.prochie, r.ded, r.kv, r.vydano, r.ostatok].map(n))]);
+    const totals: (string | number)[] = ['ИТОГО'];
+    for (let col = 1; col < headers.length; col++) totals.push(data.reduce((s, r) => s + ((r[col] as number) || 0), 0));
+    data.push(totals);
+    void downloadXlsx('payroll', `Ведомость_ЗП_${f.month || `${f.from}_${f.to}`}.xlsx`, [{ name: 'Ведомость ЗП', rows: [headers, ...data], cols: [30, ...Array(headers.length - 1).fill(14)] }]);
+}
+function exportPayouts(): void {
+    const rows = poRows.value;
+    void downloadXlsx('payroll', 'Выдачи_ЗП_' + (f.month || 'период') + '.xlsx', [
+        {
+            name: 'Выдачи',
+            rows: [['Выдачи ЗП · ' + poPeriod.value.label], [], ['Дата', 'Сотрудник', 'Комментарий', 'Сумма'], ...rows.map((p) => [p.date, p.emp_name, p.comment || '', +p.amount || 0]), [],
+                ['', '', 'Итого', rows.reduce((t, p) => t + (+p.amount || 0), 0)]],
+            cols: [12, 36, 30, 14],
+        },
+    ]);
+}
 const fmtAll = (n: number) => '₸' + Math.round(n || 0).toLocaleString('ru-RU');
 const ru = (iso: string) => {
     const p = String(iso || '')
@@ -194,7 +223,7 @@ const ru = (iso: string) => {
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center">
                     <button class="btn btn-ghost btn-sm" @click="showPayouts()">💵 Журнал выдач</button>
-                    <button class="btn btn-ghost btn-sm" @click="later(LATER.excel)">📥 Excel</button>
+                    <button class="btn btn-ghost btn-sm" @click="exportSalaryLedger">📥 Excel</button>
                 </div>
             </div>
 
@@ -410,7 +439,7 @@ const ru = (iso: string) => {
                     <option value="date">По датам</option>
                     <option value="emp">Итого по сотрудникам</option>
                 </select>
-                <button class="btn btn-ghost btn-sm" style="margin-left: auto" @click="later(LATER.excel)">📥 Excel</button>
+                <button class="btn btn-ghost btn-sm" style="margin-left: auto" @click="exportPayouts">📥 Excel</button>
             </div>
             <div style="overflow: auto">
                 <table class="data-table">

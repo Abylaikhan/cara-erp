@@ -78,7 +78,7 @@ class ControlTotalsTest extends TestCase
         $this->assertSame(['2026-03' => ['2', '150000.01']], $leads['legacy']);
         $this->assertSame(['office / company' => ['1'], 'salon_armada / client' => ['1']], $this->module('M08 Покупатели')['legacy'], 'an empty type is «client»');
         $notMigrated = collect(json_decode(file_get_contents($this->out), true)['not_migrated'])->keyBy('table');
-        $this->assertStringContainsString('ERP-053', $notMigrated['app_users']['reason']);
+        $this->assertArrayNotHasKey('app_users', $notMigrated->all(), 'the accounts are migrated (D-13, ADR-0045)');
         $this->assertSame('в legacy нет записей', $notMigrated['tech_cards']['reason']);
         $this->assertSame(0600, fileperms($this->out) & 0777, 'the details hold real sums: owner only');
     }

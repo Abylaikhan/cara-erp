@@ -2,6 +2,7 @@
 // Detail window of the reports — legacy drilldownModal (L4543–4565), openDrilldown/renderDrilldownTable/filterDrilldown
 // (L32938–33010): totals of the number columns, search through every column, the rows and their totals. Excel waits for the
 // exports (ERP-067).
+import { downloadXlsx } from '@/lib/xlsx';
 import { computed, reactive } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
 import { fmtCurrency } from '@/lib/sales';
@@ -26,7 +27,15 @@ const shown = computed(() => {
 });
 const total = (rows: Row[], key: string) => rows.reduce((s, r) => s + (parseFloat(String(r[key])) || 0), 0);
 const isNum = (c: DrillColumn, v: unknown) => c.num && v !== undefined && v !== null && v !== '—';
-const exportDrilldownExcel = () => window.alert('Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067).');
+// Legacy exportDrilldownExcel (L33437), ADR-0044: every line of the details (not only the found ones), the title as the sheet and
+// file name as legacy cuts it. Legacy SheetJS refused a sheet name with «:» («ДДС: …») and saved nothing; here the server writes
+// it with a space (ADR-0002, item 118).
+function exportDrilldownExcel(): void {
+    const page = (document.querySelector('.page.active') as HTMLElement | null)?.id.replace(/^page-/, '') || 'finance';
+    void downloadXlsx(page, dd.title.replace(/[^\w\s]/gi, '') + '_drill.xlsx', [
+        { name: dd.title.slice(0, 30), rows: [dd.cols.map((c) => c.label), ...dd.rows.map((r) => dd.cols.map((c) => (r[c.key] as string | number | null) || ''))] },
+    ]);
+}
 defineExpose({ openDrilldown });
 </script>
 

@@ -1,5 +1,6 @@
 # PHP-FPM + Composer image for PromTech ERP (Laravel 13).
 # Base images are pinned to exact versions; update them deliberately and record the change in docs/adr.
+# gd: PhpSpreadsheet (ADR-0044).
 FROM composer:2.10.3 AS composer
 
 FROM php:8.4.26-fpm-bookworm
@@ -9,8 +10,8 @@ ARG GID=1000
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        git unzip libpq-dev libicu-dev libzip-dev \
-    && docker-php-ext-install -j"$(nproc)" pdo_pgsql pgsql intl zip bcmath pcntl \
+        git unzip libpq-dev libicu-dev libzip-dev libpng-dev \
+    && docker-php-ext-install -j"$(nproc)" pdo_pgsql pgsql intl zip bcmath pcntl gd \
     && apt-get purge -y --auto-remove \
     && rm -rf /var/lib/apt/lists/*
 

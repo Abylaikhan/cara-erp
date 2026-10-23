@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DealerController;
 use App\Http\Controllers\EsfController;
 use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\HrController;
 use App\Http\Controllers\LeadCommunicationController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\SalonCashController;
 use App\Http\Controllers\SalonReportController;
 use App\Http\Controllers\SalonWorksheetController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserAccountController;
 use App\Http\Controllers\WagesController;
 use App\Http\Controllers\WarehouseController;
 use App\Support\Erp;
@@ -72,6 +74,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('page:esf')->prefix('esf')->name('esf.')->controller(EsfController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/{invoice}/detail', 'detail')->whereNumber('invoice')->name('detail');
+        Route::get('/export-goods', 'exportGoods')->middleware('throttle:10,1')->name('export-goods');
         Route::put('/{invoice}/type', 'setType')->whereNumber('invoice')->name('type');
         Route::post('/import/preview', 'preview')->name('import.preview');
         Route::post('/import', 'import')->name('import');
@@ -122,6 +125,9 @@ Route::middleware('auth')->group(function () {
     });
 
     // M01 «Дашборд»: сводка по перенесённым данным (просмотр)
+    // Выгрузки в Excel (ADR-0044): файл из строк страницы; право — право на страницу
+    Route::post('/export/xlsx', [ExportController::class, 'xlsx'])->middleware('throttle:30,1')->name('export.xlsx');
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('page:dashboard')->name('dashboard');
 
     // M15 «Касса салона», часть 1: операции своей кассы (просмотр)
@@ -135,6 +141,10 @@ Route::middleware('auth')->group(function () {
 
     // M17 «Сотрудники», часть 1: штат, карточки и история условий (просмотр)
     Route::get('/hr', [HrController::class, 'index'])->middleware('page:hr')->name('hr.index');
+    // «Сотрудники» → «Пользователи» (D-13): учётные записи — директор и HR
+    Route::post('/hr/users', [UserAccountController::class, 'store'])->middleware('page:hr')->name('hr.users.store');
+    Route::put('/hr/users/{user}', [UserAccountController::class, 'update'])->whereNumber('user')->middleware('page:hr')->name('hr.users.update');
+    Route::patch('/hr/users/{user}/active', [UserAccountController::class, 'active'])->whereNumber('user')->middleware('page:hr')->name('hr.users.active');
 
     // M19 «Зарплатная ведомость», часть 1: начисления, удержания и выдачи по сотрудникам (просмотр)
     Route::get('/payroll', [PayrollController::class, 'index'])->middleware('page:payroll')->name('payroll.index');

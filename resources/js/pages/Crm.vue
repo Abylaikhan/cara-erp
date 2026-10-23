@@ -29,6 +29,7 @@ const props = defineProps<{
     stageOrder: string[];
     tasks: TaskRow[];
     managers: string[];
+    taskManagers: { name: string; pos: string; comment: string }[];
     currentYear: number;
     timezone: string;
     clientsCount: number;
@@ -147,7 +148,7 @@ function convertLeadToOrder(): void {
         </div>
 
         <FunnelLeadModal ref="leadModal" :segments="props.segments" :sources="props.sources" :managers="props.managers" />
-        <TaskModal ref="taskModal" :leads="props.leads" :managers="props.managers" :timezone="props.timezone" />
+        <TaskModal ref="taskModal" :leads="props.leads" :managers="props.taskManagers" :timezone="props.timezone" />
         <ErpModal id="crmConvertModal" :open="convert.open" max-width="440px" overlay-class="modal-overlay-elevated" @close="convert.open = false">
             <div class="modal-header">
                 <div class="modal-title">🎉 Сделка закрыта!</div>

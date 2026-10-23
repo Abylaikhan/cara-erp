@@ -28,7 +28,9 @@ class Erp
     }
 
     /**
-     * Pages of the user's role in role-template order, restricted to pages that exist (legacy `techcards` has none).
+     * Pages of the account, restricted to pages that exist (legacy `techcards` has none). Legacy dbUsersApply: the pages of an
+     * app_users record replace those of its role when there are any; the director keeps the pages of the role besides (it can
+     * be neither blocked nor deprived of pages).
      *
      * @return list<string>
      */
@@ -37,9 +39,11 @@ class Erp
         if (! $user->is_active) {
             return [];
         }
-        $role = self::role($user->role);
+        $rolePages = self::role($user->role)['pages'] ?? [];
+        $own = is_array($user->pages) ? $user->pages : [];
+        $pages = $own === [] ? $rolePages : ($user->role === 'director' ? array_values(array_unique([...$rolePages, ...$own])) : $own);
 
-        return array_values(array_filter($role['pages'] ?? [], fn (string $p) => self::pageExists($p)));
+        return array_values(array_filter($pages, fn (string $p) => self::pageExists($p)));
     }
 
     public static function canAccess(User $user, string $page): bool

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 // Tab «Журнал работ» of «Производство» — legacy collectWorkLogEntries/renderWorkLog (L19627–19730): one line per posted stage
 // and executor, for the chosen month, with the filters of legacy. The month list of legacy was the text of a template (only one
-// option «${m}», so only the current month could be seen); here it has the twelve months (ADR-0039). «📥 Excel» comes with the
-// exports (ERP-067).
+// option «${m}», so only the current month could be seen); here it has the twelve months (ADR-0039). «📥 Excel» — legacy
+// exportWorkLogExcel (L19728): the lines on the screen (ADR-0044).
 import { computed, reactive } from 'vue';
 import { PL_MONTH_LABELS } from '@/lib/sales';
+import { downloadXlsx, isoToday } from '@/lib/xlsx';
 import { PIECE_WORKSHOPS, type WorkData } from './work';
 
 const props = defineProps<{ data: WorkData | undefined; today: string }>();
-const later = () => window.alert('Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067).');
 
 const entries = computed(() =>
     (props.data?.items ?? []).flatMap((item) =>
@@ -53,6 +53,24 @@ const rows = computed(() => {
         .sort((a, b) => a.date.localeCompare(b.date));
 });
 const ws = (id: string) => PIECE_WORKSHOPS.find((x) => x.id === id);
+function exportWorkLogExcel(): void {
+    if (!rows.value.length) {
+        window.alert('Нет данных для выгрузки.');
+        return;
+    }
+    void downloadXlsx('mrp', `PromTech_Zhurnal_rabot_${isoToday()}.xlsx`, [
+        {
+            name: 'Журнал работ',
+            rows: [
+                ['Журнал работ'],
+                [],
+                ['Дата', 'Цех', 'Исполнитель', 'Заказ', 'Изделие', 'Категория', 'Работа'],
+                ...rows.value.map((e) => [e.date.split('-').reverse().join('.'), ws(e.workshop)?.name ?? '—', e.exec, e.orderNum, e.itemName, e.category, e.stage]),
+            ],
+            cols: [12, 18, 20, 12, 26, 16, 20],
+        },
+    ]);
+}
 </script>
 
 <template>
@@ -81,7 +99,7 @@ const ws = (id: string) => PIECE_WORKSHOPS.find((x) => x.id === id);
             <option value="">Все работы</option>
             <option v-for="s in stages" :key="s" :value="s">{{ s }}</option>
         </select>
-        <button class="btn btn-ghost btn-sm" @click="later">📥 Excel</button>
+        <button class="btn btn-ghost btn-sm" @click="exportWorkLogExcel">📥 Excel</button>
     </div>
     <table class="data-table">
         <thead>

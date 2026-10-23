@@ -92,7 +92,7 @@ export function convertLeadToClient(lead: LeadRow): void {
 }
 
 /** Functions of other modules: orders (M09). */
-export const ORDERS_LATER = 'Заказы покупателей появятся после переноса раздела «Продажи».';
+export const ORDERS_LATER = 'Создание заказа появится после решений по сохраняемой цене и составу заказа (D-02, D-12).';
 
 // ── «→ Следующий этап» (legacy crmMoveToNextStage, CRM_STAGE_ORDER) ──
 /** Stage of a lead in the funnel order: «Контакт» and «Встреча» stand in «Квалификация», a new lead is «Лид». */

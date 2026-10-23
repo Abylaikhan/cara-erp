@@ -116,7 +116,7 @@ class MrpController extends Controller
                     'key' => $o->num.'|'.$i->line_no, 'num' => $o->num, 'pos' => $i->line_no + 1, 'channel' => $o->channel,
                     'date' => $o->due_date?->format('d.m.Y'), 'ship' => $o->delivery_date?->format('d.m.Y'),
                     'dateIso' => $o->due_date?->format('Y-m-d'), 'shipIso' => $o->delivery_date?->format('Y-m-d'),
-                    'name' => $i->name, 'category' => $i->category,
+                    'name' => $i->name, 'category' => $i->category, 'qty' => (float) $i->getRawOriginal('qty'),
                     'chars' => implode(', ', array_map(fn ($v) => is_array($v) ? implode(',', $v) : (string) $v, $chars)),
                     'stages' => collect($p?->stages ?? [])->map(fn ($s) => [
                         'stage' => (string) ($s['stage'] ?? ''), 'workshop' => (string) ($s['workshop'] ?? ''),

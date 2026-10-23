@@ -40,6 +40,7 @@ class ChannelIsolationTest extends TestCase
         // the salon payroll lines carry no channel (legacy shows them to every account of the page): nothing of a channel is in them
         'salon_report' => ['SalonReport', ['payroll']],
         'mrp' => ['Mrp', ['work', 'worksheet']],
+        'esf' => ['Esf', ['recon']],
     ];
 
     /** @var array<string, array{lead: int, file: int, order: string}> */

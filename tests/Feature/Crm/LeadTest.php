@@ -225,6 +225,7 @@ class LeadTest extends TestCase
                 ->where('leads', [])
                 ->where('tasks', [])
                 ->where('managers', [])
+                ->where('taskManagers', [])
                 ->where('clientsCount', 0)
                 ->reloadOnly('clientOrders', fn (Assert $reload) => $reload->where('clientOrders', []))
                 ->reloadOnly('boardOrders', fn (Assert $reload) => $reload->where('boardOrders', [])));

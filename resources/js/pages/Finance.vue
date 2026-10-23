@@ -42,7 +42,7 @@ const LATER: Partial<Record<Tab, string>> = {
     osv: 'Оборотно-сальдовая ведомость появится вместе с зарплатой и технологическими картами (ERP-061, решение D-11).',
     activity: 'P&L по видам деятельности появится вместе со сдельной оплатой и технологическими картами (ERP-063, решения D-11 и D-12).',
 };
-const excelLater = () => window.alert('Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067).');
+const excelLater = () => window.alert('Выгрузка P&L в Excel появится вместе с отчётом P&L (ERP-060, решения D-11 и D-12).');
 
 // ── Period (legacy setFinancePeriod; dates are calendar dates, no time zone shift) ──
 const MN = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
@@ -178,7 +178,7 @@ const arRecords = computed<ArRecord[]>(() => {
             </div>
 
             <div id="finance-ar" :style="{ display: tab === 'ar' ? 'block' : 'none' }">
-                <ArTab :records="arRecords" />
+                <ArTab :records="arRecords" :today="props.today" />
             </div>
  <div id="finance-purchases" :style="{ display: tab === 'purchases' ? 'block' : 'none' }">
                 <PurchasesTab :data="props.purchases" :today="props.today" :active="tab === 'purchases'" />

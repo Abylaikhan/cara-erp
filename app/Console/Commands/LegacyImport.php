@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Legacy\Importers\AppUserImporter;
 use App\Legacy\Importers\BankStatementImporter;
 use App\Legacy\Importers\CrmTaskImporter;
 use App\Legacy\Importers\CustomerImporter;
@@ -38,7 +39,7 @@ use RuntimeException;
  */
 class LegacyImport extends Command
 {
-    protected $signature = 'legacy:import {entity : all | expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects | salon_worksheet | bank_statements | staff | salary_accruals | wage_items | salon_payroll | sales_worksheet | production_worksheet}
+    protected $signature = 'legacy:import {entity : all | app_users | expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects | salon_worksheet | bank_statements | staff | salary_accruals | wage_items | salon_payroll | sales_worksheet | production_worksheet}
         {--snapshot= : Snapshot id (default: the latest loaded)}
         {--dry-run : Import, verify and roll back: nothing is written}
         {--errors= : File for every problem of a refused set (keep it in .local-audit: it names legacy rows)}';
@@ -47,6 +48,7 @@ class LegacyImport extends Command
 
     /** @var array<string, class-string> */
     private const IMPORTERS = [
+        'app_users' => AppUserImporter::class, // the accounts: the built-in roles of legacy with app_users laid over (D-13)
         'expense_categories' => ExpenseCategoryImporter::class,
         'products' => ProductImporter::class,
         'customers' => CustomerImporter::class,

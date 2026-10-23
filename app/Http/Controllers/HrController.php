@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\EmployeeChange;
 use App\Models\EmployeeSalaryHistory;
+use App\Models\User;
+use App\Services\UserAccountService;
 use App\Support\Erp;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -50,7 +52,12 @@ class HrController extends Controller
             'counts' => ['total' => $all->count(), 'prod' => $all->filter(fn ($e) => $type($e) === 'prod')->count(), 'aup' => $all->filter(fn ($e) => $type($e) === 'aup')->count()],
             'salonManager' => $salonManager,
             'canSeePin' => in_array($user->role, ['director', 'hr'], true),
-            'canManageUsers' => in_array($user->role, ['director', 'hr'], true),
+            'canManageUsers' => UserAccountService::canManage($user),
+            // «Пользователи» (legacy renderUsersTable): the accounts in the order of the built-in roles, then the others; never a
+            // password. Only the director and HR get them.
+            'accounts' => UserAccountService::canManage($user) ? $this->accounts() : [],
+            'roleTemplates' => UserAccountService::canManage($user)
+                ? collect(config('erp.roles'))->map(fn (array $r) => ['label' => $r['label'], 'channel' => $r['channel'] ?? '', 'pages' => $r['pages']])->all() : [],
             'canSeeCommissions' => $canSeeCommissions,
             'canDismiss' => in_array($user->role, ['director', 'hr'], true) || $salonManager,
             'employees' => $shown->map(fn (Employee $e) => [
@@ -92,5 +99,20 @@ class HrController extends Controller
                 ])->values(),
             ])->values(),
         ]);
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function accounts(): array
+    {
+        $order = array_flip(array_keys(config('erp.roles')));
+
+        return User::query()->orderBy('id')->get()
+            ->sortBy(fn (User $u) => [$u->role !== null && isset($order[$u->login]) ? 0 : 1, $order[$u->login] ?? 0, $u->id])
+            ->map(fn (User $u) => [
+                'id' => $u->id, 'login' => $u->login, 'name' => $u->name, 'label' => $u->sidebarCard()['roleLabel'] === '—' ? '' : $u->sidebarCard()['roleLabel'],
+                'channel' => (string) $u->channel, 'pages' => UserAccountService::currentPages($u), 'active' => $u->is_active, 'lock_version' => $u->lock_version,
+                // legacy: «код + база» — a built-in role with its record, «база» — a record alone, «встроенный» — the role alone
+                'source' => $u->role === null ? 'база' : ($u->pages !== null || $u->role_label !== null ? 'код + база' : 'встроенный'),
+            ])->values()->all();
     }
 }

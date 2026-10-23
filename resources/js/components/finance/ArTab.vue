@@ -5,9 +5,10 @@
 // used a fixed demo date). «💳 Оплата» posts money and waits for ERP-031…033.
 import { computed, ref } from 'vue';
 import { fmtCurrency } from '@/lib/sales';
+import { downloadXlsx } from '@/lib/xlsx';
 import type { FinanceOrder } from '@/pages/Finance.vue';
 
-const props = defineProps<{ records: ArRecord[] }>();
+const props = defineProps<{ records: ArRecord[]; today: string }>();
 export interface ArRecord {
     order: FinanceOrder;
     customer: string;
@@ -72,7 +73,38 @@ const byCustomer = computed(() => {
     return [...map.entries()].sort((a, b) => b[1].debt - a[1].debt);
 });
 const payLater = () => window.alert('Приём оплаты по заказу появится вместе с проведением денег (ERP-031…033, решения D-03 и D-11).');
-const excelLater = () => window.alert('Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067).');
+// Legacy exportARtoExcel (L25993), ADR-0044: every record, most overdue first; the report is dated today (legacy wrote its fixed
+// demo date — ADR-0002, item 117).
+function exportARtoExcel(): void {
+    const recs = [...all.value].sort((a, b) => (b.overdueDays ?? -999) - (a.overdueDays ?? -999));
+    const dmy = props.today.split('-').reverse().join('.');
+    void downloadXlsx('finance', 'PromTech_AR_' + props.today + '.xlsx', [
+        {
+            name: 'Дебиторка',
+            rows: [
+                ['РЕЕСТР ДЕБИТОРСКОЙ ЗАДОЛЖЕННОСТИ — PromTech'],
+                ['Дата отчёта:', dmy],
+                [],
+                ['Заказ', 'Клиент', 'Ответственный', 'Сумма заказа', 'Оплачено', '% оплаты', 'Долг', 'Срок оплаты', 'Дней просрочки', 'Статус'],
+                ...recs.map((r) => [
+                    r.order.num,
+                    r.customer,
+                    r.order.seller || '',
+                    r.total,
+                    r.paid,
+                    r.order.payment + '%',
+                    Math.round(r.debt),
+                    r.order.payment_due || '—',
+                    r.overdueDays !== null ? r.overdueDays : '—',
+                    (r.overdueDays ?? 0) > 30 ? 'Критично' : (r.overdueDays ?? 0) > 0 ? 'Просрочено' : r.overdueDays === null ? 'Срок не задан' : 'В срок',
+                ]),
+                [],
+                ['ИТОГО', '', '', recs.reduce((s, r) => s + r.total, 0), '', '', Math.round(recs.reduce((s, r) => s + r.debt, 0))],
+            ],
+            cols: [10, 28, 16, 16, 14, 10, 14, 14, 16, 12],
+        },
+    ]);
+}
 const fillClass = (p: number) => (p >= 75 ? 'green' : p >= 30 ? 'amber' : 'red');
 </script>
 
@@ -93,7 +125,7 @@ const fillClass = (p: number) => (p >= 75 ? 'green' : p >= 30 ? 'amber' : 'red')
                     <option value="overdue">Просроченные</option>
                     <option value="current">Текущие</option>
                 </select>
-                <button class="btn btn-ghost btn-sm" @click="excelLater">📥 Excel</button>
+                <button class="btn btn-ghost btn-sm" @click="exportARtoExcel">📥 Excel</button>
             </div>
         </div>
         <table class="data-table">

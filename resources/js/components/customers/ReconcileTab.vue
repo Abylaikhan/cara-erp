@@ -4,6 +4,7 @@
 // orders: shipment (total) as debit, payment by the paid share as credit, running balance, KPIs; a payment row opens the
 // operations with the order's number. Rows go by the order date in calendar order (legacy compared «дд.мм.гггг» as text). The
 // order form waits for ERP-029/030, Excel for ERP-067.
+import { downloadXlsx, ruToday, tableCells } from '@/lib/xlsx';
 import { router } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import DrilldownModal from '@/components/DrilldownModal.vue';
@@ -84,7 +85,10 @@ async function openRecDrillTx(num: string): Promise<void> {
         { key: 'amount', label: 'Сумма', num: true, color: 'var(--green)' },
     ]);
 }
-const excelLater = () => window.alert('Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067).');
+// Legacy exportReconcileExcel (L20111), ADR-0044: the act as it stands on the screen.
+function exportReconcileExcel(): void {
+    void downloadXlsx('customers', 'Сверка_' + ruToday() + '.xlsx', [{ name: 'Сверка', rows: [['Дата', 'Документ', 'Операция', 'Дебет', 'Кредит', 'Сальдо'], ...tableCells('#rec-tbody')] }]);
+}
 const printReconcile = () => window.print();
 const balColor = (b: number) => (b > 0 ? 'var(--red)' : b < 0 ? 'var(--green)' : 'var(--text3)');
 </script>
@@ -104,7 +108,7 @@ const balColor = (b: number) => (b > 0 ? 'var(--red)' : b < 0 ? 'var(--green)' :
         <span style="color: var(--text3)">—</span>
         <input id="rec-date-to" v-model="f.to" type="date" style="font-size: 13px" />
         <button class="btn btn-ghost btn-sm" @click="printReconcile">🖨 Распечатать</button>
-        <button class="btn btn-ghost btn-sm" @click="excelLater">📥 Excel</button>
+        <button class="btn btn-ghost btn-sm" @click="exportReconcileExcel">📥 Excel</button>
     </div>
 
     <div id="rec-kpi" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px">

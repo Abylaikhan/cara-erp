@@ -73,7 +73,7 @@ modal,advanceModal,,advanceModal,6746,M12 Деньги,NOT_STARTED,ERP-035 (D-03
 modal,expCatModal,,expCatModal,6914,M14 Статьи расходов,IMPLEMENTED,resources/js/components/ErpModal.vue,
 modal,expCatMergeModal,,expCatMergeModal,6956,M14 Статьи расходов,IMPLEMENTED,resources/js/components/ErpModal.vue,
 modal,chOrderModal,,chOrderModal,7046,M13 Центры прибыли,PENDING_DECISION,D-15,
-modal,userModal,,userModal,7412,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
+modal,userModal,,userModal,7412,M17 Сотрудники,IMPLEMENTED,resources/js/components/ErpModal.vue,
 modal,payrollEntryModal,,payrollEntryModal,7494,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 modal,payrollCardModal,,payrollCardModal,7545,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 modal,employeeCardModal,,employeeCardModal,7561,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
@@ -486,27 +486,27 @@ control,page-esf|L3152,option,page-esf,3152,M05 Входящие ЭСФ,IMPLEMEN
 control,page-esf|L3153,option,page-esf,3153,M05 Входящие ЭСФ,IMPLEMENTED,label,📦 Товары
 control,page-esf|input|esf-from,input,page-esf,3155,M05 Входящие ЭСФ,IMPLEMENTED,id,
 control,page-esf|input|esf-to,input,page-esf,3156,M05 Входящие ЭСФ,IMPLEMENTED,id,
-control,page-esf|button|esf-recon-automatch-btn,button,page-esf,3177,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),🔍 Найти очевидные совпадения (авто)
-control,page-esf|button|esf-recon-autodist-btn,button,page-esf,3181,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),🤖 Разнести свободные ЭСФ (платежи → авансовые отчёты)
-control,page-esf|L3186,button,page-esf,3186,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),🧹 Проверить связи с авансовыми отчётами
-control,page-esf|div|esf-recon-tab-moneytx,div,page-esf,3195,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Платежи РС/касса
-control,page-esf|div|esf-recon-tab-advance,div,page-esf,3196,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Авансовые отчёты
-control,page-esf|input|esf-recon-payment-search,input,page-esf,3198,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),
-control,page-esf|input|esf-recon-show-all,input,page-esf,3202,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),
-control,page-esf|L3206,th,page-esf,3206,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),
-control,page-esf|L3206#2,th,page-esf,3206,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Дата
-control,page-esf|L3206#3,th,page-esf,3206,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Кто
-control,page-esf|L3206#4,th,page-esf,3206,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Сумма
-control,page-esf|L3206#5,th,page-esf,3206,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Привязано
-control,page-esf|L3213,button,page-esf,3213,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Снять отметки
-control,page-esf|input|esf-recon-esf-search,input,page-esf,3220,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),
-control,page-esf|L3225,th,page-esf,3225,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),
-control,page-esf|L3225#2,th,page-esf,3225,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Дата
-control,page-esf|L3225#3,th,page-esf,3225,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Поставщик
-control,page-esf|L3225#4,th,page-esf,3225,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),№ ЭСФ
-control,page-esf|L3225#5,th,page-esf,3225,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Сумма
-control,page-esf|L3232,button,page-esf,3232,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Очистить выбор
-control,page-esf|button|esf-recon-save-btn,button,page-esf,3233,M05 Входящие ЭСФ,NOT_STARTED,ERP-048 (D-10),Сохранить связи
+control,page-esf|button|esf-recon-automatch-btn,button,page-esf,3177,M05 Входящие ЭСФ,NOT_STARTED,"present, its action comes later — esfReconAutoMatch: requirement M05.RECON_LINKS (DEC-10)",🔍 Найти очевидные совпадения (авто)
+control,page-esf|button|esf-recon-autodist-btn,button,page-esf,3181,M05 Входящие ЭСФ,NOT_STARTED,"present, its action comes later — esfReconAutoDistribute: requirement M05.RECON_LINKS (DEC-10)",🤖 Разнести свободные ЭСФ (платежи → авансовые отчёты)
+control,page-esf|L3186,button,page-esf,3186,M05 Входящие ЭСФ,IMPLEMENTED,label,🧹 Проверить связи с авансовыми отчётами
+control,page-esf|div|esf-recon-tab-moneytx,div,page-esf,3195,M05 Входящие ЭСФ,IMPLEMENTED,id,Платежи РС/касса
+control,page-esf|div|esf-recon-tab-advance,div,page-esf,3196,M05 Входящие ЭСФ,IMPLEMENTED,id,Авансовые отчёты
+control,page-esf|input|esf-recon-payment-search,input,page-esf,3198,M05 Входящие ЭСФ,IMPLEMENTED,id,
+control,page-esf|input|esf-recon-show-all,input,page-esf,3202,M05 Входящие ЭСФ,IMPLEMENTED,id,
+control,page-esf|L3206,th,page-esf,3206,M05 Входящие ЭСФ,IMPLEMENTED,an empty column header: its table is compared visually,
+control,page-esf|L3206#2,th,page-esf,3206,M05 Входящие ЭСФ,IMPLEMENTED,label,Дата
+control,page-esf|L3206#3,th,page-esf,3206,M05 Входящие ЭСФ,IMPLEMENTED,label,Кто
+control,page-esf|L3206#4,th,page-esf,3206,M05 Входящие ЭСФ,IMPLEMENTED,label,Сумма
+control,page-esf|L3206#5,th,page-esf,3206,M05 Входящие ЭСФ,IMPLEMENTED,label,Привязано
+control,page-esf|L3213,button,page-esf,3213,M05 Входящие ЭСФ,IMPLEMENTED,label,Снять отметки
+control,page-esf|input|esf-recon-esf-search,input,page-esf,3220,M05 Входящие ЭСФ,IMPLEMENTED,id,
+control,page-esf|L3225,th,page-esf,3225,M05 Входящие ЭСФ,IMPLEMENTED,an empty column header: its table is compared visually,
+control,page-esf|L3225#2,th,page-esf,3225,M05 Входящие ЭСФ,IMPLEMENTED,label,Дата
+control,page-esf|L3225#3,th,page-esf,3225,M05 Входящие ЭСФ,IMPLEMENTED,label,Поставщик
+control,page-esf|L3225#4,th,page-esf,3225,M05 Входящие ЭСФ,IMPLEMENTED,label,№ ЭСФ
+control,page-esf|L3225#5,th,page-esf,3225,M05 Входящие ЭСФ,IMPLEMENTED,label,Сумма
+control,page-esf|L3232,button,page-esf,3232,M05 Входящие ЭСФ,IMPLEMENTED,label,Очистить выбор
+control,page-esf|button|esf-recon-save-btn,button,page-esf,3233,M05 Входящие ЭСФ,NOT_STARTED,"present, its action comes later — esfReconSaveLinks: requirement M05.RECON_LINKS (DEC-10)",Сохранить связи
 control,esfDetailModal|L3247,button,esfDetailModal,3247,M05 Входящие ЭСФ,IMPLEMENTED,label,✕
 control,esfDetailModal|L3251,button,esfDetailModal,3251,M05 Входящие ЭСФ,IMPLEMENTED,label,Закрыть
 control,esfDetailModal|button|esf-create-expense-btn,button,esfDetailModal,3252,M05 Входящие ЭСФ,NOT_STARTED,"present, its action comes later — createExpenseFromEsf: requirement M05.EXPENSE_STOCK (DEC-04)",💳 Создать расход
@@ -1850,62 +1850,62 @@ control,page-hr|L7372,th,page-hr,7372,M17 Сотрудники,IMPLEMENTED,label
 control,page-hr|L7372#2,th,page-hr,7372,M17 Сотрудники,IMPLEMENTED,label,Разряд
 control,page-hr|L7372#3,th,page-hr,7372,M17 Сотрудники,IMPLEMENTED,label,Ставка ₸/шт
 control,page-hr|L7372#4,th,page-hr,7372,M17 Сотрудники,IMPLEMENTED,an empty column header: its table is compared visually,
-control,page-hr|L7380,button,page-hr,7380,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),+ Новый пользователь
-control,page-hr|L7386,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Логин
-control,page-hr|L7386#2,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Имя
-control,page-hr|L7386#3,th,page-hr,7386,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Роль
-control,page-hr|L7387,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Разделы
-control,page-hr|L7387#2,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Пароль
-control,page-hr|L7387#3,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Код ЗП
-control,page-hr|L7387#4,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Статус
-control,page-hr|L7387#5,th,page-hr,7387,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),
-control,page-hr|L7397,button,page-hr,7397,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),🔑 Выдать 6-значные коды
-control,page-hr|input|users-staff-q,input,page-hr,7398,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),
-control,page-hr|select|users-staff-filter,select,page-hr,7399,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Все Без кода ЗП Со старым 4-значным кодом Без входа в систему С входом в систему
-control,page-hr|L7400,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Все
-control,page-hr|L7400#2,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Без кода ЗП
-control,page-hr|L7400#3,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Со старым 4-значным кодом
-control,page-hr|L7400#4,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Без входа в систему
-control,page-hr|L7400#5,option,page-hr,7400,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),С входом в систему
-control,page-hr|L7405,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Сотрудник
-control,page-hr|L7405#2,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Должность
-control,page-hr|L7405#3,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Код ЗП
-control,page-hr|L7405#4,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),Вход в систему
-control,page-hr|L7405#5,th,page-hr,7405,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),
-control,userModal|L7416,button,userModal,7416,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),✕
-control,userModal|input|u-login,input,userModal,7421,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
-control,userModal|input|u-password,input,userModal,7426,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
-control,userModal|L7427,button,userModal,7427,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),🎲
-control,userModal|input|u-name,input,userModal,7432,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
-control,userModal|input|u-label,input,userModal,7436,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
-control,userModal|select|u-role-template,select,userModal,7440,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),— выбрать шаблон — Менеджер продаж Кладовщик Начальник цеха Бухгалтер HR-менедже
-control,userModal|L7441,option,userModal,7441,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),— выбрать шаблон —
-control,userModal|L7442,option,userModal,7442,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Менеджер продаж
-control,userModal|L7443,option,userModal,7443,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Кладовщик
-control,userModal|L7444,option,userModal,7444,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Начальник цеха
-control,userModal|L7445,option,userModal,7445,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Бухгалтер
-control,userModal|L7446,option,userModal,7446,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),HR-менеджер
-control,userModal|L7447,option,userModal,7447,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Менеджер закупок
-control,userModal|L7448,option,userModal,7448,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7449,option,userModal,7449,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7450,option,userModal,7450,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7451,option,userModal,7451,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7452,option,userModal,7452,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7453,option,userModal,7453,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7454,option,userModal,7454,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|select|u-channel,select,userModal,7459,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),— офис (нет ограничений) — Салон Армада Салон Назарбаева Дилер Астана Дилер Акта
-control,userModal|L7460,option,userModal,7460,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),— офис (нет ограничений) —
-control,userModal|L7461,option,userModal,7461,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7462,option,userModal,7462,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7463,option,userModal,7463,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7464,option,userModal,7464,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7465,option,userModal,7465,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7466,option,userModal,7466,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|L7467,option,userModal,7467,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),‹скрыто›
-control,userModal|button|u-delete-btn,button,userModal,7480,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),🗑 Удалить
-control,userModal|L7483,button,userModal,7483,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Отмена
-control,userModal|L7484,button,userModal,7484,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),💾 Сохранить
-control,userModal|input|u-edit-id,input,userModal,7487,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
+control,page-hr|L7380,button,page-hr,7380,M17 Сотрудники,IMPLEMENTED,label,+ Новый пользователь
+control,page-hr|L7386,th,page-hr,7386,M17 Сотрудники,IMPLEMENTED,label,Логин
+control,page-hr|L7386#2,th,page-hr,7386,M17 Сотрудники,IMPLEMENTED,label,Имя
+control,page-hr|L7386#3,th,page-hr,7386,M17 Сотрудники,IMPLEMENTED,label,Роль
+control,page-hr|L7387,th,page-hr,7387,M17 Сотрудники,IMPLEMENTED,label,Разделы
+control,page-hr|L7387#2,th,page-hr,7387,M17 Сотрудники,IMPLEMENTED,label,Пароль
+control,page-hr|L7387#3,th,page-hr,7387,M17 Сотрудники,IMPLEMENTED,label,Код ЗП
+control,page-hr|L7387#4,th,page-hr,7387,M17 Сотрудники,IMPLEMENTED,label,Статус
+control,page-hr|L7387#5,th,page-hr,7387,M17 Сотрудники,IMPLEMENTED,an empty column header: its table is compared visually,
+control,page-hr|L7397,button,page-hr,7397,M17 Сотрудники,NOT_STARTED,"present, its action comes later — usrReissuePins: requirement AUTH-01.USERS_PIN (DEC-13)",🔑 Выдать 6-значные коды
+control,page-hr|input|users-staff-q,input,page-hr,7398,M17 Сотрудники,IMPLEMENTED,id,
+control,page-hr|select|users-staff-filter,select,page-hr,7399,M17 Сотрудники,IMPLEMENTED,id,Все Без кода ЗП Со старым 4-значным кодом Без входа в систему С входом в систему
+control,page-hr|L7400,option,page-hr,7400,M17 Сотрудники,IMPLEMENTED,label,Все
+control,page-hr|L7400#2,option,page-hr,7400,M17 Сотрудники,IMPLEMENTED,label,Без кода ЗП
+control,page-hr|L7400#3,option,page-hr,7400,M17 Сотрудники,IMPLEMENTED,label,Со старым 4-значным кодом
+control,page-hr|L7400#4,option,page-hr,7400,M17 Сотрудники,IMPLEMENTED,label,Без входа в систему
+control,page-hr|L7400#5,option,page-hr,7400,M17 Сотрудники,IMPLEMENTED,label,С входом в систему
+control,page-hr|L7405,th,page-hr,7405,M17 Сотрудники,IMPLEMENTED,label,Сотрудник
+control,page-hr|L7405#2,th,page-hr,7405,M17 Сотрудники,IMPLEMENTED,label,Должность
+control,page-hr|L7405#3,th,page-hr,7405,M17 Сотрудники,IMPLEMENTED,label,Код ЗП
+control,page-hr|L7405#4,th,page-hr,7405,M17 Сотрудники,IMPLEMENTED,label,Вход в систему
+control,page-hr|L7405#5,th,page-hr,7405,M17 Сотрудники,IMPLEMENTED,an empty column header: its table is compared visually,
+control,userModal|L7416,button,userModal,7416,M17 Сотрудники,IMPLEMENTED,label,✕
+control,userModal|input|u-login,input,userModal,7421,M17 Сотрудники,IMPLEMENTED,id,
+control,userModal|input|u-password,input,userModal,7426,M17 Сотрудники,IMPLEMENTED,id,
+control,userModal|L7427,button,userModal,7427,M17 Сотрудники,IMPLEMENTED,label,🎲
+control,userModal|input|u-name,input,userModal,7432,M17 Сотрудники,IMPLEMENTED,id,
+control,userModal|input|u-label,input,userModal,7436,M17 Сотрудники,IMPLEMENTED,id,
+control,userModal|select|u-role-template,select,userModal,7440,M17 Сотрудники,IMPLEMENTED,id,— выбрать шаблон — Менеджер продаж Кладовщик Начальник цеха Бухгалтер HR-менедже
+control,userModal|L7441,option,userModal,7441,M17 Сотрудники,IMPLEMENTED,label,— выбрать шаблон —
+control,userModal|L7442,option,userModal,7442,M17 Сотрудники,IMPLEMENTED,label,Менеджер продаж
+control,userModal|L7443,option,userModal,7443,M17 Сотрудники,IMPLEMENTED,label,Кладовщик
+control,userModal|L7444,option,userModal,7444,M17 Сотрудники,IMPLEMENTED,label,Начальник цеха
+control,userModal|L7445,option,userModal,7445,M17 Сотрудники,IMPLEMENTED,label,Бухгалтер
+control,userModal|L7446,option,userModal,7446,M17 Сотрудники,IMPLEMENTED,label,HR-менеджер
+control,userModal|L7447,option,userModal,7447,M17 Сотрудники,IMPLEMENTED,label,Менеджер закупок
+control,userModal|L7448,option,userModal,7448,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7449,option,userModal,7449,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7450,option,userModal,7450,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7451,option,userModal,7451,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7452,option,userModal,7452,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7453,option,userModal,7453,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7454,option,userModal,7454,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|select|u-channel,select,userModal,7459,M17 Сотрудники,IMPLEMENTED,id,— офис (нет ограничений) — Салон Армада Салон Назарбаева Дилер Астана Дилер Акта
+control,userModal|L7460,option,userModal,7460,M17 Сотрудники,IMPLEMENTED,label,— офис (нет ограничений) —
+control,userModal|L7461,option,userModal,7461,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7462,option,userModal,7462,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7463,option,userModal,7463,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7464,option,userModal,7464,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7465,option,userModal,7465,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7466,option,userModal,7466,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|L7467,option,userModal,7467,M17 Сотрудники,IMPLEMENTED,label,‹скрыто›
+control,userModal|button|u-delete-btn,button,userModal,7480,M17 Сотрудники,DECIDED,ADR-0046,🗑 Удалить
+control,userModal|L7483,button,userModal,7483,M17 Сотрудники,IMPLEMENTED,label,Отмена
+control,userModal|L7484,button,userModal,7484,M17 Сотрудники,IMPLEMENTED,label,💾 Сохранить
+control,userModal|input|u-edit-id,input,userModal,7487,M17 Сотрудники,DUPLICATE,ADR-0046,
 control,payrollEntryModal|L7498,button,payrollEntryModal,7498,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),✕
 control,payrollEntryModal|input|pe-emp-id,input,payrollEntryModal,7501,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 control,payrollEntryModal|input|pe-period,input,payrollEntryModal,7502,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
@@ -2377,8 +2377,8 @@ function,pinLockMsg#1,,,1642,"M22 Мой кабинет, UI оболочка",NO
 function,pinPadPress#1,,,1644,UI оболочка,NOT_STARTED,requirement AUTH-01.PIN (DEC-13),
 function,updateLoginPinDisplay#1,,,1658,"M22 Мой кабинет, UI оболочка",NOT_STARTED,requirement AUTH-01.PIN (DEC-13),
 function,checkLoginPin#1,,,1666,UI оболочка,NOT_STARTED,requirement AUTH-01.PIN (DEC-13),
-function,dbUsersApply#1,,,1719,"M17 Сотрудники, UI оболочка",NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,dbUsersRefresh#1,,,1746,"M17 Сотрудники, UI оболочка",NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
+function,dbUsersApply#1,,,1719,"M17 Сотрудники, UI оболочка",IMPLEMENTED,requirement AUTH-01.USERS_DB,
+function,dbUsersRefresh#1,,,1746,"M17 Сотрудники, UI оболочка",IMPLEMENTED,requirement AUTH-01.USERS_DB,
 function,doLogin#1,,,1752,UI оболочка,IMPLEMENTED,"requirement AUTH-01.ROLES, UI-01.LOGIN",
 function,fillLogin#1,,,1855,UI оболочка,IMPLEMENTED,requirement UI-01.LOGIN,
 function,doLogout#1,,,1861,UI оболочка,IMPLEMENTED,requirement UI-01.LOGIN,
@@ -2513,42 +2513,42 @@ function,updateTxCounterpartyField#1,,,11782,M12 Деньги,NOT_STARTED,by its
 function,onTxSubcatChange#1,,,11787,M12 Деньги,NOT_STARTED,by its controls: ERP-031 (D-03/D-11),
 function,filterSupplierOpts#1,,,11793,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,onSupplierSelChange#1,,,11814,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,showEsfTab#1,,,11830,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.LIST,
+function,showEsfTab#1,,,11830,M05 Входящие ЭСФ,IMPLEMENTED,"requirement M05.LIST, M05.RECON",
 function,ensureEsfLinksLoaded#1,,,11855,"M05 Входящие ЭСФ, M12 Деньги, UI оболочка",IMPLEMENTED,requirement MIG-02.M05,
 function,esfLinkedAmount#1,,,11864,"M05 Входящие ЭСФ, M12 Деньги",IMPLEMENTED,requirement M05.LIST,
 function,esfLinkedToSource#1,,,11868,"M12 Деньги, M15 Касса салона",IMPLEMENTED,named in app/Http/Controllers/MoneyController.php,
-function,esfReconNorm#1,,,11872,"M05 Входящие ЭСФ, M12 Деньги",NOT_STARTED,by its controls: ERP-031 (D-03/D-11); ERP-035 (D-03); ERP-048 (D-10),
-function,esfReconLog#1,,,11873,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,initEsfRecon#1,,,11880,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON (DEC-10),
-function,esfReconLinked#1,,,11906,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconRemaining#1,,,11909,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconSourceLinked#1,,,11910,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconSourceAmount#1,,,11913,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconIsLegalCounterparty#1,,,11916,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconRefreshLinks#1,,,11918,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconSyncSelectedFromLinks#1,,,11922,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconRenderAll#1,,,11932,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconSetSourceTab#1,,,11951,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconGetPaymentRows#1,,,11962,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconRenderPayments#1,,,11976,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconToggleChecked#1,,,11997,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconRecomputeActiveSource#1,,,12005,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconUpdatePoolBar#1,,,12037,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconClearPool#1,,,12045,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconGetEsfCandidates#1,,,12052,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconRenderEsfCandidates#1,,,12090,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconSelectedSum#1,,,12117,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconUpdateSumInfo#1,,,12124,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconOnToggleEsf#1,,,12135,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconClearSelection#1,,,12140,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconPostLink#1,,,12145,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconSavePoolLinks#1,,,12151,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconSaveLinks#1,,,12185,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON (DEC-10),
-function,esfReconAutoMatch#1,,,12229,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON (DEC-10),
-function,esfReconDaysBetween#1,,,12284,"M05 Входящие ЭСФ, M12 Деньги",NOT_STARTED,by its controls: ERP-031 (D-03/D-11); ERP-035 (D-03); ERP-048 (D-10),
-function,esfReconAuditAdvanceLinks#1,,,12290,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON (DEC-10),
-function,esfReconDeleteAuditLink#1,,,12324,M05 Входящие ЭСФ,NOT_STARTED,by its controls: ERP-048 (D-10),
-function,esfReconAutoDistribute#1,,,12339,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON (DEC-10),
+function,esfReconNorm#1,,,11872,"M05 Входящие ЭСФ, M12 Деньги",IMPLEMENTED,requirement M05.RECON,
+function,esfReconLog#1,,,11873,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
+function,initEsfRecon#1,,,11880,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconLinked#1,,,11906,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconRemaining#1,,,11909,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconSourceLinked#1,,,11910,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconSourceAmount#1,,,11913,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconIsLegalCounterparty#1,,,11916,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconRefreshLinks#1,,,11918,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
+function,esfReconSyncSelectedFromLinks#1,,,11922,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
+function,esfReconRenderAll#1,,,11932,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconSetSourceTab#1,,,11951,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconGetPaymentRows#1,,,11962,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconRenderPayments#1,,,11976,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconToggleChecked#1,,,11997,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconRecomputeActiveSource#1,,,12005,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconUpdatePoolBar#1,,,12037,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconClearPool#1,,,12045,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconGetEsfCandidates#1,,,12052,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconRenderEsfCandidates#1,,,12090,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconSelectedSum#1,,,12117,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconUpdateSumInfo#1,,,12124,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconOnToggleEsf#1,,,12135,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconClearSelection#1,,,12140,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconPostLink#1,,,12145,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
+function,esfReconSavePoolLinks#1,,,12151,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
+function,esfReconSaveLinks#1,,,12185,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
+function,esfReconAutoMatch#1,,,12229,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
+function,esfReconDaysBetween#1,,,12284,"M05 Входящие ЭСФ, M12 Деньги",NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
+function,esfReconAuditAdvanceLinks#1,,,12290,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.RECON,
+function,esfReconDeleteAuditLink#1,,,12324,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
+function,esfReconAutoDistribute#1,,,12339,M05 Входящие ЭСФ,NOT_STARTED,requirement M05.RECON_LINKS (DEC-10),
 function,initEsfPage#1,,,12429,M05 Входящие ЭСФ,IMPLEMENTED,"requirement M05.LIST, MIG-02.M05",
 function,filterEsfUnreconciled#1,,,12477,M05 Входящие ЭСФ,IMPLEMENTED,requirement M05.LIST,
 function,abbreviateLegalForm#1,,,12498,M06 Поставщики,IMPLEMENTED,requirement M05.IMPORT,
@@ -2866,26 +2866,26 @@ function,occupiedSlots#1,,,21696,M17 Сотрудники,IMPLEMENTED,named in r
 function,openStaffDeptModal#1,,,21777,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
 function,openStaffPositionModal#1,,,21790,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),
 function,showHRTab#1,,,21835,M17 Сотрудники,IMPLEMENTED,requirement M17.STAFF,
-function,loadAppUsers#1,,,21878,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,usrEsc#1,,,21892,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
-function,usrNorm#1,,,21893,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
-function,usrSameName#1,,,21894,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
-function,usrPages#1,,,21899,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
+function,loadAppUsers#1,,,21878,—,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,usrEsc#1,,,21892,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,usrNorm#1,,,21893,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,usrSameName#1,,,21894,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,usrPages#1,,,21899,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
 function,usrEmployeeByName#1,,,21903,M17 Сотрудники,NOT_STARTED,ERP-011 (D-13),
-function,renderUsersTable#1,,,21905,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,renderUsersStaffBlock#1,,,21941,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,usrSetPin#1,,,21965,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,usrReissuePins#1,,,21982,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,usrShowPinList#1,,,21999,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
-function,usrPrintPins#1,,,22010,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
+function,renderUsersTable#1,,,21905,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,renderUsersStaffBlock#1,,,21941,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,usrSetPin#1,,,21965,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_PIN (DEC-13),
+function,usrReissuePins#1,,,21982,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_PIN (DEC-13),
+function,usrShowPinList#1,,,21999,M17 Сотрудники,NOT_STARTED,"by its controls: present, its action comes later — usrReissuePins: requirement AUTH-01.USERS_PIN (DEC-13)",
+function,usrPrintPins#1,,,22010,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_PIN (DEC-13),
 function,genUniquePin#1,,,22017,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
-function,usrTranslit#1,,,22028,M17 Сотрудники,NOT_STARTED,by its controls: ERP-011 (D-13),
-function,usrCreateFor#1,,,22032,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,openUserModal#1,,,22045,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,saveAppUser#1,,,22077,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,toggleUserActive#1,,,22113,M17 Сотрудники,NOT_STARTED,requirement AUTH-01.USERS_DB (DEC-13),
-function,applyUserRoleTemplate#1,,,22134,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
-function,deleteAppUser#1,,,22150,M17 Сотрудники,NOT_STARTED,by its controls: ERP-053 (D-13),
+function,usrTranslit#1,,,22028,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,usrCreateFor#1,,,22032,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,openUserModal#1,,,22045,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,saveAppUser#1,,,22077,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,toggleUserActive#1,,,22113,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,applyUserRoleTemplate#1,,,22134,M17 Сотрудники,IMPLEMENTED,requirement AUTH-01.USERS_TAB,
+function,deleteAppUser#1,,,22150,M17 Сотрудники,DECIDED,ADR-0046,
 function,renderSalonCommissionsSettings#1,,,22163,M17 Сотрудники,IMPLEMENTED,requirement M17.COMMISSIONS,
 function,saveStaffFieldDirect#1,,,22261,M17 Сотрудники,NOT_STARTED,ERP-059 (D-06/D-13),
 function,showSalaryHistory#1,,,22270,M17 Сотрудники,IMPLEMENTED,requirement M17.COMMISSIONS,
@@ -3577,7 +3577,7 @@ function,openClientCard#1,,,40131,M10 CRM,IMPLEMENTED,requirement M10.CLIENTS,
 function,renderClients#1,,,40183,M08 Покупатели,PENDING_DECISION,D-15,
 function,populateClientPersonSelect#1,,,40366,—,PENDING_DECISION,D-15,
 table,advance_reports,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/MoneyImporter.php,
-table,app_users,,,,—,DECIDED,"legacy:control-totals: учётные записи заводятся заново, пароли и PIN не копируются; разделы пользователей — ERP-053, DEC-13",
+table,app_users,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/AppUserImporter.php,
 table,bank_statement_raw,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/BankStatementImporter.php,
 table,customers,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/CustomerImporter.php,
 table,esf_payment_links,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/IncomingInvoiceImporter.php,

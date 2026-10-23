@@ -5,6 +5,7 @@
 // to 2026). Transfers between own accounts are not movement of money.
 import { router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
+import { downloadXlsx } from '@/lib/xlsx';
 import DrilldownModal from '@/components/DrilldownModal.vue';
 
 export interface CfsTx {
@@ -128,7 +129,29 @@ function ddCFSSection(inCats: string[], outCats: string[], label: string): void 
         ],
     );
 }
-const excelLater = () => window.alert('Выгрузка в Excel появится вместе с остальными выгрузками (ERP-067).');
+// Legacy exportCFSExcel (L24040), ADR-0044: the period of the filter (legacy took its ends through UTC, a day early — ADR-0002,
+// item 73; without a period it wrote 2026-01-01 — 2026-12-31).
+function exportCFSExcel(): void {
+    const c = cfs.value;
+    const from = props.from || '2026-01-01';
+    const to = props.to || '2026-12-31';
+    const n = (v: number) => Math.round(v);
+    const rows: (string | number)[][] = [['Отчёт о движении денежных средств (ДДС)'], [`Период: ${from} — ${to}`], [], ['Статья', 'Поступления (₸)', 'Выплаты (₸)', 'Нетто (₸)'],
+        ['Остаток на начало периода', '', '', n(c.openBalance)]];
+    c.sections.forEach((sec) => {
+        if (sec.secIn === 0 && sec.secOut === 0) return;
+        rows.push([sec.label.replace(/^../, ''), '', '', '']);
+        [...sec.rows.values()].forEach((r) => {
+            if (r.in === 0 && r.out === 0) return;
+            rows.push(['  ' + r.label, n(r.in) || 0, n(r.out) || 0, n(r.in - r.out)]);
+        });
+        rows.push(['Итого', n(sec.secIn), n(sec.secOut), n(sec.secIn - sec.secOut)]);
+        rows.push([]);
+    });
+    rows.push(['Чистый денежный поток', n(c.totalIn), n(c.totalOut), n(c.netFlow)]);
+    rows.push(['Остаток на конец периода', '', '', n(c.closeBalance)]);
+    void downloadXlsx('finance', `DDS_${from}.xlsx`, [{ name: 'ДДС', rows, cols: [38, 18, 18, 18] }]);
+}
 const td = 'padding:7px 16px;text-align:right;font-family:monospace';
 </script>
 
@@ -136,7 +159,7 @@ const td = 'padding:7px 16px;text-align:right;font-family:monospace';
     <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap">
         <div style="font-size: 12px; color: var(--text3)">📅 Период задаётся глобальным фильтром выше</div>
         <div style="flex: 1"></div>
-        <button class="btn btn-ghost btn-sm" @click="excelLater">📥 Excel</button>
+        <button class="btn btn-ghost btn-sm" @click="exportCFSExcel">📥 Excel</button>
     </div>
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px">
         <div class="card" style="padding: 14px 16px">

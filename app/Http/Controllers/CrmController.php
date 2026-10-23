@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Crm\LeadRequest;
 use App\Models\CrmTask;
+use App\Models\Employee;
 use App\Models\Lead;
 use App\Models\Order;
 use App\Models\Project;
@@ -83,8 +84,10 @@ class CrmController extends Controller
                 'lead_id' => $t->lead_id,
                 'lock_version' => $t->lock_version,
             ])->values(),
-            // Managers to choose in the funnel and task forms: the CRM users and whoever already leads a visible lead or task.
+            // Managers to choose in the funnel form: the CRM users and whoever already leads a visible lead or task.
             'managers' => $crmUsers->merge($leads->pluck('manager')->filter())->merge($tasks->pluck('manager')->filter())->unique()->sort()->values(),
+            // The task form: the salon staff of «Сотрудники», as legacy openTaskModal lists them.
+            'taskManagers' => $projectsOnly ? [] : $this->taskManagers(),
             'currentYear' => (int) now(config('erp.business_timezone'))->format('Y'),
             'timezone' => config('erp.business_timezone'),
             // Tab «Клиенты» (legacy renderClientsTab/openClientCard): the customers of the salons are the end clients of
@@ -283,5 +286,22 @@ class CrmController extends Controller
         $this->service->deactivate($lead, (int) $data['lock_version'], $request->user());
 
         return back();
+    }
+
+    /**
+     * Legacy openTaskModal/fillSellers: the staff (as loadStaffFromDB orders it, by name) whose position says «Менеджер» or
+     * «салон» or whose comment names a salon; when there is none, the whole staff. The form labels each with the comment, or
+     * else the position.
+     *
+     * @return Collection<int, array{name: string, pos: string, comment: string}>
+     */
+    private function taskManagers(): Collection
+    {
+        $staff = Employee::query()->orderBy('name')->orderBy('id')->get(['name', 'position', 'comment'])
+            ->map(fn (Employee $e) => ['name' => $e->name, 'pos' => (string) $e->getAttribute('position'), 'comment' => (string) $e->getAttribute('comment')]);
+        $salon = $staff->filter(fn (array $e) => str_contains($e['pos'], 'Менеджер') || str_contains($e['pos'], 'салон')
+            || str_contains($e['comment'], 'Армада') || str_contains($e['comment'], 'Назарбаева'));
+
+        return ($salon->isNotEmpty() ? $salon : $staff)->values();
     }
 }

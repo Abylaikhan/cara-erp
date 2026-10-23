@@ -38,7 +38,6 @@ group,bankStatementModal,NOT_STARTED,ERP-034 (Excel),Импорт банковс
 group,bankAccountModal,NOT_STARTED,ERP-031 (D-11),Расчётный счёт
 group,advanceModal,NOT_STARTED,ERP-035 (D-03),Авансовый отчёт
 group,chOrderModal,PENDING_DECISION,D-15,«Направление продаж»: открывает только openChOrderModal — её никто не вызывает
-group,userModal,NOT_STARTED,ERP-053 (D-13),Пользователь
 group,employeeCardModal,NOT_STARTED,ERP-053 (D-13),Карточка сотрудника
 group,vacationCalcModal,NOT_STARTED,ERP-056 (D-06),Отпускные и больничные
 group,salaryCalcModal,NOT_STARTED,ERP-056 (D-06),Начисление оклада по табелю
@@ -57,7 +56,6 @@ area,orders-all-items,PENDING_DECISION,D-15,«Все позиции» прода
 # Tabs of migrated pages that are not migrated yet,,,,
 area,mrp-shopfloor,NOT_STARTED,ERP-044 (D-06/D-08),Производство → цеховая доска
 area,mrp-techcards,NOT_STARTED,ERP-028 (D-12),Производство → технологические карты
-area,esf-tab-recon,NOT_STARTED,ERP-048 (D-10),ЭСФ → сверка с оплатами
 area,cust-salons,NOT_STARTED,ERP-026 (D-13),Покупатели → салоны и продавцы
 area,orders-restorations,NOT_STARTED,ERP-080 (D-08),Продажи → реставрации
 area,finance-pl,NOT_STARTED,ERP-060 (D-11/D-12),Финансы → P&L
@@ -214,7 +212,6 @@ function,txTransferLayout,NOT_STARTED,ERP-031…033 (D-03/D-11),Форма пе�
 function,posNo,NOT_STARTED,ERP-044 (D-06/D-08),№ позиции в загрузке цехов (ADR-0002 п. 53)
 area,hr-tab-wage,NOT_STARTED,ERP-055 (D-06),Сотрудники → сдельная выработка
 area,hr-tab-timesheet,NOT_STARTED,ERP-054 (D-06),Сотрудники → табель
-area,hr-tab-users,NOT_STARTED,ERP-011 (D-13),Сотрудники → пользователи
 function,curYM,NOT_STARTED,ERP-054 (D-06),Явки месяца по табелю (карточка сотрудника)
 function,deleteTariffRow,NOT_STARTED,ERP-055 (D-06),Изменение тарифов (ADR-0038)
 function,renderWageEmployees,NOT_STARTED,ERP-055 (D-06),Сдельная выработка (демонстрационный список legacy)
@@ -246,3 +243,6 @@ function,exportWorkLogExcel,NOT_STARTED,ERP-067,Выгрузка журнала 
 function,exportProdWorksheetExcel,NOT_STARTED,ERP-067,Выгрузка рабочего листа производства в Excel
 function,handleProdWorksheetImport,NOT_STARTED,ERP-041/ERP-067,Загрузка рабочего листа производства из Excel
 control,page-mrp|input|pwb-import-file,NOT_STARTED,ERP-041/ERP-067,Файл для загрузки рабочего листа производства из Excel
+function,deleteAppUser,DECIDED,ADR-0046,Учётную запись блокируют, а не удаляют (ADR-0002 п. 116)
+control,userModal|button|u-delete-btn,DECIDED,ADR-0046,Учётную запись блокируют, а не удаляют (ADR-0002 п. 116)
+control,userModal|input|u-edit-id,DUPLICATE,ADR-0046,Скрытое поле: запись выбирается по id в адресе запроса

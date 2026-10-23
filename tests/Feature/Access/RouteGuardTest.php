@@ -23,7 +23,8 @@ class RouteGuardTest extends TestCase
     private const FRAMEWORK = ['storage/{path}'];
 
     /** Signed in, no page of a role: the redirect to the first allowed page and the logout. */
-    private const ANY_PAGE = ['/', 'logout'];
+    // export/xlsx serves every page: it checks the page named in the request (ExportController, XlsxExportTest)
+    private const ANY_PAGE = ['/', 'logout', 'export/xlsx'];
 
     /** @return list<RouteDefinition> */
     private function routes(): array
