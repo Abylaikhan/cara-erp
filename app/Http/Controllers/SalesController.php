@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Realization;
 use App\Models\SalesChannel;
+use App\Models\SalesWorksheetRow;
 use App\Models\User;
 use App\Services\OrderService;
 use App\Support\ChannelScope;
@@ -66,6 +67,12 @@ class SalesController extends Controller
             // Tab «Отчёт» (legacy renderOrderReport): the lines of the orders with their characteristics, the comment and
             // the delivery date — loaded when the tab is opened.
             'report' => Inertia::optional(fn () => $this->report($request->user())),
+            // Tab «Рабочий лист реализации» (legacy swReload/swRender): the lines of the delivery notes, loaded with the tab; a
+            // salon or dealer account gets none (legacy swApplyRole hides the tab from it).
+            'worksheet' => Inertia::optional(fn () => Erp::channelOf($request->user()) !== null ? [] : $this->worksheet($request->user())),
+            // Legacy SW_ADMINS: the account that edits any note. Who wrote a note is told per line («mine»), not by logins.
+            'swAdmin' => $request->user()->login === 'director',
+            'today' => now(config('erp.business_timezone'))->format('Y-m-d'),
             // Legacy swApplyRole: a salon or dealer account does not see the worksheet and the restorations.
             'channelAccount' => Erp::channelOf($request->user()) !== null,
         ]);
@@ -117,5 +124,62 @@ class SalesController extends Controller
         $done = $this->service->complete($order, (int) $data['lock_version'], $request->user());
 
         return back()->with('toast', "✅ {$done->num} завершён");
+    }
+
+    /**
+     * Legacy swReload: order=doc_date.desc,doc_num.desc,line_no.asc. The product number in its order is the one saved on the
+     * line, or — for older notes — the place of the only line of that order with the same name (legacy swItemNo).
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function worksheet(User $user): Collection
+    {
+        $rows = SalesWorksheetRow::query()->orderByDesc('doc_date')->orderByDesc('doc_num')->orderBy('line_no')->orderBy('id')->get();
+        // Legacy swIsDriverUser/swFiltered: a driver sees only the lines of the notes they drive.
+        if (self::isDriver($user)) {
+            $rows = $rows->filter(fn (SalesWorksheetRow $r) => self::driverMatches($r->driver, $user->name));
+        }
+        $names = DB::table('order_items')->whereIn('order_id', $rows->pluck('order_id')->filter()->unique())->orderBy('line_no')
+            ->get(['order_id', 'line_no', 'name'])->groupBy('order_id');
+        // Legacy plNormProductName: String.trim() (any Unicode space) and toLowerCase().
+        $norm = fn (?string $s) => mb_strtolower(self::jsTrim((string) $s));
+
+        return $rows->map(function (SalesWorksheetRow $r) use ($names, $norm, $user) {
+            $no = $r->item_no > 0 ? $r->item_no : null;
+            if ($no === null && $r->order_id !== null) {
+                $hits = ($names->get($r->order_id) ?? collect())->filter(fn ($i) => $norm($i->name) === $norm($r->item_name));
+                $no = $hits->count() === 1 ? $hits->first()->line_no + 1 : null;
+            }
+
+            return [
+                'id' => $r->uuid, 'doc_id' => $r->doc_id, 'doc_num' => $r->doc_num, 'doc_date' => $r->doc_date->format('Y-m-d'), 'line_no' => $r->line_no,
+                'line_kind' => $r->line_kind, 'order_num' => $r->order_num, 'customer' => $r->customer, 'item_name' => $r->item_name, 'item_no' => $no,
+                'attrs' => $r->attrs, 'attrs_short' => $r->attrs_short, 'unit' => $r->unit, 'qty' => (float) $r->getRawOriginal('qty'),
+                'price' => (float) $r->getRawOriginal('price'), 'amount' => (float) $r->getRawOriginal('amount'), 'driver' => $r->driver, 'note' => $r->note,
+                'posted' => $r->posted, 'delivered' => $r->delivered, 'delivered_by' => $r->delivered_by,
+                'delivered_at' => $r->delivered_at?->toIso8601String(), 'mine' => $r->created_by !== null && $r->created_by === $user->login,
+                'created_day' => $r->created_at?->timezone(config('erp.business_timezone'))->format('Y-m-d'),
+            ];
+        })->values();
+    }
+
+    /** Legacy swIsDriverUser: the role or the name of the account says «водитель». */
+    public static function isDriver(User $user): bool
+    {
+        return preg_match('/водител/iu', (Erp::role($user->role)['label'] ?? '').' '.$user->name) === 1;
+    }
+
+    /** Legacy swDriverMatches: the driver of a note and the name of the account, one within the other. */
+    public static function driverMatches(?string $driver, ?string $name): bool
+    {
+        $a = mb_strtolower(self::jsTrim((string) $driver));
+        $b = mb_strtolower(self::jsTrim((string) $name));
+
+        return $a !== '' && $b !== '' && (str_contains($a, $b) || str_contains($b, $a));
+    }
+
+    private static function jsTrim(string $s): string
+    {
+        return (string) preg_replace('/^[\s\p{Zs}\x{FEFF}\x{2028}\x{2029}]+|[\s\p{Zs}\x{FEFF}\x{2028}\x{2029}]+$/u', '', $s);
     }
 }

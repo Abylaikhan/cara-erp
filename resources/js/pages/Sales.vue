@@ -2,15 +2,19 @@
 // M09 «Продажи», part 1 — legacy page-sales (L3824–4133): showPage('sales') (L16390), showSalesTab, renderOrders,
 // setOrderYear/setOrderMonth/clearOrderFilters/sortOrders, updateOrderTabCounts (L29921–30252). The journal is the same; the
 // orders are those of the user's channels; tabs «Реализация» and «Отчёт» are RealizationJournal and OrderReport. Orders are
-// not edited yet: the order form, «+ Новый заказ» and the realization worksheet come with ERP-029/030/049/050 (decisions
-// D-02, D-03, D-08, D-12); the restorations (legacy rs*, L31740) — with ERP-080. A salon or dealer account does not see the
-// worksheet and the restorations (legacy swApplyRole).
+// not edited yet: the order form and «+ Новый заказ» come with ERP-029/030 (decisions D-02, D-03, D-12); the realization
+// worksheet is shown (SalesWorksheetTab), its notes are written and posted with ERP-049/050 (D-08); the restorations (legacy rs*,
+// L31740) — with ERP-080. A salon or dealer account does not see the worksheet and the restorations; a driver account sees only
+// the worksheet (legacy swApplyRole).
+import { usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref } from 'vue';
 import OrderReport from '@/components/sales/OrderReport.vue';
+import SalesWorksheetTab, { type WorksheetRow } from '@/components/sales/SalesWorksheetTab.vue';
 import OrdersTable from '@/components/sales/OrdersTable.vue';
 import RealizationJournal from '@/components/sales/RealizationJournal.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
-import { fmtCurrency, paidOf, PL_MONTH_LABELS, sortValue, toISO, type OrderRow, type RealizationRow } from '@/lib/sales';
+import { fmtCurrency, isDriverUser, paidOf, PL_MONTH_LABELS, sortValue, toISO, type OrderRow, type RealizationRow } from '@/lib/sales';
+import type { SharedProps } from '@/types';
 
 const props = defineProps<{
     orders: OrderRow[];
@@ -18,15 +22,20 @@ const props = defineProps<{
     realizations?: RealizationRow[];
     channelAccount: boolean;
     report?: InstanceType<typeof OrderReport>['$props']['report'];
+    worksheet?: WorksheetRow[];
+    swAdmin: boolean;
+    today: string;
 }>();
 
 type Tab = 'all-orders' | 'queue' | 'progress' | 'done' | 'sales-journal' | 'worksheet' | 'restorations' | 'report';
-const tab = ref<Tab>('all-orders');
+const page = usePage<SharedProps>();
+const driverUser = !props.channelAccount && isDriverUser(page.props.auth.user);
+const tab = ref<Tab>(driverUser ? 'worksheet' : 'all-orders');
 const LATER: Partial<Record<Tab, string>> = {
-    worksheet: 'Рабочий лист реализации появится вместе с проведением реализации (ERP-049/050, решение D-08).',
     restorations: 'Реставрации (приём изделий на гарантийный и платный ремонт, забор и возврат по рабочему листу) переносятся следующим этапом (ERP-080).',
 };
-const roleHidden = computed(() => (props.channelAccount ? { display: 'none' } : undefined));
+const roleHidden = computed(() => (props.channelAccount || driverUser ? { display: 'none' } : undefined));
+const driverHidden = driverUser ? { display: 'none' } : undefined;
 const newOrder = () => window.alert('Создание заказа появится после решений по сохраняемой цене и составу заказа (D-02, D-12).');
 
 // ── Filters (legacy ord-* controls) ──
@@ -119,18 +128,18 @@ const count = (s: string) => props.orders.filter((o) => o.status === s).length;
             <div class="section-header">
                 <div><div class="section-title">Продажи</div><div class="section-sub">Заказы покупателей · журнал реализации · отчёты</div></div>
                 <div style="display: flex; gap: 8px">
-                    <button class="btn btn-primary btn-sm" @click="newOrder">+ Новый заказ</button>
+                    <button class="btn btn-primary btn-sm" :style="driverHidden" @click="newOrder">+ Новый заказ</button>
                 </div>
             </div>
             <div id="sales-tabs" class="tabs">
-                <div class="tab" :class="{ active: tab === 'all-orders' }" @click="tab = 'all-orders'">📋 Все заказы (<span id="s-count-all">{{ props.orders.length }}</span>)</div>
-                <div class="tab" :class="{ active: tab === 'queue' }" @click="tab = 'queue'">⏳ Очередь (<span id="s-count-queue">{{ count('queue') }}</span>)</div>
-                <div class="tab" :class="{ active: tab === 'progress' }" @click="tab = 'progress'">🔧 В работе (<span id="s-count-progress">{{ count('progress') }}</span>)</div>
-                <div class="tab" :class="{ active: tab === 'done' }" @click="tab = 'done'">✅ Завершено (<span id="s-count-done">{{ count('done') }}</span>)</div>
-                <div class="tab" :class="{ active: tab === 'sales-journal' }" @click="tab = 'sales-journal'">📒 Реализация</div>
-                <div id="sw-tab-btn" class="tab" :class="{ active: tab === 'worksheet' }" :style="roleHidden" @click="tab = 'worksheet'">📝 Рабочий лист реализации</div>
+                <div class="tab" :class="{ active: tab === 'all-orders' }" :style="driverHidden" @click="tab = 'all-orders'">📋 Все заказы (<span id="s-count-all">{{ props.orders.length }}</span>)</div>
+                <div class="tab" :class="{ active: tab === 'queue' }" :style="driverHidden" @click="tab = 'queue'">⏳ Очередь (<span id="s-count-queue">{{ count('queue') }}</span>)</div>
+                <div class="tab" :class="{ active: tab === 'progress' }" :style="driverHidden" @click="tab = 'progress'">🔧 В работе (<span id="s-count-progress">{{ count('progress') }}</span>)</div>
+                <div class="tab" :class="{ active: tab === 'done' }" :style="driverHidden" @click="tab = 'done'">✅ Завершено (<span id="s-count-done">{{ count('done') }}</span>)</div>
+                <div class="tab" :class="{ active: tab === 'sales-journal' }" :style="driverHidden" @click="tab = 'sales-journal'">📒 Реализация</div>
+                <div id="sw-tab-btn" class="tab" :class="{ active: tab === 'worksheet' }" :style="props.channelAccount ? { display: 'none' } : undefined" @click="tab = 'worksheet'">📝 Рабочий лист реализации</div>
                 <div id="rs-tab-btn" class="tab" :class="{ active: tab === 'restorations' }" :style="roleHidden" @click="tab = 'restorations'">🔧 Реставрации (<span id="rs-count">0</span>)</div>
-                <div class="tab" :class="{ active: tab === 'report' }" @click="tab = 'report'">📈 Отчёт</div>
+                <div class="tab" :class="{ active: tab === 'report' }" :style="driverHidden" @click="tab = 'report'">📈 Отчёт</div>
             </div>
 
             <!-- Status tabs: the same orders by status, with the filters of «Все заказы» -->
@@ -161,6 +170,9 @@ const count = (s: string) => props.orders.filter((o) => o.status === s).length;
                 <OrderReport :report="props.report" :orders="props.orders" :channels="props.channels" :active="tab === 'report'" />
             </div>
 
+            <div id="orders-worksheet" class="orders-tab" :style="{ display: tab === 'worksheet' ? 'block' : 'none' }">
+                <SalesWorksheetTab :rows="props.worksheet" :active="tab === 'worksheet'" :admin="props.swAdmin" :today="props.today" />
+            </div>
             <div v-for="(text, key) in LATER" :id="'orders-' + key" :key="key" class="orders-tab" :style="{ display: tab === key ? 'block' : 'none' }">
                 <div class="card">
                     <div style="font-size: 13px; color: var(--text3); line-height: 1.6">{{ text }}</div>

@@ -32,13 +32,14 @@ class ChannelIsolationTest extends TestCase
 
     /** Lists sent when a tab is opened: page → [component, props]. Kept complete by the test below. */
     private const LAZY = [
-        'sales' => ['Sales', ['realizations', 'report']],
+        'sales' => ['Sales', ['realizations', 'report', 'worksheet']],
         'finance' => ['Finance', ['transactions', 'purchases']],
         'crm' => ['Crm', ['clientOrders', 'boardOrders', 'projects']],
         'money' => ['Money', ['advances', 'calendar', 'bankRecon', 'salonRows']],
         'customers' => ['Customers', ['reconcileOrders']],
         // the salon payroll lines carry no channel (legacy shows them to every account of the page): nothing of a channel is in them
         'salon_report' => ['SalonReport', ['payroll']],
+        'mrp' => ['Mrp', ['work', 'worksheet']],
     ];
 
     /** @var array<string, array{lead: int, file: int, order: string}> */

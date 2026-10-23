@@ -7,7 +7,7 @@ page,page-esf,,page-esf,3120,M05 Входящие ЭСФ,IMPLEMENTED,resources/j
 page,page-suppliers,,page-suppliers,3302,M06 Поставщики,IMPLEMENTED,resources/js/components/ErpModal.vue,
 page,page-catalog,,page-catalog,3615,M07 Каталог,IMPLEMENTED,resources/js/components/ErpModal.vue,
 page,page-customers,,page-customers,3704,M08 Покупатели,IMPLEMENTED,resources/js/components/DrilldownModal.vue,
-page,page-sales,,page-sales,3888,M09 Продажи,IMPLEMENTED,resources/js/components/sales/OrderReport.vue,
+page,page-sales,,page-sales,3888,M09 Продажи,IMPLEMENTED,resources/js/components/PosBadge.vue,
 page,page-crm,,page-crm,4216,M10 CRM,IMPLEMENTED,resources/js/components/ErpModal.vue,
 page,page-finance,,page-finance,5448,M11 Финансы,IMPLEMENTED,resources/js/components/DrilldownModal.vue,
 page,page-money,,page-money,6104,M12 Деньги,IMPLEMENTED,resources/js/components/ErpModal.vue,
@@ -18,7 +18,7 @@ page,page-reconcile,,page-reconcile,7142,M16 Сверка с офисом,IMPLEM
 page,page-hr,,page-hr,7204,M17 Сотрудники,IMPLEMENTED,resources/js/components/ErpModal.vue,
 page,page-payroll,,page-payroll,7692,M19 Зарплатная ведомость,IMPLEMENTED,resources/js/components/ErpModal.vue,
 page,page-accruals,,page-accruals,7772,M20 Начисления ЗП,IMPLEMENTED,resources/js/layouts/ErpLayout.vue,
-page,page-wages,,page-wages,8022,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
+page,page-wages,,page-wages,8022,M18 Сдельная оплата,IMPLEMENTED,resources/js/components/mrp/work.ts,
 page,page-salon_report,,page-salon_report,8124,M21 Отчёт салонов,IMPLEMENTED,resources/js/components/salon/HistoryTab.vue,
 page,page-mycabinet,,page-mycabinet,8251,M22 Мой кабинет,NOT_STARTED,ERP-058,
 page,page-ai,,page-ai,8382,M23 AI Ассистент,NOT_STARTED,ERP-065 (D-09),
@@ -83,7 +83,7 @@ modal,accrualModal,,accrualModal,7945,M20 Начисления ЗП,NOT_STARTED,
 modal,tcTemplateModal,,tcTemplateModal,8003,M02 Производство,NOT_STARTED,ERP-028 (D-12),
 modal,swDocModal,,swDocModal,8408,M09 Продажи,NOT_STARTED,ERP-049 (D-08),
 modal,newOrderModal,,newOrderModal,8454,M02 Производство,PENDING_DECISION,D-15,
-modal,addWageModal,,addWageModal,8472,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
+modal,addWageModal,,addWageModal,8472,M18 Сдельная оплата,DECIDED,ADR-0042,
 modal,addSupplierModal,,addSupplierModal,8493,M06 Поставщики,PENDING_DECISION,D-15,
 modal,addClientModal,,addClientModal,8512,M08 Покупатели,PENDING_DECISION,D-15,
 modal,personModal,,personModal,8542,M08 Покупатели,IMPLEMENTED,resources/js/components/DrilldownModal.vue,
@@ -202,46 +202,46 @@ control,page-mrp|L2367,div,page-mrp,2367,M02 Производство,NOT_STARTE
 control,page-mrp|input|sf-report-from,input,page-mrp,2377,M02 Производство,NOT_STARTED,ERP-044 (D-06/D-08),
 control,page-mrp|input|sf-report-to,input,page-mrp,2379,M02 Производство,NOT_STARTED,ERP-044 (D-06/D-08),
 control,page-mrp|L2380,button,page-mrp,2380,M02 Производство,NOT_STARTED,ERP-044 (D-06/D-08),📥 Выгрузить в Excel
-control,page-mrp|L2391,button,page-mrp,2391,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),+ За 3 дня
-control,page-mrp|L2392,button,page-mrp,2392,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),+ За неделю
-control,page-mrp|L2393,button,page-mrp,2393,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),+ За месяц
-control,page-mrp|L2394,button,page-mrp,2394,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),+ За год
-control,page-mrp|input|pwb-add-order,input,page-mrp,2395,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|L2396,button,page-mrp,2396,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),+ Заказ
-control,page-mrp|L2398,button,page-mrp,2398,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),📤 Импорт Excel
-control,page-mrp|input|pwb-import-file,input,page-mrp,2399,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|L2400,button,page-mrp,2400,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),📥 Экспорт Excel
-control,page-mrp|L2401,button,page-mrp,2401,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),✕ Удалить отмеченные
-control,page-mrp|L2402,button,page-mrp,2402,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),🗑 Очистить лист
-control,page-mrp|input|pwb-f-search,input,page-mrp,2405,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|input|pwb-f-order,input,page-mrp,2406,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|select|pwb-f-category,select,page-mrp,2407,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Все категории
-control,page-mrp|L2407,option,page-mrp,2407,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Все категории
-control,page-mrp|select|pwb-f-workshop,select,page-mrp,2408,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Все цеха
-control,page-mrp|L2408,option,page-mrp,2408,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Все цеха
-control,page-mrp|select|pwb-f-stage,select,page-mrp,2409,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Все этапы
-control,page-mrp|L2409,option,page-mrp,2409,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Все этапы
-control,page-mrp|select|pwb-f-exec,select,page-mrp,2410,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Все исполнители
-control,page-mrp|L2410,option,page-mrp,2410,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Все исполнители
-control,page-mrp|input|pwb-f-order-from,input,page-mrp,2412,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|input|pwb-f-order-to,input,page-mrp,2413,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|input|pwb-f-ship-from,input,page-mrp,2415,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|input|pwb-f-ship-to,input,page-mrp,2416,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|div|pwb-table-wrap,div,page-mrp,2419,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Заказ / Канал Дата заказа / отправки Товар Характеристики Цех Этапы Исполнители 
-control,page-mrp|L2431,th,page-mrp,2431,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|L2431#2,input,page-mrp,2431,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|L2432,th,page-mrp,2432,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Заказ / Канал
-control,page-mrp|L2433,th,page-mrp,2433,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Дата заказа / отправки
-control,page-mrp|L2434,th,page-mrp,2434,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Товар
-control,page-mrp|L2435,th,page-mrp,2435,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Характеристики
-control,page-mrp|L2436,th,page-mrp,2436,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Цех
-control,page-mrp|L2437,th,page-mrp,2437,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Этапы
-control,page-mrp|L2438,th,page-mrp,2438,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Исполнители
-control,page-mrp|L2439,th,page-mrp,2439,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Материалы
-control,page-mrp|L2440,th,page-mrp,2440,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Техкарта
-control,page-mrp|L2441,th,page-mrp,2441,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),Статус
-control,page-mrp|L2441#2,th,page-mrp,2441,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-control,page-mrp|div|pwb-scrollbar-sticky,div,page-mrp,2446,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
+control,page-mrp|L2391,button,page-mrp,2391,M02 Производство,NOT_STARTED,"present, its action comes later — addOrdersToWorksheetByPeriod: requirement M02.WORKSHEET_EDIT (DEC-06)",+ За 3 дня
+control,page-mrp|L2392,button,page-mrp,2392,M02 Производство,NOT_STARTED,"present, its action comes later — addOrdersToWorksheetByPeriod: requirement M02.WORKSHEET_EDIT (DEC-06)",+ За неделю
+control,page-mrp|L2393,button,page-mrp,2393,M02 Производство,NOT_STARTED,"present, its action comes later — addOrdersToWorksheetByPeriod: requirement M02.WORKSHEET_EDIT (DEC-06)",+ За месяц
+control,page-mrp|L2394,button,page-mrp,2394,M02 Производство,NOT_STARTED,"present, its action comes later — addOrdersToWorksheetByPeriod: requirement M02.WORKSHEET_EDIT (DEC-06)",+ За год
+control,page-mrp|input|pwb-add-order,input,page-mrp,2395,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|L2396,button,page-mrp,2396,M02 Производство,NOT_STARTED,"present, its action comes later — addOrderToWorksheetByNum: requirement M02.WORKSHEET_EDIT (DEC-06)",+ Заказ
+control,page-mrp|L2398,button,page-mrp,2398,M02 Производство,NOT_STARTED,clicks pwb-import-file: ERP-041/ERP-067,📤 Импорт Excel
+control,page-mrp|input|pwb-import-file,input,page-mrp,2399,M02 Производство,NOT_STARTED,ERP-041/ERP-067,
+control,page-mrp|L2400,button,page-mrp,2400,M02 Производство,NOT_STARTED,"present, its action comes later — exportProdWorksheetExcel: ERP-067",📥 Экспорт Excel
+control,page-mrp|L2401,button,page-mrp,2401,M02 Производство,NOT_STARTED,"present, its action comes later — deleteSelectedProdWbRows: requirement M02.WORKSHEET_EDIT (DEC-06)",✕ Удалить отмеченные
+control,page-mrp|L2402,button,page-mrp,2402,M02 Производство,NOT_STARTED,"present, its action comes later — clearProdWorksheet: requirement M02.WORKSHEET_EDIT (DEC-06)",🗑 Очистить лист
+control,page-mrp|input|pwb-f-search,input,page-mrp,2405,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|input|pwb-f-order,input,page-mrp,2406,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|select|pwb-f-category,select,page-mrp,2407,M02 Производство,IMPLEMENTED,id,Все категории
+control,page-mrp|L2407,option,page-mrp,2407,M02 Производство,IMPLEMENTED,label,Все категории
+control,page-mrp|select|pwb-f-workshop,select,page-mrp,2408,M02 Производство,IMPLEMENTED,id,Все цеха
+control,page-mrp|L2408,option,page-mrp,2408,M02 Производство,IMPLEMENTED,label,Все цеха
+control,page-mrp|select|pwb-f-stage,select,page-mrp,2409,M02 Производство,IMPLEMENTED,id,Все этапы
+control,page-mrp|L2409,option,page-mrp,2409,M02 Производство,IMPLEMENTED,label,Все этапы
+control,page-mrp|select|pwb-f-exec,select,page-mrp,2410,M02 Производство,IMPLEMENTED,id,Все исполнители
+control,page-mrp|L2410,option,page-mrp,2410,M02 Производство,IMPLEMENTED,label,Все исполнители
+control,page-mrp|input|pwb-f-order-from,input,page-mrp,2412,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|input|pwb-f-order-to,input,page-mrp,2413,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|input|pwb-f-ship-from,input,page-mrp,2415,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|input|pwb-f-ship-to,input,page-mrp,2416,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|div|pwb-table-wrap,div,page-mrp,2419,M02 Производство,IMPLEMENTED,id,Заказ / Канал Дата заказа / отправки Товар Характеристики Цех Этапы Исполнители 
+control,page-mrp|L2431,th,page-mrp,2431,M02 Производство,IMPLEMENTED,an empty column header: its table is compared visually,
+control,page-mrp|L2431#2,input,page-mrp,2431,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+control,page-mrp|L2432,th,page-mrp,2432,M02 Производство,IMPLEMENTED,label,Заказ / Канал
+control,page-mrp|L2433,th,page-mrp,2433,M02 Производство,IMPLEMENTED,label,Дата заказа / отправки
+control,page-mrp|L2434,th,page-mrp,2434,M02 Производство,IMPLEMENTED,label,Товар
+control,page-mrp|L2435,th,page-mrp,2435,M02 Производство,IMPLEMENTED,label,Характеристики
+control,page-mrp|L2436,th,page-mrp,2436,M02 Производство,IMPLEMENTED,label,Цех
+control,page-mrp|L2437,th,page-mrp,2437,M02 Производство,IMPLEMENTED,label,Этапы
+control,page-mrp|L2438,th,page-mrp,2438,M02 Производство,IMPLEMENTED,label,Исполнители
+control,page-mrp|L2439,th,page-mrp,2439,M02 Производство,IMPLEMENTED,label,Материалы
+control,page-mrp|L2440,th,page-mrp,2440,M02 Производство,IMPLEMENTED,label,Техкарта
+control,page-mrp|L2441,th,page-mrp,2441,M02 Производство,IMPLEMENTED,label,Статус
+control,page-mrp|L2441#2,th,page-mrp,2441,M02 Производство,IMPLEMENTED,an empty column header: its table is compared visually,
+control,page-mrp|div|pwb-scrollbar-sticky,div,page-mrp,2446,M02 Производство,IMPLEMENTED,id,
 control,page-mrp|select|tc-type-filter,select,page-mrp,2460,M02 Производство,NOT_STARTED,ERP-028 (D-12),Все типы Шаблоны Привязаны к изделию Привязаны к категории Привязаны к заказу
 control,page-mrp|L2461,option,page-mrp,2461,M02 Производство,NOT_STARTED,ERP-028 (D-12),Все типы
 control,page-mrp|L2462,option,page-mrp,2462,M02 Производство,NOT_STARTED,ERP-028 (D-12),Шаблоны
@@ -250,32 +250,32 @@ control,page-mrp|L2464,option,page-mrp,2464,M02 Производство,NOT_STA
 control,page-mrp|L2465,option,page-mrp,2465,M02 Производство,NOT_STARTED,ERP-028 (D-12),Привязаны к заказу
 control,page-mrp|input|tc-search,input,page-mrp,2467,M02 Производство,NOT_STARTED,ERP-028 (D-12),
 control,page-mrp|L2469,button,page-mrp,2469,M02 Производство,NOT_STARTED,ERP-028 (D-12),+ Новый шаблон
-control,page-mrp|L2505,th,page-mrp,2505,M02 Производство,NOT_STARTED,ERP-044 (D-08),Срочность
-control,page-mrp|L2505#2,th,page-mrp,2505,M02 Производство,NOT_STARTED,ERP-044 (D-08),Заказ
-control,page-mrp|L2505#3,th,page-mrp,2505,M02 Производство,NOT_STARTED,ERP-044 (D-08),Товар
-control,page-mrp|L2505#4,th,page-mrp,2505,M02 Производство,NOT_STARTED,ERP-044 (D-08),Цех(а)
-control,page-mrp|L2505#5,th,page-mrp,2505,M02 Производство,NOT_STARTED,ERP-044 (D-08),Срок
-control,page-mrp|select|wl-month,select,page-mrp,2514,M02 Производство,NOT_STARTED,ERP-044 (D-06),"${PL_MONTH_LABELS.map((m,i)=>` ${m} `).join('')}"
-control,page-mrp|L2515,option,page-mrp,2515,M02 Производство,NOT_STARTED,ERP-044 (D-06),${m}
-control,page-mrp|select|wl-year,select,page-mrp,2517,M02 Производство,NOT_STARTED,ERP-044 (D-06),
-control,page-mrp|select|wl-workshop,select,page-mrp,2518,M02 Производство,NOT_STARTED,ERP-044 (D-06),Все цеха
-control,page-mrp|L2518,option,page-mrp,2518,M02 Производство,NOT_STARTED,ERP-044 (D-06),Все цеха
-control,page-mrp|select|wl-exec,select,page-mrp,2519,M02 Производство,NOT_STARTED,ERP-044 (D-06),Все исполнители
-control,page-mrp|L2519,option,page-mrp,2519,M02 Производство,NOT_STARTED,ERP-044 (D-06),Все исполнители
-control,page-mrp|input|wl-order,input,page-mrp,2520,M02 Производство,NOT_STARTED,ERP-044 (D-06),
-control,page-mrp|select|wl-category,select,page-mrp,2521,M02 Производство,NOT_STARTED,ERP-044 (D-06),Все категории
-control,page-mrp|L2521,option,page-mrp,2521,M02 Производство,NOT_STARTED,ERP-044 (D-06),Все категории
-control,page-mrp|input|wl-item,input,page-mrp,2522,M02 Производство,NOT_STARTED,ERP-044 (D-06),
-control,page-mrp|select|wl-stage,select,page-mrp,2523,M02 Производство,NOT_STARTED,ERP-044 (D-06),Все работы
-control,page-mrp|L2523,option,page-mrp,2523,M02 Производство,NOT_STARTED,ERP-044 (D-06),Все работы
-control,page-mrp|L2524,button,page-mrp,2524,M02 Производство,NOT_STARTED,ERP-044 (D-06),📥 Excel
-control,page-mrp|L2527,th,page-mrp,2527,M02 Производство,NOT_STARTED,ERP-044 (D-06),Дата
-control,page-mrp|L2527#2,th,page-mrp,2527,M02 Производство,NOT_STARTED,ERP-044 (D-06),Цех
-control,page-mrp|L2527#3,th,page-mrp,2527,M02 Производство,NOT_STARTED,ERP-044 (D-06),Исполнитель
-control,page-mrp|L2527#4,th,page-mrp,2527,M02 Производство,NOT_STARTED,ERP-044 (D-06),Заказ
-control,page-mrp|L2527#5,th,page-mrp,2527,M02 Производство,NOT_STARTED,ERP-044 (D-06),Изделие
-control,page-mrp|L2527#6,th,page-mrp,2527,M02 Производство,NOT_STARTED,ERP-044 (D-06),Категория
-control,page-mrp|L2527#7,th,page-mrp,2527,M02 Производство,NOT_STARTED,ERP-044 (D-06),Работа
+control,page-mrp|L2505,th,page-mrp,2505,M02 Производство,IMPLEMENTED,label,Срочность
+control,page-mrp|L2505#2,th,page-mrp,2505,M02 Производство,IMPLEMENTED,label,Заказ
+control,page-mrp|L2505#3,th,page-mrp,2505,M02 Производство,IMPLEMENTED,label,Товар
+control,page-mrp|L2505#4,th,page-mrp,2505,M02 Производство,IMPLEMENTED,label,Цех(а)
+control,page-mrp|L2505#5,th,page-mrp,2505,M02 Производство,IMPLEMENTED,label,Срок
+control,page-mrp|select|wl-month,select,page-mrp,2514,M02 Производство,IMPLEMENTED,id,"${PL_MONTH_LABELS.map((m,i)=>` ${m} `).join('')}"
+control,page-mrp|L2515,option,page-mrp,2515,M02 Производство,IMPLEMENTED,label,${m}
+control,page-mrp|select|wl-year,select,page-mrp,2517,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|select|wl-workshop,select,page-mrp,2518,M02 Производство,IMPLEMENTED,id,Все цеха
+control,page-mrp|L2518,option,page-mrp,2518,M02 Производство,IMPLEMENTED,label,Все цеха
+control,page-mrp|select|wl-exec,select,page-mrp,2519,M02 Производство,IMPLEMENTED,id,Все исполнители
+control,page-mrp|L2519,option,page-mrp,2519,M02 Производство,IMPLEMENTED,label,Все исполнители
+control,page-mrp|input|wl-order,input,page-mrp,2520,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|select|wl-category,select,page-mrp,2521,M02 Производство,IMPLEMENTED,id,Все категории
+control,page-mrp|L2521,option,page-mrp,2521,M02 Производство,IMPLEMENTED,label,Все категории
+control,page-mrp|input|wl-item,input,page-mrp,2522,M02 Производство,IMPLEMENTED,id,
+control,page-mrp|select|wl-stage,select,page-mrp,2523,M02 Производство,IMPLEMENTED,id,Все работы
+control,page-mrp|L2523,option,page-mrp,2523,M02 Производство,IMPLEMENTED,label,Все работы
+control,page-mrp|L2524,button,page-mrp,2524,M02 Производство,NOT_STARTED,"present, its action comes later — exportWorkLogExcel: ERP-067",📥 Excel
+control,page-mrp|L2527,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Дата
+control,page-mrp|L2527#2,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Цех
+control,page-mrp|L2527#3,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Исполнитель
+control,page-mrp|L2527#4,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Заказ
+control,page-mrp|L2527#5,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Изделие
+control,page-mrp|L2527#6,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Категория
+control,page-mrp|L2527#7,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Работа
 control,page-warehouse|L2539,button,page-warehouse,2539,M03 Склад,NOT_STARTED,"present, its action comes later — openWhDoc: requirement M03.DOCS (DEC-04)",📥 Приход
 control,page-warehouse|L2540,button,page-warehouse,2540,M03 Склад,NOT_STARTED,"present, its action comes later — openWhDoc: requirement M03.DOCS (DEC-04)",↔️ Перемещение
 control,page-warehouse|L2541,button,page-warehouse,2541,M03 Склад,NOT_STARTED,"present, its action comes later — openWhDoc: requirement M03.DOCS (DEC-04)",📤 Списание
@@ -717,37 +717,37 @@ control,page-sales|select|rs-cu,select,page-sales,3916,M09 Продажи,NOT_ST
 control,page-sales|L3916,option,page-sales,3916,M09 Продажи,NOT_STARTED,ERP-080 (D-08),Все
 control,page-sales|input|rs-q,input,page-sales,3917,M09 Продажи,NOT_STARTED,ERP-080 (D-08),
 control,page-sales|L3918,button,page-sales,3918,M09 Продажи,NOT_STARTED,ERP-080 (D-08),+ Принять на реставрацию
-control,page-sales|input|sw-from,input,page-sales,3926,M09 Продажи,NOT_STARTED,ERP-049 (D-08),
-control,page-sales|input|sw-to,input,page-sales,3927,M09 Продажи,NOT_STARTED,ERP-049 (D-08),
-control,page-sales|L3928,button,page-sales,3928,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Сегодня
-control,page-sales|L3929,button,page-sales,3929,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Вчера
-control,page-sales|L3930,button,page-sales,3930,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Неделя
-control,page-sales|L3931,button,page-sales,3931,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Месяц
-control,page-sales|input|sw-search,input,page-sales,3932,M09 Продажи,NOT_STARTED,ERP-049 (D-08),
-control,page-sales|select|sw-status,select,page-sales,3933,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Все статусы Черновик Проведено Не доставлено Доставлено
-control,page-sales|L3934,option,page-sales,3934,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Все статусы
-control,page-sales|L3935,option,page-sales,3935,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Черновик
-control,page-sales|L3936,option,page-sales,3936,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Проведено
-control,page-sales|L3937,option,page-sales,3937,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Не доставлено
-control,page-sales|L3938,option,page-sales,3938,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Доставлено
-control,page-sales|select|sw-driver-filter,select,page-sales,3940,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Все водители
-control,page-sales|L3940,option,page-sales,3940,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Все водители
-control,page-sales|L3942,button,page-sales,3942,M09 Продажи,NOT_STARTED,ERP-049 (D-08),🖨 Печать журнала
-control,page-sales|button|sw-new-btn,button,page-sales,3943,M09 Продажи,NOT_STARTED,ERP-049 (D-08),+ Новая накладная
-control,page-sales|L3950,th,page-sales,3950,M09 Продажи,NOT_STARTED,ERP-049 (D-08),
-control,page-sales|input|sw-check-all,input,page-sales,3950,M09 Продажи,NOT_STARTED,ERP-049 (D-08),
-control,page-sales|L3951,th,page-sales,3951,M09 Продажи,NOT_STARTED,ERP-049 (D-08),№ накл.
-control,page-sales|L3951#2,th,page-sales,3951,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Дата
-control,page-sales|L3951#3,th,page-sales,3951,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Заказ
-control,page-sales|L3951#4,th,page-sales,3951,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Покупатель
-control,page-sales|L3951#5,th,page-sales,3951,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Товар
-control,page-sales|L3951#6,th,page-sales,3951,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Характеристики
-control,page-sales|L3952,th,page-sales,3952,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Кол-во
-control,page-sales|L3952#2,th,page-sales,3952,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Цена
-control,page-sales|L3952#3,th,page-sales,3952,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Сумма
-control,page-sales|L3953,th,page-sales,3953,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Водитель
-control,page-sales|L3953#2,th,page-sales,3953,M09 Продажи,NOT_STARTED,ERP-049 (D-08),Статус
-control,page-sales|L3953#3,th,page-sales,3953,M09 Продажи,NOT_STARTED,ERP-049 (D-08),
+control,page-sales|input|sw-from,input,page-sales,3926,M09 Продажи,IMPLEMENTED,id,
+control,page-sales|input|sw-to,input,page-sales,3927,M09 Продажи,IMPLEMENTED,id,
+control,page-sales|L3928,button,page-sales,3928,M09 Продажи,IMPLEMENTED,label,Сегодня
+control,page-sales|L3929,button,page-sales,3929,M09 Продажи,IMPLEMENTED,label,Вчера
+control,page-sales|L3930,button,page-sales,3930,M09 Продажи,IMPLEMENTED,label,Неделя
+control,page-sales|L3931,button,page-sales,3931,M09 Продажи,IMPLEMENTED,label,Месяц
+control,page-sales|input|sw-search,input,page-sales,3932,M09 Продажи,IMPLEMENTED,id,
+control,page-sales|select|sw-status,select,page-sales,3933,M09 Продажи,IMPLEMENTED,id,Все статусы Черновик Проведено Не доставлено Доставлено
+control,page-sales|L3934,option,page-sales,3934,M09 Продажи,IMPLEMENTED,label,Все статусы
+control,page-sales|L3935,option,page-sales,3935,M09 Продажи,IMPLEMENTED,label,Черновик
+control,page-sales|L3936,option,page-sales,3936,M09 Продажи,IMPLEMENTED,label,Проведено
+control,page-sales|L3937,option,page-sales,3937,M09 Продажи,IMPLEMENTED,label,Не доставлено
+control,page-sales|L3938,option,page-sales,3938,M09 Продажи,IMPLEMENTED,label,Доставлено
+control,page-sales|select|sw-driver-filter,select,page-sales,3940,M09 Продажи,IMPLEMENTED,id,Все водители
+control,page-sales|L3940,option,page-sales,3940,M09 Продажи,IMPLEMENTED,label,Все водители
+control,page-sales|L3942,button,page-sales,3942,M09 Продажи,IMPLEMENTED,label,🖨 Печать журнала
+control,page-sales|button|sw-new-btn,button,page-sales,3943,M09 Продажи,NOT_STARTED,"present, its action comes later — swOpenDoc: requirement M09.WORKSHEET_EDIT (DEC-08)",+ Новая накладная
+control,page-sales|L3950,th,page-sales,3950,M09 Продажи,IMPLEMENTED,an empty column header: its table is compared visually,
+control,page-sales|input|sw-check-all,input,page-sales,3950,M09 Продажи,IMPLEMENTED,id,
+control,page-sales|L3951,th,page-sales,3951,M09 Продажи,IMPLEMENTED,label,№ накл.
+control,page-sales|L3951#2,th,page-sales,3951,M09 Продажи,IMPLEMENTED,label,Дата
+control,page-sales|L3951#3,th,page-sales,3951,M09 Продажи,IMPLEMENTED,label,Заказ
+control,page-sales|L3951#4,th,page-sales,3951,M09 Продажи,IMPLEMENTED,label,Покупатель
+control,page-sales|L3951#5,th,page-sales,3951,M09 Продажи,IMPLEMENTED,label,Товар
+control,page-sales|L3951#6,th,page-sales,3951,M09 Продажи,IMPLEMENTED,label,Характеристики
+control,page-sales|L3952,th,page-sales,3952,M09 Продажи,IMPLEMENTED,label,Кол-во
+control,page-sales|L3952#2,th,page-sales,3952,M09 Продажи,IMPLEMENTED,label,Цена
+control,page-sales|L3952#3,th,page-sales,3952,M09 Продажи,IMPLEMENTED,label,Сумма
+control,page-sales|L3953,th,page-sales,3953,M09 Продажи,IMPLEMENTED,label,Водитель
+control,page-sales|L3953#2,th,page-sales,3953,M09 Продажи,IMPLEMENTED,label,Статус
+control,page-sales|L3953#3,th,page-sales,3953,M09 Продажи,IMPLEMENTED,an empty column header: its table is compared visually,
 control,page-sales|select|rep-period-type,select,page-sales,3967,M09 Продажи,IMPLEMENTED,id,Все заказы Месяц Период
 control,page-sales|L3968,option,page-sales,3968,M09 Продажи,IMPLEMENTED,label,Все заказы
 control,page-sales|L3969,option,page-sales,3969,M09 Продажи,IMPLEMENTED,label,Месяц
@@ -2082,41 +2082,41 @@ control,tcTemplateModal|L8007,button,tcTemplateModal,8007,M02 Производс
 control,tcTemplateModal|L8013,button,tcTemplateModal,8013,M02 Производство,NOT_STARTED,ERP-028 (D-12),+ Добавить этап
 control,tcTemplateModal|L8016,button,tcTemplateModal,8016,M02 Производство,NOT_STARTED,ERP-028 (D-12),Закрыть
 control,tcTemplateModal|L8017,button,tcTemplateModal,8017,M02 Производство,NOT_STARTED,ERP-028 (D-12),💾 Сохранить
-control,page-wages|L8028,button,page-wages,8028,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),+ Внести выработку
-control,page-wages|select|pw-filter-month,select,page-wages,8056,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
-control,page-wages|select|pw-filter-year,select,page-wages,8057,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
-control,page-wages|select|pw-filter-act,select,page-wages,8058,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Все категории
-control,page-wages|L8059,option,page-wages,8059,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Все категории
-control,page-wages|select|pw-filter-ws,select,page-wages,8061,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Все цеха 🎨 Малярка ✂️ Столярка/Раскройный 🔧 Шлифовка 🔩 Сборка 🧵 Обивочный 🪵 Шпон
-control,page-wages|L8062,option,page-wages,8062,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Все цеха
-control,page-wages|L8063,option,page-wages,8063,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),🎨 Малярка
-control,page-wages|L8064,option,page-wages,8064,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),✂️ Столярка/Раскройный
-control,page-wages|L8065,option,page-wages,8065,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),🔧 Шлифовка
-control,page-wages|L8066,option,page-wages,8066,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),🔩 Сборка
-control,page-wages|L8067,option,page-wages,8067,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),🧵 Обивочный
-control,page-wages|L8068,option,page-wages,8068,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),🪵 Шпонирование
-control,page-wages|L8069,option,page-wages,8069,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),📦 Упаковка
-control,page-wages|L8075,th,page-wages,8075,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),#
-control,page-wages|L8076,th,page-wages,8076,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Сотрудник
-control,page-wages|L8077,th,page-wages,8077,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Цех / Вид деятельности
-control,page-wages|L8078,th,page-wages,8078,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Операций (шт)
-control,page-wages|L8079,th,page-wages,8079,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),План
-control,page-wages|L8080,th,page-wages,8080,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Прогресс
-control,page-wages|L8081,th,page-wages,8081,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Начислено
-control,page-wages|L8082,th,page-wages,8082,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
-control,page-wages|L8092,button,page-wages,8092,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),✕
-control,page-wages|L8096,th,page-wages,8096,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Дата
-control,page-wages|L8096#2,th,page-wages,8096,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Операция
-control,page-wages|L8096#3,th,page-wages,8096,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Заказ
-control,page-wages|L8097,th,page-wages,8097,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Кол-во
-control,page-wages|L8098,th,page-wages,8098,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Ставка ₸/шт
-control,page-wages|L8099,th,page-wages,8099,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Сумма
-control,page-wages|L8109,button,page-wages,8109,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),+ Операция
-control,page-wages|L8113,th,page-wages,8113,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Операция
-control,page-wages|L8113#2,th,page-wages,8113,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Этап
-control,page-wages|L8114,th,page-wages,8114,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Разряд
-control,page-wages|L8115,th,page-wages,8115,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Ставка (₸/шт)
-control,page-wages|L8115#2,th,page-wages,8115,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
+control,page-wages|L8028,button,page-wages,8028,M18 Сдельная оплата,IMPLEMENTED,label,+ Внести выработку
+control,page-wages|select|pw-filter-month,select,page-wages,8056,M18 Сдельная оплата,IMPLEMENTED,id,
+control,page-wages|select|pw-filter-year,select,page-wages,8057,M18 Сдельная оплата,IMPLEMENTED,id,
+control,page-wages|select|pw-filter-act,select,page-wages,8058,M18 Сдельная оплата,IMPLEMENTED,id,Все категории
+control,page-wages|L8059,option,page-wages,8059,M18 Сдельная оплата,IMPLEMENTED,label,Все категории
+control,page-wages|select|pw-filter-ws,select,page-wages,8061,M18 Сдельная оплата,IMPLEMENTED,id,Все цеха 🎨 Малярка ✂️ Столярка/Раскройный 🔧 Шлифовка 🔩 Сборка 🧵 Обивочный 🪵 Шпон
+control,page-wages|L8062,option,page-wages,8062,M18 Сдельная оплата,IMPLEMENTED,label,Все цеха
+control,page-wages|L8063,option,page-wages,8063,M18 Сдельная оплата,IMPLEMENTED,label,🎨 Малярка
+control,page-wages|L8064,option,page-wages,8064,M18 Сдельная оплата,IMPLEMENTED,label,✂️ Столярка/Раскройный
+control,page-wages|L8065,option,page-wages,8065,M18 Сдельная оплата,IMPLEMENTED,label,🔧 Шлифовка
+control,page-wages|L8066,option,page-wages,8066,M18 Сдельная оплата,IMPLEMENTED,label,🔩 Сборка
+control,page-wages|L8067,option,page-wages,8067,M18 Сдельная оплата,IMPLEMENTED,label,🧵 Обивочный
+control,page-wages|L8068,option,page-wages,8068,M18 Сдельная оплата,IMPLEMENTED,label,🪵 Шпонирование
+control,page-wages|L8069,option,page-wages,8069,M18 Сдельная оплата,IMPLEMENTED,label,📦 Упаковка
+control,page-wages|L8075,th,page-wages,8075,M18 Сдельная оплата,IMPLEMENTED,label,#
+control,page-wages|L8076,th,page-wages,8076,M18 Сдельная оплата,IMPLEMENTED,label,Сотрудник
+control,page-wages|L8077,th,page-wages,8077,M18 Сдельная оплата,IMPLEMENTED,label,Цех / Вид деятельности
+control,page-wages|L8078,th,page-wages,8078,M18 Сдельная оплата,IMPLEMENTED,label,Операций (шт)
+control,page-wages|L8079,th,page-wages,8079,M18 Сдельная оплата,IMPLEMENTED,label,План
+control,page-wages|L8080,th,page-wages,8080,M18 Сдельная оплата,IMPLEMENTED,label,Прогресс
+control,page-wages|L8081,th,page-wages,8081,M18 Сдельная оплата,IMPLEMENTED,label,Начислено
+control,page-wages|L8082,th,page-wages,8082,M18 Сдельная оплата,IMPLEMENTED,an empty column header: its table is compared visually,
+control,page-wages|L8092,button,page-wages,8092,M18 Сдельная оплата,IMPLEMENTED,label,✕
+control,page-wages|L8096,th,page-wages,8096,M18 Сдельная оплата,IMPLEMENTED,label,Дата
+control,page-wages|L8096#2,th,page-wages,8096,M18 Сдельная оплата,IMPLEMENTED,label,Операция
+control,page-wages|L8096#3,th,page-wages,8096,M18 Сдельная оплата,IMPLEMENTED,label,Заказ
+control,page-wages|L8097,th,page-wages,8097,M18 Сдельная оплата,IMPLEMENTED,label,Кол-во
+control,page-wages|L8098,th,page-wages,8098,M18 Сдельная оплата,IMPLEMENTED,label,Ставка ₸/шт
+control,page-wages|L8099,th,page-wages,8099,M18 Сдельная оплата,IMPLEMENTED,label,Сумма
+control,page-wages|L8109,button,page-wages,8109,M18 Сдельная оплата,NOT_STARTED,"present, its action comes later — addTariffRow: ERP-055 (D-06)",+ Операция
+control,page-wages|L8113,th,page-wages,8113,M18 Сдельная оплата,IMPLEMENTED,label,Операция
+control,page-wages|L8113#2,th,page-wages,8113,M18 Сдельная оплата,IMPLEMENTED,label,Этап
+control,page-wages|L8114,th,page-wages,8114,M18 Сдельная оплата,IMPLEMENTED,label,Разряд
+control,page-wages|L8115,th,page-wages,8115,M18 Сдельная оплата,IMPLEMENTED,label,Ставка (₸/шт)
+control,page-wages|L8115#2,th,page-wages,8115,M18 Сдельная оплата,IMPLEMENTED,an empty column header: its table is compared visually,
 control,page-salon_report|L8129,div,page-salon_report,8129,M21 Отчёт салонов,IMPLEMENTED,label,📋 Текущий период
 control,page-salon_report|L8130,div,page-salon_report,8130,M21 Отчёт салонов,IMPLEMENTED,label,📄 Платёжная ведомость
 control,page-salon_report|L8131,div,page-salon_report,8131,M21 Отчёт салонов,IMPLEMENTED,label,📅 История ЗП
@@ -2273,13 +2273,13 @@ control,newOrderModal|L8462#4,option,newOrderModal,8462,M02 Производст
 control,newOrderModal|textarea|ord-note,textarea,newOrderModal,8463,M02 Производство,PENDING_DECISION,D-15,
 control,newOrderModal|L8465,button,newOrderModal,8465,M02 Производство,PENDING_DECISION,D-15,Отмена
 control,newOrderModal|L8466,button,newOrderModal,8466,M02 Производство,PENDING_DECISION,D-15,Создать заказ
-control,addWageModal|L8476,button,addWageModal,8476,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),✕
-control,addWageModal|select|wage-emp,select,addWageModal,8479,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
-control,addWageModal|input|wage-date,input,addWageModal,8479,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
-control,addWageModal|select|wage-op,select,addWageModal,8480,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
-control,addWageModal|input|wage-qty,input,addWageModal,8480,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),
-control,addWageModal|L8486,button,addWageModal,8486,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Отмена
-control,addWageModal|L8487,button,addWageModal,8487,M18 Сдельная оплата,NOT_STARTED,ERP-055 (D-06),Сохранить
+control,addWageModal|L8476,button,addWageModal,8476,M18 Сдельная оплата,DECIDED,ADR-0042,✕
+control,addWageModal|select|wage-emp,select,addWageModal,8479,M18 Сдельная оплата,DECIDED,ADR-0042,
+control,addWageModal|input|wage-date,input,addWageModal,8479,M18 Сдельная оплата,DECIDED,ADR-0042,
+control,addWageModal|select|wage-op,select,addWageModal,8480,M18 Сдельная оплата,DECIDED,ADR-0042,
+control,addWageModal|input|wage-qty,input,addWageModal,8480,M18 Сдельная оплата,DECIDED,ADR-0042,
+control,addWageModal|L8486,button,addWageModal,8486,M18 Сдельная оплата,DECIDED,ADR-0042,Отмена
+control,addWageModal|L8487,button,addWageModal,8487,M18 Сдельная оплата,DECIDED,ADR-0042,Сохранить
 control,addSupplierModal|L8497,button,addSupplierModal,8497,M06 Поставщики,PENDING_DECISION,D-15,✕
 control,addSupplierModal|input|sup-name,input,addSupplierModal,8500,M06 Поставщики,PENDING_DECISION,D-15,
 control,addSupplierModal|input|sup-category,input,addSupplierModal,8500,M06 Поставщики,PENDING_DECISION,D-15,
@@ -2395,8 +2395,8 @@ function,calcAccountStats#1,,,8805,M12 Деньги,IMPLEMENTED,requirement M12.
 function,renderMoneyKPIs#1,,,8820,"M12 Деньги, UI оболочка",IMPLEMENTED,requirement M12.VIEW,
 function,loadSalonWbFromDB#1,,,8852,M12 Деньги,IMPLEMENTED,requirement M12.SALONWB,
 function,showSalonWbSalon#1,,,8865,M12 Деньги,IMPLEMENTED,requirement M12.SALONWB,
-function,syncStickyScroll#1,,,8877,"M02 Производство, M12 Деньги",IMPLEMENTED,requirement M12.SALONWB,
-function,initStickyScroll#1,,,8884,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
+function,syncStickyScroll#1,,,8877,"M02 Производство, M12 Деньги",IMPLEMENTED,"requirement M02.WORKSHEET, M12.SALONWB",
+function,initStickyScroll#1,,,8884,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
 function,renderSalonWorksheet#1,,,8892,M12 Деньги,IMPLEMENTED,requirement M12.SALONWB,
 function,setSalonWbYearFilter#1,,,8967,M12 Деньги,IMPLEMENTED,requirement M12.SALONWB,
 function,swbParseDateCell#1,,,8993,M12 Деньги,NOT_STARTED,by its controls: ERP-067 (Excel),
@@ -2708,16 +2708,16 @@ function,addTCStage#1,,,17803,M02 Производство,NOT_STARTED,by its co
 function,removeTCStage#1,,,17808,M02 Производство,NOT_STARTED,by its controls: ERP-028 (D-12),
 function,moveTCStage#1,,,17813,M02 Производство,NOT_STARTED,by its controls: ERP-028 (D-12),
 function,saveTCTemplate#1,,,17820,M02 Производство,NOT_STARTED,by its controls: ERP-028 (D-12),
-function,renderPieceWages#1,,,17852,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
-function,updatePieceGoal#1,,,17957,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
-function,showPieceDetail#1,,,17966,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
-function,renderPieceTariffs#1,,,18013,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
+function,renderPieceWages#1,,,17852,M18 Сдельная оплата,IMPLEMENTED,requirement M18.WAGES,
+function,updatePieceGoal#1,,,17957,M18 Сдельная оплата,NOT_STARTED,requirement M18.WAGES_EDIT (DEC-06),
+function,showPieceDetail#1,,,17966,M18 Сдельная оплата,IMPLEMENTED,requirement M18.WAGES,
+function,renderPieceTariffs#1,,,18013,M18 Сдельная оплата,IMPLEMENTED,requirement M18.WAGES,
 function,renderWageEmployees#1,,,18052,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,ERP-055 (D-06),
 function,addWageEmployeeRow#1,,,18100,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,deleteWageEmployeeRow#1,,,18104,"M17 Сотрудники, M18 Сдельная оплата",NOT_STARTED,ERP-055 (D-06),
-function,calcWage#1,,,18113,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
+function,calcWage#1,,,18113,M18 Сдельная оплата,NOT_STARTED,requirement M18.WAGES_EDIT (DEC-06),
 function,saveOrder#1,,,18124,M02 Производство,PENDING_DECISION,by its controls: D-15,
-function,saveWage#1,,,18172,M18 Сдельная оплата,NOT_STARTED,by its controls: ERP-055 (D-06),
+function,saveWage#1,,,18172,M18 Сдельная оплата,NOT_STARTED,requirement M18.WAGES_EDIT (DEC-06),
 function,sendAI#1,,,18216,M23 AI Ассистент,NOT_STARTED,by its controls: ERP-065 (D-09),
 function,askAI#1,,,18217,M23 AI Ассистент,NOT_STARTED,by its controls: ERP-065 (D-09),
 function,addMsg#1,,,18218,M23 AI Ассистент,NOT_STARTED,by its controls: ERP-065 (D-09),
@@ -2777,11 +2777,11 @@ function,savePerson#1,,,19485,M08 Покупатели,IMPLEMENTED,"requirement 
 function,deletePerson#1,,,19522,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,showCustTab#1,,,19596,M08 Покупатели,IMPLEMENTED,requirement M08.PERSONS.LIST,
 function,showMrpTab#1,,,19608,M02 Производство,IMPLEMENTED,requirement M02.JOURNAL,
-function,collectWorkLogEntries#1,,,19627,"M02 Производство, M18 Сдельная оплата, M22 Мой кабинет",NOT_STARTED,by its controls: ERP-044 (D-06); ERP-055 (D-06); ERP-058,
-function,computeStageAmountFor#1,,,19652,"M02 Производство, M18 Сдельная оплата, M22 Мой кабинет",NOT_STARTED,by its controls: ERP-044 (D-06); ERP-055 (D-06); ERP-058,
-function,renderWorkLog#1,,,19657,M02 Производство,NOT_STARTED,by its controls: ERP-044 (D-06),
-function,exportWorkLogExcel#1,,,19728,M02 Производство,NOT_STARTED,by its controls: ERP-044 (D-06),
-function,renderWorkshopLoad#1,,,19752,M02 Производство,NOT_STARTED,requirement M02.SHOPFLOOR (DEC-06),
+function,collectWorkLogEntries#1,,,19627,"M02 Производство, M18 Сдельная оплата, M22 Мой кабинет",IMPLEMENTED,"requirement M02.WORKLOG, M18.WAGES",
+function,computeStageAmountFor#1,,,19652,"M02 Производство, M18 Сдельная оплата, M22 Мой кабинет",IMPLEMENTED,requirement M18.WAGES,
+function,renderWorkLog#1,,,19657,M02 Производство,IMPLEMENTED,requirement M02.WORKLOG,
+function,exportWorkLogExcel#1,,,19728,M02 Производство,NOT_STARTED,ERP-067,
+function,renderWorkshopLoad#1,,,19752,M02 Производство,IMPLEMENTED,requirement M02.WORKLOAD,
 function,switchToCustTabByKey#1,,,19824,M08 Покупатели,PENDING_DECISION,D-15,
 function,flashHighlightRow#1,,,19832,M02 Производство,NOT_STARTED,ERP-044 (D-06/D-08),
 function,goToPersonFromClient#1,,,19842,M08 Покупатели,PENDING_DECISION,D-15,
@@ -2998,7 +2998,7 @@ function,plNormOrderNum#1,,,26502,M11 Финансы,NOT_STARTED,by its controls
 function,plChannelByCustomerName#1,,,26516,"M02 Производство, M11 Финансы, M12 Деньги",NOT_STARTED,ERP-060 (D-11/D-12),
 function,plFindOrderForRealization#1,,,26523,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
 function,plChannelForRealization#1,,,26532,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
-function,plNormProductName#1,,,26539,"M09 Продажи, M11 Финансы",NOT_STARTED,by its controls: ERP-028/ERP-060 (D-12); ERP-049 (D-08); ERP-060 (D-11/D-12),
+function,plNormProductName#1,,,26539,"M09 Продажи, M11 Финансы",IMPLEMENTED,requirement M09.WORKSHEET,
 function,plCategoryForProductName#1,,,26540,M11 Финансы,NOT_STARTED,by its controls: ERP-028/ERP-060 (D-12); ERP-060 (D-11/D-12),
 function,renderRevenueByChannel#1,,,26549,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
 function,renderRevenueByCategory#1,,,26597,M11 Финансы,NOT_STARTED,by its controls: ERP-060 (D-11/D-12),
@@ -3155,59 +3155,59 @@ function,getOrderSortValue#1,,,30653,M09 Продажи,IMPLEMENTED,requirement 
 function,renderOrders#1,,,30674,M09 Продажи,IMPLEMENTED,requirement M09.JOURNAL,
 function,renderOrdersList#1,,,30908,UI оболочка,IMPLEMENTED,requirement M09.JOURNAL,
 function,updateOrderTabCounts#1,,,30912,UI оболочка,IMPLEMENTED,requirement M09.JOURNAL,
-function,swEsc#1,,,30937,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swFmt#1,,,30938,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swNum#1,,,30939,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swToday#1,,,30940,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08); ERP-080 (D-08),
-function,swIsoToRu#1,,,30941,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swUser#1,,,30942,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swIsAdmin#1,,,30943,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swIsDriverUser#1,,,30944,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swDriverMatches#1,,,30945,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swCreatedToday#1,,,30950,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swDocRows#1,,,30955,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swIsAuthor#1,,,30956,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swCanEdit#1,,,30957,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swCanPost#1,,,30962,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swCanUnpost#1,,,30963,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swCanDeliver#1,,,30964,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
+function,swEsc#1,,,30937,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swFmt#1,,,30938,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swNum#1,,,30939,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swToday#1,,,30940,M09 Продажи,IMPLEMENTED,named in tests/visual/legacy_compare.py,
+function,swIsoToRu#1,,,30941,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swUser#1,,,30942,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swIsAdmin#1,,,30943,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swIsDriverUser#1,,,30944,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swDriverMatches#1,,,30945,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swCreatedToday#1,,,30950,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swDocRows#1,,,30955,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swIsAuthor#1,,,30956,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swCanEdit#1,,,30957,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swCanPost#1,,,30962,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swCanUnpost#1,,,30963,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swCanDeliver#1,,,30964,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
 function,swApplyRole#1,,,30967,UI оболочка,IMPLEMENTED,requirement M09.JOURNAL,
-function,swOpen#1,,,30979,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET (DEC-08),
-function,swQuick#1,,,30984,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swReload#1,,,30993,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
+function,swOpen#1,,,30979,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swQuick#1,,,30984,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swReload#1,,,30993,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
 function,swStatusOf#1,,,31010,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,swFiltered#1,,,31014,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swAttrsShort#1,,,31033,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swItemNo#1,,,31039,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swNoBadge#1,,,31046,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swAttrsView#1,,,31047,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swRender#1,,,31049,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET (DEC-08),
-function,swRowCheck#1,,,31106,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swToggleAll#1,,,31115,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swPrintHtml#1,,,31118,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swPrintDoc#1,,,31127,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swPrintJournal#1,,,31146,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swNextDocNum#1,,,31163,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swFillLists#1,,,31171,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swOpenDoc#1,,,31179,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swCustomerChanged#1,,,31208,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swOpenOrderPicker#1,,,31215,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swShippedQty#1,,,31222,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swLoadOrderItems#1,,,31230,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swAttrsFromItem#1,,,31262,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swAddPickedItems#1,,,31266,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swSyncHeaderFromInputs#1,,,31285,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swAddFreeLine#1,,,31286,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swSetAllShort#1,,,31290,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swRenderLines#1,,,31291,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swLineSet#1,,,31309,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swRemoveLine#1,,,31315,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swUpdateTotal#1,,,31316,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swSaveDoc#1,,,31318,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET (DEC-08),
-function,swDeleteDoc#1,,,31362,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swToggleDelivered#1,,,31369,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
-function,swPost#1,,,31383,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET (DEC-08),
-function,swUnpost#1,,,31419,M09 Продажи,NOT_STARTED,by its controls: ERP-049 (D-08),
+function,swFiltered#1,,,31014,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swAttrsShort#1,,,31033,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swItemNo#1,,,31039,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swNoBadge#1,,,31046,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swAttrsView#1,,,31047,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swRender#1,,,31049,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swRowCheck#1,,,31106,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swToggleAll#1,,,31115,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swPrintHtml#1,,,31118,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swPrintDoc#1,,,31127,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swPrintJournal#1,,,31146,M09 Продажи,IMPLEMENTED,requirement M09.WORKSHEET,
+function,swNextDocNum#1,,,31163,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swFillLists#1,,,31171,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swOpenDoc#1,,,31179,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swCustomerChanged#1,,,31208,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swOpenOrderPicker#1,,,31215,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swShippedQty#1,,,31222,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swLoadOrderItems#1,,,31230,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swAttrsFromItem#1,,,31262,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swAddPickedItems#1,,,31266,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swSyncHeaderFromInputs#1,,,31285,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swAddFreeLine#1,,,31286,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swSetAllShort#1,,,31290,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swRenderLines#1,,,31291,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swLineSet#1,,,31309,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swRemoveLine#1,,,31315,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swUpdateTotal#1,,,31316,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swSaveDoc#1,,,31318,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swDeleteDoc#1,,,31362,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swToggleDelivered#1,,,31369,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swPost#1,,,31383,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
+function,swUnpost#1,,,31419,M09 Продажи,NOT_STARTED,requirement M09.WORKSHEET_EDIT (DEC-08),
 function,showSalesTab#1,,,31435,M09 Продажи,IMPLEMENTED,requirement M09.JOURNAL,
 function,showOrdersTab#1,,,31451,M10 CRM,IMPLEMENTED,requirement M10.LEADS,
 function,prjEsc#1,,,31545,"M09 Продажи, M10 CRM",IMPLEMENTED,requirement M10.PROJECTS,
@@ -3386,28 +3386,28 @@ function,PROD_STAGE_NAMES#1,,,35261,M02 Производство,IMPLEMENTED,req
 function,itemKeyOf#1,,,35264,"M02 Производство, UI оболочка",IMPLEMENTED,requirement M02.PROGRESS_IMPORT,
 function,posNo#1,,,35266,M02 Производство,NOT_STARTED,ERP-044 (D-06/D-08),
 function,posBadge#1,,,35267,"M02 Производство, M09 Продажи",IMPLEMENTED,requirement M02.POS-NO,
-function,itemOrderAmount#1,,,35268,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,initPwbColumnResize#1,,,35277,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-function,onMove#1,,,35303,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-function,onUp#1,,,35306,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-function,savePwbColumnWidths#1,,,35316,M02 Производство,NOT_STARTED,ERP-041 (D-05/D-06),
-function,initProdWorksheet#1,,,35323,M02 Производство,NOT_STARTED,requirement M02.SHOPFLOOR (DEC-06),
+function,itemOrderAmount#1,,,35268,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
+function,initPwbColumnResize#1,,,35277,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+function,onMove#1,,,35303,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+function,onUp#1,,,35306,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+function,savePwbColumnWidths#1,,,35316,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+function,initProdWorksheet#1,,,35323,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
 function,ensureProgressForItem#1,,,35354,—,NOT_STARTED,ERP-041 (D-05/D-06),
-function,saveProdProgress#1,,,35367,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
+function,saveProdProgress#1,,,35367,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
 function,addOrderItemToWorksheet#1,,,35397,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,findOrderBySearchNum#1,,,35411,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,addManyItemsToWorksheet#1,,,35434,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,addOrdersToWorksheetByPeriod#1,,,35470,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,addOrderToWorksheetByNum#1,,,35486,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,togglePwbSelectAll#1,,,35498,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,togglePwbRow#1,,,35504,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,deleteProdWbRow#1,,,35508,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,deleteSelectedProdWbRows#1,,,35515,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,clearProdWorksheet#1,,,35520,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,pwbPopulateFilters#1,,,35536,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,renderProdWorksheet#1,,,35556,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,itemCharacteristicsText#1,,,35648,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,openPwbStageEditor#1,,,35656,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
+function,findOrderBySearchNum#1,,,35411,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
+function,addManyItemsToWorksheet#1,,,35434,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
+function,addOrdersToWorksheetByPeriod#1,,,35470,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
+function,addOrderToWorksheetByNum#1,,,35486,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
+function,togglePwbSelectAll#1,,,35498,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+function,togglePwbRow#1,,,35504,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+function,deleteProdWbRow#1,,,35508,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
+function,deleteSelectedProdWbRows#1,,,35515,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
+function,clearProdWorksheet#1,,,35520,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
+function,pwbPopulateFilters#1,,,35536,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+function,renderProdWorksheet#1,,,35556,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+function,itemCharacteristicsText#1,,,35648,M02 Производство,IMPLEMENTED,requirement M02.WORKSHEET,
+function,openPwbStageEditor#1,,,35656,M02 Производство,NOT_STARTED,requirement M02.WORKSHEET_EDIT (DEC-06),
 function,renderPwbStagesList#1,,,35668,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
 function,computePwbStageAmount#1,,,35724,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
 function,addPwbStage#1,,,35734,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
@@ -3429,8 +3429,8 @@ function,updatePwbMaterialField#1,,,35944,M02 Производство,NOT_START
 function,removePwbMaterialRow#1,,,35957,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
 function,postPwbMaterial#1,,,35965,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
 function,unpostPwbMaterial#1,,,35984,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,exportProdWorksheetExcel#1,,,36004,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,handleProdWorksheetImport#1,,,36032,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
+function,exportProdWorksheetExcel#1,,,36004,M02 Производство,NOT_STARTED,ERP-067,
+function,handleProdWorksheetImport#1,,,36032,M02 Производство,NOT_STARTED,ERP-041/ERP-067,
 function,initPurchasesExtra#1,,,36071,UI оболочка,IMPLEMENTED,requirement M04.REQUESTS,
 function,showPurchExtraTab#1,,,36096,M04 Закупки,IMPLEMENTED,requirement M04.REQUESTS,
 function,setMreqView#1,,,36106,M04 Закупки,IMPLEMENTED,requirement M04.REQUESTS,
@@ -3596,7 +3596,7 @@ table,order_payments,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/M
 table,orders,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/MoneyImporter.php,
 table,payment_history,,,,—,NOT_STARTED,ERP-032 (D-03),
 table,production_progress,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/ProductionProgressImporter.php,
-table,production_worksheet,,,,—,DECIDED,"legacy:control-totals: рабочий лист производства — с проведением этапов (ERP-041…043, DEC-05, DEC-06)",
+table,production_worksheet,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/ProductionWorksheetImporter.php,
 table,products,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/ProductImporter.php,
 table,project_calcs,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/ProjectImporter.php,
 table,project_comments,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/ProjectImporter.php,
@@ -3608,7 +3608,7 @@ table,restoration_files,,,,—,NOT_STARTED,ERP-080 (D-08),
 table,restorations,,,,—,NOT_STARTED,ERP-080 (D-08),
 table,salary_accruals,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SalaryAccrualImporter.php,
 table,salary_accruals_history,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SalaryAccrualImporter.php,
-table,sales_worksheet,,,,—,DECIDED,"legacy:control-totals: рабочий лист реализации — с проведением реализации (ERP-049/050, DEC-08)",
+table,sales_worksheet,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SalesWorksheetImporter.php,
 table,salon_payroll,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SalonPayrollImporter.php,
 table,salon_worksheet,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/SalonWorksheetImporter.php,
 table,staff,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/EmployeeImporter.php,
@@ -3626,8 +3626,8 @@ storage,localStorage.setItem:erp_theme,,,1887,UI оболочка,IMPLEMENTED,th
 storage,localStorage.getItem:erp_theme,,,1892,UI оболочка,IMPLEMENTED,the same key in the target,
 storage,localStorage.getItem:(computed key),,,14134,UI оболочка,NOT_STARTED,as its function getUserPrefs: by its controls: ERP-058,
 storage,localStorage.setItem:(computed key),,,14141,UI оболочка,NOT_STARTED,as its function saveUserPref: by its controls: ERP-058,
-storage,localStorage.getItem:(computed key),,,35284,UI оболочка,NOT_STARTED,as its function initPwbColumnResize: ERP-041 (D-05/D-06),
-storage,localStorage.setItem:(computed key),,,35320,UI оболочка,NOT_STARTED,as its function savePwbColumnWidths: ERP-041 (D-05/D-06),
+storage,localStorage.getItem:(computed key),,,35284,UI оболочка,IMPLEMENTED,as its function initPwbColumnResize: requirement M02.WORKSHEET,
+storage,localStorage.setItem:(computed key),,,35320,UI оболочка,IMPLEMENTED,as its function savePwbColumnWidths: requirement M02.WORKSHEET,
 network,fetch@sbFetch,,,624,—,IMPLEMENTED,"as its function sbFetch: requirement MIG-01.COPY, OPS-01.LIMITS",
 network,fetch@sbInsert,,,647,—,DECIDED,as its function sbInsert: ADR-0029,
 network,fetch@sbUpsert,,,658,—,DECIDED,as its function sbUpsert: ADR-0029,
@@ -3646,4 +3646,4 @@ network,fetch@saveAllFixedCosts,,,21279,—,NOT_STARTED,as its function saveAllF
 network,fetch@prjUploadFiles,,,32092,—,IMPLEMENTED,as its function prjUploadFiles: requirement M10.PROJECTS,
 network,fetch@prjStorageDelete,,,32101,—,IMPLEMENTED,as its function prjStorageDelete: requirement M10.PROJECTS,
 network,fetch@rsUploadFiles,,,32418,—,NOT_STARTED,as its function rsUploadFiles: requirement M09.RESTORATIONS (DEC-08),
-network,fetch@addManyItemsToWorksheet,,,35454,—,NOT_STARTED,as its function addManyItemsToWorksheet: by its controls: ERP-041 (D-05/D-06),
+network,fetch@addManyItemsToWorksheet,,,35454,—,NOT_STARTED,as its function addManyItemsToWorksheet: requirement M02.WORKSHEET_EDIT (DEC-06),

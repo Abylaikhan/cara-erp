@@ -80,6 +80,7 @@ legacy-copy: ## Read-only copy of the legacy Supabase (GET only) → .local-audi
 	@docker compose run --rm app php artisan legacy:natural-order order_items
 	@docker compose run --rm app php artisan legacy:natural-order advance_reports --order=date.desc
 	@docker compose run --rm app php artisan legacy:natural-order salon_payroll --order=year.desc,month.desc
+	@docker compose run --rm app php artisan legacy:natural-order production_worksheet
 
 migration-rehearsal: ## Rehearsal of the legacy migration on a temporary database: migrate, every import, control totals, repeat (no change)
 	@bash scripts/migration-rehearsal.sh $(if $(SNAPSHOT),--snapshot $(SNAPSHOT))

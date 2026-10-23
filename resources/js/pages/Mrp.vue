@@ -2,10 +2,17 @@
 // M02 «Производство», part 1 — legacy page-mrp (L2233–2300), tab «Производственные заказы»: showMrpTab/showMrpOrdersFilter
 // (L19073, L33439), renderMrpOrdersJournal (L36074). Every order line with its effective status (counted by the server, as
 // legacy mrpEffectiveStatus), the stages recorded on the worksheet, filters and sorting. The month filter offers the months
-// (legacy wrote them into the page as text, so the list held only «Все месяцы»). View only: the shop floor, the worksheet,
-// technological cards, workload, the work log and the Excel tasks come with ERP-041…044 (decisions D-05, D-06, D-12).
-import { computed, reactive, ref } from 'vue';
+// (legacy wrote them into the page as text, so the list held only «Все месяцы»). Tabs «Загрузка цехов» and «Журнал работ» read
+// the recorded stages (WorkloadTab, WorklogTab); «Рабочий лист производства» shows the lines on it (ProdWorksheetTab). View
+// only: the shop floor, editing the worksheet, technological cards and the Excel tasks come with ERP-041…044 (decisions D-05,
+// D-06, D-12).
+import { router } from '@inertiajs/vue3';
+import { computed, reactive, ref, watch } from 'vue';
 import PosBadge from '@/components/PosBadge.vue';
+import ProdWorksheetTab, { type PwbData } from '@/components/mrp/ProdWorksheetTab.vue';
+import type { WorkData } from '@/components/mrp/work';
+import WorkloadTab from '@/components/mrp/WorkloadTab.vue';
+import WorklogTab from '@/components/mrp/WorklogTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import { ORDER_FORM_LATER, PL_MONTH_LABELS, PROGRESS_CLASS, STATUS_BADGE, STATUS_LABELS } from '@/lib/sales';
 
@@ -23,10 +30,14 @@ interface Position {
     stages: string[] | null;
     completed: boolean;
 }
-const props = defineProps<{ positions: Position[]; operations: string[] }>();
+const props = defineProps<{ positions: Position[]; operations: string[]; today: string; work?: WorkData; worksheet?: PwbData }>();
 
 type Tab = 'orders' | 'shopfloor' | 'worksheet' | 'techcards' | 'workload' | 'worklog';
 const tab = ref<Tab>('orders');
+// «Загрузка цехов» and «Журнал работ» read the recorded stages, loaded with the first of them (legacy prodProgress).
+watch(tab, (t) => {
+    if ((t === 'workload' || t === 'worklog') && props.work === undefined) router.reload({ only: ['work'] });
+});
 const tabs: { id: Tab; label: string }[] = [
     { id: 'orders', label: 'Производственные заказы' },
     { id: 'shopfloor', label: '🏭 Производство' },
@@ -37,10 +48,7 @@ const tabs: { id: Tab; label: string }[] = [
 ];
 const LATER: Partial<Record<Tab, string>> = {
     shopfloor: 'Производственная доска цехов появится вместе с проведением этапов (ERP-042…044, решения D-06 и D-08).',
-    worksheet: 'Рабочий лист производства появится вместе с проведением этапов и списанием материалов (ERP-041…043, решения D-05 и D-06).',
     techcards: 'Технологические карты переносятся вместе с нормами и тарифами этапов (ERP-028, решение D-12).',
-    workload: 'Загрузка цехов строится по технологическим картам и появится вместе с ними (ERP-044).',
-    worklog: 'Журнал работ появится вместе с проведением этапов (ERP-044).',
 };
 const later = (text: string) => () => window.alert(text);
 const exportTasks = later('Выгрузка заданий в Excel появится вместе с остальными выгрузками (ERP-067).');
@@ -199,6 +207,15 @@ const stageLabel = (p: Position) => (p.stages && p.stages.length ? p.stages.join
                 </div>
             </div>
 
+            <div id="mrp-worksheet" class="mrp-tab" :style="{ display: tab === 'worksheet' ? 'block' : 'none' }">
+                <ProdWorksheetTab :data="props.worksheet" :active="tab === 'worksheet'" :operations="props.operations" />
+            </div>
+            <div id="mrp-workload" class="mrp-tab" :style="{ display: tab === 'workload' ? 'block' : 'none' }">
+                <WorkloadTab :data="props.work" :today="props.today" />
+            </div>
+            <div id="mrp-worklog" class="mrp-tab" :style="{ display: tab === 'worklog' ? 'block' : 'none' }">
+                <WorklogTab :data="props.work" :today="props.today" />
+            </div>
             <div v-for="(text, key) in LATER" :id="'mrp-' + key" :key="key" class="mrp-tab" :style="{ display: tab === key ? 'block' : 'none' }">
                 <div class="card">
                     <div style="font-size: 13px; color: var(--text3); line-height: 1.6">{{ text }}</div>

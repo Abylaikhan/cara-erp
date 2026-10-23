@@ -55,7 +55,7 @@ PAGE_COMPONENTS = {
     'page-esf': 'Esf', 'page-suppliers': 'Suppliers', 'page-catalog': 'Catalog', 'page-customers': 'Customers',
     'page-sales': 'Sales', 'page-crm': 'Crm', 'page-finance': 'Finance', 'page-money': 'Money',
     'page-expense_cats': 'ExpenseCats', 'page-money_salon': 'MoneySalon', 'page-reconcile': 'Reconcile',
-    'page-salon_report': 'SalonReport', 'page-accruals': 'Accruals', 'page-hr': 'Hr', 'page-payroll': 'Payroll',
+    'page-salon_report': 'SalonReport', 'page-accruals': 'Accruals', 'page-hr': 'Hr', 'page-payroll': 'Payroll', 'page-wages': 'Wages',
 }
 # The module of each legacy modal window (by its title and the page that opens it).
 MODAL_MODULES = {

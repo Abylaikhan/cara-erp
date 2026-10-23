@@ -106,3 +106,17 @@ export const localISODate = (y: number, m: number, d: number): string => {
     const dt = new Date(y, m, d);
     return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
 };
+
+/** Legacy swIsDriverUser: the role or the name of the account says «водитель». */
+export const isDriverUser = (u: { name?: string; roleLabel?: string } | null | undefined): boolean => !!u && /водител/i.test((u.roleLabel || '') + ' ' + (u.name || ''));
+
+/** Legacy swDriverMatches: the driver of a note and the name of the account, one within the other. */
+export const driverMatches = (driver: string | null | undefined, name: string | null | undefined): boolean => {
+    const a = String(driver || '')
+        .toLowerCase()
+        .trim();
+    const b = String(name || '')
+        .toLowerCase()
+        .trim();
+    return !!a && !!b && (a.includes(b) || b.includes(a));
+};

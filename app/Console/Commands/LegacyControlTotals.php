@@ -26,8 +26,6 @@ class LegacyControlTotals extends Command
     /** Legacy tables no importer reads yet, and why. */
     private const NOT_MIGRATED = [
         'app_users' => 'учётные записи заводятся заново, пароли и PIN не копируются; разделы пользователей — ERP-053, DEC-13',
-        'sales_worksheet' => 'рабочий лист реализации — с проведением реализации (ERP-049/050, DEC-08)',
-        'production_worksheet' => 'рабочий лист производства — с проведением этапов (ERP-041…043, DEC-05, DEC-06)',
     ];
 
     public function handle(): int
@@ -224,6 +222,14 @@ class LegacyControlTotals extends Command
                     {$sum($num('vacation'))} vacation, {$sum($num('advance'))} advance, {$sum($num('total'))} total, {$sum($num('remainder'))} remainder {$from('salon_payroll')} GROUP BY 1",
                 "SELECT year || '-' || lpad(month::text, 2, '0'), count(*), {$sum('salary')}, {$sum('commission')}, {$sum('bonus')}, {$sum('vacation')}, {$sum('advance')}, {$sum('total')},
                     {$sum('remainder')} FROM salon_payroll_rows GROUP BY 1"],
+            ['M09 Рабочий лист реализации', 'sales_worksheet',
+                "SELECT {$month("data->>'doc_date'")} p, count(*) n, count(DISTINCT data->>'doc_id') notes, {$sum($num('amount'))} amount, {$sum($num('qty'))} qty,
+                    count(*) FILTER (WHERE data->>'posted' = 'true') posted {$from('sales_worksheet')} GROUP BY 1",
+                "SELECT {$tMonth('doc_date')}, count(*), count(DISTINCT doc_id), {$sum('amount')}, {$sum('qty')}, count(*) FILTER (WHERE posted) FROM sales_worksheet_rows GROUP BY 1"],
+            // The month a line was put on the worksheet (Asia/Almaty), the lines and the distinct orders.
+            ['M02 Рабочий лист производства', 'production_worksheet',
+                "SELECT coalesce({$almaty("data->>'added_at'")}, '—') p, count(*) n, count(DISTINCT data->>'order_num') orders {$from('production_worksheet')} GROUP BY 1",
+                "SELECT coalesce(to_char(added_at AT TIME ZONE 'Asia/Almaty', 'YYYY-MM'), '—'), count(*), count(DISTINCT order_num) FROM production_worksheet_rows GROUP BY 1"],
             ['M10 Проекты', 'projects, project_calcs, project_comments, project_files',
                 "SELECT table_name p, count(*) n FROM legacy.rows WHERE snapshot_id = {$s} AND table_name IN ('projects', 'project_calcs', 'project_comments', 'project_files') GROUP BY 1",
                 "SELECT 'projects', count(*) FROM projects HAVING count(*) > 0 UNION ALL SELECT 'project_calcs', count(*) FROM project_calcs HAVING count(*) > 0

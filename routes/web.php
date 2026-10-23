@@ -26,6 +26,7 @@ use App\Http\Controllers\SalonCashController;
 use App\Http\Controllers\SalonReportController;
 use App\Http\Controllers\SalonWorksheetController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\WagesController;
 use App\Http\Controllers\WarehouseController;
 use App\Support\Erp;
 use Illuminate\Support\Facades\Route;
@@ -137,6 +138,9 @@ Route::middleware('auth')->group(function () {
 
     // M19 «Зарплатная ведомость», часть 1: начисления, удержания и выдачи по сотрудникам (просмотр)
     Route::get('/payroll', [PayrollController::class, 'index'])->middleware('page:payroll')->name('payroll.index');
+
+    // M18 «Сдельная оплата», часть 1: выработка по проведённым этапам, детализация, тарифная сетка (просмотр)
+    Route::get('/wages', [WagesController::class, 'index'])->middleware('page:wages')->name('wages.index');
 
     // M20 «Начисления ЗП», часть 1: журнал начислений (просмотр)
     Route::get('/accruals', [AccrualController::class, 'index'])->middleware('page:accruals')->name('accruals.index');

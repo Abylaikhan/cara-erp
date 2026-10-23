@@ -48,6 +48,9 @@ KNOWN = {
     ('sr-tab-current', 'sr-month', '*'): 'ADR-0002, п. 81',  # legacy loses the last day of the month (UTC)
     ('sr-tab-current', 'sr-year', '*'): 'ADR-0002, п. 81',
     ('money-tab-cash', 'cash-cat-filter', ''): 'ADR-0002, п. 90',
+    # «Журнал работ»: the month list of legacy is the text of a template (one option «${m}»), so only the current month shows.
+    ('mrp-worklog', 'wl-month', 'options'): 'ADR-0002, п. 103',
+    ('mrp-worklog', 'wl-month', '*'): 'ADR-0002, п. 103',
 }
 # Controls this comparison cannot compare, with the reason (a limit of how legacy gets its data, not a difference).
 SKIP = {

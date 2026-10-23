@@ -97,6 +97,20 @@ def unscroll(page):
     page.evaluate("document.querySelectorAll('*').forEach(e => { if ((e.scrollTop || e.scrollLeft) && !e.closest('.modal-overlay')) { e.scrollTop = 0; e.scrollLeft = 0; } }); window.scrollTo(0, 0)")
 
 
+def settle_scroll(page, limit_ms=4000):
+    """Wait until a smooth scroll (scrollIntoView behavior 'smooth', both sides) has come to rest: reset while it runs, the
+    animation would go on after unscroll and leave the page shifted."""
+    js = "() => [...document.querySelectorAll('*')].map(e => e.scrollTop + ',' + e.scrollLeft).join(';') + window.scrollY"
+    last, still = page.evaluate(js), 0
+    for _ in range(limit_ms // 100):
+        page.wait_for_timeout(100)
+        now = page.evaluate(js)
+        still = still + 1 if now == last else 0
+        if still >= 3:
+            return
+        last = now
+
+
 def rest_mouse(page):
     """Legacy is driven by calls and its pointer never moves; the clicks of the target leave the pointer over a button (hover
     colours). Before a screenshot of the target the pointer leaves the window, and the hover transition (.15s) ends."""
@@ -337,12 +351,51 @@ with sync_playwright() as p:
                 'X-Inertia-Partial-Data': 'report', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
             return (await r.json()).props.report;
         }""")
+        # «Рабочий лист реализации»: the period from the first note to today, so every line shows.
+        page.locator('#sales-tabs .tab').nth(5).click(); page.wait_for_timeout(1500)
+        worksheet = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/sales', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Sales',
+                'X-Inertia-Partial-Data': 'worksheet', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.worksheet;
+        }""")
+        sw_from = min((r['doc_date'] for r in worksheet), default='')  # no lines: the period stays today, as on both sides
+        if sw_from:
+            page.fill('#sw-from', sw_from); page.locator('#sw-from').dispatch_event('change'); page.wait_for_timeout(600)
+        target_shot(page, str(OUT / f'target-sales-worksheet-{theme}.png'))
+        run_filters(page, 'target', theme, 'orders-worksheet')
+        target_sw = [page.locator(x).inner_text() for x in ('#sw-tbody', '#sw-tfoot')]
         page.goto(TARGET + '/mrp', wait_until='networkidle'); page.wait_for_timeout(1500)
         target_shot(page, str(OUT / f'target-mrp-{theme}.png'))
         run_filters(page, 'target', theme, 'mrp-orders')
         mrp = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']['positions']
         page.locator('#mrp-orders > .tabs .tab').nth(1).click(); page.wait_for_timeout(800)
         target_shot(page, str(OUT / f'target-mrp-queue-{theme}.png'))
+        # «Загрузка цехов» and «Журнал работ»: the recorded stages, loaded with the tab.
+        page.locator('#page-mrp > .tabs .tab').nth(4).click(); page.wait_for_timeout(1500)
+        target_shot(page, str(OUT / f'target-mrp-workload-{theme}.png'))
+        target_wload = [page.locator(x).inner_text() for x in ('#workload-grid', '#workload-tbody')]
+        page.locator('#page-mrp > .tabs .tab').nth(5).click(); page.wait_for_timeout(800)
+        target_shot(page, str(OUT / f'target-mrp-worklog-{theme}.png'))
+        run_filters(page, 'target', theme, 'mrp-worklog')
+        target_wlog = page.locator('#wl-tbody').inner_text()
+        mrp_work = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/mrp', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Mrp',
+                'X-Inertia-Partial-Data': 'work', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.work;
+        }""")
+        # «Рабочий лист производства»: the lines on it, loaded with the tab.
+        page.locator('#page-mrp > .tabs .tab').nth(2).click(); page.wait_for_timeout(1500)
+        target_shot(page, str(OUT / f'target-mrp-worksheet-{theme}.png'))
+        run_filters(page, 'target', theme, 'mrp-worksheet')
+        target_pwb = page.locator('#pwb-tbody').inner_text()
+        mrp_pwb = page.evaluate("""async () => {
+            const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
+            const r = await fetch('/mrp', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Mrp',
+                'X-Inertia-Partial-Data': 'worksheet', 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html, application/xhtml+xml'}});
+            return (await r.json()).props.worksheet;
+        }""")
         page.goto(TARGET + '/money', wait_until='networkidle'); page.wait_for_timeout(1500)
         target_shot(page, str(OUT / f'target-money-{theme}.png'))
         run_filters(page, 'target', theme, 'money-tab-cash')
@@ -502,6 +555,22 @@ with sync_playwright() as p:
         page.locator('#page-hr .tabs .tab').nth(5).click(); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-hr-tariffs-{theme}.png'))
         target_tariffs = page.locator('#hr-tab-tariffs').inner_text()
+        # M18 «Сдельная оплата»: the rating and the KPIs of the current month, the filters, the grid of rates; then the detail of
+        # the first employee in the month of the latest posted stage.
+        page.goto(TARGET + '/wages', wait_until='networkidle'); page.wait_for_timeout(800)
+        target_shot(page, str(OUT / f'target-wages-{theme}.png'))
+        run_filters(page, 'target', theme, 'page-wages')
+        wages = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        wage_parts = ('#pw-kpi-fot', '#pw-kpi-ops', '#pw-kpi-best', '#pw-kpi-goal', '#piece-wages-tbody', '#piece-tariff-tbody')
+        target_wages = [page.locator(x).inner_text() for x in wage_parts]
+        wage_month = max([e['date'] for e in wages['entries']] or [''])[:7]
+        wage_years = page.locator('#pw-filter-year option').evaluate_all('os => os.map(o => o.value)')
+        if wage_month[:4] in wage_years:
+            page.select_option('#pw-filter-year', wage_month[:4]); page.select_option('#pw-filter-month', str(int(wage_month[5:7]))); page.wait_for_timeout(300)
+        if wages['staff']:
+            page.locator('#piece-wages-tbody tr').first.click(); page.wait_for_timeout(300); settle_scroll(page)
+            target_shot(page, str(OUT / f'target-wages-detail-{theme}.png'))
+        target_wage_detail = page.locator('#pw-detail').inner_text() if wages['staff'] else ''
         ctx.close()
         # ---------------- legacy
         ctx = browser.new_context(viewport=VIEWPORT, locale='ru-RU')
@@ -859,6 +928,24 @@ with sync_playwright() as p:
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))
         run_filters(page, 'legacy', theme, 'orders-report')
+        # «Рабочий лист реализации»: the same lines (with the product numbers the target found), the same period; legacy asks
+        # its server for a period, here it filters the lines it holds.
+        page.evaluate("""([rows, from]) => {
+            // The target says per line whether the account wrote it (no logins reach the page); legacy compares logins.
+            const all = rows.map(r => ({...r, created_by: r.mine ? swUser() : '-', created_at: r.created_day ? r.created_day + 'T12:00:00' : null}));
+            window.swReload = () => {
+                const f = document.getElementById('sw-from').value || swToday(), t = document.getElementById('sw-to').value || f;
+                swRows = all.filter(r => r.doc_date >= f && r.doc_date <= t); swSel.clear(); swRender();
+            };
+            showSalesTab('worksheet', document.getElementById('sw-tab-btn'));
+            if (from) document.getElementById('sw-from').value = from;
+            swReload();
+        }""", [worksheet, sw_from])
+        page.wait_for_timeout(800)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-sales-worksheet-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'orders-worksheet')
+        print(f'sales worksheet ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ')
+              for n, a, b in zip(('строки', 'итог'), target_sw, [page.locator(x).inner_text() for x in ('#sw-tbody', '#sw-tfoot')])))
         # Production journal: legacy gets the order lines with the effective status the server counted (its own rule, applied
         # to the same data) and the stages recorded on the worksheet; nothing is left for it to load.
         page.evaluate("""(positions) => {
@@ -879,6 +966,43 @@ with sync_playwright() as p:
         run_filters(page, 'legacy', theme, 'mrp-orders')
         page.evaluate("showMrpOrdersFilter('queue', document.querySelectorAll('#mrp-orders > .tabs .tab')[1])"); page.wait_for_timeout(800)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-queue-{theme}.png'))
+        # The recorded stages in full for «Загрузка цехов» and «Журнал работ» (keyed as the journal above keyed its lines), the
+        # staff for the executor filter. Legacy takes «today» in UTC (ADR-0039); its month list of the work log is text.
+        page.evaluate("""(w) => {
+            w.items.forEach(it => { prodProgress[it.num + '|' + (it.pos - 1)] = {id: 0, version: 1, materials: [], completed: false, stages: it.stages}; });
+            employeesData = w.execs.map(n => ({name: n}));
+            showMrpTab('workload', document.querySelectorAll('#page-mrp > .tabs .tab')[4]);
+        }""", mrp_work)
+        page.wait_for_timeout(800)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-workload-{theme}.png'))
+        legacy_wload = [page.locator(x).inner_text() for x in ('#workload-grid', '#workload-tbody')]
+        page.evaluate("showMrpTab('worklog', document.querySelectorAll('#page-mrp > .tabs .tab')[5])"); page.wait_for_timeout(800)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-worklog-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'mrp-worklog')
+        print(f'mrp workload/worklog ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ')
+              for n, a, b in zip(('цеха', 'позиции', 'журнал работ'), target_wload + [target_wlog], legacy_wload + [page.locator('#wl-tbody').inner_text()])))
+        # «Рабочий лист производства»: legacy gets the same lines (prodWbRows, in the same order), their orders' channel and dates,
+        # the characteristics as one value (the server joins the values as legacy itemCharacteristicsText does; the test covers
+        # it), what is recorded for them and the staff. Its own loads (warehouse, payroll) find no server.
+        page.evaluate("""(w) => {
+            // what the later pages read of these orders is put back after this tab
+            window._pwbSaved = w.rows.map(r => { const o = ordersData.find(x => x.num === r.num); return [o, {channel: o.channel, date: o.date, deliveryDate: o.deliveryDate}, o.items[r.pos - 1], o.items[r.pos - 1].attributes]; });
+            w.rows.forEach(r => {
+                const o = ordersData.find(x => x.num === r.num);
+                Object.assign(o, {channel: r.channel, date: r.date || '', deliveryDate: r.ship || ''});
+                Object.assign(o.items[r.pos - 1], {attributes: r.chars ? {chars: r.chars} : {}});
+                prodProgress[r.num + '|' + (r.pos - 1)] = {id: 0, version: 1, completed: r.completed, materials: r.materials.map(n => ({name: n === '?' ? '' : n})),
+                    stages: r.stages.map(s => ({stage: s.stage, workshop: s.workshop, posted: s.posted, started: s.started, assignees: s.assignees.map(n => ({name: n}))}))};
+            });
+            prodWbRows = w.rows.map(r => ({orderNum: r.num, itemIdx: r.pos - 1, itemKey: r.num + '|' + (r.pos - 1)}));
+            employeesData = w.execs.map(n => ({name: n}));
+            showMrpTab('worksheet', document.querySelectorAll('#page-mrp > .tabs .tab')[2]);
+        }""", mrp_pwb)
+        page.wait_for_timeout(1500)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-mrp-worksheet-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'mrp-worksheet')
+        print(f'mrp worksheet ({theme}): строки ' + ('совпадает' if target_pwb.split() == page.locator('#pwb-tbody').inner_text().split() else 'РАСХОЖДЕНИЕ'))
+        page.evaluate("[...window._pwbSaved].reverse().forEach(([o, f, it, attrs]) => { Object.assign(o, f); it.attributes = attrs; })")
         # Money: legacy gets the target's accounts (without account numbers, which are not stored — ADR-0002, item 54), the
         # operations in the same order, the expense items, the ESF links and order payments of each operation, and one open
         # advance carrying the advance debt.
@@ -1109,6 +1233,38 @@ with sync_playwright() as p:
         print(f'hr tariffs ({theme}): ' + ('совпадает' if target_tariffs.split() == page.locator('#hr-tab-tariffs').inner_text().split() else 'РАСХОЖДЕНИЕ'))
         print(f'hr ({theme}): штатное расписание ' + ('совпадает' if target_org.split() == legacy_org.split() else 'РАСХОЖДЕНИЕ')
               + ', таблица ' + ('совпадает' if target_hr_table.splitlines() == legacy_hr_table.splitlines() else 'РАСХОЖДЕНИЕ'))
+        # «Сдельная оплата»: legacy gets the production staff (type «prod», the plan) and, for every entry of the target, a posted
+        # stage of its own that it counts to the same amount (the rate = the amount, quantity and КТУ 1) on the same line of
+        # the same order; the amounts are counted by the server by the rule of legacy (WagesPageTest). The catalog gives the
+        # categories; nothing is left for legacy to load.
+        page.evaluate("""(w) => {
+            employeesData = w.staff.map(s => ({name: s.name, pos: s.pos, ws: s.ws, type: 'prod', pieceGoal: s.goal,
+                initials: s.name.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(), color: 'rgba(79,142,247,.15)', tc: 'var(--accent)'}));
+            catalogData = w.categories.length ? w.categories.map((c, i) => ({name: 'p' + i, category: c})) : [{name: '—', category: ''}]; catalogLoaded = true;
+            ordersData = [{num: '—', items: []}]; prodProgress = {};
+            w.entries.forEach(e => {
+                let o = ordersData.find(x => x.num === e.num);
+                if (!o) { o = {num: e.num, items: []}; ordersData.push(o); }
+                o.items[e.pos - 1] = o.items[e.pos - 1] || {name: e.name, category: e.category === '—' ? '' : e.category, qty: 1, price: 0, attributes: {}};
+                const key = e.num + '|' + (e.pos - 1);
+                (prodProgress[key] = prodProgress[key] || {id: 0, version: 1, materials: [], completed: false, stages: []}).stages.push({stage: e.stage === '(без названия)' ? '' : e.stage,
+                    workshop: e.workshop, posted: true, postedDate: e.date, payMethod: 'rate', rate: e.amount, qty: 1, assignees: [{name: e.exec, ktu: 1}]});
+            });
+            _prodWbLoaded = true;
+            showPage('wages', document.querySelector(".nav-item[onclick*=\\"showPage('wages'\\"]"));
+        }""", wages)
+        page.wait_for_timeout(1200)
+        unscroll(page); page.screenshot(path=str(OUT / f'legacy-wages-{theme}.png'))
+        run_filters(page, 'legacy', theme, 'page-wages')
+        legacy_wages = [page.locator(x).inner_text() for x in wage_parts]
+        if wage_month[:4] in wage_years:
+            page.select_option('#pw-filter-year', wage_month[:4]); page.select_option('#pw-filter-month', str(int(wage_month[5:7]))); page.wait_for_timeout(300)
+        if wages['staff']:
+            page.locator('#piece-wages-tbody tr').first.click(); page.wait_for_timeout(300); settle_scroll(page)
+            unscroll(page); rest_mouse(page); page.screenshot(path=str(OUT / f'legacy-wages-detail-{theme}.png'))
+        legacy_wage_detail = page.locator('#pw-detail').inner_text() if wages['staff'] else ''
+        print(f'wages ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ') for n, a, b in
+              zip(('ФОТ', 'операции', 'лучший', 'план', 'рейтинг', 'тарифы', 'детализация'), target_wages + [target_wage_detail], legacy_wages + [legacy_wage_detail])))
         ctx.close()
         # Payment calendar of legacy: its own page, clock at noon of the target's business date in UTC (legacy takes «today»
         # through UTC — in Almaty a day early, ADR-0002); the same balances, unpaid orders (status «В работе» as the
@@ -1327,7 +1483,7 @@ with sync_playwright() as p:
             n = len(a2) if isinstance(a2, list) else 1
             print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'mrp', 'mrp-queue', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'payroll', 'payroll-payouts', 'hr', 'hr-employees', 'hr-table', 'hr-commissions', 'hr-tariffs') + (('hr-card',) if hr['employees'] else ()):
+        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'sales-worksheet', 'mrp', 'mrp-queue', 'mrp-worksheet', 'mrp-workload', 'mrp-worklog', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'payroll', 'payroll-payouts', 'hr', 'hr-employees', 'hr-table', 'hr-commissions', 'hr-tariffs', 'wages') + (('hr-card',) if hr['employees'] else ()) + (('wages-detail',) if wages['staff'] else ()):
             if EMPTY and shot in EMPTY_DEVIATIONS:  # pictures kept, not compared: a documented deviation
                 print(f'{shot}-{theme}: not compared — {EMPTY_DEVIATIONS[shot]}')
                 continue

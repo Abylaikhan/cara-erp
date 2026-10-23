@@ -30,12 +30,12 @@ LIMIT_MS = int(os.environ.get('LIMIT_MS', '3000'))
 
 # page → (Inertia component, lazily loaded props)
 PAGES = {
-    'dashboard': ('Dashboard', []), 'mrp': ('Mrp', []), 'warehouse': ('Warehouse', []), 'purchases': ('Purchases', []),
-    'esf': ('Esf', []), 'suppliers': ('Suppliers', []), 'catalog': ('Catalog', []), 'sales': ('Sales', ['realizations', 'report']),
+    'dashboard': ('Dashboard', []), 'mrp': ('Mrp', ['work', 'worksheet']), 'warehouse': ('Warehouse', []), 'purchases': ('Purchases', []),
+    'esf': ('Esf', []), 'suppliers': ('Suppliers', []), 'catalog': ('Catalog', []), 'sales': ('Sales', ['realizations', 'report', 'worksheet']),
     'customers': ('Customers', ['reconcileOrders']), 'crm': ('Crm', ['clientOrders', 'boardOrders', 'projects']),
     'finance': ('Finance', ['transactions', 'purchases']), 'money': ('Money', ['advances', 'calendar', 'bankRecon', 'salonRows']),
     'expense_cats': ('ExpenseCats', []), 'money_salon': ('MoneySalon', []), 'reconcile': ('Reconcile', []),
-    'salon_report': ('SalonReport', []), 'accruals': ('Accruals', []), 'hr': ('Hr', []), 'payroll': ('Payroll', []),
+    'salon_report': ('SalonReport', ['payroll']), 'accruals': ('Accruals', []), 'hr': ('Hr', []), 'wages': ('Wages', []), 'payroll': ('Payroll', []),
 }
 # The director has no salon pages (legacy role template): those are asked as the head of the salons.
 SALON_PAGES = {'money_salon', 'salon_report'}

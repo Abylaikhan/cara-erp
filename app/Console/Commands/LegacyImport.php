@@ -17,9 +17,11 @@ use App\Legacy\Importers\OrderImporter;
 use App\Legacy\Importers\PieceWorkImporter;
 use App\Legacy\Importers\ProductImporter;
 use App\Legacy\Importers\ProductionProgressImporter;
+use App\Legacy\Importers\ProductionWorksheetImporter;
 use App\Legacy\Importers\ProjectImporter;
 use App\Legacy\Importers\RealizationImporter;
 use App\Legacy\Importers\SalaryAccrualImporter;
+use App\Legacy\Importers\SalesWorksheetImporter;
 use App\Legacy\Importers\SalonPayrollImporter;
 use App\Legacy\Importers\SalonWorksheetImporter;
 use App\Legacy\Importers\SupplierImporter;
@@ -36,7 +38,7 @@ use RuntimeException;
  */
 class LegacyImport extends Command
 {
-    protected $signature = 'legacy:import {entity : all | expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects | salon_worksheet | bank_statements | staff | salary_accruals | wage_items | salon_payroll}
+    protected $signature = 'legacy:import {entity : all | expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects | salon_worksheet | bank_statements | staff | salary_accruals | wage_items | salon_payroll | sales_worksheet | production_worksheet}
         {--snapshot= : Snapshot id (default: the latest loaded)}
         {--dry-run : Import, verify and roll back: nothing is written}
         {--errors= : File for every problem of a refused set (keep it in .local-audit: it names legacy rows)}';
@@ -66,6 +68,8 @@ class LegacyImport extends Command
         'salary_accruals' => SalaryAccrualImporter::class, // with their earlier versions
         'wage_items' => PieceWorkImporter::class,
         'salon_payroll' => SalonPayrollImporter::class,
+        'sales_worksheet' => SalesWorksheetImporter::class, // after orders and realizations: a line names its order and realization
+        'production_worksheet' => ProductionWorksheetImporter::class, // after orders: a row names its order line
     ];
 
     public function handle(): int

@@ -1,7 +1,6 @@
 kind,selector,status,reference,note
 # Pages not migrated yet (they render «не перенесено»),,,,
 group,page-channels,NOT_STARTED,ERP-062 (D-11),Центры прибыли
-group,page-wages,NOT_STARTED,ERP-055 (D-06),Сдельная оплата
 group,page-mycabinet,NOT_STARTED,ERP-058,Мой кабинет
 group,page-ai,NOT_STARTED,ERP-065 (D-09),AI-ассистент
 # Modal windows not migrated yet,,,,
@@ -45,7 +44,7 @@ group,vacationCalcModal,NOT_STARTED,ERP-056 (D-06),Отпускные и бол�
 group,salaryCalcModal,NOT_STARTED,ERP-056 (D-06),Начисление оклада по табелю
 group,accrualModal,NOT_STARTED,ERP-056 (D-06),Начисление ЗП
 group,swDocModal,NOT_STARTED,ERP-049 (D-08),Накладная рабочего листа реализации
-group,addWageModal,NOT_STARTED,ERP-055 (D-06),Выработка сдельщика
+group,addWageModal,DECIDED,ADR-0042,"Форма legacy перечисляет демонстрационных сотрудников из своего кода и ничего не сохраняет; выработка — проведённые этапы"
 group,addSellerModal,NOT_STARTED,ERP-026 (D-13),Продавец салона
 # Windows and blocks that nothing in legacy opens: carry over or drop — the customer's answer (D-15; old purchases — D-07),,,,
 group,whMoveModal,PENDING_DECISION,D-15,«Приход материала»: окно не открывает ни одна функция legacy
@@ -57,14 +56,10 @@ area,cust-clients,PENDING_DECISION,D-15,Блок «Клиенты» покупа
 area,orders-all-items,PENDING_DECISION,D-15,«Все позиции» продаж: ни одна вкладка его не показывает
 # Tabs of migrated pages that are not migrated yet,,,,
 area,mrp-shopfloor,NOT_STARTED,ERP-044 (D-06/D-08),Производство → цеховая доска
-area,mrp-worksheet,NOT_STARTED,ERP-041 (D-05/D-06),Производство → рабочий лист
 area,mrp-techcards,NOT_STARTED,ERP-028 (D-12),Производство → технологические карты
-area,mrp-workload,NOT_STARTED,ERP-044 (D-08),Производство → загрузка цехов
-area,mrp-worklog,NOT_STARTED,ERP-044 (D-06),Производство → журнал работ
 area,esf-tab-recon,NOT_STARTED,ERP-048 (D-10),ЭСФ → сверка с оплатами
 area,cust-salons,NOT_STARTED,ERP-026 (D-13),Покупатели → салоны и продавцы
 area,orders-restorations,NOT_STARTED,ERP-080 (D-08),Продажи → реставрации
-area,orders-worksheet,NOT_STARTED,ERP-049 (D-08),Продажи → рабочий лист реализации
 area,finance-pl,NOT_STARTED,ERP-060 (D-11/D-12),Финансы → P&L
 area,finance-margin,NOT_STARTED,ERP-028/ERP-060 (D-12),Финансы → маржинальность (по технологическим картам)
 area,finance-bep,NOT_STARTED,ERP-063 (D-11),Финансы → точка безубыточности
@@ -104,10 +99,6 @@ function,renderWaybillItems,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая до�
 function,renderWaybillAvailableItems,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
 function,addWaybillItem,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
 function,removeWaybillItem,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
-function,initPwbColumnResize,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
-function,onMove,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
-function,onUp,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
-function,savePwbColumnWidths,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
 function,ensureProgressForItem,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
 function,buildPL,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,plFilteredTx,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
@@ -251,3 +242,7 @@ function,exportSalaryLedger,NOT_STARTED,ERP-067,Выгрузка в Excel
 function,exportPayrollToExcel,NOT_STARTED,ERP-067,Выгрузка в Excel
 function,loadAsync,NOT_STARTED,ERP-067,Выгрузка в Excel
 function,addTariffRow,NOT_STARTED,ERP-055 (D-06),Изменение тарифов (ADR-0038)
+function,exportWorkLogExcel,NOT_STARTED,ERP-067,Выгрузка журнала работ в Excel
+function,exportProdWorksheetExcel,NOT_STARTED,ERP-067,Выгрузка рабочего листа производства в Excel
+function,handleProdWorksheetImport,NOT_STARTED,ERP-041/ERP-067,Загрузка рабочего листа производства из Excel
+control,page-mrp|input|pwb-import-file,NOT_STARTED,ERP-041/ERP-067,Файл для загрузки рабочего листа производства из Excel

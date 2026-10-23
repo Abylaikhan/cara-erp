@@ -11,7 +11,7 @@ use RuntimeException;
 
 /**
  * A legacy table copied as it is into its application table, for records the application shows but does not change yet
- * (staff and payroll until D-06/D-13): idempotent through the legacy uuid (kept on the row and in legacy_id_map), rows
+ * (staff and payroll until D-06/D-13): idempotent through the legacy key — its uuid, or its number (kept on the row and in legacy_id_map); rows
  * deleted in legacy are deleted here too (their values stay in the audit trail), every row read back and compared.
  */
 trait MirrorsLegacyTable
@@ -49,21 +49,22 @@ trait MirrorsLegacyTable
 
     /**
      * @param  class-string<Model>  $model
-     * @param  list<array<string, mixed>>  $attributes  one set per legacy row, with its uuid
+     * @param  list<array<string, mixed>>  $attributes  one set per legacy row, with its legacy key ($key: the uuid, or the
+     *                                                  number of a table keyed by numbers)
      * @return array{created: int, updated: int, unchanged: int}
      */
-    private function mirror(string $sourceTable, string $model, array $attributes, string $snapshotId): array
+    private function mirror(string $sourceTable, string $model, array $attributes, string $snapshotId, string $key = 'uuid'): array
     {
         $stats = ['created' => 0, 'updated' => 0, 'unchanged' => 0];
-        $existing = $model::query()->whereIn('uuid', array_column($attributes, 'uuid'))->lockForUpdate()->get()->keyBy('uuid');
+        $existing = $model::query()->whereIn($key, array_column($attributes, $key))->lockForUpdate()->get()->keyBy($key);
         $map = [];
         foreach ($attributes as $a) {
-            $row = $existing->get($a['uuid']) ?? new $model;
+            $row = $existing->get($a[$key]) ?? new $model;
             $row->forceFill($a);
             $stats[! $row->exists ? 'created' : ($row->isDirty() ? 'updated' : 'unchanged')]++;
             $row->timestamps = false;
             $row->save();
-            $map[] = ['source_table' => $sourceTable, 'source_key' => $a['uuid'], 'target_table' => $row->getTable(), 'target_id' => $row->getKey(), 'snapshot_id' => $snapshotId];
+            $map[] = ['source_table' => $sourceTable, 'source_key' => (string) $a[$key], 'target_table' => $row->getTable(), 'target_id' => $row->getKey(), 'snapshot_id' => $snapshotId];
         }
         foreach (array_chunk($map, 1000) as $chunk) {
             DB::table('legacy_id_map')->upsert($chunk, ['source_table', 'source_key'], ['target_id', 'snapshot_id', 'imported_at']);
@@ -76,19 +77,19 @@ trait MirrorsLegacyTable
      * Rows no longer in legacy are deleted (their values go to the audit trail).
      *
      * @param  class-string<Model>  $model
-     * @param  list<string>  $keep  legacy uuids of the snapshot
+     * @param  list<string|int>  $keep  legacy keys of the snapshot
      */
-    private function removeGone(string $sourceTable, string $model, array $keep, ?User $by): int
+    private function removeGone(string $sourceTable, string $model, array $keep, ?User $by, string $key = 'uuid'): int
     {
         $keep = array_flip($keep);
-        $gone = $model::query()->lockForUpdate()->get()->filter(fn (Model $m) => ! isset($keep[$m->getAttribute('uuid')]));
+        $gone = $model::query()->lockForUpdate()->get()->filter(fn (Model $m) => ! isset($keep[$m->getAttribute($key)]));
         if ($gone->isEmpty()) {
             return 0;
         }
         $table = $gone->first()->getTable();
-        Audit::record('legacy.removed', $table, null, ['legacy_keys' => $gone->pluck('uuid')->values()->all(), 'rows' => $gone->map->getAttributes()->values()->all()], $by);
+        Audit::record('legacy.removed', $table, null, ['legacy_keys' => $gone->pluck($key)->values()->all(), 'rows' => $gone->map->getAttributes()->values()->all()], $by);
         $model::query()->whereIn('id', $gone->modelKeys())->delete();
-        DB::table('legacy_id_map')->where('source_table', $sourceTable)->whereIn('source_key', $gone->pluck('uuid'))->delete();
+        DB::table('legacy_id_map')->where('source_table', $sourceTable)->whereIn('source_key', $gone->pluck($key)->map(fn ($k) => (string) $k))->delete();
 
         return $gone->count();
     }
@@ -102,15 +103,15 @@ trait MirrorsLegacyTable
      * @param  array<string, int>  $numbers  field → scale
      * @param  list<string>  $days
      */
-    private function verifyMirror(string $model, array $attributes, array $numbers, array $days): void
+    private function verifyMirror(string $model, array $attributes, array $numbers, array $days, string $key = 'uuid'): void
     {
-        $stored = $model::query()->whereIn('uuid', array_column($attributes, 'uuid'))->get()->keyBy('uuid');
+        $stored = $model::query()->whereIn($key, array_column($attributes, $key))->get()->keyBy($key);
         $label = (new $model)->getTable();
         if ($stored->count() !== count($attributes)) {
             throw new RuntimeException("Verification failed: {$stored->count()} of ".count($attributes)." {$label} rows stored");
         }
         foreach ($attributes as $a) {
-            $row = $stored[$a['uuid']];
+            $row = $stored[$a[$key]];
             foreach ($a as $field => $expected) {
                 $actual = isset($numbers[$field]) ? $row->getRawOriginal($field) : $row->getAttribute($field);
                 $same = match (true) {
@@ -120,7 +121,7 @@ trait MirrorsLegacyTable
                     default => $actual === $expected,
                 };
                 if (! $same) {
-                    throw new RuntimeException("Verification failed for {$label} {$a['uuid']} ({$field})");
+                    throw new RuntimeException("Verification failed for {$label} {$a[$key]} ({$field})");
                 }
             }
         }
