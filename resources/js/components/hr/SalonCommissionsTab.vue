@@ -100,7 +100,7 @@ const showSalaryHistory = (e: Employee) => Object.assign(hist, { open: true, emp
             <button class="modal-close" @click="hist.open = false">✕</button>
         </div>
         <div id="shr-body" style="padding: 16px">
-            <table v-if="hist.emp?.salaryHistory.length" class="data-table">
+            <table v-if="hist.emp?.salaryHistory?.length" class="data-table">
                 <thead>
                     <tr>
                         <th>С месяца</th>

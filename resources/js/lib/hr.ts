@@ -72,9 +72,10 @@ export interface Employee {
     status: string;
     fired_date: string | null;
     changes: EmployeeChangeRow[];
-    commissionPct: number;
-    commissionMethod: string;
-    salaryHistory: { from: string; salary: number; pct: number; note: string | null }[];
+    // «Комиссии салонов»: only the roles that see that tab get them (ADR-0002, п. 111)
+    commissionPct?: number;
+    commissionMethod?: string;
+    salaryHistory?: { from: string; salary: number; pct: number; note: string | null }[];
 }
 
 /** Legacy initials: the first letters of the first two words. */

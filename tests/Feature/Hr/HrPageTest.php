@@ -70,4 +70,29 @@ class HrPageTest extends TestCase
         $this->get('/hr')->assertRedirect('/login');
         $this->actingAs(User::factory()->role('dealer_astana')->create())->get('/hr')->assertForbidden();
     }
+
+    public function test_the_commissions_and_the_salary_history_go_only_to_the_roles_that_see_their_tab(): void
+    {
+        // TEST-AC-14: the rights of the tabs are kept by the server, not only by the menu.
+        $b = $this->employee('dddddddd-dddd-4ddd-8ddd-aaaaaaaaaaa1', 'Борисов Тест', 'office', 'Продавец', 'Армада');
+        DB::table('employees')->where('id', $b)->update(['commission_pct' => '1.5', 'commission_method' => 'paid']);
+        DB::table('employee_salary_history')->insert(['uuid' => 'ffffffff-ffff-4fff-8fff-aaaaaaaaaaa1', 'employee_id' => $b, 'salary' => 100, 'commission_pct' => 1,
+            'valid_from' => '2031-01-01', 'note' => 'Первый', 'created_at' => now(), 'updated_at' => now()]);
+
+        // legacy canSeeCommissions: the director, the chief accountant and the managers of the salons
+        foreach (['director', 'accountant', 'salon_armada_mgr'] as $role) {
+            $this->actingAs(User::factory()->role($role)->create())->get('/hr')->assertOk()->assertInertia(fn (Assert $page) => $page
+                ->where('canSeeCommissions', true)
+                ->where('employees.0.commissionPct', 1.5)
+                ->where('employees.0.commissionMethod', 'paid')
+                ->has('employees.0.salaryHistory', 1));
+        }
+        // «Бухгалтер/HR» opens the page, not that tab: nothing of it is sent
+        $this->actingAs(User::factory()->role('hr')->create())->get('/hr')->assertOk()->assertInertia(fn (Assert $page) => $page
+            ->where('canSeeCommissions', false)
+            ->has('employees', 1)
+            ->missing('employees.0.commissionPct')
+            ->missing('employees.0.commissionMethod')
+            ->missing('employees.0.salaryHistory'));
+    }
 }

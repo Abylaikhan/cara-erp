@@ -17,7 +17,8 @@ use Inertia\Response;
  * with its conditions of work and their history, the salaries and commissions of the salons' staff with their history
  * (renderSalonCommissionsSettings/showSalaryHistory). View only: changing a card, hiring and dismissing, the PIN, the payroll
  * figures and the other tabs come with the payroll rules and the users (ERP-053…057, decisions D-06 and D-13).
- * The head of the salons gets only the employees of the salons (legacy filtered them in the browser after loading all).
+ * The head of the salons gets only the employees of the salons (legacy filtered them in the browser after loading all); the
+ * commissions and the history of salaries go only to the roles that see «Комиссии салонов» (legacy loaded them for all).
  */
 class HrController extends Controller
 {
@@ -29,8 +30,10 @@ class HrController extends Controller
         $salonManager = ($role['is_manager'] ?? false) && ($role['channel'] ?? null) === null;
         $all = Employee::query()->orderBy('name')->orderBy('id')->get();
         $changes = EmployeeChange::query()->orderByDesc('change_date')->orderBy('id')->get()->groupBy('employee_id');
-        // legacy showSalaryHistory: staff_salary_history of the employee, order=valid_from.desc
-        $history = EmployeeSalaryHistory::query()->orderByDesc('valid_from')->orderBy('id')->get()->groupBy('employee_id');
+        // The commission % and base and the history of salaries are shown by «Комиссии салонов» only (legacy showSalaryHistory:
+        // staff_salary_history of the employee, order=valid_from.desc): only the roles that see that tab get them.
+        $canSeeCommissions = in_array($user->role, ['director', 'accountant'], true) || ($role['is_manager'] ?? false);
+        $history = $canSeeCommissions ? EmployeeSalaryHistory::query()->orderByDesc('valid_from')->orderBy('id')->get()->groupBy('employee_id') : collect();
         // Legacy: an empty type is «prod» (loadStaffFromDB s.type||'prod').
         $type = fn (Employee $e) => $e->getAttribute('type') ?: 'prod';
         $shown = $salonManager ? $all->filter(function (Employee $e) {
@@ -48,7 +51,7 @@ class HrController extends Controller
             'salonManager' => $salonManager,
             'canSeePin' => in_array($user->role, ['director', 'hr'], true),
             'canManageUsers' => in_array($user->role, ['director', 'hr'], true),
-            'canSeeCommissions' => in_array($user->role, ['director', 'accountant'], true) || ($role['is_manager'] ?? false),
+            'canSeeCommissions' => $canSeeCommissions,
             'canDismiss' => in_array($user->role, ['director', 'hr'], true) || $salonManager,
             'employees' => $shown->map(fn (Employee $e) => [
                 'id' => $e->uuid,
@@ -66,13 +69,15 @@ class HrController extends Controller
                 'deduction_opv_pct' => $num($e, 'deduction_opv_pct'),
                 'deduction_osms_pct' => $num($e, 'deduction_osms_pct'),
                 'deduction_so_pct' => $num($e, 'deduction_so_pct'),
-                // «Комиссии салонов» (legacy loadStaffFromDB: commission_pct||0, commission_method||'sales')
-                'commissionPct' => $num($e, 'commission_pct') ?? 0,
-                'commissionMethod' => $e->getAttribute('commission_method') ?: 'sales',
-                'salaryHistory' => ($history->get($e->id) ?? collect())->map(fn (EmployeeSalaryHistory $h) => [
-                    'from' => $h->valid_from->format('Y-m-d'), 'salary' => (float) ($h->getRawOriginal('salary') ?? 0),
-                    'pct' => (float) ($h->getRawOriginal('commission_pct') ?? 0), 'note' => $h->note,
-                ])->values(),
+                // «Комиссии салонов» (legacy loadStaffFromDB: commission_pct||0, commission_method||'sales'), for its roles only
+                ...($canSeeCommissions ? [
+                    'commissionPct' => $num($e, 'commission_pct') ?? 0,
+                    'commissionMethod' => $e->getAttribute('commission_method') ?: 'sales',
+                    'salaryHistory' => ($history->get($e->id) ?? collect())->map(fn (EmployeeSalaryHistory $h) => [
+                        'from' => $h->valid_from->format('Y-m-d'), 'salary' => (float) ($h->getRawOriginal('salary') ?? 0),
+                        'pct' => (float) ($h->getRawOriginal('commission_pct') ?? 0), 'note' => $h->note,
+                    ])->values(),
+                ] : []),
                 'status' => $e->getAttribute('status') ?: 'active',
                 'fired_date' => $e->fired_date?->format('Y-m-d'),
                 // legacy openStaffChangesHistory: staff_changes of the employee, newest first
