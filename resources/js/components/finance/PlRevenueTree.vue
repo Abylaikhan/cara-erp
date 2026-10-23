@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Legacy plRevenueTreeHtml/togglePlRevTree (L26699–26740): direction → category → product, a click opens a level; the totals
-// of the months under the table (ADR-0052).
+// of the months under the table (ADR-0052). Also the two levels of the cost estimate (renderMaterialCostEstimate/toggleMatCostRow):
+// its header and the label of its total are given.
 import { computed, ref } from 'vue';
 
 export interface PlTreeRow {
@@ -9,8 +10,12 @@ export interface PlTreeRow {
     monthly: number[];
     cats?: PlTreeRow[];
     items?: PlTreeRow[];
+    mats?: PlTreeRow[];
 }
-const props = defineProps<{ rows: PlTreeRow[] }>();
+const props = withDefaults(defineProps<{ rows: PlTreeRow[]; header?: string; totalLabel?: string }>(), {
+    header: 'Направление / категория / товар',
+    totalLabel: 'Итого',
+});
 const MONTHS = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
 const COLORS = ['var(--accent)', 'var(--green)', 'var(--text2)'];
 const fmt2 = (n: number) => (n ? '₸' + Math.round(n).toLocaleString('ru-RU') : '—');
@@ -27,7 +32,7 @@ function togglePlRevTree(key: string): void {
 const flat = computed(() => {
     const out: { row: PlTreeRow; level: number; children: PlTreeRow[] }[] = [];
     const walk = (r: PlTreeRow, level: number) => {
-        const children = (level === 0 ? r.cats : r.items) ?? [];
+        const children = (level === 0 ? (r.cats ?? r.mats) : r.items) ?? [];
         out.push({ row: r, level, children });
         if (children.length && expanded.value.has(r.key)) children.forEach((c) => walk(c, level + 1));
     };
@@ -42,7 +47,7 @@ const mono = "text-align:right;font-family:'IBM Plex Mono',monospace";
     <table v-else class="data-table" style="font-size: 11px; white-space: nowrap">
         <thead>
             <tr>
-                <th>Направление / категория / товар</th>
+                <th>{{ props.header }}</th>
                 <th v-for="m in MONTHS" :key="m" style="text-align: right">{{ m }}</th>
                 <th style="text-align: right; color: var(--accent)">Итого за год</th>
             </tr>
@@ -64,7 +69,7 @@ const mono = "text-align:right;font-family:'IBM Plex Mono',monospace";
         </tbody>
         <tfoot>
             <tr style="border-top: 2px solid var(--border)">
-                <td style="font-weight: 700">Итого</td>
+                <td style="font-weight: 700">{{ props.totalLabel }}</td>
                 <td v-for="(v, i) in totals" :key="i" :style="mono + ';font-weight:700'">{{ fmt2(v) }}</td>
                 <td :style="mono + ';font-weight:700;color:var(--accent)'">{{ fmt2(sum(totals)) }}</td>
             </tr>

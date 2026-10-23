@@ -6,7 +6,7 @@
 import { computed, ref } from 'vue';
 import ArTab, { type ArRecord } from '@/components/finance/ArTab.vue';
 import CfsTab, { type CfsTx } from '@/components/finance/CfsTab.vue';
-import PlTab, { type PlData, type PlExpenses, type PlMonthly, type PlRevenue, type PlTree } from '@/components/finance/PlTab.vue';
+import PlTab, { type PlData, type PlExpenses, type PlMonthly, type PlRevenue, type PlTree, type PlCost } from '@/components/finance/PlTab.vue';
 import PurchasesTab, { type PurchasesData } from '@/components/finance/PurchasesTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 
@@ -38,6 +38,7 @@ const props = defineProps<{
     plRevCategory?: PlRevenue;
     plExpenses?: PlExpenses;
     plRevTree?: PlTree;
+    plCost?: PlCost;
 }>();
 
 type Tab = 'pl' | 'ar' | 'purchases' | 'margin' | 'bep' | 'cfs' | 'osv' | 'activity';
@@ -197,6 +198,7 @@ const arRecords = computed<ArRecord[]>(() => {
                     :rev-category="props.plRevCategory"
                     :expenses="props.plExpenses"
                     :tree="props.plRevTree"
+                    :cost="props.plCost"
                     :from="period.from"
                     :to="period.to"
                     :active="tab === 'pl'"

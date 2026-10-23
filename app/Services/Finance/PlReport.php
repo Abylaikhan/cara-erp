@@ -255,24 +255,7 @@ class PlReport
      */
     private function esfLines(): array
     {
-        $materials = DB::table('materials as m')->join('warehouses as w', 'w.code', '=', 'm.warehouse_code')->where('w.type', 'material')->where('m.active', true)
-            ->orderBy('m.name')->orderBy('m.id')->get(['m.name', 'm.category'])->map(fn ($m) => [mb_strtolower(trim($m->name)), $m->category]);
-        $exact = [];
-        foreach ($materials as [$n, $c]) {
-            $exact[$n] ??= $c;
-        }
-        $cache = [];
-        $category = function (string $name) use ($materials, $exact, &$cache): ?string {
-            $n = mb_strtolower(trim($name));
-            if ($n === '') {
-                return null;
-            }
-            if (! array_key_exists($n, $cache)) {
-                $cache[$n] = $exact[$n] ?? ($materials->first(fn ($m) => $m[0] !== '' && (str_contains($m[0], $n) || str_contains($n, $m[0])))[1] ?? null);
-            }
-
-            return $cache[$n];
-        };
+        $category = self::materialCategoryResolver();
         $out = [];
         $lines = DB::table('incoming_invoice_items as i')->join('incoming_invoices as v', 'v.id', '=', 'i.invoice_id')->where('v.invoice_type', 'goods')
             ->get(['v.date', 'i.description', 'i.total', 'i.amount']);
@@ -285,6 +268,33 @@ class PlReport
         }
 
         return $out;
+    }
+
+    /**
+     * Legacy materialCategoryForName: the category of the material with this name in a material warehouse — exactly (without
+     * case), else the first whose name contains it or is contained.
+     */
+    public static function materialCategoryResolver(): \Closure
+    {
+        $materials = DB::table('materials as m')->join('warehouses as w', 'w.code', '=', 'm.warehouse_code')->where('w.type', 'material')->where('m.active', true)
+            ->orderBy('m.name')->orderBy('m.id')->get(['m.name', 'm.category'])->map(fn ($m) => [mb_strtolower(trim($m->name)), $m->category]);
+        $exact = [];
+        foreach ($materials as [$n, $c]) {
+            $exact[$n] ??= $c;
+        }
+        $cache = [];
+
+        return function (string $name) use ($materials, $exact, &$cache): ?string {
+            $n = mb_strtolower(trim($name));
+            if ($n === '') {
+                return null;
+            }
+            if (! array_key_exists($n, $cache)) {
+                $cache[$n] = $exact[$n] ?? ($materials->first(fn ($m) => $m[0] !== '' && (str_contains($m[0], $n) || str_contains($n, $m[0])))[1] ?? null);
+            }
+
+            return $cache[$n];
+        };
     }
 
     /**

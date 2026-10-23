@@ -54,6 +54,15 @@ export interface PlTree {
     years: string[];
     rows: PlTreeRow[];
 }
+export interface PlCost {
+    year: string;
+    years: string[];
+    rows: PlTreeRow[];
+    unmatchedCount: number;
+    unmatchedAmount: number;
+    opr: number;
+    unallocated: number;
+}
 export interface PlMonthly {
     year: string;
     years: string[];
@@ -66,6 +75,7 @@ const props = defineProps<{
     revCategory: PlRevenue | undefined;
     expenses: PlExpenses | undefined;
     tree: PlTree | undefined;
+    cost: PlCost | undefined;
     from: string | null;
     to: string | null;
     active: boolean;
@@ -85,7 +95,7 @@ watch(
     () => props.active,
     (active) => {
         if (!active) return;
-        const loaded = { plMonthly: props.monthly, plRevChannel: props.revChannel, plRevCategory: props.revCategory, plExpenses: props.expenses, plRevTree: props.tree };
+        const loaded = { plMonthly: props.monthly, plRevChannel: props.revChannel, plRevCategory: props.revCategory, plExpenses: props.expenses, plRevTree: props.tree, plCost: props.cost };
         const only = (Object.keys(loaded) as (keyof typeof loaded)[]).filter((k) => loaded[k] === undefined);
         if (only.length) router.reload({ only: [...only] });
     },
@@ -230,12 +240,24 @@ function exportRevenueTreeToExcel(): void {
     rows.push(['Итого', ...totals.map((v) => Math.round(v)), Math.round(totals.reduce((s, v) => s + v, 0))]);
     void downloadXlsx('finance', `PromTech_Vyruchka_struktura_${t.year}.xlsx`, [{ name: String(t.year), rows, cols: [36, ...Array(12).fill(12), 14] }]);
 }
+// ── Оценка себестоимости по категориям (legacy renderMaterialCostEstimate, exportMatCostExcel) ──
+const setCostYear = (year: string) => router.reload({ only: ['plCost'], data: { pl_cost_year: year } });
+function exportMatCostExcel(): void {
+    const c = props.cost;
+    if (!c || !c.rows.length) return void window.alert('Нет данных для выгрузки.');
+    const totals = Array(12).fill(0) as number[];
+    const line = (label: string, m: number[]) => [label, ...m.map((v) => Math.round(v)), Math.round(m.reduce((s, v) => s + v, 0))];
+    const rows: (string | number)[][] = [['Оценка материальной себестоимости по категориям — ' + c.year + ' (без техкарт, приближённо)'], [], ['Категория продукции / материал', ...MONTHS, 'Итого за год']];
+    c.rows.forEach((r) => {
+        r.monthly.forEach((v, i) => (totals[i] += v));
+        rows.push(line(r.label, r.monthly));
+        (r.mats ?? []).forEach((m) => rows.push(line('   ' + m.label, m.monthly)));
+    });
+    rows.push(['Итого', ...totals.map((v) => Math.round(v)), Math.round(totals.reduce((s, v) => s + v, 0))]);
+    void downloadXlsx('finance', `PromTech_Sebestoimost_ocenka_${c.year}.xlsx`, [{ name: String(c.year), rows, cols: [36, ...Array(12).fill(12), 14] }]);
+}
 const cell = (r: Row) => (r.bold ? 'font-weight:700' : '') + (r.big ? ';font-size:14px' : '');
-const LATER = 'Появится следующим шагом переноса P&L (ERP-060, ответ бухгалтера № 36).';
-const later = () => window.alert(LATER);
-const SUBREPORTS = [
-    { title: 'Оценка себестоимости по категориям (без техкарт)', select: 'pl-matcost-year', body: 'pl-matcost' },
-];
+
 </script>
 
 <template>
@@ -395,16 +417,29 @@ const SUBREPORTS = [
                 <PlRevenueTree v-if="props.tree" :rows="props.tree.rows" />
             </div>
         </div>
-        <div v-for="s in SUBREPORTS" :key="s.body" class="card" style="grid-column: 1/3">
+        <div class="card" style="grid-column: 1/3">
             <div class="card-header">
-                <span class="card-title">{{ s.title }}</span>
+                <span class="card-title">Оценка себестоимости по категориям (без техкарт)</span>
                 <div style="display: flex; gap: 6px; align-items: center">
-                    <select :id="s.select" style="font-size: 12px; width: auto"></select>
-                    <button class="btn btn-ghost btn-sm" @click="later">📥 Excel</button>
+                    <select id="pl-matcost-year" :value="props.cost?.year" style="font-size: 12px; width: auto" @change="setCostYear(($event.target as HTMLSelectElement).value)">
+                        <option v-for="y in props.cost?.years ?? []" :key="y" :value="y">{{ y }}</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" @click="exportMatCostExcel">📥 Excel</button>
                 </div>
             </div>
-            <div :id="s.body" style="overflow-x: auto">
-                <div style="padding: 12px; color: var(--text3); font-size: 13px">{{ LATER }}</div>
+            <div id="pl-matcost" style="overflow-x: auto">
+                <template v-if="props.cost">
+                    <div style="font-size: 11px; color: var(--text3); margin-bottom: 6px">
+                        Оценочный расчёт (нет техкарт) — материалы взяты из ЭСФ (тип «Товары»), продукция — по дате реализации.
+                        <template v-if="props.cost.unmatchedCount"
+                            >Не удалось определить категорию у {{ props.cost.unmatchedCount }} строк ЭСФ на сумму {{ fmt(props.cost.unmatchedAmount) }} (не нашлось похожего названия на
+                            складе материалов).</template
+                        >
+                        <template v-if="props.cost.opr > 0"> В ОПР (инструмент/расходники/прочее): {{ fmt(props.cost.opr) }}.</template>
+                        <template v-if="props.cost.unallocated > 0"> Не распределено (не было выручки по подходящим категориям в этом месяце): {{ fmt(props.cost.unallocated) }}.</template>
+                    </div>
+                    <PlRevenueTree :rows="props.cost.rows" header="Категория продукции / материал" total-label="Итого (оценка материальной себестоимости)" />
+                </template>
             </div>
         </div>
         <div class="card">

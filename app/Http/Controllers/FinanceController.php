@@ -66,6 +66,7 @@ class FinanceController extends Controller
             'plRevChannel' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rch_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byChannel($y)]),
             'plExpenses' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_exp_year'), 'years' => $this->plYears(), ...app(PlExpenses::class)->build($y)]),
             'plRevTree' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rtree_year'), 'years' => $this->plYears(), 'rows' => app(PlRevenue::class)->tree($y)]),
+            'plCost' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_cost_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->costEstimate($y)]),
             'plRevCategory' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rcat_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byCategory($y)]),
             // Tab «Закупки» (legacy renderPurchasesDash, openSupplierReconciliation): incoming invoices, payments with a
             // counterparty (in tenge), suppliers and the supplier lines of the advance reports; sent when the tab is opened.

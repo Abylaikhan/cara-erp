@@ -3,6 +3,9 @@
 namespace Tests\Feature\Finance;
 
 use App\Legacy\Importers\ChannelCustomerNameImporter;
+use App\Models\IncomingInvoice;
+use App\Models\IncomingInvoiceItem;
+use App\Models\Material;
 use App\Models\User;
 use App\Services\Finance\PlRevenue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -84,6 +87,29 @@ class PlRevenueTest extends TestCase
         $this->assertSame([['Стулья', 350.0, [['Стул демо', 350.0]]], ['Столы', 100.0, [['Стол демо', 100.0]]]],
             array_map(fn ($c) => [$c['label'], array_sum($c['monthly']), array_map(fn ($i) => [$i['label'], array_sum($i['monthly'])], $c['items'])], $tree[0]['cats']));
         $this->assertSame(['ch:other|cat:Без категории', 'Без названия'], [$tree[1]['cats'][0]['key'], $tree[1]['cats'][0]['items'][0]['label']]);
+    }
+
+    public function test_the_cost_estimate_spreads_the_materials_of_a_month_by_revenue(): void
+    {
+        DB::table('products')->insert([['name' => 'Диван демо', 'category' => 'Диваны'], ['name' => 'Кресло демо', 'category' => 'Кресла'], ['name' => 'Стол демо', 'category' => 'Столы']]);
+        $this->realization('2031-01-10', null, null, 'Диван демо', '300');
+        $this->realization('2031-01-11', null, null, 'Кресло демо', '100');
+        $this->realization('2031-01-12', null, null, 'Стол демо', '600');
+        foreach ([['Ткань демо', 'Ткань/Обивочные', 'wh_fabric'], ['Шлифкруг демо', 'Инструмент/Абразивы', 'wh_main'], ['Брус демо', 'Пиломатериалы', 'wh_wood']] as [$n, $c, $w]) {
+            (new Material(['name' => $n, 'category' => $c, 'unit' => 'шт', 'price' => 1, 'min_qty' => 0, 'warehouse_code' => $w]))->forceFill(['qty' => 0])->save();
+        }
+        $inv = IncomingInvoice::create(['num' => '1', 'date' => '2031-01-20', 'status' => 'DELIVERED', 'invoice_type' => 'goods', 'supplier_name' => 'ТОО Демо', 'total_amount' => 0, 'total_nds' => 0, 'total_with_nds' => 0]);
+        $inv2 = IncomingInvoice::create(['num' => '2', 'date' => '2031-02-20', 'status' => 'DELIVERED', 'invoice_type' => 'goods', 'supplier_name' => 'ТОО Демо', 'total_amount' => 0, 'total_nds' => 0, 'total_with_nds' => 0]);
+        foreach ([[$inv, 'Ткань демо', '1000'], [$inv, 'Шлифкруг демо', '70'], [$inv, 'Неизвестное демо', '5'], [$inv2, 'Брус демо', '40']] as $k => [$i, $d, $t]) {
+            IncomingInvoiceItem::query()->create(['invoice_id' => $i->id, 'line_no' => $k + 1, 'description' => $d, 'qty' => 1, 'unit_price' => $t, 'amount' => $t, 'nds_rate' => 0, 'nds_amount' => 0, 'total' => $t]);
+        }
+
+        $r = (new PlRevenue)->costEstimate('2031');
+        // the fabric of January: sofas and armchairs may use it, 300 : 100 of their revenue; tables may not
+        $this->assertSame([['Диваны', 750.0, [['Ткань/Обивочные', 750.0]]], ['Кресла', 250.0, [['Ткань/Обивочные', 250.0]]]],
+            array_map(fn ($row) => [$row['label'], array_sum($row['monthly']), array_map(fn ($m) => [$m['label'], array_sum($m['monthly'])], $row['mats'])], $r['rows']));
+        // tools — overheads; an unknown line — unmatched; the timber of February — no revenue that month to carry it
+        $this->assertSame([1, 5.0, 70.0, 40.0], [$r['unmatchedCount'], $r['unmatchedAmount'], $r['opr'], $r['unallocated']]);
     }
 
     public function test_the_page_gets_each_table_for_its_own_year(): void
