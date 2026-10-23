@@ -68,6 +68,24 @@ class PlRevenueTest extends TestCase
         $this->assertSame([2, 1], [$r['matched'], $r['other']]);
     }
 
+    public function test_the_tree_of_direction_category_and_product(): void
+    {
+        $this->order('МО-1', 'dealer_astana', 'Дилер Демо');
+        DB::table('products')->insert([['name' => 'Стол демо', 'category' => 'Столы'], ['name' => 'Стул демо', 'category' => 'Стулья']]);
+        $this->realization('2031-01-10', 'МО-1', 'X', 'Стол демо', '100');
+        $this->realization('2031-02-10', 'МО-1', 'X', 'Стул демо', '300');
+        $this->realization('2031-02-11', 'МО-1', 'X', 'Стул демо', '50');
+        $this->realization('2031-03-01', null, 'Никто', '', '20');           // no channel, no product
+        $this->realization('2031-03-02', null, 'Никто', 'Стол демо', '0');   // no amount — not in the tree
+
+        $tree = (new PlRevenue)->tree('2031');
+        $astana = DB::table('sales_channels')->where('code', 'dealer_astana')->value('name');
+        $this->assertSame([[$astana, 450.0], ['Без канала / прочее', 20.0]], array_map(fn ($c) => [$c['label'], array_sum($c['monthly'])], $tree));
+        $this->assertSame([['Стулья', 350.0, [['Стул демо', 350.0]]], ['Столы', 100.0, [['Стол демо', 100.0]]]],
+            array_map(fn ($c) => [$c['label'], array_sum($c['monthly']), array_map(fn ($i) => [$i['label'], array_sum($i['monthly'])], $c['items'])], $tree[0]['cats']));
+        $this->assertSame(['ch:other|cat:Без категории', 'Без названия'], [$tree[1]['cats'][0]['key'], $tree[1]['cats'][0]['items'][0]['label']]);
+    }
+
     public function test_the_page_gets_each_table_for_its_own_year(): void
     {
         $this->realization('2031-03-01', null, null, 'Стол', '100');

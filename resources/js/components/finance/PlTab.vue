@@ -10,6 +10,7 @@ import { fmtCurrency } from '@/lib/sales';
 import { downloadXlsx } from '@/lib/xlsx';
 import PlExpensesTable, { type PlExpenseRow } from '@/components/finance/PlExpensesTable.vue';
 import PlRevenueTable from '@/components/finance/PlRevenueTable.vue';
+import PlRevenueTree, { type PlTreeRow } from '@/components/finance/PlRevenueTree.vue';
 
 export interface PlData {
     from: string | null;
@@ -48,6 +49,11 @@ export interface PlExpenses {
     rows: PlExpenseRow[];
     dividends: number[];
 }
+export interface PlTree {
+    year: string;
+    years: string[];
+    rows: PlTreeRow[];
+}
 export interface PlMonthly {
     year: string;
     years: string[];
@@ -59,6 +65,7 @@ const props = defineProps<{
     revChannel: PlRevenue | undefined;
     revCategory: PlRevenue | undefined;
     expenses: PlExpenses | undefined;
+    tree: PlTree | undefined;
     from: string | null;
     to: string | null;
     active: boolean;
@@ -78,7 +85,7 @@ watch(
     () => props.active,
     (active) => {
         if (!active) return;
-        const loaded = { plMonthly: props.monthly, plRevChannel: props.revChannel, plRevCategory: props.revCategory, plExpenses: props.expenses };
+        const loaded = { plMonthly: props.monthly, plRevChannel: props.revChannel, plRevCategory: props.revCategory, plExpenses: props.expenses, plRevTree: props.tree };
         const only = (Object.keys(loaded) as (keyof typeof loaded)[]).filter((k) => loaded[k] === undefined);
         if (only.length) router.reload({ only: [...only] });
     },
@@ -204,11 +211,29 @@ function exportExpensesByMonthToExcel(): void {
     }
     void downloadXlsx('finance', `PromTech_Raskhody_${e.year}.xlsx`, [{ name: String(e.year), rows, cols: [32, ...Array(12).fill(12), 14] }]);
 }
+// ── Выручка: направление → категория → товар (legacy renderRevenueByChannelCategory, exportRevenueTreeToExcel) ──
+const setTreeYear = (year: string) => router.reload({ only: ['plRevTree'], data: { pl_rtree_year: year } });
+function exportRevenueTreeToExcel(): void {
+    const t = props.tree;
+    if (!t || !t.rows.length) return void window.alert('Нет данных для выгрузки.');
+    const totals = Array(12).fill(0) as number[];
+    const line = (label: string, m: number[]) => [label, ...m.map((v) => Math.round(v)), Math.round(m.reduce((s, v) => s + v, 0))];
+    const rows: (string | number)[][] = [['Выручка по направлениям, категориям и товарам — ' + t.year], [], ['Направление / Категория / Товар', ...MONTHS, 'Итого за год']];
+    t.rows.forEach((ch) => {
+        ch.monthly.forEach((v, i) => (totals[i] += v));
+        rows.push(line(ch.label, ch.monthly));
+        (ch.cats ?? []).forEach((cat) => {
+            rows.push(line('   ' + cat.label, cat.monthly));
+            (cat.items ?? []).forEach((it) => rows.push(line('      ' + it.label, it.monthly)));
+        });
+    });
+    rows.push(['Итого', ...totals.map((v) => Math.round(v)), Math.round(totals.reduce((s, v) => s + v, 0))]);
+    void downloadXlsx('finance', `PromTech_Vyruchka_struktura_${t.year}.xlsx`, [{ name: String(t.year), rows, cols: [36, ...Array(12).fill(12), 14] }]);
+}
 const cell = (r: Row) => (r.bold ? 'font-weight:700' : '') + (r.big ? ';font-size:14px' : '');
 const LATER = 'Появится следующим шагом переноса P&L (ERP-060, ответ бухгалтера № 36).';
 const later = () => window.alert(LATER);
 const SUBREPORTS = [
-    { title: 'Выручка: направление → категория → товар', select: 'pl-rev-tree-year', body: 'pl-rev-tree' },
     { title: 'Оценка себестоимости по категориям (без техкарт)', select: 'pl-matcost-year', body: 'pl-matcost' },
 ];
 </script>
@@ -354,6 +379,20 @@ const SUBREPORTS = [
             </div>
             <div id="pl-exp-by-month" style="overflow-x: auto">
                 <PlExpensesTable v-if="props.expenses" :rows="props.expenses.rows" :dividends="props.expenses.dividends" />
+            </div>
+        </div>
+        <div class="card" style="grid-column: 1/3">
+            <div class="card-header">
+                <span class="card-title">Выручка: направление → категория → товар</span>
+                <div style="display: flex; gap: 6px; align-items: center">
+                    <select id="pl-rev-tree-year" :value="props.tree?.year" style="font-size: 12px; width: auto" @change="setTreeYear(($event.target as HTMLSelectElement).value)">
+                        <option v-for="y in props.tree?.years ?? []" :key="y" :value="y">{{ y }}</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" @click="exportRevenueTreeToExcel">📥 Excel</button>
+                </div>
+            </div>
+            <div id="pl-rev-tree" style="overflow-x: auto">
+                <PlRevenueTree v-if="props.tree" :rows="props.tree.rows" />
             </div>
         </div>
         <div v-for="s in SUBREPORTS" :key="s.body" class="card" style="grid-column: 1/3">
