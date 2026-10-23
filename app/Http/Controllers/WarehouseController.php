@@ -7,9 +7,11 @@ use App\Http\Requests\Warehouse\MaterialCellRequest;
 use App\Http\Requests\Warehouse\NewMaterialRequest;
 use App\Models\Material;
 use App\Models\MaterialAlias;
+use App\Models\StockDocument;
 use App\Models\Supplier;
 use App\Models\Warehouse;
 use App\Services\MaterialService;
+use App\Services\Warehouse\StockDocumentService;
 use App\Support\LegacyNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,6 +56,17 @@ class WarehouseController extends Controller
             'aliases' => MaterialAlias::query()->orderBy('material_name')->orderBy('alias_name')->orderBy('id')
                 ->get(['id', 'material_name', 'alias_name', 'category'])->values(),
             'suppliers' => Supplier::query()->active()->orderBy('name')->orderBy('id')->get(['id', 'name'])->values(),
+            // «📄 Документы» (ADR-0049): newest first, as legacy sorts them; the lines for the window of a document.
+            'documents' => StockDocument::query()->with('lines.material:id,name')->orderByDesc('doc_date')->orderByDesc('id')->get()
+                ->map(fn (StockDocument $d) => [
+                    'id' => $d->id, 'type' => $d->doc_type, 'num' => $d->num, 'date' => $d->doc_date->format('Y-m-d'), 'status' => $d->status === 'posted' ? 'done' : 'draft',
+                    'supplier' => $d->supplier_name ?? '', 'esf_ref' => $d->esf_ref ?? '', 'note' => $d->note ?? '', 'createdBy' => $d->created_by_name ?? '',
+                    'lock_version' => $d->lock_version,
+                    'items' => $d->lines->map(fn ($l) => ['materialId' => $l->material_id, 'name' => $l->material->name ?? '', 'qty' => (float) $l->qty, 'qtyText' => (string) $l->qty,
+                        'unit' => $l->unit, 'price' => (float) $l->price, 'priceText' => (string) $l->price, 'amount' => (float) $l->amount])->values(),
+                ])->values(),
+            'nextReceiptNum' => StockDocumentService::nextNumber('receipt'),
+            'today' => now(config('erp.business_timezone'))->format('Y-m-d'),
         ]);
     }
 

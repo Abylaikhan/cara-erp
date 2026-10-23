@@ -9,11 +9,13 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DealerController;
 use App\Http\Controllers\EsfController;
+use App\Http\Controllers\EsfLinkController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\HrController;
 use App\Http\Controllers\LeadCommunicationController;
+use App\Http\Controllers\MoneyAccountController;
 use App\Http\Controllers\MoneyController;
 use App\Http\Controllers\MrpController;
 use App\Http\Controllers\PageController;
@@ -26,6 +28,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SalonCashController;
 use App\Http\Controllers\SalonReportController;
 use App\Http\Controllers\SalonWorksheetController;
+use App\Http\Controllers\StockDocumentController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserAccountController;
 use App\Http\Controllers\WagesController;
@@ -165,6 +168,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/money', [MoneyController::class, 'index'])->middleware('page:money')->name('money.index');
     Route::get('/money/payouts/{transaction}', [MoneyController::class, 'payouts'])->whereNumber('transaction')->middleware('page:money')->name('money.payouts');
     Route::post('/money/bank-recon/clear', [BankReconController::class, 'clear'])->middleware('page:money')->name('money.bank-recon.clear');
+    Route::middleware('page:warehouse')->prefix('warehouse/documents')->name('warehouse.documents.')->controller(StockDocumentController::class)->group(function () {
+        Route::post('/', 'store')->name('store');
+        Route::put('/{document}', 'update')->whereNumber('document')->name('update');
+        Route::post('/{document}/post', 'post')->whereNumber('document')->name('post');
+    });
+    Route::post('/esf/links', [EsfLinkController::class, 'store'])->middleware(['page:esf', 'throttle:60,1'])->name('esf.links.store');
+    Route::delete('/esf/links/{link}', [EsfLinkController::class, 'destroy'])->whereNumber('link')->middleware('page:esf')->name('esf.links.destroy');
+    Route::middleware('page:money')->prefix('money/accounts')->name('money.accounts.')->controller(MoneyAccountController::class)->group(function () {
+        Route::post('/', 'store')->name('store');
+        Route::put('/{account}', 'update')->whereNumber('account')->name('update');
+        Route::delete('/{account}', 'destroy')->whereNumber('account')->name('destroy');
+    });
     Route::middleware('page:money')->prefix('money/salon-worksheet')->name('money.salon-worksheet.')->controller(SalonWorksheetController::class)->group(function () {
         Route::post('/', 'store')->name('store');
         Route::post('/clear', 'clear')->name('clear');

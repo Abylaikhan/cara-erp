@@ -32,6 +32,10 @@ class MaterialImporter
         if ($rows->isEmpty()) {
             throw new RuntimeException("Snapshot {$snapshotId} has no warehouse rows");
         }
+        // The import writes the stock of legacy; once documents moved it here (ADR-0049) that would undo them.
+        if (DB::table('stock_movements')->exists()) {
+            throw new RuntimeException('Остатки склада уже меняли документы новой системы (stock_movements): перенос материалов из legacy их перезапишет и остановлен (ADR-0049).');
+        }
         $this->validate($rows->all());
 
         return DB::transaction(function () use ($rows, $snapshotId, $by) {

@@ -57,7 +57,7 @@ class EsfReconTest extends TestCase
             ['invoice' => $inv->id, 'type' => 'money_tx', 'source' => $tx, 'amount' => 60.25],
             ['invoice' => $inv->id, 'type' => 'advance_report', 'source' => $adv, 'amount' => 40],
             ['invoice' => $inv->id, 'type' => 'advance_report', 'source' => null, 'amount' => 5],
-        ], array_map(fn ($l) => [...$l, 'amount' => $l['amount'] == (int) $l['amount'] ? (int) $l['amount'] : $l['amount']], $recon['links']));
+        ], array_map(fn ($l) => [...array_diff_key($l, ['id' => 0]), 'amount' => $l['amount'] == (int) $l['amount'] ? (int) $l['amount'] : $l['amount']], $recon['links']));
     }
 
     public function test_only_roles_with_the_page_get_it(): void

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Связь ЭСФ с оплатой или авансовым отчётом (legacy esf_payment_links): how much of the invoice that payment covers.
- * Read-only until «Деньги» are migrated: the source is the legacy id (ERP-048, decision D-10).
+ * The source is named by its legacy id; links are saved in «Сверка с оплатами» (EsfLinkService, D-10, ADR-0048).
  *
  * @property int $id
  * @property int $invoice_id

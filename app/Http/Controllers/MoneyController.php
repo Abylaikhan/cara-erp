@@ -126,7 +126,8 @@ class MoneyController extends Controller
         return Inertia::render('Money', [
             'accounts' => $accounts->map(fn (MoneyAccount $a) => [
                 'id' => $a->id, 'name' => $a->name, 'bank' => $a->bank ?? '', 'currency' => $a->currency, 'type' => $a->type, 'icon' => $a->icon,
-                'opening' => (float) $a->opening_balance,
+                'opening' => (float) $a->opening_balance, 'openingText' => (string) $a->opening_balance, 'iik' => $a->iik ?? '', 'bik' => $a->bik ?? '',
+                'lock_version' => $a->lock_version,
             ])->values(),
             'transactions' => $tx->map(function ($t) use ($orderPayments, $esf, $items) {
                 $orders = $t->order_num !== null ? [$t->order_num] : [];

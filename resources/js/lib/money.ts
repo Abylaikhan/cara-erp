@@ -9,6 +9,11 @@ export interface MoneyAccount {
     type: 'cash' | 'bank';
     icon: string | null;
     opening: number;
+    /** The opening balance as stored (to the tiyn), for the window «Расчётный счёт». */
+    openingText: string;
+    iik: string;
+    bik: string;
+    lock_version: number;
 }
 export interface MoneyTx {
     id: number;
@@ -108,7 +113,6 @@ export const openingOf = (txs: MoneyTx[], accountId: number): number =>
 export const LATER = {
     edit: 'Правка и копирование операций появятся вместе с проведением денег: правила оплат и остатков ждут решений D-03 и D-11 (ERP-031…033).',
     add: 'Новые операции и переводы появятся вместе с проведением денег (ERP-031…033, решения D-03 и D-11).',
-    account: 'Новые кассы и счета появятся вместе с проведением денег (ERP-031).',
     statement: 'Импорт банковской выписки появится отдельной частью раздела (ERP-034).',
     zpRecon: 'Исправление удаляет и создаёт денежные операции и появится вместе с проведением денег (ERP-031…033, решения D-03 и D-11). Сравнение уже показано.',
     merge: 'Объединение выплат кассы в одну платёжку меняет операции и выплаты зарплатной ведомости и появится вместе с проведением денег и начислениями ЗП (ERP-031…033, ERP-057, решения D-03 и D-11).',

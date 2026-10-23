@@ -3,6 +3,7 @@
 // «Авансовые отчёты», «Все операции» (CashTab, BankTab, AdvancesTab, AllTab). View only: new operations, editing, transfers and statement import come with
 // ERP-031…035 (decisions D-03, D-11); «Платёжный календарь» is CalendarTab, «Рабочий лист салонов» SalonWorksheetTab, «Сверка с банком» BankReconTab.
 import { computed, ref } from 'vue';
+import AccountModal from '@/components/money/AccountModal.vue';
 import AdvancesTab from '@/components/money/AdvancesTab.vue';
 import AllTab from '@/components/money/AllTab.vue';
 import BankReconTab, { type BankRecon } from '@/components/money/BankReconTab.vue';
@@ -63,6 +64,8 @@ const kpi = computed(() => {
     return { cash, bank, total: cash + bank, cashCount: props.accounts.filter((a) => a.type === 'cash').length };
 });
 const hint = computed(() => (hasPeriod() ? ' (оборот)' : ''));
+const accountModal = ref<InstanceType<typeof AccountModal> | null>(null);
+const openAccount = (acc: MoneyAccount | null, type?: 'cash') => accountModal.value?.openBankAccountModal(acc, type);
 const fab = ref(true);
 const add = () => window.alert(LATER.add);
 </script>
@@ -157,10 +160,10 @@ const add = () => window.alert(LATER.add);
             </div>
 
             <div v-if="visited.has('cash')" id="money-tab-cash" :style="{ display: tab === 'cash' ? '' : 'none' }">
-                <CashTab :accounts="props.accounts" :txs="props.transactions" :categories="props.categories" />
+                <CashTab :accounts="props.accounts" :txs="props.transactions" :categories="props.categories" @account="openAccount" />
             </div>
             <div v-if="visited.has('bank')" id="money-tab-bank" :style="{ display: tab === 'bank' ? '' : 'none' }">
-                <BankTab :accounts="props.accounts" :txs="props.transactions" :categories="props.categories" />
+                <BankTab :accounts="props.accounts" :txs="props.transactions" :categories="props.categories" @account="openAccount" />
             </div>
             <div v-if="visited.has('advances')" id="money-tab-advances" :style="{ display: tab === 'advances' ? '' : 'none' }">
                 <AdvancesTab :advances="props.advances" :active="tab === 'advances'" />
@@ -178,5 +181,6 @@ const add = () => window.alert(LATER.add);
                 <CalendarTab :data="props.calendar" :accounts="props.accounts" :categories="props.categories" :active="tab === 'calendar'" />
             </div>
         </div>
+        <AccountModal ref="accountModal" />
     </ErpLayout>
 </template>

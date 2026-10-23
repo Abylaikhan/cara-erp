@@ -49,7 +49,15 @@ class HrPageTest extends TestCase
             ->where('employees.1.salaryHistory.1.note', 'Первый')
             ->where('canSeePin', true)
             ->where('salonManager', false)
+            ->where('canOpenPayroll', true)
             ->missing('employees.0.pin'));
+    }
+
+    public function test_the_payroll_button_opens_the_page_only_for_those_who_may_open_it(): void
+    {
+        // № 77: the payroll tab of «Сотрудники» is left out; its button in the header leads to the page «Зарплатная ведомость»
+        $this->actingAs(User::factory()->role('hr')->create())->get('/hr')->assertInertia(fn (Assert $page) => $page->where('canOpenPayroll', false));
+        $this->actingAs(User::factory()->role('director')->create())->get('/hr')->assertInertia(fn (Assert $page) => $page->where('canOpenPayroll', true));
     }
 
     public function test_the_head_of_the_salons_gets_the_salons_people_and_the_full_counts(): void

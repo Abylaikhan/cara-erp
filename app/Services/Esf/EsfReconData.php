@@ -34,8 +34,9 @@ class EsfReconData
                     ->map(fn ($l) => is_array($l) ? ($invoiceIds[(string) ($l['esfInvoiceId'] ?? '')] ?? null) : null)->filter()->unique()->values()->all(),
             ])->all();
 
-        $links = DB::table('esf_payment_links')->orderBy('id')->get(['invoice_id', 'source_type', 'source_legacy_id', 'amount'])
+        $links = DB::table('esf_payment_links')->orderBy('id')->get(['id', 'invoice_id', 'source_type', 'source_legacy_id', 'amount'])
             ->map(fn ($l) => [
+                'id' => $l->id,
                 'invoice' => $l->invoice_id,
                 'type' => $l->source_type,
                 'source' => match ($l->source_type) {

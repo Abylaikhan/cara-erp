@@ -9,6 +9,8 @@ import { computed, reactive, ref } from 'vue';
 import { accountStats, catLabel, fmt, fmtShort, hasPeriod, inPeriod, LATER, period, type Categories, type MoneyAccount, type MoneyTx } from '@/lib/money';
 
 const props = defineProps<{ accounts: MoneyAccount[]; txs: MoneyTx[]; categories: Categories }>();
+// «+ Счёт» and a card open the window «Расчётный счёт» of the page (legacy openBankAccountModal; ADR-0047).
+const emit = defineEmits<{ account: [acc: MoneyAccount | null] }>();
 
 const banks = computed(() => props.accounts.filter((a) => a.type === 'bank'));
 const bankIds = computed(() => new Set(banks.value.map((a) => a.id)));
@@ -111,7 +113,7 @@ const later = (text: string) => () => window.alert(text);
 <template>
     <div style="display: flex; gap: 10px; margin-bottom: 14px; align-items: center; flex-wrap: wrap">
         <div style="flex: 1"></div>
-        <button class="btn btn-ghost btn-sm" @click="later(LATER.account)()">+ Счёт</button>
+        <button class="btn btn-ghost btn-sm" @click="emit('account', null)">+ Счёт</button>
         <button class="btn btn-ghost btn-sm" @click="later(LATER.statement)()">📑 Импорт выписки</button>
         <button class="btn btn-primary btn-sm" @click="later(LATER.add)()">📥 Поступление</button>
         <button class="btn btn-ghost btn-sm" @click="later(LATER.add)()">📤 Списание</button>
@@ -119,7 +121,7 @@ const later = (text: string) => () => window.alert(text);
     </div>
     <!-- Карточки счетов -->
     <div id="bank-accounts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 16px">
-        <div v-for="acc in banks" :key="acc.id" class="card" style="padding: 16px; cursor: pointer" @click="later(LATER.account)()">
+        <div v-for="acc in banks" :key="acc.id" class="card" style="padding: 16px; cursor: pointer" @click="emit('account', acc)">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px">
                 <div>
                     <div style="font-weight: 700; font-size: 14px">{{ acc.name }}</div>

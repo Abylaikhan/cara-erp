@@ -60,6 +60,7 @@ class HrController extends Controller
                 ? collect(config('erp.roles'))->map(fn (array $r) => ['label' => $r['label'], 'channel' => $r['channel'] ?? '', 'pages' => $r['pages']])->all() : [],
             'canSeeCommissions' => $canSeeCommissions,
             'canDismiss' => in_array($user->role, ['director', 'hr'], true) || $salonManager,
+            'canOpenPayroll' => Erp::canAccess($user, 'payroll'),
             'employees' => $shown->map(fn (Employee $e) => [
                 'id' => $e->uuid,
                 'name' => $e->name,

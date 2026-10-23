@@ -324,6 +324,10 @@ with sync_playwright() as p:
             target_shot(page, str(OUT / f'target-warehouse-{shot}-{theme}.png'))
             if shot in ('remains', 'aliases'):
                 run_filters(page, 'target', theme, 'wh-tab-' + shot)
+            if shot == 'docs':  # «📥 Приходная накладная» (ADR-0049)
+                page.locator('#wh-tab-docs button', has_text='📥 Приход').click(); page.wait_for_timeout(400)
+                target_shot(page, str(OUT / f'target-warehouse-receipt-{theme}.png'))
+                page.locator('#whDocModal .modal-close').click(); page.wait_for_timeout(200)
         page.locator('#page-warehouse button', has_text='+ Материал').click(); page.wait_for_timeout(300)
         target_shot(page, str(OUT / f'target-warehouse-add-{theme}.png'))
         page.locator('#mat-category-grid button').first.click(); page.wait_for_timeout(300)
@@ -525,6 +529,7 @@ with sync_playwright() as p:
         target_shot(page, str(OUT / f'target-money-{theme}.png'))
         run_filters(page, 'target', theme, 'money-tab-cash')
         money = page.evaluate("JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page)")['props']
+        bank_first = next((a['id'] for a in money['accounts'] if a['type'] == 'bank'), None)
         # Reference c54cf25: the running balance over the whole history and «👥» only on salary expenses of the salary cash
         # (the table as text, every cash desk), and «🔁 Сверка переводов» of the salary cash.
         target_cash = []
@@ -562,6 +567,11 @@ with sync_playwright() as p:
             page.locator('#page-money > .tabs .tab').nth(i).click(); page.wait_for_timeout(1500)
             target_shot(page, str(OUT / f'target-money-{shot}-{theme}.png'))
             run_filters(page, 'target', theme, 'money-tab-' + shot)
+            # The window «Расчётный счёт» of the first bank account (ADR-0047).
+            if shot == 'bank' and bank_first is not None:
+                page.locator('#bank-accounts-grid .card').first.click(); page.wait_for_timeout(500)
+                target_shot(page, str(OUT / f'target-money-account-{theme}.png'))
+                page.locator('#bankAccountModal .modal-close').click(); page.wait_for_timeout(200)
         advances = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
             const r = await fetch('/money', {headers: {'X-Inertia': 'true', 'X-Inertia-Version': initial.version || '', 'X-Inertia-Partial-Component': 'Money',
@@ -688,7 +698,7 @@ with sync_playwright() as p:
         page.locator('#hr-tab-salon-commissions').click(); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-hr-commissions-{theme}.png'))
         target_comm = page.locator('#hr-tab-salon_commissions').inner_text()
-        page.locator('#page-hr .tabs .tab').nth(5).click(); page.wait_for_timeout(500)
+        page.locator('#page-hr .tabs .tab').nth(3).click(); page.wait_for_timeout(500)
         target_shot(page, str(OUT / f'target-hr-tariffs-{theme}.png'))
         target_tariffs = page.locator('#hr-tab-tariffs').inner_text()
         # M18 «Сдельная оплата»: the rating and the KPIs of the current month, the filters, the grid of rates; then the detail of
@@ -855,6 +865,16 @@ with sync_playwright() as p:
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-warehouse-{shot}-{theme}.png'))
             if shot in ('remains', 'aliases'):
                 run_filters(page, 'legacy', theme, 'wh-tab-' + shot)
+            if shot == 'docs':
+                # Legacy hides «Поставщик» and «ЭСФ (основание)» of a receipt and shows «Склад-источник» (ADR-0002, item 123); it
+                # dates the form in UTC and numbers it by its own counter: the target's date and number are typed in.
+                page.evaluate("""([today, num]) => { openWhDoc('receipt');
+                    document.getElementById('whdoc-fromwh-row').style.display = 'none';
+                    document.getElementById('whdoc-supplier-row').style.display = ''; document.getElementById('whdoc-esf-row').style.display = '';
+                    document.getElementById('whdoc-date').value = today; document.getElementById('whdoc-num').value = num; }""",
+                              [wh_props['today'], wh_props['nextReceiptNum']]); page.wait_for_timeout(400)
+                unscroll(page); page.screenshot(path=str(OUT / f'legacy-warehouse-receipt-{theme}.png'))
+                page.evaluate("closeModal('whDocModal')"); page.wait_for_timeout(200)
         page.evaluate("openAddMaterialModal()"); page.wait_for_timeout(300)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-warehouse-add-{theme}.png'))
         page.evaluate("selectMatCategory('lumber')"); page.wait_for_timeout(300)
@@ -1194,11 +1214,11 @@ with sync_playwright() as p:
         export_note('production worksheet', theme, pwb_export, legacy_export(page, 'exportProdWorksheetExcel()'))
         print(f'mrp worksheet ({theme}): строки ' + ('совпадает' if target_pwb.split() == page.locator('#pwb-tbody').inner_text().split() else 'РАСХОЖДЕНИЕ'))
         page.evaluate("[...window._pwbSaved].reverse().forEach(([o, f, it, attrs]) => { Object.assign(o, f); it.attributes = attrs; })")
-        # Money: legacy gets the target's accounts (without account numbers, which are not stored — ADR-0002, item 54), the
-        # operations in the same order, the expense items, the ESF links and order payments of each operation, and one open
-        # advance carrying the advance debt.
+        # Money: legacy gets the target's accounts (number and БИК as stored here), the operations in the same order, the
+        # expense items, the ESF links and order payments of each operation, and one open advance carrying the advance debt.
+        # Its cash cards get the «✏️» of the target (ADR-0002, item 121).
         page.evaluate("""(m) => {
-            bankAccounts = m.accounts.map(a => ({id: String(a.id), name: a.name, bank: a.bank, iin: '', bik: '', balance: 0, openingBalance: a.opening, currency: a.currency, type: a.type, icon: a.icon || ''}));
+            bankAccounts = m.accounts.map(a => ({id: String(a.id), name: a.name, bank: a.bank, iin: a.iik, bik: a.bik, balance: 0, openingBalance: a.opening, currency: a.currency, type: a.type, icon: a.icon || ''}));
             moneyTx = m.transactions.map(t => ({id: t.id, sbId: String(t.id), date: t.date, accountId: String(t.account), flow: t.flow, category: t.category,
                 subcategory: t.item || '', endClient: '', amount: t.amount, desc: t.desc, counterparty: t.ctr, bin: '', orderNum: t.order, amountFx: t.fx, fxCurrency: ''}));
             _expenseCats = [...new Set(m.transactions.map(t => t.item).filter(Boolean))].map(n => ({code: n, name: n})); _expenseCatsLoaded = true;
@@ -1209,6 +1229,8 @@ with sync_playwright() as p:
             showPage('money', document.querySelector(".nav-item[onclick*=\\"showPage('money'\\"]"));
         }""", money)
         page.wait_for_timeout(2000)
+        page.evaluate("""() => document.querySelectorAll('#cash-summary-grid .card > div:first-child').forEach(h => h.insertAdjacentHTML('beforeend',
+            '<button class="btn btn-ghost btn-sm" style="padding: 0 6px; font-size: 11px" title="Изменить кассу">✏️</button>'))""")
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-{theme}.png'))
         run_filters(page, 'legacy', theme, 'money-tab-cash')
         legacy_cash = []
@@ -1237,6 +1259,12 @@ with sync_playwright() as p:
             page.evaluate(f"showMoneyTab('{tab}', document.querySelectorAll('#page-money > .tabs .tab')[{idx}])"); page.wait_for_timeout(1500)
             unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-{tab}-{theme}.png'))
             run_filters(page, 'legacy', theme, 'money-tab-' + tab)
+            # Legacy fills «Начальный остаток» with the current balance of the record (0); here — the saved opening balance (item 122).
+            if tab == 'bank' and bank_first is not None:
+                page.evaluate("(a) => { openBankAccountModal(String(a.id)); document.getElementById('ba-balance').value = a.openingText; }",
+                              next(a for a in money['accounts'] if a['id'] == bank_first)); page.wait_for_timeout(500)
+                unscroll(page); page.screenshot(path=str(OUT / f'legacy-money-account-{theme}.png'))
+                page.evaluate("closeModal('bankAccountModal')"); page.wait_for_timeout(200)
         # Advances: the same reports, with the issuing operation the target links (added without an account, so the totals
         # stay) and «Потрачено» as its lines give it.
         page.evaluate("""(rows) => {
@@ -1405,10 +1433,12 @@ with sync_playwright() as p:
         print(f'payroll ({theme}): ' + ', '.join(f'{n} ' + ('совпадает' if a.split() == b.split() else 'РАСХОЖДЕНИЕ') for n, a, b in zip(('KPI', 'строки', 'итоги', 'выдачи'), target_pr + [target_po], legacy_pr + [legacy_po])))
         # «Сотрудники»: legacy gets the staff the target renders (as loadStaffFromDB keeps it); its demonstration lists of piece
         # work and of the payroll (wageEmployees, payrollStaff) are emptied — the target does not show them (ADR-0036). Legacy
-        # draws the staffing table only when its tab is clicked: it is clicked (ADR-0002).
+        # draws the staffing table only when its tab is clicked: it is clicked (ADR-0002). Its tabs «Сдельная выработка» and
+        # «Зарплатная ведомость» are left out by the customer's answer (№ 77, ADR-0002, item 120).
         page.evaluate("""(r) => {
             employeesData = r.employees.map(e => ({...e, initials: e.name.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(), color: 'rgba(79,142,247,.15)', tc: 'var(--accent)'}));
             wageEmployees = []; payrollStaff = [];
+            document.querySelectorAll("#page-hr .tabs .tab[onclick*=\\"'wage'\\"], #page-hr .tabs .tab[onclick*=\\"'payroll'\\"]").forEach(t => t.remove());
             showPage('hr', document.querySelector(".nav-item[onclick*=\\"showPage('hr'\\"]"));
         }""", hr)
         page.wait_for_timeout(1200)
@@ -1431,7 +1461,7 @@ with sync_playwright() as p:
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-hr-commissions-{theme}.png'))
         legacy_comm = page.locator('#hr-tab-salon_commissions').inner_text()
         print(f'hr commissions ({theme}): ' + ('совпадает' if target_comm.split() == legacy_comm.split() else 'РАСХОЖДЕНИЕ'))
-        page.evaluate("showHRTab('tariffs', document.querySelectorAll('#page-hr .tab')[5])"); page.wait_for_timeout(500)
+        page.evaluate("showHRTab('tariffs', document.querySelectorAll('#page-hr .tab')[3])"); page.wait_for_timeout(500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-hr-tariffs-{theme}.png'))
         print(f'hr tariffs ({theme}): ' + ('совпадает' if target_tariffs.split() == page.locator('#hr-tab-tariffs').inner_text().split() else 'РАСХОЖДЕНИЕ'))
         print(f'hr ({theme}): штатное расписание ' + ('совпадает' if target_org.split() == legacy_org.split() else 'РАСХОЖДЕНИЕ')
@@ -1690,7 +1720,7 @@ with sync_playwright() as p:
             n = len(a2) if isinstance(a2, list) else 1
             print(f'supplier tools {key} ({theme}): {n} — ' + ('совпадает' if a2 == b2 else 'РАСХОЖДЕНИЕ'))
         ctx.close()
-        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'esf-recon', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'sales-worksheet', 'mrp', 'mrp-queue', 'mrp-worksheet', 'mrp-workload', 'mrp-worklog', 'money', 'money-zprecon', 'money-bank', 'money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'payroll', 'payroll-payouts', 'hr', 'hr-employees', 'hr-table', 'hr-commissions', 'hr-tariffs', 'wages') + (('hr-card',) if hr['employees'] else ()) + (('wages-detail',) if wages['staff'] else ()):
+        for shot in ('login', 'm14') + (('m14-modal',) if first else ()) + ('catalog',) + (('catalog-modal',) if product_id is not None else ()) + ('customers',) + (('customers-modal',) if persons else ()) + ('dealers', 'dealer-modal', 'cust-reconcile', 'suppliers') + (('supplier-card',) if plain is not None else ()) + ('suppliers-categories', 'suppliers-rating', 'supplier-merge', 'warehouse', 'warehouse-categories', 'warehouse-workshops', 'warehouse-docs', 'warehouse-receipt', 'warehouse-remains', 'warehouse-aliases', 'warehouse-add', 'esf') + (('esf-detail',) if invoices else ()) + ('esf-import', 'esf-recon', 'crm', 'crm-leads', 'crm-leads-table') + (('crm-lead-modal',) if first_lead is not None else ()) + ('crm-funnel', 'crm-funnel-modal') + (('crm-popover',) if first_card is not None else ()) + ('crm-tasks', 'crm-task-modal', 'crm-clients') + (('crm-client-card',) if first_client else ()) + ('crm-board-prod', 'crm-board-pay', 'crm-projects', 'crm-project-new') + ('purchases', 'purchases-kanban', 'purchases-planfact', 'purchases-modal', 'sales', 'sales-queue', 'sales-done', 'sales-journal', 'sales-report', 'sales-worksheet', 'mrp', 'mrp-queue', 'mrp-worksheet', 'mrp-workload', 'mrp-worklog', 'money', 'money-zprecon', 'money-bank') + (('money-account',) if bank_first is not None else ()) + ('money-all', 'money-advances', 'money-bankrecon', 'money-calendar', 'money-salonwb', 'money-salon', 'salon-report', 'salon-paysheet', 'salon-history', 'reconcile', 'dashboard', 'finance-ar', 'finance-cfs', 'finance-purchases', 'accruals', 'payroll', 'payroll-payouts', 'hr', 'hr-employees', 'hr-table', 'hr-commissions', 'hr-tariffs', 'wages') + (('hr-card',) if hr['employees'] else ()) + (('wages-detail',) if wages['staff'] else ()):
             if EMPTY and shot in EMPTY_DEVIATIONS:  # pictures kept, not compared: a documented deviation
                 print(f'{shot}-{theme}: not compared — {EMPTY_DEVIATIONS[shot]}')
                 continue

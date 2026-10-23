@@ -5,6 +5,7 @@
 // history. View only: saving a card, hiring, dismissing and the PIN come with the users and the payroll rules (D-13, D-06);
 // «ФОТ» and «Нагрузка» of the KPIs, the attendance of the cards and the other tabs are counted by legacy from figures in its
 // own code (demonstration lists, unconfirmed rates) and wait for those decisions (ADR-0036).
+import { router } from '@inertiajs/vue3';
 import { computed, reactive, ref } from 'vue';
 import ErpModal from '@/components/ErpModal.vue';
 import SalonCommissionsTab from '@/components/hr/SalonCommissionsTab.vue';
@@ -20,6 +21,7 @@ const props = defineProps<{
     canManageUsers: boolean;
     canSeeCommissions: boolean;
     canDismiss: boolean;
+    canOpenPayroll: boolean;
     employees: Employee[];
     accounts: Account[];
     roleTemplates: Record<string, { label: string; channel: string; pages: string[] }>;
@@ -33,17 +35,14 @@ const LATER = {
 };
 const later = (text: string) => window.alert(text);
 const TAB_LATER: Record<string, string> = {
-    wage: 'Сдельная выработка появится вместе с расчётом сдельной оплаты (ERP-055, решение D-06).',
-    payroll: 'Зарплатная ведомость появится вместе с правилами расчёта зарплаты (ERP-057, решение D-06).',
     timesheet: 'Табель появится вместе с правилами расчёта зарплаты (ERP-054, решение D-06).',
 };
 
-// ── Tabs (legacy showHRTab; the head of the salons sees «Сотрудники» and «Комиссии» only, and starts on «Сотрудники») ──
+// ── Tabs (legacy showHRTab; the head of the salons sees «Сотрудники» and «Комиссии» only, and starts on «Сотрудники»).
+// «Сдельная выработка» and «Зарплатная ведомость» of legacy are left out: the customer's answer 23.10, № 77 (ADR-0002, item 120).
 const TABS = [
     { id: 'orgchart', label: '🏢 Штатное расписание' },
     { id: 'employees', label: '👤 Сотрудники' },
-    { id: 'wage', label: '🔨 Сдельная выработка' },
-    { id: 'payroll', label: '📊 Зарплатная ведомость' },
     { id: 'timesheet', label: '📅 Табель' },
     { id: 'tariffs', label: '⚙️ Тарифы' },
     { id: 'salon_commissions', label: '💰 Комиссии салонов', domId: 'hr-tab-salon-commissions' },
@@ -52,11 +51,10 @@ const TABS = [
 const visible = (id: string) => {
     if (id === 'users' && !props.canManageUsers) return false;
     if (id === 'salon_commissions' && !props.canSeeCommissions) return false;
-    if (props.salonManager && ['orgchart', 'wage', 'payroll', 'timesheet', 'tariffs', 'users'].includes(id)) return false;
+    if (props.salonManager && ['orgchart', 'timesheet', 'tariffs', 'users'].includes(id)) return false;
     return true;
 };
 const start = props.salonManager ? 'employees' : 'orgchart';
-// Legacy «📊 Зарплатная ведомость» of the header opens the payroll tab but marks the third tab (index 2) as active.
 const state = reactive({ tab: start, marked: TABS.findIndex((t) => t.id === start) });
 function showHRTab(id: string, marked: number): void {
     state.tab = id;
@@ -178,7 +176,8 @@ function openStaffChangesHistory(): void {
                     <div class="section-sub">Штат · зарплата · сдельный учёт · табель</div>
                 </div>
                 <div style="display: flex; gap: 8px">
-                    <button class="btn btn-ghost btn-sm" @click="showHRTab('payroll', 2)">📊 Зарплатная ведомость</button>
+                    <!-- legacy opened its payroll tab; that tab is left out (№ 77), the button opens the page «Зарплатная ведомость» -->
+                    <button v-if="props.canOpenPayroll" class="btn btn-ghost btn-sm" @click="router.visit('/payroll')">📊 Зарплатная ведомость</button>
                     <button class="btn btn-primary btn-sm" @click="openEmployeeCard(null)">+ Сотрудник</button>
                 </div>
             </div>
@@ -476,7 +475,7 @@ function openStaffChangesHistory(): void {
                 <UsersTab v-if="props.canManageUsers" :accounts="props.accounts" :employees="props.employees" :templates="props.roleTemplates" />
             </div>
 
-            <!-- Остальные вкладки — с правилами зарплаты -->
+            <!-- Табель — с правилами зарплаты -->
             <div v-for="(text, id) in TAB_LATER" :id="'hr-tab-' + id" :key="id" :style="{ display: state.tab === id ? '' : 'none' }">
                 <div class="card">
                     <div style="font-size: 13px; color: var(--text3); line-height: 1.6">{{ text }}</div>

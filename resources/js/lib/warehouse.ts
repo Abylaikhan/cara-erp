@@ -95,4 +95,4 @@ export const CAT_ICONS: Record<string, string> = {
 };
 
 /** Warehouse documents (receipt, transfer, write-off, inventory) move stock; they wait for decisions D-04/D-05. */
-export const DOCUMENTS_LATER = 'Складские документы (приход, перемещение, списание, инвентаризация) появятся после решения, какие документы двигают склад и допустим ли минус (D-04, D-05).';
+export const DOCUMENTS_LATER = 'Перемещение, списание и применение инвентаризации появятся следующим шагом: приход уже проводится (№ 45, ADR-0049); отмена движения ждёт ответа на вопрос № 47.';

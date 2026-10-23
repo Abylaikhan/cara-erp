@@ -5,8 +5,6 @@ group,page-mycabinet,NOT_STARTED,ERP-058,Мой кабинет
 group,page-ai,NOT_STARTED,ERP-065 (D-09),AI-ассистент
 # Modal windows not migrated yet,,,,
 group,aliasFindModal,PENDING_DECISION,D-15,«Сопоставить материал»: открывает только promptAliasFind — её никто не вызывает
-group,whDocModal,NOT_STARTED,ERP-039 (D-04/D-05),Складской документ
-group,whDocViewModal,NOT_STARTED,ERP-039 (D-04/D-05),Просмотр складского документа
 group,normsModal,NOT_STARTED,ERP-028 (D-12),Нормы расхода
 group,goodsReceiptModal,NOT_STARTED,ERP-046 (D-04),Накладная поступления
 group,esfExpenseModal,NOT_STARTED,ERP-048 (D-10),Расход из ЭСФ
@@ -35,7 +33,6 @@ group,paymentModal,NOT_STARTED,ERP-032 (D-03),Оплата заказа
 group,moneyTxModal,NOT_STARTED,ERP-031 (D-03/D-11),Денежная операция
 group,salonTransferModal,NOT_STARTED,ERP-051 (D-03),Перенос строк рабочего листа салона
 group,bankStatementModal,NOT_STARTED,ERP-034 (Excel),Импорт банковской выписки
-group,bankAccountModal,NOT_STARTED,ERP-031 (D-11),Расчётный счёт
 group,advanceModal,NOT_STARTED,ERP-035 (D-03),Авансовый отчёт
 group,chOrderModal,PENDING_DECISION,D-15,«Направление продаж»: открывает только openChOrderModal — её никто не вызывает
 group,employeeCardModal,NOT_STARTED,ERP-053 (D-13),Карточка сотрудника
@@ -210,19 +207,19 @@ function,zrOrphanFix,NOT_STARTED,ERP-031…033 (D-03/D-11),Сверка пере
 function,zrApply,NOT_STARTED,ERP-031…033 (D-03/D-11),Сверка переводов: удаление и создание поступлений кассы ЗП (ADR-0002 п. 92)
 function,txTransferLayout,NOT_STARTED,ERP-031…033 (D-03/D-11),Форма перевода между счетами (ADR-0035)
 function,posNo,NOT_STARTED,ERP-044 (D-06/D-08),№ позиции в загрузке цехов (ADR-0002 п. 53)
-area,hr-tab-wage,NOT_STARTED,ERP-055 (D-06),Сотрудники → сдельная выработка
+area,hr-tab-wage,DECIDED,ADR-0002 п. 120,Сотрудники → сдельная выработка: вкладка убрана по ответу заказчика (№ 77)
 area,hr-tab-timesheet,NOT_STARTED,ERP-054 (D-06),Сотрудники → табель
 function,curYM,NOT_STARTED,ERP-054 (D-06),Явки месяца по табелю (карточка сотрудника)
 function,deleteTariffRow,NOT_STARTED,ERP-055 (D-06),Изменение тарифов (ADR-0038)
-function,renderWageEmployees,NOT_STARTED,ERP-055 (D-06),Сдельная выработка (демонстрационный список legacy)
-function,deleteWageEmployeeRow,NOT_STARTED,ERP-055 (D-06),Сдельная выработка
+function,renderWageEmployees,DECIDED,ADR-0002 п. 120,Сдельная выработка вкладки «Сотрудники» — вкладка убрана (№ 77)
+function,deleteWageEmployeeRow,DECIDED,ADR-0002 п. 120,Сдельная выработка вкладки «Сотрудники» — вкладка убрана (№ 77)
 function,openStaffDeptModal,NOT_STARTED,ERP-053 (D-13),Изменение штатного расписания
 function,openStaffPositionModal,NOT_STARTED,ERP-053 (D-13),Изменение штатного расписания
 function,usrEmployeeByName,NOT_STARTED,ERP-011 (D-13),Пользователи
 function,saveStaffFieldDirect,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: правка оклада и процента
 function,saveStaffField,NOT_STARTED,ERP-059 (D-06/D-13),Комиссии салонов: правка оклада и процента
-function,renderPayroll,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
-function,renderHRPayrollKpi,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
+function,renderPayroll,DECIDED,ADR-0002 п. 120,Расчётная ведомость вкладки «Сотрудники» — вкладка убрана (№ 77); налоги не считаются (№ 50)
+function,renderHRPayrollKpi,DECIDED,ADR-0002 п. 120,Расчётная ведомость вкладки «Сотрудники» — вкладка убрана (№ 77); налоги не считаются (№ 50)
 function,renderHRPayrollTable,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
 function,setPayrollMonth,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
 function,openPayrollCard,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
@@ -246,3 +243,12 @@ control,page-mrp|input|pwb-import-file,NOT_STARTED,ERP-041/ERP-067,Файл дл
 function,deleteAppUser,DECIDED,ADR-0046,Учётную запись блокируют, а не удаляют (ADR-0002 п. 116)
 control,userModal|button|u-delete-btn,DECIDED,ADR-0046,Учётную запись блокируют, а не удаляют (ADR-0002 п. 116)
 control,userModal|input|u-edit-id,DUPLICATE,ADR-0046,Скрытое поле: запись выбирается по id в адресе запроса
+control,bankAccountModal|input|ba-edit-id,DUPLICATE,ADR-0047,Скрытое поле: счёт выбирается по id в адресе запроса
+control,whDocModal|select|whdoc-fromwh,DECIDED,ADR-0002 п. 123,«Склад-источник» у прихода не показывается: материал приходует свой склад; для перемещения — с перемещением (ERP-039)
+control,whDocModal|select|whdoc-tows,NOT_STARTED,ERP-039 (D-04/D-05),Перемещение: цех-получатель
+control,whDocModal|select|whdoc-wsid,NOT_STARTED,ERP-039 (D-04/D-05),Списание: цех
+control,whDocModal|select|whdoc-wotype,NOT_STARTED,ERP-039 (D-04/D-05),Списание: на заказ или ОПР
+control,whDocModal|L2855,NOT_STARTED,ERP-039 (D-04/D-05),Списание: на заказ
+control,whDocModal|L2856,NOT_STARTED,ERP-039 (D-04/D-05),Списание: на ОПР
+control,whDocModal|select|whdoc-order,NOT_STARTED,ERP-039 (D-04/D-05),Списание: заказ
+control,page-payroll|input|payroll-search,DECIDED,ADR-0002 п. 99,Поиск фильтрует ведомость; legacy вызывал из него расчёт вкладки «Сотрудники» (renderPayroll) и ничего не фильтровал

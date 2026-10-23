@@ -32,6 +32,10 @@ class IncomingInvoiceImporter
         if ($invoices->isEmpty()) {
             throw new RuntimeException("Snapshot {$snapshotId} has no incoming_invoices rows");
         }
+        // The links are rewritten from legacy: once they were changed here (ADR-0048) the import would undo that work.
+        if (DB::table('audit_events')->where('action', 'like', 'esf_link.%')->exists()) {
+            throw new RuntimeException('Связи ЭСФ с оплатами уже менялись в новой системе (журнал аудита, esf_link.*): перенос ЭСФ из legacy их перезапишет и остановлен (ADR-0048).');
+        }
         $natural = DB::getSchemaBuilder()->hasTable('legacy.natural_order')
             ? DB::table('legacy.natural_order')->where(['snapshot_id' => $snapshotId, 'table_name' => 'incoming_invoice_items'])->pluck('position', 'row_id')
             : collect();

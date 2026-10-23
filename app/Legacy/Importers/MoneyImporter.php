@@ -47,11 +47,22 @@ class MoneyImporter
 
         return DB::transaction(function () use ($accounts, $tx, $payments, $advances, $categories, $orders, $snapshotId, $by) {
             $stats = ['accounts' => count($accounts), 'operations' => $tx->count(), 'order_payments' => $payments->count(), 'advance_reports' => $advances->count(), 'created' => 0, 'unchanged' => 0, 'updated' => 0];
-            $accountIds = $this->upsert('money_accounts', 'money_accounts', $accounts, fn ($a, $i) => [
-                'name' => $a['name'], 'bank' => $a['bank'] ?: null, 'bik' => $a['bik'] ?: null, 'currency' => $a['currency'] ?: 'KZT', 'type' => $a['type'],
-                'icon' => $a['icon'] ?: null, 'opening_balance' => bcadd($a['openingBalance'] ?? '0', '0', 2), 'sort_order' => $i,
-                'created_at' => now(), 'updated_at' => now(),
-            ], $snapshotId, $stats, ['created_at', 'updated_at']);
+            // An account changed here in the window «Расчётный счёт» (its version above 1) keeps what was entered — legacy has its
+            // accounts in the code of the page and no way to change them; an account deleted here is not brought back (ADR-0047).
+            $mapped = DB::table('legacy_id_map')->where('source_table', 'money_accounts')->pluck('target_id', 'source_key');
+            $here = DB::table('money_accounts')->whereIn('id', $mapped->values())->get()->keyBy('id');
+            $accounts = array_values(array_filter($accounts, fn ($a) => ! isset($mapped[(string) $a['id']]) || $here->has($mapped[(string) $a['id']])));
+            $accountIds = $this->upsert('money_accounts', 'money_accounts', $accounts, function ($a, $i) use ($mapped, $here) {
+                $own = isset($mapped[(string) $a['id']]) ? $here->get($mapped[(string) $a['id']]) : null;
+                if ($own !== null && $own->lock_version > 1) {
+                    return ['name' => $own->name, 'bank' => $own->bank, 'bik' => $own->bik, 'currency' => $own->currency, 'type' => $own->type, 'icon' => $own->icon,
+                        'opening_balance' => $own->opening_balance, 'sort_order' => $own->sort_order, 'created_at' => now(), 'updated_at' => now()];
+                }
+
+                return ['name' => $a['name'], 'bank' => $a['bank'] ?: null, 'bik' => $a['bik'] ?: null, 'currency' => $a['currency'] ?: 'KZT', 'type' => $a['type'],
+                    'icon' => $a['icon'] ?: null, 'opening_balance' => bcadd($a['openingBalance'] ?? '0', '0', 2), 'sort_order' => $i,
+                    'created_at' => now(), 'updated_at' => now()];
+            }, $snapshotId, $stats, ['created_at', 'updated_at']);
             $txIds = $this->upsert('money_transactions', 'money_tx', $tx->all(), fn ($t) => $this->transaction($t, $accountIds, $categories->all(), $orders->all()), $snapshotId, $stats);
             $this->upsert('order_payments', 'order_payments', $payments->all(), fn ($p) => [
                 'transaction_id' => $txIds[(string) $p['tx_id']], 'order_num' => trim((string) $p['order_num']), 'order_id' => $orders[trim((string) $p['order_num'])] ?? null,

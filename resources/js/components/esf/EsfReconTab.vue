@@ -5,11 +5,12 @@
 // esfReconUpdateSumInfo/esfReconOnToggleEsf/esfReconClearSelection/esfReconAuditAdvanceLinks (L11872–12330): the payments
 // (expense operations of every account, advance reports) with what is linked to them, the invoices still to reconcile, the
 // choice of a payment or a group and of its invoices, the check of the links to advance reports. The data load with the tab.
-// Saving links, the automatic matching and distribution and deleting a link come with the decision on how invoices are
-// spread over payments (ERP-048, D-10) — ADR-0043.
-import { router } from '@inertiajs/vue3';
+// «Сохранить связи» and «🗑 Удалить связь» save on the server (esfReconSaveLinks/esfReconDeleteAuditLink, D-10 — ADR-0048);
+// the automatic matching and distribution wait for the answer to question № 53 (ADR-0043).
+import { router, usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import { fmtCurrency } from '@/lib/sales';
+import type { SharedProps } from '@/types';
 
 export interface ReconInvoice {
     id: number;
@@ -22,7 +23,7 @@ export interface ReconInvoice {
 export interface ReconData {
     payments: { id: number; date: string; counterparty: string | null; amount: number }[];
     advances: { id: number; date: string; emp_name: string | null; issued: number; status: string | null; lineInvoices: number[] }[];
-    links: { invoice: number; type: string; source: number | null; amount: number }[];
+    links: { id: number; invoice: number; type: string; source: number | null; amount: number }[];
 }
 type Source = { type: 'money_tx' | 'advance_report'; id: number; date: string; label: string; amount: number };
 type Pool = { type: 'pool'; items: { type: string; id: number; amount: number }[]; amount: number; label: string; date: string };
@@ -38,7 +39,7 @@ watch(
 
 const TOLERANCE = 100; // legacy ESF_RECON_TOLERANCE, ₸
 const LEGAL_RE = /(^|[^А-Яа-яЁёA-Za-z])(ТОО|АО|ИП|ГП|ПК|КХ|TOO)([^А-Яа-яЁёA-Za-z]|$)/i;
-const LATER = 'Связи ЭСФ с оплатами сохраняются и удаляются после решения о распределении ЭСФ по оплатам (ERP-048, решение D-10).';
+const LATER = 'Автоматический подбор связей появится после ответа на вопрос № 53: подбор списком и сохранение одной кнопкой (ERP-048, решение D-10).';
 const later = () => window.alert(LATER);
 const norm = (s: string | null | undefined) =>
     (s || '')
@@ -219,11 +220,42 @@ const activeInfo = computed(() => {
         ? { strong: 'Группа: ' + src.label, rest: ` · ${src.items.length} платежей · ${fmtCurrency(src.amount)}` }
         : { strong: src.label, rest: ` · ${src.date} · ${fmtCurrency(src.amount)}` };
 });
+// ── Saving (legacy esfReconSaveLinks): the server links, unlinks and writes the lines of the log; then the choice is read
+// again from the links (esfReconSyncSelectedFromLinks) and the lists are drawn ──
+const page = usePage<SharedProps>();
+const log = ref('');
+const saving = ref(false);
+function logLines(lines: string[] | undefined): void {
+    if (lines?.length) log.value += lines.join('\n') + '\n';
+}
+function saveLinks(): void {
+    const src = active.value;
+    if (!src) {
+        logLines(['⚠️ Нет выбранного платежа — нечего сохранять.']);
+        return;
+    }
+    const sources = src.type === 'pool' ? src.items.map((it) => ({ type: it.type, id: it.id })) : [{ type: src.type, id: src.id }];
+    router.post(
+        '/esf/links',
+        { sources, invoices: [...selected.value] },
+        {
+            only: ['recon', 'flash'],
+            preserveScroll: true,
+            onStart: () => (saving.value = true),
+            onFinish: () => (saving.value = false),
+            onSuccess: () => {
+                logLines((page.props.flash.result as unknown as { esfLog?: string[] } | null)?.esfLog);
+                recomputeActive();
+            },
+            onError: (e) => logLines(['❌ Ошибка при сохранении: ' + (Object.values(e)[0] || '')]),
+        },
+    );
+}
 const sum = computed(() => [...selected.value].reduce((s, id) => s + (+(props.invoices.find((i) => i.id === id)?.total_with_nds ?? 0) || 0), 0));
 const over = computed(() => active.value !== null && sum.value > active.value.amount + TOLERANCE);
 
 // ── Links to advance reports whose report no longer names the invoice (legacy esfReconAuditAdvanceLinks) ──
-const audit = reactive<{ text: string; items: { emp: string; date: string; issued: number; num: string; supplier: string; amount: number }[] }>({ text: '', items: [] });
+const audit = reactive<{ text: string; items: { id: number; emp: string; date: string; issued: number; num: string; supplier: string; amount: number }[] }>({ text: '', items: [] });
 function auditAdvanceLinks(): void {
     const items: typeof audit.items = [];
     links.value
@@ -233,12 +265,26 @@ function auditAdvanceLinks(): void {
             const inv = props.invoices.find((i) => i.id === l.invoice);
             if (!adv || !inv) return;
             if (!adv.lineInvoices.includes(l.invoice))
-                items.push({ emp: adv.emp_name || '—', date: adv.date, issued: adv.issued, num: inv.num || '', supplier: inv.supplier_name || '', amount: l.amount });
+                items.push({ id: l.id, emp: adv.emp_name || '—', date: adv.date, issued: adv.issued, num: inv.num || '', supplier: inv.supplier_name || '', amount: l.amount });
         });
     audit.items = items;
     audit.text = items.length
         ? `Найдено ${items.length} связей, где в текущих строках авансового отчёта эта ЭСФ не числится — проверьте, актуальны ли они:`
         : 'Подозрительных связей не найдено (либо во всех отчётах есть соответствующая строка).';
+}
+// Legacy esfReconDeleteAuditLink: asks, deletes the one link, checks again.
+function deleteAuditLink(s: (typeof audit.items)[number]): void {
+    if (!window.confirm(`Удалить связь ЭСФ №${s.num} с авансовым отчётом «${s.emp}»?`)) return;
+    router.delete(`/esf/links/${s.id}`, {
+        only: ['recon', 'flash'],
+        preserveScroll: true,
+        onSuccess: () => {
+            logLines([`🗑 Удалена устаревшая связь: ЭСФ №${s.num} ↔ ${s.emp}`]);
+            auditAdvanceLinks();
+            recomputeActive();
+        },
+        onError: (e) => window.alert('Ошибка удаления: ' + (Object.values(e)[0] || '')),
+    });
 }
 </script>
 
@@ -274,7 +320,7 @@ function auditAdvanceLinks(): void {
                     <span style="flex: 1; font-size: 12px">
                         <strong>{{ s.emp }}</strong> ({{ s.date }}, {{ fmtCurrency(s.issued) }}) ↔ ЭСФ <strong>№{{ s.num }}</strong>, {{ s.supplier }} ({{ fmtCurrency(s.amount) }})
                     </span>
-                    <button class="btn btn-ghost btn-sm" style="font-size: 11px; color: var(--red)" @click="later">🗑 Удалить связь</button>
+                    <button class="btn btn-ghost btn-sm" style="font-size: 11px; color: var(--red)" @click="deleteAuditLink(s)">🗑 Удалить связь</button>
                 </div>
             </div>
 
@@ -388,7 +434,7 @@ function auditAdvanceLinks(): void {
                         >
                         <span style="flex: 1"></span>
                         <button class="btn btn-ghost btn-sm" @click="clearSelection">Очистить выбор</button>
-                        <button id="esf-recon-save-btn" class="btn btn-primary btn-sm" :disabled="!active" @click="later">Сохранить связи</button>
+                        <button id="esf-recon-save-btn" class="btn btn-primary btn-sm" :disabled="!active || saving" @click="saveLinks">Сохранить связи</button>
                     </div>
                 </div>
             </div>
@@ -407,7 +453,7 @@ function auditAdvanceLinks(): void {
                     white-space: pre-wrap;
                     margin-top: 10px;
                 "
-            ></div>
+            >{{ log }}</div>
         </div>
     </template>
 </template>

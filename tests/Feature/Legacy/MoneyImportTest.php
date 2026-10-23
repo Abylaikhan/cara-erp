@@ -81,6 +81,20 @@ class MoneyImportTest extends TestCase
         $this->assertSame([0, 0, 8], [$again['created'], $again['updated'], $again['unchanged']]);
     }
 
+    public function test_an_account_changed_or_deleted_here_stays_so_on_the_next_import(): void
+    {
+        // № 37 (ADR-0047): the opening balances are entered here; legacy keeps its accounts in the code of the page
+        $this->rows('money_tx', [['id' => 'x-tx', 'account_id' => 'acc-bank', 'date' => '2026-10-01', 'flow' => 'income', 'category' => 'order_payment', 'amount' => 1,
+            'subcategory' => null, 'amount_fx' => null, 'fx_currency' => null, 'description' => '', 'counterparty' => '', 'bin' => null, 'order_num' => null, 'created_at' => '2026-10-01T05:00:00+00:00']]);
+        (new MoneyImporter(self::HTML))->import(self::SNAPSHOT);
+        DB::table('money_accounts')->where('name', 'Банк Демо')->update(['opening_balance' => '777.77', 'name' => 'Банк Демо — основной', 'lock_version' => 2]);
+        DB::table('money_accounts')->where('name', 'Касса Демо')->delete();
+
+        $stats = (new MoneyImporter(self::HTML))->import(self::SNAPSHOT);
+        $this->assertSame(0, $stats['created'], 'the deleted cash desk is not brought back');
+        $this->assertSame([['Банк Демо — основной', '777.77']], DB::table('money_accounts')->get(['name', 'opening_balance'])->map(fn ($a) => [$a->name, $a->opening_balance])->all());
+    }
+
     public function test_operations_deleted_in_legacy_are_deleted_here_too(): void
     {
         $this->legacyData();

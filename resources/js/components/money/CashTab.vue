@@ -10,6 +10,10 @@ import { downloadXlsx } from '@/lib/xlsx';
 import { accountStats, catLabel, fmt, fmtShort, hasPeriod, inPeriod, LATER, openingOf, type Categories, type MoneyAccount, type MoneyTx } from '@/lib/money';
 
 const props = defineProps<{ accounts: MoneyAccount[]; txs: MoneyTx[]; categories: Categories }>();
+// «+ Касса» and «✏️» of a card open the window «Расчётный счёт» of the page (legacy had no way to change a cash desk; ADR-0047).
+const emit = defineEmits<{ account: [acc: MoneyAccount | null, type?: 'cash'] }>();
+// The opening balance of a cash desk counts in its balance, as legacy counts it for a bank account (№ 37, ADR-0047).
+const openingOfCash = (id: number) => props.accounts.find((a) => a.id === id)?.opening ?? 0;
 
 const cash = computed(() => props.accounts.filter((a) => a.type === 'cash'));
 const cashId = ref<number>(cash.value[0]?.id ?? 0);
@@ -24,8 +28,8 @@ function sortCashTx(col: string): void {
 const icon = (col: string) => (col === sort.col ? (sort.asc ? '▲' : '▼') : '');
 
 const stats = computed(() => accountStats(props.txs, cashId.value));
-const openBal = computed(() => openingOf(props.txs, cashId.value));
-const balance = computed(() => (hasPeriod() ? openBal.value + stats.value.income - stats.value.expense : stats.value.income - stats.value.expense));
+const openBal = computed(() => openingOfCash(cashId.value) + openingOf(props.txs, cashId.value));
+const balance = computed(() => openBal.value + stats.value.income - stats.value.expense);
 const cats = computed(() => [...new Set(props.txs.filter((t) => t.account === cashId.value).map((t) => t.category))].sort());
 
 const rows = computed(() => {
@@ -57,7 +61,7 @@ const rows = computed(() => {
 // the period.
 const balanceAfter = computed(() => {
     const map = new Map<MoneyTx, number>();
-    let acc = 0;
+    let acc = openingOfCash(cashId.value);
     props.txs
         .map((t, i) => ({ t, i }))
         .filter((x) => x.t.account === cashId.value)
@@ -142,8 +146,9 @@ const payDiff = computed(() => (pay.tx && pay.res ? (pay.tx.amount || 0) - pay.r
         <div v-for="acc in cash" :key="acc.id" class="card" style="padding: 12px 14px; cursor: pointer; border-left: 3px solid var(--accent)" @click="cashId = acc.id">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px">
                 <div style="font-size: 12px; font-weight: 600">{{ acc.icon || '💵' }} {{ acc.name }}</div>
+                <button class="btn btn-ghost btn-sm" style="padding: 0 6px; font-size: 11px" title="Изменить кассу" @click.stop="emit('account', acc)">✏️</button>
             </div>
-            <div style="font-size: 18px; font-weight: 700; color: var(--accent)">{{ fmt(accountStats(props.txs, acc.id).balance) }}</div>
+            <div style="font-size: 18px; font-weight: 700; color: var(--accent)">{{ fmt(accountStats(props.txs, acc.id).balance + (hasPeriod() ? 0 : acc.opening)) }}</div>
             <div style="font-size: 11px; color: var(--text3); margin-top: 4px">
                 <span style="color: var(--green)">↑{{ fmt(accountStats(props.txs, acc.id).income) }}</span>
                 &nbsp;
@@ -181,7 +186,7 @@ const payDiff = computed(() => (pay.tx && pay.res ? (pay.tx.amount || 0) - pay.r
         <button class="btn btn-primary btn-sm" @click="later(LATER.add)()">📥 Приход</button>
         <button class="btn btn-ghost btn-sm" @click="later(LATER.add)()">📤 Расход</button>
         <button class="btn btn-ghost btn-sm" @click="later(LATER.add)()">↔️ Перевод</button>
-        <button class="btn btn-ghost btn-sm" @click="later(LATER.account)()">+ Касса</button>
+        <button class="btn btn-ghost btn-sm" @click="emit('account', null, 'cash')">+ Касса</button>
     </div>
 
     <!-- Фильтры журнала кассы -->

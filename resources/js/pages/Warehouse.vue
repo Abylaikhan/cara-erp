@@ -1,13 +1,15 @@
 <script setup lang="ts">
 // M03 «Склад» — legacy page-warehouse (L2470–2884): renderWhKPIs, showWhTab, renderWhWarehouses, filterWhByPhysical,
 // renderWhStocks, filterWhByCat, renderWhWorkshops, renderWhDocs, renderWhCost (L27658–28220). Same markup, texts and
-// calculations on the real directory. Stock moves only through warehouse documents, which wait for decisions D-04/D-05:
-// until then documents, workshop stock and write-offs are empty, without legacy's built-in demo documents
-// (docs/adr/0008-warehouse.md).
+// calculations on the real directory. Stock moves only through warehouse documents: the receipt is saved and posted (№ 45,
+// ADR-0049); transfers, write-offs and workshop stock wait for the rest of D-04/D-05; legacy's built-in demo documents are not
+// carried over (docs/adr/0008-warehouse.md).
 import { computed, reactive, ref } from 'vue';
 import AddMaterialModal from '@/components/warehouse/AddMaterialModal.vue';
 import AliasesTab from '@/components/warehouse/AliasesTab.vue';
 import InventoryTab from '@/components/warehouse/InventoryTab.vue';
+import StockDocModal, { type StockDoc } from '@/components/warehouse/StockDocModal.vue';
+import StockDocViewModal from '@/components/warehouse/StockDocViewModal.vue';
 import StockTable, { type StockFilters } from '@/components/warehouse/StockTable.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import {
@@ -29,6 +31,9 @@ const props = defineProps<{
     workshops: Workshop[];
     aliases: MaterialAliasRow[];
     suppliers: { id: number; name: string }[];
+    documents: StockDoc[];
+    nextReceiptNum: string;
+    today: string;
 }>();
 
 // Quantities and prices come rounded to 0.01 as legacy loadWarehouseFromDB keeps them; row values are computed by the server.
@@ -116,9 +121,15 @@ function filterWhByCat(cat: string): void {
     showWhTab('remains');
 }
 
-// ── Документы / Цехи / Себестоимость: no warehouse documents and no orders yet ──
+// ── Документы (legacy renderWhDocs): newest first, by type and by workshop (a receipt has no workshop) ──
 const docType = ref('all');
 const docWorkshop = ref('all');
+const docs = computed(() => props.documents.filter((d) => (docType.value === 'all' || d.type === docType.value) && docWorkshop.value === 'all'));
+const docTotal = (d: StockDoc) => d.items.reduce((s, it) => s + it.qty * it.price, 0);
+const docModal = ref<InstanceType<typeof StockDocModal> | null>(null);
+const docView = ref<InstanceType<typeof StockDocViewModal> | null>(null);
+const openReceipt = () => docModal.value?.openWhDoc(null);
+// ── Перемещение, списание, Цехи, Себестоимость: wait for the rest of D-04/D-05 and for orders ──
 const later = () => window.alert(DOCUMENTS_LATER);
 const addMaterialModal = ref<InstanceType<typeof AddMaterialModal> | null>(null);
 </script>
@@ -132,7 +143,7 @@ const addMaterialModal = ref<InstanceType<typeof AddMaterialModal> | null>(null)
                     <div class="section-sub">Многоскладовой учёт · приход · перемещение · списание</div>
                 </div>
                 <div style="display: flex; gap: 8px">
-                    <button class="btn btn-ghost btn-sm" @click="later">📥 Приход</button>
+                    <button class="btn btn-ghost btn-sm" @click="openReceipt">📥 Приход</button>
                     <button class="btn btn-ghost btn-sm" @click="later">↔️ Перемещение</button>
                     <button class="btn btn-ghost btn-sm" @click="later">📤 Списание</button>
                     <button class="btn btn-primary btn-sm" @click="addMaterialModal?.openAddMaterialModal()">+ Материал</button>
@@ -302,7 +313,7 @@ const addMaterialModal = ref<InstanceType<typeof AddMaterialModal> | null>(null)
                         <option v-for="ws in props.workshops" :key="ws.id" :value="ws.id">{{ ws.icon }} {{ ws.name }}</option>
                     </select>
                     <div style="flex: 1"></div>
-                    <button class="btn btn-ghost btn-sm" @click="later">📥 Приход</button>
+                    <button class="btn btn-ghost btn-sm" @click="openReceipt">📥 Приход</button>
                     <button class="btn btn-ghost btn-sm" @click="later">↔️ Перемещение</button>
                     <button class="btn btn-ghost btn-sm" @click="later">📤 Списание / ОПР</button>
                 </div>
@@ -322,8 +333,22 @@ const addMaterialModal = ref<InstanceType<typeof AddMaterialModal> | null>(null)
                         </tr>
                     </thead>
                     <tbody id="wh-docs-tbody">
-                        <tr>
+                        <tr v-if="!docs.length">
                             <td colspan="10" style="text-align: center; padding: 20px; color: var(--text3)">Складских документов пока нет</td>
+                        </tr>
+                        <tr v-for="d in docs" :key="d.id" style="cursor: pointer" @click="docView?.viewWhDoc(d)">
+                            <td style="font-size: 12px">{{ d.date }}</td>
+                            <td style="font-family: 'IBM Plex Mono', monospace; color: var(--accent); font-size: 12px">{{ d.num }}</td>
+                            <td><span class="badge badge-green">📥 Приход</span></td>
+                            <td style="font-size: 12px; color: var(--text3); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ d.supplier || '—' }}</td>
+                            <td style="font-size: 12px">Поставщик → Склад</td>
+                            <td style="text-align: center; font-size: 12px">{{ d.items.length }}</td>
+                            <td style="text-align: right; font-family: 'IBM Plex Mono', monospace">₸{{ docTotal(d).toLocaleString('ru-RU') }}</td>
+                            <td style="font-size: 12px; color: var(--text2)">{{ d.note || '—' }}</td>
+                            <td>
+                                <span class="badge" :class="d.status === 'done' ? 'badge-green' : 'badge-amber'">{{ d.status === 'done' ? 'Проведён' : 'Черновик' }}</span>
+                            </td>
+                            <td><button class="btn btn-ghost btn-sm" style="font-size: 11px" @click.stop="docView?.viewWhDoc(d)">👁</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -357,5 +382,7 @@ const addMaterialModal = ref<InstanceType<typeof AddMaterialModal> | null>(null)
         </div>
 
         <AddMaterialModal ref="addMaterialModal" :materials="items" />
+        <StockDocModal ref="docModal" :materials="items" :suppliers="props.suppliers" :today="props.today" :next-num="props.nextReceiptNum" />
+        <StockDocViewModal ref="docView" @edit="(d) => docModal?.openWhDoc(d)" />
     </ErpLayout>
 </template>
