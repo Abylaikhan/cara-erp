@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MoneyAccount;
 use App\Models\Order;
+use App\Services\Finance\PlExpenses;
 use App\Services\Finance\PlReport;
 use App\Services\Finance\PlRevenue;
 use App\Support\ChannelScope;
@@ -63,6 +64,7 @@ class FinanceController extends Controller
             'plMonthly' => Inertia::optional(fn () => $this->plMonthly($request)),
             // «Выручка по направлениям» / «по категориям продукции» of a year (legacy renderRevenueByChannel/ByCategory)
             'plRevChannel' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rch_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byChannel($y)]),
+            'plExpenses' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_exp_year'), 'years' => $this->plYears(), ...app(PlExpenses::class)->build($y)]),
             'plRevCategory' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rcat_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byCategory($y)]),
             // Tab «Закупки» (legacy renderPurchasesDash, openSupplierReconciliation): incoming invoices, payments with a
             // counterparty (in tenge), suppliers and the supplier lines of the advance reports; sent when the tab is opened.

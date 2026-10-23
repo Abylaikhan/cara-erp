@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261023T190730Z-a69d",
-    "started_at": "2026-10-23T19:07:30Z",
+    "run_id": "20261023T191413Z-6f01",
+    "started_at": "2026-10-23T19:14:13Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-23T19:08:56Z",
+    "finished_at": "2026-10-23T21:48:32Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "6f602218428a3c2778ab95e40313dea883302906",
-    "at": "2026-10-23T19:07:30Z"
+    "target_ref": "dc46602a646792a22672466ad993c5ed7e58bd2a",
+    "at": "2026-10-23T19:14:13Z"
   },
   "last_reported": {
-    "run_id": "20261023T190730Z-a69d",
+    "run_id": "20261023T191413Z-6f01",
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
     "source_blob": "8777f7bbfbf1e409ab285f4b3c0968056418d78a",
-    "target_ref": "6f602218428a3c2778ab95e40313dea883302906",
-    "logical_key": "a7ed99d078815a07",
+    "target_ref": "dc46602a646792a22672466ad993c5ed7e58bd2a",
+    "logical_key": "00401551a825f780",
     "local_date": "2026-10-24",
-    "completed_at": "2026-10-23T19:08:56Z",
-    "report": "daily/2026-10-24/20261023T190730Z-a69d.md",
-    "artifact_sha256": "d8ea9117b30504b94924370e17191a4a7d840399fd819435db8d4205e2b11fd4",
+    "completed_at": "2026-10-23T21:48:32Z",
+    "report": "daily/2026-10-24/20261023T191413Z-6f01.md",
+    "artifact_sha256": "92a2042d9b01950f036f34a02d8377b3dee2507c901308757b42b55dee9cf6f7",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -213,6 +213,9 @@
       "Tests\\Feature\\Finance\\PlReportTest::test_month_by_month_a_month_to_come_is_not_counted",
       "Tests\\Feature\\Finance\\PlReportTest::test_the_page_gets_the_statement_of_its_period_only_when_asked",
       "Tests\\Feature\\Finance\\PlReportTest::test_the_statement_of_a_period_as_legacy_builds_it",
+      "Tests\\Feature\\Finance\\PlRevenueTest::test_the_category_of_a_realization_by_the_catalog",
+      "Tests\\Feature\\Finance\\PlRevenueTest::test_the_channel_of_a_realization_as_legacy_finds_it",
+      "Tests\\Feature\\Finance\\PlRevenueTest::test_the_page_gets_each_table_for_its_own_year",
       "Tests\\Feature\\Hr\\HrPageTest::test_roles_without_the_page_are_refused",
       "Tests\\Feature\\Hr\\HrPageTest::test_the_commissions_and_the_salary_history_go_only_to_the_roles_that_see_their_tab",
       "Tests\\Feature\\Hr\\HrPageTest::test_the_head_of_the_salons_gets_the_salons_people_and_the_full_counts",
@@ -398,15 +401,15 @@
   },
   "last_verified": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "6f602218428a3c2778ab95e40313dea883302906",
+    "target_ref": "dc46602a646792a22672466ad993c5ed7e58bd2a",
     "required_suite_version": "suite-1+364b9b",
-    "completed_at": "2026-10-23T19:08:56Z",
-    "run_id": "20261023T190730Z-a69d"
+    "completed_at": "2026-10-23T21:48:32Z",
+    "run_id": "20261023T191413Z-6f01"
   },
   "changelog": {
-    "entries": 65,
-    "last_header": "## 2026-10-24 · 20261023T190730Z-a69d",
-    "sha256": "1618270d993a94db13e1e350b24f5c47e38a3c238e4615d0c7bc08a6d70c3dfc"
+    "entries": 66,
+    "last_header": "## 2026-10-24 · 20261023T191413Z-6f01",
+    "sha256": "fab3a325de6a2a4d21efb34579682bec4e4b6fe265fff542c0324b6bb3990d46"
   },
   "accepted_source_ref": {
     "commit": "c54cf25639e3398139fa5a07003b035bf5e7090c",
