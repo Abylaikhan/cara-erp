@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261023T105912Z-4991",
-    "started_at": "2026-10-23T10:59:12Z",
+    "run_id": "20261023T141342Z-bb81",
+    "started_at": "2026-10-23T14:13:42Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-23T11:01:14Z",
+    "finished_at": "2026-10-23T14:15:13Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "3bb76f97196082d6ce2990658e47b77517d830d1",
-    "at": "2026-10-23T10:59:12Z"
+    "target_ref": "456517b1f3b7c92644f6884286f171884d736a57",
+    "at": "2026-10-23T14:13:42Z"
   },
   "last_reported": {
-    "run_id": "20261023T105912Z-4991",
+    "run_id": "20261023T141342Z-bb81",
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
     "source_blob": "8777f7bbfbf1e409ab285f4b3c0968056418d78a",
-    "target_ref": "3bb76f97196082d6ce2990658e47b77517d830d1",
-    "logical_key": "60ab6913771361e7",
+    "target_ref": "456517b1f3b7c92644f6884286f171884d736a57",
+    "logical_key": "e1618f1f0c7eaa75",
     "local_date": "2026-10-23",
-    "completed_at": "2026-10-23T11:01:14Z",
-    "report": "daily/2026-10-23/20261023T105912Z-4991.md",
-    "artifact_sha256": "b9737301d6db56d458494965278732e44f41bc9b8d25f8ccf8d29355f6f5e8db",
+    "completed_at": "2026-10-23T14:15:13Z",
+    "report": "daily/2026-10-23/20261023T141342Z-bb81.md",
+    "artifact_sha256": "34b1ea69454b9f1b00fae0b719acaa67c05e5ca195322ac3740d9dfc673bbc9e",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -169,6 +169,12 @@
       "Tests\\Feature\\Customers\\DealerTest::test_tab_lists_the_legacy_dealers_and_puts_new_ones_first",
       "Tests\\Feature\\Dashboard\\DashboardTest::test_monthly_sums_counts_and_critical_stock",
       "Tests\\Feature\\Dashboard\\DashboardTest::test_roles_without_the_dashboard_cannot_open_it",
+      "Tests\\Feature\\Esf\\EsfLinkTest::test_a_group_of_payments_is_filled_in_order_and_an_unticked_invoice_is_unlinked",
+      "Tests\\Feature\\Esf\\EsfLinkTest::test_a_link_carried_over_keeps_its_amount_even_over_the_invoice",
+      "Tests\\Feature\\Esf\\EsfLinkTest::test_a_short_payment_covers_part_of_an_invoice_and_never_more_than_is_left",
+      "Tests\\Feature\\Esf\\EsfLinkTest::test_an_advance_report_counts_what_was_issued_and_a_link_is_deleted_alone",
+      "Tests\\Feature\\Esf\\EsfLinkTest::test_only_expense_operations_known_to_legacy_and_existing_invoices",
+      "Tests\\Feature\\Esf\\EsfLinkTest::test_the_import_from_legacy_stops_once_links_were_changed_here",
       "Tests\\Feature\\Esf\\EsfReconTest::test_only_roles_with_the_page_get_it",
       "Tests\\Feature\\Esf\\EsfReconTest::test_the_tab_gets_the_expense_payments_the_advance_reports_and_the_links_by_their_ids_here",
       "Tests\\Feature\\Esf\\EsfTest::test_duplicate_by_fields_when_there_is_no_registration_number",
@@ -207,6 +213,7 @@
       "Tests\\Feature\\Hr\\HrPageTest::test_roles_without_the_page_are_refused",
       "Tests\\Feature\\Hr\\HrPageTest::test_the_commissions_and_the_salary_history_go_only_to_the_roles_that_see_their_tab",
       "Tests\\Feature\\Hr\\HrPageTest::test_the_head_of_the_salons_gets_the_salons_people_and_the_full_counts",
+      "Tests\\Feature\\Hr\\HrPageTest::test_the_payroll_button_opens_the_page_only_for_those_who_may_open_it",
       "Tests\\Feature\\Hr\\HrPageTest::test_the_staff_with_counts_and_history",
       "Tests\\Feature\\Hr\\UserAccountTest::test_a_new_account_signs_in_with_its_pages_and_channel",
       "Tests\\Feature\\Hr\\UserAccountTest::test_blocking_follows_legacy_and_ends_access",
@@ -247,6 +254,7 @@
       "Tests\\Feature\\Legacy\\MigrationToolsTest::test_a_dry_run_imports_verifies_and_writes_nothing",
       "Tests\\Feature\\Legacy\\MigrationToolsTest::test_a_refused_set_keeps_every_problem_in_the_error_journal",
       "Tests\\Feature\\Legacy\\MigrationToolsTest::test_the_references_report_names_what_the_import_cannot_resolve_or_resolve_uniquely",
+      "Tests\\Feature\\Legacy\\MoneyImportTest::test_an_account_changed_or_deleted_here_stays_so_on_the_next_import",
       "Tests\\Feature\\Legacy\\MoneyImportTest::test_imports_accounts_operations_payments_and_advances",
       "Tests\\Feature\\Legacy\\MoneyImportTest::test_operations_deleted_in_legacy_are_deleted_here_too",
       "Tests\\Feature\\Legacy\\MoneyImportTest::test_rejects_the_whole_set_when_a_row_is_wrong",
@@ -279,6 +287,10 @@
       "Tests\\Feature\\Legacy\\WarehouseImportTest::test_material_import_is_idempotent",
       "Tests\\Feature\\Money\\BankReconTest::test_legacy_statements_are_imported_and_rows_cleared_in_legacy_are_removed",
       "Tests\\Feature\\Money\\BankReconTest::test_statements_and_the_journal_load_with_the_tab_and_clearing_keeps_transferred_rows",
+      "Tests\\Feature\\Money\\MoneyAccountTest::test_a_new_account_and_the_deletion_of_an_empty_one",
+      "Tests\\Feature\\Money\\MoneyAccountTest::test_an_account_with_operations_keeps_its_type_and_currency_and_is_not_deleted",
+      "Tests\\Feature\\Money\\MoneyAccountTest::test_only_the_roles_with_the_page_change_accounts",
+      "Tests\\Feature\\Money\\MoneyAccountTest::test_the_opening_balance_is_saved_to_the_tiyn_under_the_version_of_the_account",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_advances_load_with_their_tab_spent_by_the_lines",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_page_lists_accounts_operations_with_orders_esf_and_the_advance_debt",
       "Tests\\Feature\\Money\\MoneyJournalTest::test_payment_calendar_loads_with_its_tab_in_tenge",
@@ -351,6 +363,10 @@
       "Tests\\Feature\\Suppliers\\SupplierToolsTest::test_card_lists_the_invoices_by_bin_or_by_name",
       "Tests\\Feature\\Suppliers\\SupplierToolsTest::test_import_from_esf_plans_then_adds_suppliers_and_fills_bins",
       "Tests\\Feature\\Suppliers\\SupplierToolsTest::test_orphans_spellings_and_creating_a_card",
+      "Tests\\Feature\\Warehouse\\StockReceiptTest::test_a_draft_keeps_the_stock_and_is_posted_later_under_its_version",
+      "Tests\\Feature\\Warehouse\\StockReceiptTest::test_posting_adds_the_quantities_once_and_writes_the_movements",
+      "Tests\\Feature\\Warehouse\\StockReceiptTest::test_the_form_is_checked_as_legacy_checks_it_and_a_number_is_taken_once",
+      "Tests\\Feature\\Warehouse\\StockReceiptTest::test_the_import_of_materials_stops_once_documents_moved_the_stock",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_aliases_are_added_once_per_material_and_deleted",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_directory_holds_the_nine_legacy_warehouses",
       "Tests\\Feature\\Warehouse\\WarehouseTest::test_inline_cells_are_saved_and_the_quantity_is_not_edited_directly",
@@ -370,15 +386,15 @@
   },
   "last_verified": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "3bb76f97196082d6ce2990658e47b77517d830d1",
+    "target_ref": "456517b1f3b7c92644f6884286f171884d736a57",
     "required_suite_version": "suite-1+364b9b",
-    "completed_at": "2026-10-23T11:01:14Z",
-    "run_id": "20261023T105912Z-4991"
+    "completed_at": "2026-10-23T14:15:13Z",
+    "run_id": "20261023T141342Z-bb81"
   },
   "changelog": {
-    "entries": 60,
-    "last_header": "## 2026-10-23 · 20261023T105912Z-4991",
-    "sha256": "f58dec3313808a76358a2abdf6a68c6f43dc524b13cd20b9f2ee14a8a2888fc3"
+    "entries": 61,
+    "last_header": "## 2026-10-23 · 20261023T141342Z-bb81",
+    "sha256": "02015c76d71412177bda965b94480039777d366d6aecd65eaf79651cc5f5eec2"
   },
   "accepted_source_ref": {
     "commit": "c54cf25639e3398139fa5a07003b035bf5e7090c",
