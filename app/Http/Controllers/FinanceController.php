@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MoneyAccount;
 use App\Models\Order;
 use App\Services\Finance\PlReport;
+use App\Services\Finance\PlRevenue;
 use App\Support\ChannelScope;
 use App\Support\Erp;
 use Illuminate\Http\Request;
@@ -60,6 +61,9 @@ class FinanceController extends Controller
             'pl' => Inertia::optional(fn () => $this->pl($request)),
             // «Отчёт о прибылях и убытках — помесячно» of a year (legacy renderMonthlyPL)
             'plMonthly' => Inertia::optional(fn () => $this->plMonthly($request)),
+            // «Выручка по направлениям» / «по категориям продукции» of a year (legacy renderRevenueByChannel/ByCategory)
+            'plRevChannel' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rch_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byChannel($y)]),
+            'plRevCategory' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rcat_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byCategory($y)]),
             // Tab «Закупки» (legacy renderPurchasesDash, openSupplierReconciliation): incoming invoices, payments with a
             // counterparty (in tenge), suppliers and the supplier lines of the advance reports; sent when the tab is opened.
             'purchases' => Inertia::optional(fn () => $this->purchases()),
@@ -80,14 +84,25 @@ class FinanceController extends Controller
     /** @return array<string, mixed> */
     private function plMonthly(Request $request): array
     {
-        $report = app(PlReport::class);
-        $years = $report->years();
-        $today = now(config('erp.business_timezone'));
-        $asked = is_string($y = $request->query('pl_year')) ? $y : '';
-        // legacy: the year chosen before, else the current year, else the newest with realizations
-        $year = in_array($asked, $years, true) ? $asked : (in_array($today->format('Y'), $years, true) ? $today->format('Y') : ($years[0] ?? $today->format('Y')));
+        $year = $this->plYear($request, 'pl_year');
 
-        return ['year' => $year, 'years' => $years ?: [$today->format('Y')], 'months' => $report->monthly($year, $today->format('Y-m'))];
+        return ['year' => $year, 'years' => $this->plYears(), 'months' => app(PlReport::class)->monthly($year, now(config('erp.business_timezone'))->format('Y-m'))];
+    }
+
+    /** Legacy plBuildRevenueYearOptions: the years of the realizations, newest first; none — the current year. @return list<string> */
+    private function plYears(): array
+    {
+        return app(PlReport::class)->years() ?: [now(config('erp.business_timezone'))->format('Y')];
+    }
+
+    /** The year chosen before (the query), else the current year, else the newest with realizations. */
+    private function plYear(Request $request, string $param): string
+    {
+        $years = $this->plYears();
+        $current = now(config('erp.business_timezone'))->format('Y');
+        $asked = is_string($y = $request->query($param)) ? $y : '';
+
+        return in_array($asked, $years, true) ? $asked : (in_array($current, $years, true) ? $current : $years[0]);
     }
 
     private function purchases(): array

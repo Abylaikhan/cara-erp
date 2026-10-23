@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261023T190309Z-85de",
-    "started_at": "2026-10-23T19:03:09Z",
+    "run_id": "20261023T190730Z-a69d",
+    "started_at": "2026-10-23T19:07:30Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-23T19:04:33Z",
+    "finished_at": "2026-10-23T19:08:56Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "e88c63b7c61e2216edfcfc1e82f2ce5f2a571490",
-    "at": "2026-10-23T19:03:09Z"
+    "target_ref": "6f602218428a3c2778ab95e40313dea883302906",
+    "at": "2026-10-23T19:07:30Z"
   },
   "last_reported": {
-    "run_id": "20261023T190309Z-85de",
+    "run_id": "20261023T190730Z-a69d",
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
     "source_blob": "8777f7bbfbf1e409ab285f4b3c0968056418d78a",
-    "target_ref": "e88c63b7c61e2216edfcfc1e82f2ce5f2a571490",
-    "logical_key": "cd36eba6bf279c87",
+    "target_ref": "6f602218428a3c2778ab95e40313dea883302906",
+    "logical_key": "a7ed99d078815a07",
     "local_date": "2026-10-24",
-    "completed_at": "2026-10-23T19:04:33Z",
-    "report": "daily/2026-10-24/20261023T190309Z-85de.md",
-    "artifact_sha256": "cce7529f2f2119a01b045b43bf162385c46af941d73ebdeb58170f9301a55fe5",
+    "completed_at": "2026-10-23T19:08:56Z",
+    "report": "daily/2026-10-24/20261023T190730Z-a69d.md",
+    "artifact_sha256": "d8ea9117b30504b94924370e17191a4a7d840399fd819435db8d4205e2b11fd4",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -210,6 +210,7 @@
       "Tests\\Feature\\Finance\\FinanceTest::test_orders_with_totals_and_operations_in_tenge_with_the_tab",
       "Tests\\Feature\\Finance\\FinanceTest::test_purchases_load_with_their_tab",
       "Tests\\Feature\\Finance\\FinanceTest::test_roles_without_the_page_cannot_open_it",
+      "Tests\\Feature\\Finance\\PlReportTest::test_month_by_month_a_month_to_come_is_not_counted",
       "Tests\\Feature\\Finance\\PlReportTest::test_the_page_gets_the_statement_of_its_period_only_when_asked",
       "Tests\\Feature\\Finance\\PlReportTest::test_the_statement_of_a_period_as_legacy_builds_it",
       "Tests\\Feature\\Hr\\HrPageTest::test_roles_without_the_page_are_refused",
@@ -397,15 +398,15 @@
   },
   "last_verified": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "e88c63b7c61e2216edfcfc1e82f2ce5f2a571490",
+    "target_ref": "6f602218428a3c2778ab95e40313dea883302906",
     "required_suite_version": "suite-1+364b9b",
-    "completed_at": "2026-10-23T19:04:33Z",
-    "run_id": "20261023T190309Z-85de"
+    "completed_at": "2026-10-23T19:08:56Z",
+    "run_id": "20261023T190730Z-a69d"
   },
   "changelog": {
-    "entries": 64,
-    "last_header": "## 2026-10-24 · 20261023T190309Z-85de",
-    "sha256": "4ccedf0406c1c2b9b3640824a9298e71bcc13e11b693e327f95ed159a915f48e"
+    "entries": 65,
+    "last_header": "## 2026-10-24 · 20261023T190730Z-a69d",
+    "sha256": "1618270d993a94db13e1e350b24f5c47e38a3c238e4615d0c7bc08a6d70c3dfc"
   },
   "accepted_source_ref": {
     "commit": "c54cf25639e3398139fa5a07003b035bf5e7090c",

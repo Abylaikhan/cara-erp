@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Legacy\Importers\AppUserImporter;
 use App\Legacy\Importers\BankStatementImporter;
+use App\Legacy\Importers\ChannelCustomerNameImporter;
 use App\Legacy\Importers\CrmTaskImporter;
 use App\Legacy\Importers\CustomerImporter;
 use App\Legacy\Importers\EmployeeImporter;
@@ -40,7 +41,7 @@ use RuntimeException;
  */
 class LegacyImport extends Command
 {
-    protected $signature = 'legacy:import {entity : all | app_users | expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects | salon_worksheet | bank_statements | staff | staff_structure | salary_accruals | wage_items | salon_payroll | sales_worksheet | production_worksheet}
+    protected $signature = 'legacy:import {entity : all | app_users | expense_categories | products | customers | suppliers | warehouse | material_aliases | incoming_invoices | leads | tasks | material_requests | orders | realizations | production_progress | money | projects | salon_worksheet | bank_statements | staff | staff_structure | channel_customer_names | salary_accruals | wage_items | salon_payroll | sales_worksheet | production_worksheet}
         {--snapshot= : Snapshot id (default: the latest loaded)}
         {--dry-run : Import, verify and roll back: nothing is written}
         {--errors= : File for every problem of a refused set (keep it in .local-audit: it names legacy rows)}';
@@ -69,6 +70,7 @@ class LegacyImport extends Command
         'bank_statements' => BankStatementImporter::class, // after money: a statement belongs to an account
         'staff' => EmployeeImporter::class, // with the salary history and the changes of conditions
         'staff_structure' => StaffStructureImporter::class, // the staffing table: departments and positions from the code of the page (ADR-0051)
+        'channel_customer_names' => ChannelCustomerNameImporter::class, // P&L: the customers that tell the channel of a realization (ADR-0052)
         'salary_accruals' => SalaryAccrualImporter::class, // with their earlier versions
         'wage_items' => PieceWorkImporter::class,
         'salon_payroll' => SalonPayrollImporter::class,

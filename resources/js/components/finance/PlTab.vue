@@ -8,6 +8,7 @@ import { router } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 import { fmtCurrency } from '@/lib/sales';
 import { downloadXlsx } from '@/lib/xlsx';
+import PlRevenueTable from '@/components/finance/PlRevenueTable.vue';
 
 export interface PlData {
     from: string | null;
@@ -32,12 +33,28 @@ export interface PlData {
     payrollLedgerSdelnaya: number;
     payrollLedgerAup: number;
 }
+export interface PlRevenue {
+    year: string;
+    years: string[];
+    rows: { label: string; data: number[] }[];
+    matched: number;
+    other: number;
+    samples?: { orderNum: string; customer: string }[];
+}
 export interface PlMonthly {
     year: string;
     years: string[];
     months: (PlData | null)[];
 }
-const props = defineProps<{ data: PlData | undefined; monthly: PlMonthly | undefined; from: string | null; to: string | null; active: boolean }>();
+const props = defineProps<{
+    data: PlData | undefined;
+    monthly: PlMonthly | undefined;
+    revChannel: PlRevenue | undefined;
+    revCategory: PlRevenue | undefined;
+    from: string | null;
+    to: string | null;
+    active: boolean;
+}>();
 
 // The statement of the period of the page: loaded when the tab is shown and again when the period changes.
 watch(
@@ -52,7 +69,9 @@ watch(
 watch(
     () => props.active,
     (active) => {
-        if (active && props.monthly === undefined) router.reload({ only: ['plMonthly'] });
+        if (!active) return;
+        const only = (['plMonthly', 'plRevChannel', 'plRevCategory'] as const).filter((k) => props[k === 'plMonthly' ? 'monthly' : k === 'plRevChannel' ? 'revChannel' : 'revCategory'] === undefined);
+        if (only.length) router.reload({ only: [...only] });
     },
     { immediate: true },
 );
@@ -142,12 +161,25 @@ function exportMonthlyPLExcel(): void {
     ];
     void downloadXlsx('finance', `PromTech_PnL_pomesyachno_${year}.xlsx`, [{ name: String(year), rows, cols: [32, ...Array(12).fill(12), 14] }]);
 }
+// ── Выручка по направлениям / по категориям (legacy renderRevenueByChannel/ByCategory, exportRevenueTableToExcel) ──
+const setRevenueYear = (prop: 'plRevChannel' | 'plRevCategory', year: string) =>
+    router.reload({ only: [prop], data: { [prop === 'plRevChannel' ? 'pl_rch_year' : 'pl_rcat_year']: year } });
+function exportRevenueTableToExcel(rev: PlRevenue | undefined, title: string, filenamePrefix: string): void {
+    if (!rev || !rev.rows.length) return void window.alert('Нет данных для выгрузки.');
+    const totals = MONTHS.map((_, i) => rev.rows.reduce((s, r) => s + (r.data[i] || 0), 0));
+    const rows: (string | number)[][] = [
+        [title + ' — ' + rev.year],
+        [],
+        ['Направление', ...MONTHS, 'Итого за год'],
+        ...rev.rows.map((r) => [r.label, ...r.data.map((v) => Math.round(v)), Math.round(r.data.reduce((s, v) => s + v, 0))]),
+        ['Итого', ...totals.map((v) => Math.round(v)), Math.round(totals.reduce((s, v) => s + v, 0))],
+    ];
+    void downloadXlsx('finance', `${filenamePrefix}_${rev.year}.xlsx`, [{ name: rev.year, rows, cols: [26, ...Array(12).fill(12), 14] }]);
+}
 const cell = (r: Row) => (r.bold ? 'font-weight:700' : '') + (r.big ? ';font-size:14px' : '');
 const LATER = 'Появится следующим шагом переноса P&L (ERP-060, ответ бухгалтера № 36).';
 const later = () => window.alert(LATER);
 const SUBREPORTS = [
-    { title: 'Выручка по направлениям', select: 'pl-rev-channel-year', body: 'pl-rev-by-channel' },
-    { title: 'Выручка по категориям продукции', select: 'pl-rev-category-year', body: 'pl-rev-by-category' },
     { title: 'Расходы по категориям и статьям', select: 'pl-exp-year', body: 'pl-exp-by-month' },
     { title: 'Выручка: направление → категория → товар', select: 'pl-rev-tree-year', body: 'pl-rev-tree' },
     { title: 'Оценка себестоимости по категориям (без техкарт)', select: 'pl-matcost-year', body: 'pl-matcost' },
@@ -229,6 +261,58 @@ const SUBREPORTS = [
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+        <div class="card" style="grid-column: 1/3">
+            <div class="card-header">
+                <span class="card-title">Выручка по направлениям</span>
+                <div style="display: flex; gap: 6px; align-items: center">
+                    <select
+                        id="pl-rev-channel-year"
+                        :value="props.revChannel?.year"
+                        style="font-size: 12px; width: auto"
+                        @change="setRevenueYear('plRevChannel', ($event.target as HTMLSelectElement).value)"
+                    >
+                        <option v-for="y in props.revChannel?.years ?? []" :key="y" :value="y">{{ y }}</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" @click="exportRevenueTableToExcel(props.revChannel, 'Выручка по направлениям', 'PromTech_Vyruchka_napravleniya')">📥 Excel</button>
+                </div>
+            </div>
+            <div id="pl-rev-by-channel" style="overflow-x: auto">
+                <template v-if="props.revChannel">
+                    <div v-if="props.revChannel.other > 0" style="font-size: 11px; color: var(--text3); margin-bottom: 6px">
+                        Не удалось определить канал для {{ props.revChannel.other }} из {{ props.revChannel.matched + props.revChannel.other }} строк реализации. Примеры (заказ → клиент):
+                        {{ (props.revChannel.samples ?? []).map((s) => `«${s.orderNum}» → ${s.customer}`).join('; ') }}
+                    </div>
+                    <PlRevenueTable :rows="props.revChannel.rows" />
+                </template>
+            </div>
+        </div>
+        <div class="card" style="grid-column: 1/3">
+            <div class="card-header">
+                <span class="card-title">Выручка по категориям продукции</span>
+                <div style="display: flex; gap: 6px; align-items: center">
+                    <select
+                        id="pl-rev-category-year"
+                        :value="props.revCategory?.year"
+                        style="font-size: 12px; width: auto"
+                        @change="setRevenueYear('plRevCategory', ($event.target as HTMLSelectElement).value)"
+                    >
+                        <option v-for="y in props.revCategory?.years ?? []" :key="y" :value="y">{{ y }}</option>
+                    </select>
+                    <button class="btn btn-ghost btn-sm" @click="exportRevenueTableToExcel(props.revCategory, 'Выручка по категориям продукции', 'PromTech_Vyruchka_kategorii')">
+                        📥 Excel
+                    </button>
+                </div>
+            </div>
+            <div id="pl-rev-by-category" style="overflow-x: auto">
+                <template v-if="props.revCategory">
+                    <div v-if="props.revCategory.other > 0" style="font-size: 11px; color: var(--text3); margin-bottom: 6px">
+                        Не удалось определить категорию для {{ props.revCategory.other }} из {{ props.revCategory.matched + props.revCategory.other }} строк реализации — попали в
+                        «Без категории» (возможно, название товара записано иначе, чем в справочнике).
+                    </div>
+                    <PlRevenueTable :rows="props.revCategory.rows" />
+                </template>
             </div>
         </div>
         <div v-for="s in SUBREPORTS" :key="s.body" class="card" style="grid-column: 1/3">
