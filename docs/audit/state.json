@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261023T045031Z-e458",
-    "started_at": "2026-10-23T04:50:31Z",
+    "run_id": "20261023T105912Z-4991",
+    "started_at": "2026-10-23T10:59:12Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-23T04:51:55Z",
+    "finished_at": "2026-10-23T11:01:14Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "b5ba5459627a3d582520c33ff215b0ae06d39b24",
-    "at": "2026-10-23T04:50:31Z"
+    "target_ref": "3bb76f97196082d6ce2990658e47b77517d830d1",
+    "at": "2026-10-23T10:59:12Z"
   },
   "last_reported": {
-    "run_id": "20261023T045031Z-e458",
+    "run_id": "20261023T105912Z-4991",
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
     "source_blob": "8777f7bbfbf1e409ab285f4b3c0968056418d78a",
-    "target_ref": "b5ba5459627a3d582520c33ff215b0ae06d39b24",
-    "logical_key": "a443520e4d9be8e6",
+    "target_ref": "3bb76f97196082d6ce2990658e47b77517d830d1",
+    "logical_key": "60ab6913771361e7",
     "local_date": "2026-10-23",
-    "completed_at": "2026-10-23T04:51:55Z",
-    "report": "daily/2026-10-23/20261023T045031Z-e458.md",
-    "artifact_sha256": "27186824acbf381c6e2967339c66d414bf7908f171794cb88683d1d809ed6620",
+    "completed_at": "2026-10-23T11:01:14Z",
+    "report": "daily/2026-10-23/20261023T105912Z-4991.md",
+    "artifact_sha256": "b9737301d6db56d458494965278732e44f41bc9b8d25f8ccf8d29355f6f5e8db",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -94,6 +94,7 @@
       "Tests\\Feature\\Access\\RouteGuardTest::test_every_route_but_the_public_ones_requires_a_signed_in_user",
       "Tests\\Feature\\Access\\RouteGuardTest::test_every_route_that_changes_something_goes_through_the_web_group",
       "Tests\\Feature\\Access\\RouteGuardTest::test_every_signed_in_route_checks_the_page_of_the_role",
+      "Tests\\Feature\\Auth\\IssuePasswordsTest::test_new_passwords_replace_the_old_ones_and_go_to_the_file_only",
       "Tests\\Feature\\Auth\\LoginTest::test_after_logout_the_server_refuses_changes",
       "Tests\\Feature\\Auth\\LoginTest::test_empty_login_or_password_shows_legacy_message",
       "Tests\\Feature\\Auth\\LoginTest::test_first_page_follows_role_template",
@@ -115,6 +116,7 @@
       "Tests\\Feature\\Crm\\CrmTaskTest::test_checkbox_marks_done_and_reopens_and_delete_hides_the_task",
       "Tests\\Feature\\Crm\\CrmTaskTest::test_form_creates_and_edits_a_task",
       "Tests\\Feature\\Crm\\CrmTaskTest::test_roles_without_crm_cannot_reach_tasks",
+      "Tests\\Feature\\Crm\\CrmTaskTest::test_the_task_form_offers_the_salon_staff_as_legacy_does",
       "Tests\\Feature\\Crm\\LeadCommunicationTest::test_entries_are_added_listed_and_deleted",
       "Tests\\Feature\\Crm\\LeadCommunicationTest::test_history_of_another_channel_is_not_reachable",
       "Tests\\Feature\\Crm\\LeadTest::test_clients_tab_counts_salon_end_clients_and_loads_their_orders_with_the_tab",
@@ -167,6 +169,8 @@
       "Tests\\Feature\\Customers\\DealerTest::test_tab_lists_the_legacy_dealers_and_puts_new_ones_first",
       "Tests\\Feature\\Dashboard\\DashboardTest::test_monthly_sums_counts_and_critical_stock",
       "Tests\\Feature\\Dashboard\\DashboardTest::test_roles_without_the_dashboard_cannot_open_it",
+      "Tests\\Feature\\Esf\\EsfReconTest::test_only_roles_with_the_page_get_it",
+      "Tests\\Feature\\Esf\\EsfReconTest::test_the_tab_gets_the_expense_payments_the_advance_reports_and_the_links_by_their_ids_here",
       "Tests\\Feature\\Esf\\EsfTest::test_duplicate_by_fields_when_there_is_no_registration_number",
       "Tests\\Feature\\Esf\\EsfTest::test_import_creates_an_unknown_supplier_and_refuses_a_second_copy",
       "Tests\\Feature\\Esf\\EsfTest::test_page_lists_invoices_with_linked_amounts_type_change_and_detail_with_material_match",
@@ -194,6 +198,9 @@
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_top_level_category_and_zero_sort_order",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_update_keeps_code_and_level_and_records_changes",
       "Tests\\Feature\\ExpenseCategories\\ExpenseCategoryTest::test_validation_messages_repeat_legacy_texts",
+      "Tests\\Feature\\Export\\EsfGoodsExportTest::test_the_goods_lines_with_their_guessed_warehouse",
+      "Tests\\Feature\\Export\\XlsxExportTest::test_the_page_decides_who_may_export_and_the_file_is_named_as_legacy_names_it",
+      "Tests\\Feature\\Export\\XlsxExportTest::test_values_keep_their_kind_and_a_text_is_never_a_formula",
       "Tests\\Feature\\Finance\\FinanceTest::test_orders_with_totals_and_operations_in_tenge_with_the_tab",
       "Tests\\Feature\\Finance\\FinanceTest::test_purchases_load_with_their_tab",
       "Tests\\Feature\\Finance\\FinanceTest::test_roles_without_the_page_cannot_open_it",
@@ -201,6 +208,12 @@
       "Tests\\Feature\\Hr\\HrPageTest::test_the_commissions_and_the_salary_history_go_only_to_the_roles_that_see_their_tab",
       "Tests\\Feature\\Hr\\HrPageTest::test_the_head_of_the_salons_gets_the_salons_people_and_the_full_counts",
       "Tests\\Feature\\Hr\\HrPageTest::test_the_staff_with_counts_and_history",
+      "Tests\\Feature\\Hr\\UserAccountTest::test_a_new_account_signs_in_with_its_pages_and_channel",
+      "Tests\\Feature\\Hr\\UserAccountTest::test_blocking_follows_legacy_and_ends_access",
+      "Tests\\Feature\\Hr\\UserAccountTest::test_editing_keeps_the_pages_the_form_does_not_offer_and_changes_the_password_only_when_typed",
+      "Tests\\Feature\\Hr\\UserAccountTest::test_only_the_director_and_hr_manage_accounts_and_see_them",
+      "Tests\\Feature\\Legacy\\AppUserImportTest::test_a_record_of_an_unknown_login_is_refused_whole",
+      "Tests\\Feature\\Legacy\\AppUserImportTest::test_the_built_in_accounts_are_made_and_a_record_is_laid_over_its_role",
       "Tests\\Feature\\Legacy\\ControlTotalsTest::test_a_changed_record_is_a_difference",
       "Tests\\Feature\\Legacy\\ControlTotalsTest::test_a_legacy_table_without_importer_or_reason_fails",
       "Tests\\Feature\\Legacy\\ControlTotalsTest::test_imported_modules_reconcile_and_unmigrated_tables_are_explained",
@@ -357,15 +370,15 @@
   },
   "last_verified": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "b5ba5459627a3d582520c33ff215b0ae06d39b24",
+    "target_ref": "3bb76f97196082d6ce2990658e47b77517d830d1",
     "required_suite_version": "suite-1+364b9b",
-    "completed_at": "2026-10-23T04:51:55Z",
-    "run_id": "20261023T045031Z-e458"
+    "completed_at": "2026-10-23T11:01:14Z",
+    "run_id": "20261023T105912Z-4991"
   },
   "changelog": {
-    "entries": 59,
-    "last_header": "## 2026-10-23 · 20261023T045031Z-e458",
-    "sha256": "823cbddf301fdc58343fa65ef3a46e98bd860b15bcafee167ed4817f58b38df1"
+    "entries": 60,
+    "last_header": "## 2026-10-23 · 20261023T105912Z-4991",
+    "sha256": "f58dec3313808a76358a2abdf6a68c6f43dc524b13cd20b9f2ee14a8a2888fc3"
   },
   "accepted_source_ref": {
     "commit": "c54cf25639e3398139fa5a07003b035bf5e7090c",
