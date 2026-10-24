@@ -20,15 +20,18 @@ const form = reactive({ open: false, type: 'call', date: '', text: '', error: ''
 const pop = ref<HTMLElement | null>(null);
 const textEl = ref<HTMLTextAreaElement | null>(null);
 
+// The communications of the lead shown now: an answer for a lead opened before comes too late and is dropped.
 async function loadComms(id: number): Promise<void> {
     const response = await fetch(`/crm/leads/${id}/communications`, { headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
-    comms.value = response.ok ? await response.json() : [];
+    const list = response.ok ? await response.json() : [];
+    if (leadId.value === id) comms.value = list;
 }
 
 async function open(l: LeadRow, button: HTMLElement): Promise<void> {
     leadId.value = l.id;
     form.open = false;
     await loadComms(l.id);
+    if (leadId.value !== l.id) return;
     pos.shown = true;
     await nextTick();
     // Above the button, right edges aligned; below it when there is no room above (legacy openCrmPopover).

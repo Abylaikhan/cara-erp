@@ -104,10 +104,15 @@ function setEsfType(inv: Invoice, type: string): void {
 // ── Detail (openEsfDetail): loaded on demand ──
 const detail = ref<Detail | null>(null);
 const detailOpen = ref(false);
+let lastDetail = 0;
 async function openEsfDetail(inv: Invoice): Promise<void> {
+    lastDetail = inv.id; // two invoices clicked quickly: only the last one opens
     const response = await fetch(`/esf/${inv.id}/detail`, { headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
+    if (lastDetail !== inv.id) return;
     if (!response.ok) return void window.alert('Не удалось открыть ЭСФ — обновите страницу.');
-    detail.value = (await response.json()) as Detail;
+    const loaded = (await response.json()) as Detail;
+    if (lastDetail !== inv.id) return;
+    detail.value = loaded;
     detailOpen.value = true;
 }
 const DETAIL_STATUS: Record<string, string> = { ...STATUS_LABEL, POSTED: '🏷 Проведён' };

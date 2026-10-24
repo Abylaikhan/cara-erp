@@ -70,11 +70,14 @@ const rec = computed(() => {
 
 const dd = ref<InstanceType<typeof DrilldownModal> | null>(null);
 const openOrder = () => window.alert('Форма заказа появится вместе с правкой заказов (ERP-029/030, решения D-02 и D-12).');
+let lastDrill = '';
 async function openRecDrillTx(num: string): Promise<void> {
+    lastDrill = num; // two orders clicked quickly: only the last one opens
     const order = list.value.find((o) => o.num === num);
     const total = order ? Number(order.total) : 0;
     const res = await fetch(`/customers/reconcile/payments/${encodeURIComponent(num)}`, { headers: { Accept: 'application/json' } });
     const txs: { date: string; category: string | null; desc: string | null; amount: string }[] = res.ok ? await res.json() : [];
+    if (lastDrill !== num) return;
     const rows = txs.map((t) => ({ date: t.date || '—', cat: t.category === 'order_payment' ? 'Оплата заказа' : t.category || '—', desc: t.desc || '—', amount: Number(t.amount) || 0 }));
     const paid = rows.reduce((s, r) => s + r.amount, 0);
     const f2 = (n: number) => '₸' + Math.round(n).toLocaleString('ru-RU');
