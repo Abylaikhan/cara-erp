@@ -1393,20 +1393,20 @@ control,page-finance|L5803,th,page-finance,5803,M11 Финансы,IMPLEMENTED,l
 control,page-finance|L5804,th,page-finance,5804,M11 Финансы,IMPLEMENTED,label,В год
 control,page-finance|L5840,button,page-finance,5840,M11 Финансы,NOT_STARTED,"present, its action comes later — exportCFSExcel: ERP-067 (Excel)",📥 Excel
 control,page-finance|L5870,button,page-finance,5870,M11 Финансы,IMPLEMENTED,label,📥 Excel
-control,page-finance|L5880,button,page-finance,5880,M11 Финансы,NOT_STARTED,ERP-063 (D-11),🔄 Пересчитать
-control,page-finance|L5881,button,page-finance,5881,M11 Финансы,NOT_STARTED,ERP-063 (D-11),📥 Excel
-control,page-finance|L5893,th,page-finance,5893,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Статья расходов
-control,page-finance|L5894,th,page-finance,5894,M11 Финансы,NOT_STARTED,ERP-063 (D-11),База распределения
-control,page-finance|L5895,th,page-finance,5895,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Сумма (₸)
-control,page-finance|L5896,th,page-finance,5896,M11 Финансы,NOT_STARTED,ERP-063 (D-11),
-control,page-finance|L5901,button,page-finance,5901,M11 Финансы,NOT_STARTED,ERP-063 (D-11),+ Статья
-control,page-finance|L5912,th,page-finance,5912,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Цех
-control,page-finance|L5913,th,page-finance,5913,M11 Финансы,NOT_STARTED,ERP-063 (D-11),🪑 Стул
-control,page-finance|L5914,th,page-finance,5914,M11 Финансы,NOT_STARTED,ERP-063 (D-11),🪞 Стол
-control,page-finance|L5915,th,page-finance,5915,M11 Финансы,NOT_STARTED,ERP-063 (D-11),🛋 Мягкая
-control,page-finance|L5916,th,page-finance,5916,M11 Финансы,NOT_STARTED,ERP-063 (D-11),🛏 Кровать
-control,page-finance|L5917,th,page-finance,5917,M11 Финансы,NOT_STARTED,ERP-063 (D-11),🗄 Корпусная
-control,page-finance|L5918,th,page-finance,5918,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Итого
+control,page-finance|L5880,button,page-finance,5880,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),🔄 Пересчитать
+control,page-finance|L5881,button,page-finance,5881,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),📥 Excel
+control,page-finance|L5893,th,page-finance,5893,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),Статья расходов
+control,page-finance|L5894,th,page-finance,5894,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),База распределения
+control,page-finance|L5895,th,page-finance,5895,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),Сумма (₸)
+control,page-finance|L5896,th,page-finance,5896,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),
+control,page-finance|L5901,button,page-finance,5901,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),+ Статья
+control,page-finance|L5912,th,page-finance,5912,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),Цех
+control,page-finance|L5913,th,page-finance,5913,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),🪑 Стул
+control,page-finance|L5914,th,page-finance,5914,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),🪞 Стол
+control,page-finance|L5915,th,page-finance,5915,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),🛋 Мягкая
+control,page-finance|L5916,th,page-finance,5916,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),🛏 Кровать
+control,page-finance|L5917,th,page-finance,5917,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),🗄 Корпусная
+control,page-finance|L5918,th,page-finance,5918,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),Итого
 control,cabEmailModal|L5932,button,cabEmailModal,5932,M22 Мой кабинет,NOT_STARTED,ERP-058,✕
 control,cabEmailModal|input|cab-email-input,input,cabEmailModal,5936,M22 Мой кабинет,NOT_STARTED,ERP-058,
 control,cabEmailModal|input|cab-email-slip,input,cabEmailModal,5943,M22 Мой кабинет,NOT_STARTED,ERP-058,
@@ -2901,12 +2901,12 @@ function,renderTimesheet#1,,,22737,M17 Сотрудники,NOT_STARTED,by its c
 function,calcIPN#1,,,22977,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 function,buildPayrollRow#1,,,22983,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 function,showFinanceTab#1,,,23021,M11 Финансы,IMPLEMENTED,requirement M11.AR,
-function,buildActivityPL#1,,,23089,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,renderActivityPL#1,,,23207,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,renderOPZTable#1,,,23335,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,addOPZRow#1,,,23355,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,renderWSAllocTable#1,,,23360,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,exportActivityExcel#1,,,23380,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
+function,buildActivityPL#1,,,23089,M11 Финансы,PENDING_DECISION,by its controls: № 81 (ERP-063),
+function,renderActivityPL#1,,,23207,M11 Финансы,PENDING_DECISION,by its controls: № 81 (ERP-063),
+function,renderOPZTable#1,,,23335,M11 Финансы,PENDING_DECISION,by its controls: № 81 (ERP-063),
+function,addOPZRow#1,,,23355,M11 Финансы,PENDING_DECISION,by its controls: № 81 (ERP-063),
+function,renderWSAllocTable#1,,,23360,M11 Финансы,PENDING_DECISION,by its controls: № 81 (ERP-063),
+function,exportActivityExcel#1,,,23380,M11 Финансы,PENDING_DECISION,by its controls: № 81 (ERP-063),
 function,setOSVMonth#1,,,23411,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,buildOSV#1,,,23427,M11 Финансы,IMPLEMENTED,requirement M11.OSV,
 function,post#1,,,23465,M11 Финансы,IMPLEMENTED,named in app/Http/Controllers/StockDocumentController.php,
@@ -3298,7 +3298,7 @@ function,rsAfterDocSaved#1,,,32463,M09 Продажи,NOT_STARTED,requirement M0
 function,rsAfterDelivered#1,,,32471,M09 Продажи,NOT_STARTED,requirement M09.RESTORATIONS (DEC-08),
 function,sortSJ#1,,,32485,M09 Продажи,IMPLEMENTED,requirement M09.REALIZATION_JOURNAL,
 function,loadRealizationsFromDB#1,,,32498,"M02 Производство, M09 Продажи, UI оболочка",IMPLEMENTED,"requirement M09.REALIZATION_JOURNAL, OPS-01.LIMITS",
-function,mapCategory#1,,,32537,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
+function,mapCategory#1,,,32537,M11 Финансы,PENDING_DECISION,by its controls: № 81 (ERP-063),
 function,setSjPeriod#1,,,32549,M09 Продажи,IMPLEMENTED,requirement M09.REALIZATION_JOURNAL,
 function,setSjMonthYear#1,,,32574,M09 Продажи,IMPLEMENTED,requirement M09.REALIZATION_JOURNAL,
 function,renderSalesJournal#1,,,32583,M09 Продажи,IMPLEMENTED,"requirement M09.REALIZATION_JOURNAL, UI-03.STATES",

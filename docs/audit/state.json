@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261023T233744Z-f10c",
-    "started_at": "2026-10-23T23:37:44Z",
+    "run_id": "20261024T000108Z-b160",
+    "started_at": "2026-10-24T00:01:08Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-23T23:39:10Z",
+    "finished_at": "2026-10-24T00:02:38Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "14e13af608d79aa9ac97287436d83e56482766f8",
-    "at": "2026-10-23T23:37:44Z"
+    "target_ref": "67c35e0d18afd87e250b08c5aac4667385b92007",
+    "at": "2026-10-24T00:01:08Z"
   },
   "last_reported": {
-    "run_id": "20261023T233744Z-f10c",
+    "run_id": "20261024T000108Z-b160",
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
     "source_blob": "8777f7bbfbf1e409ab285f4b3c0968056418d78a",
-    "target_ref": "14e13af608d79aa9ac97287436d83e56482766f8",
-    "logical_key": "4aa009404371f7eb",
+    "target_ref": "67c35e0d18afd87e250b08c5aac4667385b92007",
+    "logical_key": "469b4ed1e06dfcdd",
     "local_date": "2026-10-24",
-    "completed_at": "2026-10-23T23:39:10Z",
-    "report": "daily/2026-10-24/20261023T233744Z-f10c.md",
-    "artifact_sha256": "72aca79280709d176b70ecf23b45f6ec802f2aa5b71f217c4eb83299944bbc8c",
+    "completed_at": "2026-10-24T00:02:38Z",
+    "report": "daily/2026-10-24/20261024T000108Z-b160.md",
+    "artifact_sha256": "2da9e487e0c0f012fb37419eae7cd4c879dfaa39886d29b6637f0918555ed078",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -210,6 +210,11 @@
       "Tests\\Feature\\Finance\\FinanceTest::test_orders_with_totals_and_operations_in_tenge_with_the_tab",
       "Tests\\Feature\\Finance\\FinanceTest::test_purchases_load_with_their_tab",
       "Tests\\Feature\\Finance\\FinanceTest::test_roles_without_the_page_cannot_open_it",
+      "Tests\\Feature\\Finance\\FixedCostsTest::test_a_month_without_a_plan_takes_the_one_before_else_the_fixed_articles",
+      "Tests\\Feature\\Finance\\FixedCostsTest::test_a_row_needs_a_name_a_plan_not_below_zero_and_a_day_of_the_month",
+      "Tests\\Feature\\Finance\\FixedCostsTest::test_the_fact_of_an_article_is_the_expenses_of_its_month",
+      "Tests\\Feature\\Finance\\FixedCostsTest::test_the_month_is_saved_as_a_whole_over_what_was_loaded",
+      "Tests\\Feature\\Finance\\FixedCostsTest::test_the_page_gets_the_month_asked_for",
       "Tests\\Feature\\Finance\\OsvReportTest::test_the_page_gets_the_trial_balance_and_the_entries_of_an_account",
       "Tests\\Feature\\Finance\\OsvReportTest::test_the_trial_balance_of_a_period_as_legacy_posts_it",
       "Tests\\Feature\\Finance\\PlExpensesTest::test_expenses_by_category_and_article_dividends_apart",
@@ -407,15 +412,15 @@
   },
   "last_verified": {
     "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "14e13af608d79aa9ac97287436d83e56482766f8",
+    "target_ref": "67c35e0d18afd87e250b08c5aac4667385b92007",
     "required_suite_version": "suite-1+364b9b",
-    "completed_at": "2026-10-23T23:39:10Z",
-    "run_id": "20261023T233744Z-f10c"
+    "completed_at": "2026-10-24T00:02:38Z",
+    "run_id": "20261024T000108Z-b160"
   },
   "changelog": {
-    "entries": 72,
-    "last_header": "## 2026-10-24 · 20261023T233744Z-f10c",
-    "sha256": "f7a77bec16aeece9be90fecccd619bb0da6706d10657f08bfeb4626808123735"
+    "entries": 73,
+    "last_header": "## 2026-10-24 · 20261024T000108Z-b160",
+    "sha256": "78f0c20a286763ce36b620dceedf06a98998fd06b7d24bfb8adf1129e9e1155a"
   },
   "accepted_source_ref": {
     "commit": "c54cf25639e3398139fa5a07003b035bf5e7090c",

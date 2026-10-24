@@ -52,7 +52,7 @@ const props = defineProps<{
 type Tab = 'pl' | 'ar' | 'purchases' | 'margin' | 'bep' | 'cfs' | 'osv' | 'activity';
 const tab = ref<Tab>('pl');
 const LATER: Partial<Record<Tab, string>> = {
-    activity: 'P&L по видам деятельности появится вместе со сдельной оплатой и технологическими картами (ERP-063, решения D-11 и D-12).',
+    activity: 'P&L по видам деятельности в старой системе считался по примерным данным; как его считать — вопрос № 81 (ERP-063, решения D-06 и D-12).',
 };
 const excelLater = () => window.alert('Выгрузка P&L в Excel появится вместе с отчётом P&L (ERP-060, решения D-11 и D-12).');
 

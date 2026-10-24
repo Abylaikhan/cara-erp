@@ -75,7 +75,7 @@ control,page-finance|L5750,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по п
 control,page-finance|L5751,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
 control,page-finance|L5752,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
 control,page-finance|L5753,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
-area,finance-activity,NOT_STARTED,ERP-063 (D-11),Финансы → P&L по видам деятельности
+area,finance-activity,PENDING_DECISION,№ 81 (ERP-063),Финансы → P&L по видам деятельности: в legacy выручка 0 и примерные затраты
 area,money-fab,NOT_STARTED,ERP-031 (D-03/D-11),Деньги → кнопка новой операции
 # Documented differences of the shell (ADR-0002),,,,
 area,login-hints-block,DECIDED,ADR-0002 п. 1,Подсказки с логинами и паролями ролей — не переносятся (AUTH-01)
