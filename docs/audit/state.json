@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261024T172121Z-4b9c",
-    "started_at": "2026-10-24T17:21:21Z",
+    "run_id": "20261024T173011Z-c4f2",
+    "started_at": "2026-10-24T17:30:11Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-24T17:22:48Z",
+    "finished_at": "2026-10-24T17:31:41Z",
     "exit_code": 0
   },
   "last_observed": {
     "source_ref": "d7d448fbdd4d2fc3f38fc7b27d300b8efff43bb1",
-    "target_ref": "1dc0f7935d422c102d129e20e8a4fb2e873b5519",
-    "at": "2026-10-24T17:21:21Z"
+    "target_ref": "26b7524d082a10375ca4e0a51c787b29f8ffb109",
+    "at": "2026-10-24T17:30:11Z"
   },
   "last_reported": {
-    "run_id": "20261024T172121Z-4b9c",
+    "run_id": "20261024T173011Z-c4f2",
     "source_ref": "d7d448fbdd4d2fc3f38fc7b27d300b8efff43bb1",
     "source_blob": "7d1b27c55d687f4336180137b805c150f67324cb",
-    "target_ref": "1dc0f7935d422c102d129e20e8a4fb2e873b5519",
-    "logical_key": "9ee3eedfaddbe841",
+    "target_ref": "26b7524d082a10375ca4e0a51c787b29f8ffb109",
+    "logical_key": "73e8cd2dca49f223",
     "local_date": "2026-10-24",
-    "completed_at": "2026-10-24T17:22:48Z",
-    "report": "daily/2026-10-24/20261024T172121Z-4b9c.md",
-    "artifact_sha256": "331551899fd802c564c966db536227484869eb5583fcf4a9b5452bacb168c483",
+    "completed_at": "2026-10-24T17:31:41Z",
+    "report": "daily/2026-10-24/20261024T173011Z-c4f2.md",
+    "artifact_sha256": "6690204dae97a464c221efcad3461d34b5d1f343b9839faaa65ec4161d56de91",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -412,15 +412,15 @@
   },
   "last_verified": {
     "source_ref": "d7d448fbdd4d2fc3f38fc7b27d300b8efff43bb1",
-    "target_ref": "1dc0f7935d422c102d129e20e8a4fb2e873b5519",
+    "target_ref": "26b7524d082a10375ca4e0a51c787b29f8ffb109",
     "required_suite_version": "suite-1+364b9b",
-    "completed_at": "2026-10-24T17:22:48Z",
-    "run_id": "20261024T172121Z-4b9c"
+    "completed_at": "2026-10-24T17:31:41Z",
+    "run_id": "20261024T173011Z-c4f2"
   },
   "changelog": {
-    "entries": 81,
-    "last_header": "## 2026-10-24 · 20261024T172121Z-4b9c",
-    "sha256": "1319ca76ba7177617932b2d39782a3d5cdc0a69cde493789e6aaa33429a981a2"
+    "entries": 82,
+    "last_header": "## 2026-10-24 · 20261024T173011Z-c4f2",
+    "sha256": "62500978f3cf49b917252097c73cae46604709b4e7017f67ae624cc9b6c37b7a"
   },
   "accepted_source_ref": {
     "commit": "c54cf25639e3398139fa5a07003b035bf5e7090c",
