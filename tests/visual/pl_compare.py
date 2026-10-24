@@ -9,7 +9,9 @@ server counts the same. Every figure is compared in whole tenge (legacy sums flo
 What both show is compared too, line by line (cells of a row joined, sums in tenge within 1), against the target signed in on
 the dev app with the year as the period: the KPI and the statement of «📊 P&L» and its sub-reports, «Маржинальность по
 категориям», the KPI of «Точка безубыточности», the ОСВ (ADR-0052…0055). PL_SHAPES=1 prints the shape of differing lines
-(digits → #, letters → a).
+(digits → #, letters → a). The table of «Маржинальность по категориям», the KPI and the chart of «Точка безубыточности» are
+also compared as pictures of the blocks (dark theme, 1440×900; at most 0.5 % of the pixels may differ, as make visual-compare);
+the pictures stay in .local-audit/pl-compare.
 
 Output: per table «совпадает» or the number of differing cells and the first row numbers — never a value or a name (the data
 are real). The dump stays in .local-audit. Usage: PL_YEAR=2026 python3 tests/visual/pl_compare.py
@@ -25,6 +27,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from PIL import Image, ImageChops
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -116,6 +119,33 @@ def flatten(rows: list, children: tuple[str, ...], label='label', monthly='month
     return out
 
 
+# The blocks compared as pictures and how legacy draws them on its own page (the year as the period of the page).
+SHOTS = {'margin-category-table': 'маржинальность по категориям', 'bep-kpi': 'KPI точки безубыточности', 'bep-canvas': 'график точки безубыточности'}
+LEGACY_SHOTS_JS = r"""([year]) => {
+    document.getElementById('login-screen').style.display = 'none'; document.getElementById('diag-panel')?.remove();  // ADR-0002, item 2
+    showPage('finance', document.querySelector(".nav-item[onclick*=\"showPage('finance'\"]"));
+    const show = (tab, i) => { document.querySelectorAll('#finance-tabs .tab').forEach((t, k) => t.classList.toggle('active', k === i));
+        ['pl','ar','purchases','margin','bep','cfs','osv','activity'].forEach(id => { const e = document.getElementById('finance-' + id); if (e) e.style.display = id === tab ? 'block' : 'none'; }); };
+    const y = +year;
+    financePeriod = {from: new Date(Date.UTC(y, 0, 1)), to: new Date(Date.UTC(y, 11, 31)), mode: 'year'};
+    show('margin', 3); const s = document.getElementById('margin-category-year'); renderCategoryMargin(); s.value = year; renderCategoryMargin();
+}"""
+LEGACY_BEP_JS = r"""() => {
+    document.querySelectorAll('#finance-tabs .tab').forEach((t, k) => t.classList.toggle('active', k === 4));
+    ['pl','ar','purchases','margin','bep','cfs','osv','activity'].forEach(id => { const e = document.getElementById('finance-' + id); if (e) e.style.display = id === 'bep' ? 'block' : 'none'; });
+    renderBEPKpi();
+    try { renderBEPChart(); } catch (e) { /* legacy: the hint reads a name it never defined (ADR-0002, item 127) */ }
+}"""
+
+
+def shot_diff(name: str) -> float:
+    a, b = Image.open(OUT / f'legacy-{name}.png').convert('RGB'), Image.open(OUT / f'target-{name}.png').convert('RGB')
+    w, h = min(a.width, b.width), min(a.height, b.height)
+    d = ImageChops.difference(a.crop((0, 0, w, h)), b.crop((0, 0, w, h))).convert('L').point(lambda v: 255 if v > 24 else 0)
+    size = 100 * (abs(a.width - b.width) * max(a.height, b.height) + abs(a.height - b.height) * w) / max(1, max(a.width, b.width) * max(a.height, b.height))
+    return round(100 * sum(1 for v in d.getdata() if v) / max(1, w * h) + size, 2)
+
+
 def target_shown(page) -> dict:
     """The target as the director sees it: the year as the period, «Маржинальность» of the year, the KPI of «Точка безубыточности»."""
     page.goto(TARGET + '/login', wait_until='networkidle')
@@ -137,9 +167,12 @@ def target_shown(page) -> dict:
     page.wait_for_selector('#margin-category-table table', timeout=120000)
     page.select_option('#margin-category-year', YEAR); page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
     shown['margin-category-table'] = page.evaluate(SHOWN_JS, 'margin-category-table')
+    page.locator('#margin-category-table').screenshot(path=str(OUT / 'target-margin-category-table.png'))
     page.locator('#finance-tabs .tab').nth(4).click()
     page.wait_for_selector('#bep-kpi .bep-kpi-card', timeout=120000); page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
     shown['bep-kpi'] = page.evaluate(SHOWN_JS, 'bep-kpi')
+    for id in ('bep-kpi', 'bep-canvas'):
+        page.locator(f'#{id}').screenshot(path=str(OUT / f'target-{id}.png'))
     page.locator('#finance-tabs .tab').nth(6).click()
     page.wait_for_selector('#osv-body table', timeout=120000); page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
     shown['osv-body'] = page.evaluate(SHOWN_JS, 'osv-body')
@@ -180,6 +213,11 @@ def main() -> int:
         page.goto(BLOB.as_uri(), wait_until='load', timeout=60000); page.wait_for_timeout(1500)
         page.evaluate(LEGACY_JS, data['legacy'])
         legacy = page.evaluate(YEAR_JS, [YEAR])
+        page.evaluate(LEGACY_SHOTS_JS, [YEAR]); page.wait_for_timeout(500)
+        page.locator('#margin-category-table').screenshot(path=str(OUT / 'legacy-margin-category-table.png'))
+        page.evaluate(LEGACY_BEP_JS); page.wait_for_timeout(500)
+        for id in ('bep-kpi', 'bep-canvas'):
+            page.locator(f'#{id}').screenshot(path=str(OUT / f'legacy-{id}.png'))
         shown = target_shown(browser.new_page(viewport={'width': 1440, 'height': 900}, locale='ru-RU'))
         browser.close()
 
@@ -208,6 +246,10 @@ def main() -> int:
     ok &= jl == jt
     for key, name in SHOWN.items():
         ok &= text_report(name + ' на экране', legacy['shown'][key], shown[key])
+    for key, name in SHOTS.items():
+        pct = shot_diff(key)
+        print(f'{name}, картинка: отличается {pct} % пикселей — ' + ('совпадает' if pct <= 0.5 else 'РАСХОЖДЕНИЕ'))
+        ok &= pct <= 0.5
     return 0 if ok else 1
 
 
