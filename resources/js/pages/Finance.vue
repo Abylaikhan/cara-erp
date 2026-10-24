@@ -4,7 +4,6 @@
 // L22610). «Дебиторка» (ArTab), «Закупки» (PurchasesTab), «ДДС» (CfsTab), «P&L» (PlTab, ADR-0052), «ОСВ» (OsvTab, ADR-0053),
 // «Маржинальность» (MarginTab, ADR-0054) and «Точка безубыточности» (BepTab, ADR-0055) are migrated; P&L by activity comes
 // next (ERP-063).
-import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ArTab, { type ArRecord } from '@/components/finance/ArTab.vue';
 import BepTab, { type FixedCostsData } from '@/components/finance/BepTab.vue';
@@ -15,6 +14,7 @@ import PlTab, { type PlData, type PlExpenses, type PlMonthly, type PlRevenue, ty
 import PurchasesTab, { type PurchasesData } from '@/components/finance/PurchasesTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
 import { downloadXlsx } from '@/lib/xlsx';
+import { reloadLatest } from '@/lib/reload';
 
 export interface FinanceOrder {
     num: string;
@@ -183,7 +183,7 @@ function writePl(p: PlData): void {
 function exportPLtoExcel(): void {
     const { from, to } = period.value;
     if (props.pl && props.pl.from === from && props.pl.to === to) return writePl(props.pl);
-    router.reload({ only: ['pl'], data: { pl_from: from ?? '', pl_to: to ?? '' }, onSuccess: (page) => writePl(page.props.pl as PlData) });
+    reloadLatest('pl', { pl_from: from ?? '', pl_to: to ?? '' }, { onSuccess: (page) => writePl(page.props.pl as PlData) });
 }
 </script>
 

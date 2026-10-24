@@ -8,6 +8,7 @@ import { router } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import type { PlData } from '@/components/finance/PlTab.vue';
 import { fmtCurrency } from '@/lib/sales';
+import { reloadLatest } from '@/lib/reload';
 
 export interface FixedCostRow {
     id: number | null;
@@ -51,6 +52,15 @@ const rows = ref<FixedCostRow[]>([]);
 const version = ref('');
 const period = ref('');
 const hint = ref('Факт берётся из журнала операций за выбранный месяц');
+// While a month is loading the plan cannot be edited (legacy covered the page with «Загрузка постоянных затрат...»): rows added
+// meanwhile would be replaced by the month that comes.
+const loading = ref(false);
+let loadSeq = 0;
+function loadMonth(value?: string): void {
+    const seq = ++loadSeq;
+    loading.value = true;
+    reloadLatest('fixedCosts', value ? { fc_period: value } : {}, { onFinish: () => seq === loadSeq && (loading.value = false) });
+}
 let timer: ReturnType<typeof setTimeout> | null = null;
 let saving = false;
 let after: (() => void) | null = null;
@@ -68,14 +78,14 @@ watch(
     () => [props.active, props.from, props.to] as const,
     ([active, from, to]) => {
         if (!active) return;
-        if (props.data === undefined) router.reload({ only: ['fixedCosts'] });
-        if (!props.pl || props.pl.from !== from || props.pl.to !== to) router.reload({ only: ['pl'], data: { pl_from: from ?? '', pl_to: to ?? '' } });
+        if (props.data === undefined) loadMonth();
+        if (!props.pl || props.pl.from !== from || props.pl.to !== to) reloadLatest('pl', { pl_from: from ?? '', pl_to: to ?? '' });
     },
     { immediate: true },
 );
 // A change not saved yet is saved to its own month first (legacy saved it to the month chosen after it).
 function loadFixedCostsPeriod(value: string): void {
-    const load = () => router.reload({ only: ['fixedCosts'], data: { fc_period: value } });
+    const load = () => loadMonth(value);
     if (timer || saving) save(load);
     else load();
 }
@@ -121,6 +131,7 @@ function save(then?: () => void): void {
     );
 }
 function addFixedCostRow(): void {
+    if (loading.value || !props.data) return;
     rows.value.push({ id: null, name: 'Новая статья', category: props.data?.categories[0]?.code ?? 'other', plan: 0, approved: false, pay_day: null });
     fcAutoSave();
     void nextTick(() => {
@@ -319,12 +330,12 @@ watch(
                 <select id="fc-month-select" :value="props.data?.period ?? months[0].value" style="font-size: 13px" @change="loadFixedCostsPeriod(($event.target as HTMLSelectElement).value)">
                     <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
                 </select>
-                <button class="btn btn-primary btn-sm" @click="addFixedCostRow">+ Статья</button>
+                <button class="btn btn-primary btn-sm" :disabled="loading || !props.data" @click="addFixedCostRow">+ Статья</button>
                 <button class="btn btn-ghost btn-sm" @click="addFCCategory">+ Категория</button>
             </div>
         </div>
-        <div id="fc-period-hint" style="font-size: 12px; color: var(--text3); margin-bottom: 10px">{{ hint }}</div>
-        <table id="fc-plan-table" class="data-table">
+        <div id="fc-period-hint" style="font-size: 12px; color: var(--text3); margin-bottom: 10px">{{ loading || !props.data ? '⏳ Загрузка постоянных затрат...' : hint }}</div>
+        <table id="fc-plan-table" class="data-table" :style="loading || !props.data ? 'pointer-events:none;opacity:.6' : ''">
             <thead>
                 <tr>
                     <th style="min-width: 200px">Статья затрат</th>

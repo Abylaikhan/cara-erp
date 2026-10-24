@@ -6,6 +6,11 @@ materials, the salary ledger, the catalog) are taken from the dev database in le
 to the accepted reference (every network request blocked) and legacy counts buildPL and the six sub-reports of a year. The
 server counts the same. Every figure is compared in whole tenge (legacy sums floats; 1 tenge of rounding is allowed).
 
+What both show is compared too, line by line (cells of a row joined, sums in tenge within 1), against the target signed in on
+the dev app with the year as the period: the KPI and the statement of «📊 P&L» and its sub-reports, «Маржинальность по
+категориям», the KPI of «Точка безубыточности», the ОСВ (ADR-0052…0055). PL_SHAPES=1 prints the shape of differing lines
+(digits → #, letters → a).
+
 Output: per table «совпадает» or the number of differing cells and the first row numbers — never a value or a name (the data
 are real). The dump stays in .local-audit. Usage: PL_YEAR=2026 python3 tests/visual/pl_compare.py
 """
@@ -15,6 +20,7 @@ import datetime as dt
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -27,6 +33,9 @@ ACCEPTED = CFG['source']['accepted_ref']['sha256']
 BLOB = next(b for b in sorted((ROOT / '.local-audit/blobs').glob('*.html')) if hashlib.sha256(b.read_bytes()).hexdigest() == ACCEPTED)
 YEAR = os.environ.get('PL_YEAR') or str(dt.date.today().year)
 OUT = ROOT / '.local-audit' / 'pl-compare'
+ENV = (ROOT / '.env').read_text()
+TARGET = os.environ.get('E2E_BASE') or 'http://localhost:' + (re.search(r'^APP_PORT=(\d+)', ENV, re.M) or [None, '8080'])[1]
+DEV_PASSWORD = re.search(r'^DEV_ADMIN_PASSWORD=(.*)$', ENV, re.M).group(1).strip()
 
 LEGACY_JS = r"""(d) => {
     realizationsData = d.realizations; ordersData = d.orders; _cacheLoaded.money = true;
@@ -51,10 +60,28 @@ YEAR_JS = r"""([year]) => {
     draw(renderMaterialCostEstimate, 'pl-matcost-year');
     draw(renderCategoryMargin, 'margin-category-year');
     const osv = buildOSV();
-    return {osv: {rows: osv.rows, totals: osv.totals, journal: osv.journal.length}, pl, monthly: window._monthlyPLRows, channel: window._plChannelRows, category: window._plCategoryRows,
+    renderBEPKpi(); renderPL(); renderOSV();
+    return {shown: Object.fromEntries(SHOWN_IDS.map(id => [id, eval(SHOWN_JS)(id)])), osv: {rows: osv.rows, totals: osv.totals, journal: osv.journal.length}, pl, monthly: window._monthlyPLRows, channel: window._plChannelRows, category: window._plCategoryRows,
         expenses: window._plExpenseCatRows, dividends: window._plExpenseDividends, tree: window._plRevTreeRows, cost: window._matCostRows,
         costHint: document.querySelector('#pl-matcost > div')?.textContent || '', catMargin: window._categoryMarginRows};
 }"""
+
+# The text of a block as it is shown, the same for a hidden page: a line per table row (its cells joined) or per child.
+SHOWN_JS = r"""(id) => {
+    // the text nodes of an element, each trimmed, joined by a space: the markup's own line breaks do not count
+    const t = n => { const w = document.createTreeWalker(n, NodeFilter.SHOW_TEXT), out = []; while (w.nextNode()) { const v = w.currentNode.nodeValue.replace(/\s+/g, ' ').trim(); if (v) out.push(v); } return out.join(' '); };
+    const el = document.getElementById(id);
+    if (!el) return '';
+    const rows = el.querySelectorAll('tr');
+    const lines = rows.length ? [...el.children].filter(c => c.tagName !== 'TABLE').map(t).concat([...rows].map(tr => [...tr.children].map(t).join(' | ')))
+                              : [...el.children].map(t);
+    return lines.join('\n');
+}"""
+# What is compared as shown: the statement and its sub-reports of the year, «Маржинальность», the KPI of ТБУ, the ОСВ.
+SHOWN = {'pl-kpi-row': 'KPI P&L', 'pl-statement': 'отчёт P&L', 'pl-monthly': 'помесячно', 'pl-rev-by-channel': 'выручка по направлениям',
+         'pl-rev-by-category': 'выручка по категориям', 'pl-exp-by-month': 'расходы по статьям', 'pl-matcost': 'оценка себестоимости',
+         'margin-category-table': 'маржинальность по категориям', 'bep-kpi': 'KPI точки безубыточности', 'osv-body': 'ОСВ'}
+YEAR_JS = YEAR_JS.replace('eval(SHOWN_JS)', '(' + SHOWN_JS + ')').replace('SHOWN_IDS', json.dumps(list(SHOWN)))
 
 PL_KEYS = ['revenue', 'materialCost', 'wageCost', 'oprCost', 'grossMargin', 'aupSalary', 'prodTaxes', 'commercialCost', 'otherFixed', 'ebit',
            'esfMaterialEstimate', 'prodToMaterials', 'prodUnclassified', 'advCommercialCost', 'advOtherExpense', 'advUndetermined', 'payrollLedgerSdelnaya', 'payrollLedgerAup']
@@ -89,6 +116,55 @@ def flatten(rows: list, children: tuple[str, ...], label='label', monthly='month
     return out
 
 
+def target_shown(page) -> dict:
+    """The target as the director sees it: the year as the period, «Маржинальность» of the year, the KPI of «Точка безубыточности»."""
+    page.goto(TARGET + '/login', wait_until='networkidle')
+    page.fill('#login-username', 'director'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
+    page.wait_for_url(lambda u: '/login' not in u)
+    page.goto(TARGET + '/finance', wait_until='networkidle')
+    page.wait_for_selector('#pl-statement table', timeout=120000); page.wait_for_load_state('networkidle')
+    if YEAR != dt.date.today().strftime('%Y'):  # another year: the statement is asked again for it
+        with page.expect_response(lambda r: '/finance' in r.url and f'pl_from={YEAR}-01-01' in r.url and f'pl_to={YEAR}-12-31' in r.url, timeout=120000):
+            page.fill('#fp-date-from', f'{YEAR}-01-01'); page.locator('#fp-date-from').dispatch_event('change')
+            page.fill('#fp-date-to', f'{YEAR}-12-31'); page.locator('#fp-date-to').dispatch_event('change')
+        page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
+    for sel in ('pl-monthly-year', 'pl-rev-channel-year', 'pl-rev-category-year', 'pl-exp-year', 'pl-matcost-year'):
+        page.wait_for_selector(f'#{sel} option[value="{YEAR}"]', state='attached', timeout=120000)
+        page.select_option(f'#{sel}', YEAR); page.wait_for_load_state('networkidle')
+    page.wait_for_timeout(1500)
+    shown = {id: page.evaluate(SHOWN_JS, id) for id in list(SHOWN)[:7]}
+    page.locator('#finance-tabs .tab').nth(3).click()
+    page.wait_for_selector('#margin-category-table table', timeout=120000)
+    page.select_option('#margin-category-year', YEAR); page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
+    shown['margin-category-table'] = page.evaluate(SHOWN_JS, 'margin-category-table')
+    page.locator('#finance-tabs .tab').nth(4).click()
+    page.wait_for_selector('#bep-kpi .bep-kpi-card', timeout=120000); page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
+    shown['bep-kpi'] = page.evaluate(SHOWN_JS, 'bep-kpi')
+    page.locator('#finance-tabs .tab').nth(6).click()
+    page.wait_for_selector('#osv-body table', timeout=120000); page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
+    shown['osv-body'] = page.evaluate(SHOWN_JS, 'osv-body')
+    return shown
+
+
+def text_report(name: str, legacy: str, target: str) -> bool:
+    norm = lambda t: [' '.join(l.split()) for l in t.splitlines() if l.strip()]
+    a, b = norm(legacy), norm(target)
+    # the same text, the sums in tenge within 1 (legacy adds floats, the server counts exactly — as the figures above)
+    money = re.compile(r'₸(-?\d[\d \u00a0]*)')
+    def same(x, y):
+        if x is None or y is None or money.sub('₸', x) != money.sub('₸', y):
+            return x == y
+        return all(abs(int(re.sub(r'\D', '', m) or 0) * (-1 if m.startswith('-') else 1) - int(re.sub(r'\D', '', n) or 0) * (-1 if n.startswith('-') else 1)) <= 1
+                   for m, n in zip(money.findall(x), money.findall(y)))
+    bad = [i + 1 for i in range(max(len(a), len(b))) if not same(a[i] if i < len(a) else None, b[i] if i < len(b) else None)]
+    print(f'{name}: строк {len(b)} / {len(a)}, ' + ('совпадает' if not bad else f'РАСХОЖДЕНИЙ {len(bad)}, строки {bad[:5]}'))
+    if bad and os.environ.get('PL_SHAPES'):  # the shape of the lines only: digits → #, letters → a
+        shape = lambda l: re.sub(r'[^\W\d_]', 'a', re.sub(r'\d', '#', l))
+        for i in range(min(14, max(len(a), len(b)))):
+            print('   ', repr(shape(a[i]) if i < len(a) else None)[:70], '|', repr(shape(b[i]) if i < len(b) else None)[:70])
+    return not bad
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     dump = subprocess.run(['docker', 'compose', 'exec', '-T', '-e', f'PL_YEAR={YEAR}', 'app', 'php', 'artisan', 'tinker', '--execute', "require 'tests/visual/pl_dump.php';"],
@@ -104,6 +180,7 @@ def main() -> int:
         page.goto(BLOB.as_uri(), wait_until='load', timeout=60000); page.wait_for_timeout(1500)
         page.evaluate(LEGACY_JS, data['legacy'])
         legacy = page.evaluate(YEAR_JS, [YEAR])
+        shown = target_shown(browser.new_page(viewport={'width': 1440, 'height': 900}, locale='ru-RU'))
         browser.close()
 
     ok = True
@@ -129,6 +206,8 @@ def main() -> int:
     jl, jt = legacy['osv']['journal'], len(target['osv']['journal'])
     print(f'ОСВ проводки: {jt} / {jl} — ' + ('совпадает' if jl == jt else 'РАСХОЖДЕНИЕ'))
     ok &= jl == jt
+    for key, name in SHOWN.items():
+        ok &= text_report(name + ' на экране', legacy['shown'][key], shown[key])
     return 0 if ok else 1
 
 

@@ -6,6 +6,7 @@
 import { router } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 import { downloadXlsx } from '@/lib/xlsx';
+import { reloadLatest } from '@/lib/reload';
 
 export interface CatMargin {
     year: string;
@@ -29,7 +30,7 @@ const companyPct = computed(() => {
     const rev = rows.reduce((s, r) => s + sum(r.revenue), 0);
     return rev > 0 ? Math.round((rows.reduce((s, r) => s + sum(r.margin), 0) / rev) * 100) : 0;
 });
-const setYear = (year: string) => router.reload({ only: ['catMargin'], data: { cm_year: year } });
+const setYear = (year: string) => reloadLatest('catMargin', { cm_year: year });
 function exportCategoryMarginExcel(): void {
     const d = props.data;
     if (!d || !d.rows.length) return void window.alert('Нет данных для выгрузки.');

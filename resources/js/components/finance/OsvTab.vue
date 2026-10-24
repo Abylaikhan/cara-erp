@@ -7,6 +7,7 @@ import { router } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import DrilldownModal from '@/components/DrilldownModal.vue';
 import { downloadXlsx } from '@/lib/xlsx';
+import { reloadLatest } from '@/lib/reload';
 
 interface OsvRow {
     code: string;
@@ -36,7 +37,7 @@ watch(
     () => [props.active, props.from, props.to] as const,
     ([active, from, to]) => {
         if (!active || (props.data && props.data.from === from && props.data.to === to)) return;
-        router.reload({ only: ['osv'], data: { osv_from: from ?? '', osv_to: to ?? '' } });
+        reloadLatest('osv', { osv_from: from ?? '', osv_to: to ?? '' });
     },
     { immediate: true },
 );

@@ -7,6 +7,7 @@
 import { router } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 import { fmtCurrency } from '@/lib/sales';
+import { reloadLatest } from '@/lib/reload';
 import { downloadXlsx } from '@/lib/xlsx';
 import PlExpensesTable, { type PlExpenseRow } from '@/components/finance/PlExpensesTable.vue';
 import PlRevenueTable from '@/components/finance/PlRevenueTable.vue';
@@ -88,7 +89,7 @@ watch(
     ([active, from, to]) => {
         if (!active) return;
         if (props.data && props.data.from === from && props.data.to === to) return;
-        router.reload({ only: ['pl'], data: { pl_from: from ?? '', pl_to: to ?? '' } });
+        reloadLatest('pl', { pl_from: from ?? '', pl_to: to ?? '' });
     },
     { immediate: true },
 );
@@ -174,7 +175,7 @@ const monthlyRows = computed(() =>
 );
 const fmt2 = (n: number | null) => (n ? '₸' + Math.round(n).toLocaleString('ru-RU') : '—');
 function setMonthlyYear(year: string): void {
-    router.reload({ only: ['plMonthly'], data: { pl_year: year } });
+    reloadLatest('plMonthly', { pl_year: year });
 }
 // Legacy exportMonthlyPLExcel: a month to come is 0 in the file
 function exportMonthlyPLExcel(): void {
@@ -190,7 +191,7 @@ function exportMonthlyPLExcel(): void {
 }
 // ── Выручка по направлениям / по категориям (legacy renderRevenueByChannel/ByCategory, exportRevenueTableToExcel) ──
 const setRevenueYear = (prop: 'plRevChannel' | 'plRevCategory', year: string) =>
-    router.reload({ only: [prop], data: { [prop === 'plRevChannel' ? 'pl_rch_year' : 'pl_rcat_year']: year } });
+    reloadLatest(prop, { [prop === 'plRevChannel' ? 'pl_rch_year' : 'pl_rcat_year']: year });
 function exportRevenueTableToExcel(rev: PlRevenue | undefined, title: string, filenamePrefix: string): void {
     if (!rev || !rev.rows.length) return void window.alert('Нет данных для выгрузки.');
     const totals = MONTHS.map((_, i) => rev.rows.reduce((s, r) => s + (r.data[i] || 0), 0));
@@ -204,7 +205,7 @@ function exportRevenueTableToExcel(rev: PlRevenue | undefined, title: string, fi
     void downloadXlsx('finance', `${filenamePrefix}_${rev.year}.xlsx`, [{ name: rev.year, rows, cols: [26, ...Array(12).fill(12), 14] }]);
 }
 // ── Расходы по категориям и статьям (legacy renderExpensesByMonth, exportExpensesByMonthToExcel) ──
-const setExpensesYear = (year: string) => router.reload({ only: ['plExpenses'], data: { pl_exp_year: year } });
+const setExpensesYear = (year: string) => reloadLatest('plExpenses', { pl_exp_year: year });
 function exportExpensesByMonthToExcel(): void {
     const e = props.expenses;
     if (!e || !e.rows.length) return void window.alert('Нет данных для выгрузки.');
@@ -223,7 +224,7 @@ function exportExpensesByMonthToExcel(): void {
     void downloadXlsx('finance', `PromTech_Raskhody_${e.year}.xlsx`, [{ name: String(e.year), rows, cols: [32, ...Array(12).fill(12), 14] }]);
 }
 // ── Выручка: направление → категория → товар (legacy renderRevenueByChannelCategory, exportRevenueTreeToExcel) ──
-const setTreeYear = (year: string) => router.reload({ only: ['plRevTree'], data: { pl_rtree_year: year } });
+const setTreeYear = (year: string) => reloadLatest('plRevTree', { pl_rtree_year: year });
 function exportRevenueTreeToExcel(): void {
     const t = props.tree;
     if (!t || !t.rows.length) return void window.alert('Нет данных для выгрузки.');
@@ -242,7 +243,7 @@ function exportRevenueTreeToExcel(): void {
     void downloadXlsx('finance', `PromTech_Vyruchka_struktura_${t.year}.xlsx`, [{ name: String(t.year), rows, cols: [36, ...Array(12).fill(12), 14] }]);
 }
 // ── Оценка себестоимости по категориям (legacy renderMaterialCostEstimate, exportMatCostExcel) ──
-const setCostYear = (year: string) => router.reload({ only: ['plCost'], data: { pl_cost_year: year } });
+const setCostYear = (year: string) => reloadLatest('plCost', { pl_cost_year: year });
 function exportMatCostExcel(): void {
     const c = props.cost;
     if (!c || !c.rows.length) return void window.alert('Нет данных для выгрузки.');
