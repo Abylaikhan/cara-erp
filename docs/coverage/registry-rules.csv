@@ -110,31 +110,17 @@ function,renderWaybillAvailableItems,NOT_STARTED,ERP-044 (D-06/D-08),Цехов�
 function,addWaybillItem,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
 function,removeWaybillItem,NOT_STARTED,ERP-044 (D-06/D-08),Цеховая доска и сопроводительная накладная
 function,ensureProgressForItem,NOT_STARTED,ERP-041 (D-05/D-06),Рабочий лист производства
-function,ddPLRevenue,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,ddPLExpense,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
+function,ddPLRevenue,NOT_STARTED,ERP-062 (№ 80),Детализация «Центров прибыли» (renderChannelPL) — после ответа на № 80
+function,ddPLExpense,NOT_STARTED,ERP-062 (№ 80),Детализация «Центров прибыли» (renderChannelPL) — после ответа на № 80
 function,findWarehousePrice,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,calcItemMaterialCost,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,calcItemWageCost,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,calcItemMargin,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,calcOrderMargin,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,openMarginDetail,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
-function,sumPayrollLedgerColumns,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
-function,txPayoutsFor,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
 function,txPayoutsHtml,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
-function,showTxPayouts,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
-function,showEmpPayrollHistory,NOT_STARTED,ERP-056 (D-06),Начисления ЗП
-function,openEmployeeCardByName,NOT_STARTED,ERP-053/054 (D-13),Сотрудники и табель
-function,initDynamicPeriods,NOT_STARTED,ERP-053/054 (D-13),Сотрудники и табель
-function,loadStaffFromDB,NOT_STARTED,ERP-053/054 (D-13),Сотрудники и табель
-function,renderOSV,NOT_STARTED,ERP-061 (D-11),ОСВ
-function,ddOSVAccount,NOT_STARTED,ERP-061 (D-11),ОСВ
 function,fcToMonthly,DECIDED,ADR-0002 п. 126,Только для примерного списка затрат legacy — не используется
-function,exportARtoExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
-function,exportCFSExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
-function,exportCashCp,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
 function,exportOrderReport,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
-function,exportSalesJournalExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
-function,exportReconcileExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
 function,openPaymentModal,NOT_STARTED,ERP-032 (D-03),Оплата заказа
 function,renderPaymentHistory,NOT_STARTED,ERP-032 (D-03),Оплата заказа
 function,guessSalonExpenseCategory,NOT_STARTED,ERP-051 (D-03),Перенос строк рабочего листа салона в кассу
@@ -193,7 +179,6 @@ table,restorations,NOT_STARTED,ERP-080 (D-08),0 строк в копии legacy
 table,tech_cards,NOT_STARTED,ERP-028 (D-12),0 строк в копии legacy
 table,wh_documents,NOT_STARTED,ERP-039 (D-04/D-05),0 строк в копии legacy
 network,fetch@attempt,NOT_STARTED,ERP-031 (D-03/D-11),Запись операции с повтором (sbInsertMoneyTxSafe)
-function,exportDrilldownExcel,NOT_STARTED,ERP-067 (Excel),В новой версии кнопка показывает сообщение о выгрузках
 function,r1,NOT_STARTED,ERP-028 (D-12),Округление расчёта технологических карт
 function,openVacationCalcModal,NOT_STARTED,ERP-056 (D-06),Отпускные и больничные: расчёт
 function,openSalaryCalcModal,NOT_STARTED,ERP-056 (D-06),Начислить оклад по табелю
@@ -230,13 +215,9 @@ function,buildPayrollRow,NOT_STARTED,ERP-057 (D-06),Расчётная ведо�
 function,calcIPN,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
 function,curMonthFirst,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
 function,curMonthLast,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
-function,exportPayouts,NOT_STARTED,ERP-067,Выгрузка в Excel
-function,exportSalaryLedger,NOT_STARTED,ERP-067,Выгрузка в Excel
 function,exportPayrollToExcel,NOT_STARTED,ERP-067,Выгрузка в Excel
 function,loadAsync,NOT_STARTED,ERP-067,Выгрузка в Excel
 function,addTariffRow,NOT_STARTED,ERP-055 (D-06),Изменение тарифов (ADR-0038)
-function,exportWorkLogExcel,NOT_STARTED,ERP-067,Выгрузка журнала работ в Excel
-function,exportProdWorksheetExcel,NOT_STARTED,ERP-067,Выгрузка рабочего листа производства в Excel
 function,handleProdWorksheetImport,NOT_STARTED,ERP-041/ERP-067,Загрузка рабочего листа производства из Excel
 control,page-mrp|input|pwb-import-file,NOT_STARTED,ERP-041/ERP-067,Файл для загрузки рабочего листа производства из Excel
 function,deleteAppUser,DECIDED,ADR-0046,Учётную запись блокируют, а не удаляют (ADR-0002 п. 116)

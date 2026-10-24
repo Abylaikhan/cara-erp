@@ -210,7 +210,7 @@ control,page-mrp|input|pwb-add-order,input,page-mrp,2395,M02 Производс�
 control,page-mrp|L2396,button,page-mrp,2396,M02 Производство,NOT_STARTED,"present, its action comes later — addOrderToWorksheetByNum: requirement M02.WORKSHEET_EDIT (DEC-06)",+ Заказ
 control,page-mrp|L2398,button,page-mrp,2398,M02 Производство,NOT_STARTED,clicks pwb-import-file: ERP-041/ERP-067,📤 Импорт Excel
 control,page-mrp|input|pwb-import-file,input,page-mrp,2399,M02 Производство,NOT_STARTED,ERP-041/ERP-067,
-control,page-mrp|L2400,button,page-mrp,2400,M02 Производство,NOT_STARTED,"present, its action comes later — exportProdWorksheetExcel: ERP-067",📥 Экспорт Excel
+control,page-mrp|L2400,button,page-mrp,2400,M02 Производство,IMPLEMENTED,label,📥 Экспорт Excel
 control,page-mrp|L2401,button,page-mrp,2401,M02 Производство,NOT_STARTED,"present, its action comes later — deleteSelectedProdWbRows: requirement M02.WORKSHEET_EDIT (DEC-06)",✕ Удалить отмеченные
 control,page-mrp|L2402,button,page-mrp,2402,M02 Производство,NOT_STARTED,"present, its action comes later — clearProdWorksheet: requirement M02.WORKSHEET_EDIT (DEC-06)",🗑 Очистить лист
 control,page-mrp|input|pwb-f-search,input,page-mrp,2405,M02 Производство,IMPLEMENTED,id,
@@ -268,7 +268,7 @@ control,page-mrp|L2521,option,page-mrp,2521,M02 Производство,IMPLEME
 control,page-mrp|input|wl-item,input,page-mrp,2522,M02 Производство,IMPLEMENTED,id,
 control,page-mrp|select|wl-stage,select,page-mrp,2523,M02 Производство,IMPLEMENTED,id,Все работы
 control,page-mrp|L2523,option,page-mrp,2523,M02 Производство,IMPLEMENTED,label,Все работы
-control,page-mrp|L2524,button,page-mrp,2524,M02 Производство,NOT_STARTED,"present, its action comes later — exportWorkLogExcel: ERP-067",📥 Excel
+control,page-mrp|L2524,button,page-mrp,2524,M02 Производство,IMPLEMENTED,label,📥 Excel
 control,page-mrp|L2527,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Дата
 control,page-mrp|L2527#2,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Цех
 control,page-mrp|L2527#3,th,page-mrp,2527,M02 Производство,IMPLEMENTED,label,Исполнитель
@@ -684,7 +684,7 @@ control,page-customers|L3858,option,page-customers,3858,M08 Покупатели
 control,page-customers|input|rec-date-from,input,page-customers,3860,M08 Покупатели,IMPLEMENTED,id,
 control,page-customers|input|rec-date-to,input,page-customers,3862,M08 Покупатели,IMPLEMENTED,id,
 control,page-customers|L3863,button,page-customers,3863,M08 Покупатели,IMPLEMENTED,label,🖨 Распечатать
-control,page-customers|L3864,button,page-customers,3864,M08 Покупатели,NOT_STARTED,"present, its action comes later — exportReconcileExcel: ERP-067 (Excel)",📥 Excel
+control,page-customers|L3864,button,page-customers,3864,M08 Покупатели,IMPLEMENTED,label,📥 Excel
 control,page-customers|L3874,th,page-customers,3874,M08 Покупатели,IMPLEMENTED,label,Дата
 control,page-customers|L3875,th,page-customers,3875,M08 Покупатели,IMPLEMENTED,label,Документ / Заказ
 control,page-customers|L3876,th,page-customers,3876,M08 Покупатели,IMPLEMENTED,label,Операция
@@ -845,7 +845,7 @@ control,page-sales|L4112,option,page-sales,4112,M09 Продажи,IMPLEMENTED,l
 control,page-sales|L4113,option,page-sales,4113,M09 Продажи,IMPLEMENTED,label,💳 Частично
 control,page-sales|L4114,option,page-sales,4114,M09 Продажи,IMPLEMENTED,label,❌ Не оплачен
 control,page-sales|input|sj-search,input,page-sales,4116,M09 Продажи,IMPLEMENTED,id,
-control,page-sales|L4118,button,page-sales,4118,M09 Продажи,NOT_STARTED,"present, its action comes later — exportSalesJournalExcel: ERP-067 (Excel)",📥 Excel
+control,page-sales|L4118,button,page-sales,4118,M09 Продажи,IMPLEMENTED,label,📥 Excel
 control,page-sales|L4119,button,page-sales,4119,M09 Продажи,IMPLEMENTED,label,🖨 Печать
 control,page-sales|L4125,th,page-sales,4125,M09 Продажи,IMPLEMENTED,label,№
 control,page-sales|L4126,th,page-sales,4126,M09 Продажи,IMPLEMENTED,label,Дата ▲
@@ -1046,7 +1046,7 @@ control,leadModal|L4535,button,leadModal,4535,M10 CRM,IMPLEMENTED,label,💾 С�
 control,leadModal|input|lead-edit-id,input,leadModal,4537,M10 CRM,IMPLEMENTED,ADR-0010,
 control,drilldownModal|L4551,button,drilldownModal,4551,M11 Финансы,IMPLEMENTED,label,✕
 control,drilldownModal|input|dd-search,input,drilldownModal,4555,M11 Финансы,IMPLEMENTED,id,
-control,drilldownModal|L4556,button,drilldownModal,4556,M11 Финансы,NOT_STARTED,"present, its action comes later — exportDrilldownExcel: ERP-067 (Excel)",📥 Excel
+control,drilldownModal|L4556,button,drilldownModal,4556,M11 Финансы,IMPLEMENTED,label,📥 Excel
 control,fixedCostModal|L4573,button,fixedCostModal,4573,M11 Финансы,PENDING_DECISION,D-15,✕
 control,fixedCostModal|input|fc-name,input,fixedCostModal,4578,M11 Финансы,PENDING_DECISION,D-15,
 control,fixedCostModal|select|fc-category,select,fixedCostModal,4582,M11 Финансы,PENDING_DECISION,D-15,🏭 Аренда 👥 ФОТ (постоянная часть) 💡 Коммунальные услуги ⚙️ Оборудование и техник
@@ -1324,7 +1324,7 @@ control,page-finance|select|ar-filter,select,page-finance,5586,M11 Финанс�
 control,page-finance|L5587,option,page-finance,5587,M11 Финансы,IMPLEMENTED,label,Все
 control,page-finance|L5588,option,page-finance,5588,M11 Финансы,IMPLEMENTED,label,Просроченные
 control,page-finance|L5589,option,page-finance,5589,M11 Финансы,IMPLEMENTED,label,Текущие
-control,page-finance|L5591,button,page-finance,5591,M11 Финансы,NOT_STARTED,"present, its action comes later — exportARtoExcel: ERP-067 (Excel)",📥 Excel
+control,page-finance|L5591,button,page-finance,5591,M11 Финансы,IMPLEMENTED,label,📥 Excel
 control,page-finance|L5596,th,page-finance,5596,M11 Финансы,IMPLEMENTED,label,Заказ
 control,page-finance|L5596#2,th,page-finance,5596,M11 Финансы,IMPLEMENTED,label,Клиент
 control,page-finance|L5596#3,th,page-finance,5596,M11 Финансы,IMPLEMENTED,label,Ответственный
@@ -1391,7 +1391,7 @@ control,page-finance|L5801,th,page-finance,5801,M11 Финансы,IMPLEMENTED,l
 control,page-finance|L5802,th,page-finance,5802,M11 Финансы,IMPLEMENTED,label,Категория
 control,page-finance|L5803,th,page-finance,5803,M11 Финансы,IMPLEMENTED,label,В месяц
 control,page-finance|L5804,th,page-finance,5804,M11 Финансы,IMPLEMENTED,label,В год
-control,page-finance|L5840,button,page-finance,5840,M11 Финансы,NOT_STARTED,"present, its action comes later — exportCFSExcel: ERP-067 (Excel)",📥 Excel
+control,page-finance|L5840,button,page-finance,5840,M11 Финансы,IMPLEMENTED,label,📥 Excel
 control,page-finance|L5870,button,page-finance,5870,M11 Финансы,IMPLEMENTED,label,📥 Excel
 control,page-finance|L5880,button,page-finance,5880,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),🔄 Пересчитать
 control,page-finance|L5881,button,page-finance,5881,M11 Финансы,PENDING_DECISION,№ 81 (ERP-063),📥 Excel
@@ -1956,7 +1956,7 @@ control,employeeCardModal|button|emp-card-delete,button,employeeCardModal,7682,M
 control,employeeCardModal|L7684,button,employeeCardModal,7684,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Отмена
 control,employeeCardModal|L7685,button,employeeCardModal,7685,M17 Сотрудники,NOT_STARTED,ERP-053 (D-13),Сохранить
 control,page-payroll|L7699,button,page-payroll,7699,M19 Зарплатная ведомость,IMPLEMENTED,label,💵 Журнал выдач
-control,page-payroll|L7700,button,page-payroll,7700,M19 Зарплатная ведомость,NOT_STARTED,"present, its action comes later — exportSalaryLedger: ERP-067",📥 Excel
+control,page-payroll|L7700,button,page-payroll,7700,M19 Зарплатная ведомость,IMPLEMENTED,label,📥 Excel
 control,page-payroll|select|payroll-month,select,page-payroll,7706,M19 Зарплатная ведомость,IMPLEMENTED,id,— Произвольный период — Ноябрь 2025 Декабрь 2025 Январь 2026 Февраль 2026 Март 2
 control,page-payroll|L7707,option,page-payroll,7707,M19 Зарплатная ведомость,IMPLEMENTED,label,— Произвольный период —
 control,page-payroll|L7708,option,page-payroll,7708,M19 Зарплатная ведомость,IMPLEMENTED,label,Ноябрь 2025
@@ -2346,7 +2346,7 @@ function,sbDelete#1,,,670,"M02 Производство, M03 Склад, M05 В�
 function,sbPatch#1,,,679,"M02 Производство, M04 Закупки, M05 Входящие ЭСФ …",DECIDED,ADR-0029,
 function,sbPost#1,,,692,"M07 Каталог, M10 CRM",DECIDED,ADR-0029,
 function,sbInsertMany#1,,,706,"M06 Поставщики, M09 Продажи, M12 Деньги",DECIDED,ADR-0029,
-function,loadStaffFromDB#1,,,720,"M09 Продажи, M10 CRM, M12 Деньги …",NOT_STARTED,ERP-053/054 (D-13),
+function,loadStaffFromDB#1,,,720,"M09 Продажи, M10 CRM, M12 Деньги …",IMPLEMENTED,requirement M17.STAFF,
 function,loadSuppliersFromDB#1,,,778,"M12 Деньги, UI оболочка",IMPLEMENTED,"requirement M06.LIST, MIG-02.M06",
 function,loadWarehouseFromDB#1,,,805,"M11 Финансы, UI оболочка",IMPLEMENTED,requirement MIG-02.M03,
 function,loadPurchasesFromDB#1,,,848,UI оболочка,IMPLEMENTED,named in resources/js/pages/Suppliers.vue,
@@ -2428,7 +2428,7 @@ function,recalcOrderPayment#1,,,9754,M12 Деньги,NOT_STARTED,requirement M1
 function,cashCpRows#1,,,9777,M12 Деньги,IMPLEMENTED,requirement M12.VIEW,
 function,showCashByCounterparty#1,,,9791,M12 Деньги,IMPLEMENTED,requirement M12.VIEW,
 function,cashCpPick#1,,,9815,M12 Деньги,IMPLEMENTED,named in resources/js/components/money/CashTab.vue,
-function,exportCashCp#1,,,9820,M12 Деньги,NOT_STARTED,ERP-067 (Excel),
+function,exportCashCp#1,,,9820,M12 Деньги,IMPLEMENTED,named in resources/js/components/money/CashTab.vue,
 function,cmDocKey#1,,,9835,M12 Деньги,NOT_STARTED,requirement M12.CASH_MERGE (DEC-03 DEC-11),
 function,cmLinkedIds#1,,,9840,M12 Деньги,NOT_STARTED,requirement M12.CASH_MERGE (DEC-03 DEC-11),
 function,cmBuildGroups#1,,,9847,M12 Деньги,NOT_STARTED,requirement M12.CASH_MERGE (DEC-03 DEC-11),
@@ -2495,10 +2495,10 @@ function,txSalCollect#1,,,11282,M12 Деньги,NOT_STARTED,by its controls: ER
 function,txSalSavePayments#1,,,11293,M12 Деньги,NOT_STARTED,by its controls: ERP-031 (D-03/D-11),
 function,txTransferLayout#1,,,11308,—,NOT_STARTED,ERP-031…033 (D-03/D-11),
 function,txHasPayoutBreakdown#1,,,11325,M12 Деньги,IMPLEMENTED,requirement M12.PAYOUTS,
-function,txPayoutsFor#1,,,11333,"M09 Продажи, M12 Деньги, M15 Касса салона",NOT_STARTED,ERP-057 (D-06),
+function,txPayoutsFor#1,,,11333,"M09 Продажи, M12 Деньги, M15 Касса салона",IMPLEMENTED,requirement M12.PAYOUTS,
 function,txPayoutsHtml#1,,,11350,"M09 Продажи, M12 Деньги, M15 Касса салона",NOT_STARTED,ERP-057 (D-06),
 function,txShowSalaryBreakdown#1,,,11363,"M09 Продажи, M12 Деньги, M15 Касса салона",NOT_STARTED,"by its controls: ERP-030 (D-02/D-12); ERP-031 (D-03/D-11); present, its action comes later — openMoneyTxModal: requirement M12.POSTING (DEC-03)",
-function,showTxPayouts#1,,,11374,M12 Деньги,NOT_STARTED,ERP-057 (D-06),
+function,showTxPayouts#1,,,11374,M12 Деньги,IMPLEMENTED,requirement M12.PAYOUTS,
 function,openMoneyTxModal#1,,,11389,"M09 Продажи, M12 Деньги, M15 Касса салона",NOT_STARTED,requirement M12.POSTING (DEC-03),
 function,initExpenseCatsPage#1,,,11566,UI оболочка,IMPLEMENTED,requirement M14.LIST,
 function,renderExpCats#1,,,11571,M14 Статьи расходов,IMPLEMENTED,"requirement M14.ACCESS, M14.FILTERS, M14.LIST",
@@ -2589,21 +2589,21 @@ function,saveAccrual#1,,,13525,M20 Начисления ЗП,NOT_STARTED,by its 
 function,initSalaryLedgerPage#1,,,13590,"M19 Зарплатная ведомость, M20 Начисления ЗП",IMPLEMENTED,"requirement M19.LEDGER, M20.JOURNAL",
 function,togglePayrollCols#1,,,13625,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
 function,openPayrollRowMenu#1,,,13633,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
-function,openEmployeeCardByName#1,,,13675,—,NOT_STARTED,ERP-053/054 (D-13),
+function,openEmployeeCardByName#1,,,13675,—,IMPLEMENTED,named in resources/js/pages/Hr.vue,
 function,prPayoutsPeriod#1,,,13685,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
 function,showPayouts#1,,,13692,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
 function,prPayoutRows#1,,,13715,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
 function,renderPayouts#1,,,13725,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
-function,exportPayouts#1,,,13747,M19 Зарплатная ведомость,NOT_STARTED,ERP-067,
-function,showEmpPayrollHistory#1,,,13756,—,NOT_STARTED,ERP-056 (D-06),
+function,exportPayouts#1,,,13747,M19 Зарплатная ведомость,IMPLEMENTED,named in resources/js/pages/Payroll.vue,
+function,showEmpPayrollHistory#1,,,13756,—,IMPLEMENTED,named in resources/js/pages/Accruals.vue,
 function,curYM#1,,,13767,"M17 Сотрудники, M20 Начисления ЗП",NOT_STARTED,ERP-054 (D-06),
 function,curMonthFirst#1,,,13768,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
 function,curMonthLast#1,,,13769,M19 Зарплатная ведомость,NOT_STARTED,ERP-057 (D-06),
-function,initDynamicPeriods#1,,,13770,—,NOT_STARTED,ERP-053/054 (D-13),
+function,initDynamicPeriods#1,,,13770,—,IMPLEMENTED,named in resources/js/components/salon/payroll.ts,
 function,fillPayrollMonthSelects#1,,,13799,"M19 Зарплатная ведомость, M20 Начисления ЗП",IMPLEMENTED,"requirement M19.LEDGER, M20.JOURNAL",
 function,onPayrollMonthChange#1,,,13830,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
 function,renderSalaryLedger#1,,,13841,M19 Зарплатная ведомость,IMPLEMENTED,requirement M19.LEDGER,
-function,exportSalaryLedger#1,,,14088,M19 Зарплатная ведомость,NOT_STARTED,ERP-067,
+function,exportSalaryLedger#1,,,14088,M19 Зарплатная ведомость,IMPLEMENTED,named in resources/js/pages/Payroll.vue,
 function,getUserPrefs#1,,,14133,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
 function,saveUserPref#1,,,14138,M22 Мой кабинет,NOT_STARTED,by its controls: ERP-058,
 function,getUserPref#1,,,14144,"M09 Продажи, M12 Деньги, M15 Касса салона",NOT_STARTED,"by its controls: ERP-030 (D-02/D-12); ERP-031 (D-03/D-11); present, its action comes later — openMoneyTxModal: requirement M12.POSTING (DEC-03)",
@@ -2780,7 +2780,7 @@ function,showMrpTab#1,,,19608,M02 Производство,IMPLEMENTED,requireme
 function,collectWorkLogEntries#1,,,19627,"M02 Производство, M18 Сдельная оплата, M22 Мой кабинет",IMPLEMENTED,"requirement M02.WORKLOG, M18.WAGES",
 function,computeStageAmountFor#1,,,19652,"M02 Производство, M18 Сдельная оплата, M22 Мой кабинет",IMPLEMENTED,requirement M18.WAGES,
 function,renderWorkLog#1,,,19657,M02 Производство,IMPLEMENTED,requirement M02.WORKLOG,
-function,exportWorkLogExcel#1,,,19728,M02 Производство,NOT_STARTED,ERP-067,
+function,exportWorkLogExcel#1,,,19728,M02 Производство,IMPLEMENTED,named in resources/js/components/mrp/WorklogTab.vue,
 function,renderWorkshopLoad#1,,,19752,M02 Производство,IMPLEMENTED,requirement M02.WORKLOAD,
 function,switchToCustTabByKey#1,,,19824,M08 Покупатели,PENDING_DECISION,D-15,
 function,flashHighlightRow#1,,,19832,M02 Производство,NOT_STARTED,ERP-044 (D-06/D-08),
@@ -2794,7 +2794,7 @@ function,renderSalonsTab#1,,,19930,M08 Покупатели,NOT_STARTED,requirem
 function,renderCounterpartyReconcile#1,,,19934,M08 Покупатели,IMPLEMENTED,requirement M08.RECONCILE,
 function,openRecDrillTx#1,,,20078,—,IMPLEMENTED,requirement M08.RECONCILE,
 function,printReconcile#1,,,20107,M08 Покупатели,IMPLEMENTED,requirement M08.RECONCILE,
-function,exportReconcileExcel#1,,,20111,M08 Покупатели,NOT_STARTED,ERP-067 (Excel),
+function,exportReconcileExcel#1,,,20111,M08 Покупатели,IMPLEMENTED,named in resources/js/components/customers/ReconcileTab.vue,
 function,renderDealers#1,,,20125,M08 Покупатели,IMPLEMENTED,requirement M08.DEALERS,
 function,deleteDealer#1,,,20148,M08 Покупатели,IMPLEMENTED,requirement M08.DEALERS,
 function,addDealerRow#1,,,20149,M08 Покупатели,IMPLEMENTED,requirement M08.DEALERS,
@@ -2912,13 +2912,13 @@ function,buildOSV#1,,,23427,M11 Финансы,IMPLEMENTED,requirement M11.OSV,
 function,post#1,,,23465,M11 Финансы,IMPLEMENTED,named in app/Http/Controllers/StockDocumentController.php,
 function,parseDMY#1,,,23696,"M02 Производство, M08 Покупатели, M09 Продажи …",IMPLEMENTED,named in app/Console/Commands/LegacyControlTotals.php,
 function,aggregateRows#1,,,23709,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,renderOSV#1,,,23722,M11 Финансы,NOT_STARTED,ERP-061 (D-11),
+function,renderOSV#1,,,23722,M11 Финансы,IMPLEMENTED,requirement M11.OSV,
 function,exportOSVExcel#1,,,23813,M11 Финансы,IMPLEMENTED,requirement M11.OSV,
 function,setCFSMonth#1,,,23839,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,buildCFS#1,,,23855,M11 Финансы,IMPLEMENTED,requirement M11.CFS,
-function,cfsLabel#1,,,23892,M11 Финансы,NOT_STARTED,"by its controls: present, its action comes later — exportCFSExcel: ERP-067 (Excel)",
+function,cfsLabel#1,,,23892,M11 Финансы,IMPLEMENTED,named in resources/js/components/finance/CfsTab.vue,
 function,renderCFS#1,,,23949,M11 Финансы,IMPLEMENTED,"requirement M11.CFS, UI-03.STATES",
-function,exportCFSExcel#1,,,24040,M11 Финансы,NOT_STARTED,ERP-067 (Excel),
+function,exportCFSExcel#1,,,24040,M11 Финансы,IMPLEMENTED,named in resources/js/components/finance/CfsTab.vue,
 function,renderPayroll#1,,,24069,M19 Зарплатная ведомость,DECIDED,ADR-0002 п. 120,
 function,renderHRPayrollKpi#1,,,24160,M19 Зарплатная ведомость,DECIDED,ADR-0002 п. 120,
 function,renderHRPayrollTable#1,,,24180,M19 Зарплатная ведомость,DECIDED,ADR-0002 п. 120,
@@ -2982,7 +2982,7 @@ function,openPaymentModal#1,,,25867,M11 Финансы,NOT_STARTED,ERP-032 (D-03
 function,updatePaymentPreview#1,,,25898,M09 Продажи,NOT_STARTED,by its controls: ERP-032 (D-03),
 function,renderPaymentHistory#1,,,25913,M11 Финансы,NOT_STARTED,ERP-032 (D-03),
 function,savePayment#1,,,25933,M09 Продажи,NOT_STARTED,by its controls: ERP-032 (D-03),
-function,exportARtoExcel#1,,,25993,M11 Финансы,NOT_STARTED,ERP-067 (Excel),
+function,exportARtoExcel#1,,,25993,M11 Финансы,IMPLEMENTED,named in resources/js/components/finance/ArTab.vue,
 function,plFilteredOrders#1,,,26023,M11 Финансы,IMPLEMENTED,requirement M11.AR,
 function,plFilteredTx#1,,,26046,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,buildPL#1,,,26064,M11 Финансы,IMPLEMENTED,requirement M11.PL,
@@ -3010,7 +3010,7 @@ function,rowHtml#1,,,26707,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,exportRevenueTreeToExcel#1,,,26742,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,getMatCostConfig#1,,,26783,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,materialCategoryForName#1,,,26820,M11 Финансы,IMPLEMENTED,requirement M11.PL,
-function,sumPayrollLedgerColumns#1,,,26840,M11 Финансы,NOT_STARTED,ERP-057 (D-06),
+function,sumPayrollLedgerColumns#1,,,26840,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,estimateMaterialCostForPeriod#1,,,26863,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,toggleMatCostRow#1,,,26886,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,renderMonthlyPL#1,,,26892,M11 Финансы,IMPLEMENTED,requirement M11.PL,
@@ -3304,7 +3304,7 @@ function,setSjMonthYear#1,,,32574,M09 Продажи,IMPLEMENTED,requirement M09
 function,renderSalesJournal#1,,,32583,M09 Продажи,IMPLEMENTED,"requirement M09.REALIZATION_JOURNAL, UI-03.STATES",
 function,autoCompleteOrders#1,,,32749,M12 Деньги,DECIDED,0013-sales-journal.md,
 function,markOrderDone#1,,,32792,M09 Продажи,IMPLEMENTED,requirement M09.COMPLETE,
-function,exportSalesJournalExcel#1,,,32806,M09 Продажи,NOT_STARTED,ERP-067 (Excel),
+function,exportSalesJournalExcel#1,,,32806,M09 Продажи,IMPLEMENTED,named in resources/js/components/sales/RealizationJournal.vue,
 function,setOKPeriodPay#1,,,32826,M10 CRM,IMPLEMENTED,requirement M10.ORDER_BOARDS,
 function,setOKPeriod#1,,,32857,M10 CRM,IMPLEMENTED,requirement M10.ORDER_BOARDS,
 function,renderOrdersKanban#1,,,32884,M10 CRM,IMPLEMENTED,requirement M10.ORDER_BOARDS,
@@ -3319,12 +3319,12 @@ function,clearCache#1,,,33348,UI оболочка,IMPLEMENTED,requirement UI-01.
 function,openDrilldown#1,,,33367,—,IMPLEMENTED,requirement M11.CFS,
 function,renderDrilldownTable#1,,,33394,M11 Финансы,IMPLEMENTED,requirement M11.CFS,
 function,filterDrilldown#1,,,33428,M11 Финансы,IMPLEMENTED,requirement M11.CFS,
-function,exportDrilldownExcel#1,,,33437,M11 Финансы,NOT_STARTED,ERP-067 (Excel),
-function,ddPLRevenue#1,,,33449,—,NOT_STARTED,ERP-060 (D-11/D-12),
-function,ddPLExpense#1,,,33472,—,NOT_STARTED,ERP-060 (D-11/D-12),
+function,exportDrilldownExcel#1,,,33437,M11 Финансы,IMPLEMENTED,named in resources/js/components/DrilldownModal.vue,
+function,ddPLRevenue#1,,,33449,—,NOT_STARTED,ERP-062 (№ 80),
+function,ddPLExpense#1,,,33472,—,NOT_STARTED,ERP-062 (№ 80),
 function,ddCFSSection#1,,,33488,—,IMPLEMENTED,requirement M11.CFS,
 function,ddMarginItem#1,,,33512,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,ddOSVAccount#1,,,33530,—,NOT_STARTED,ERP-061 (D-11),
+function,ddOSVAccount#1,,,33530,—,IMPLEMENTED,requirement M11.OSV,
 function,periodLabel#1,,,33571,—,IMPLEMENTED,requirement M11.CFS,
 function,showLoading#1,,,33578,"M10 CRM, M11 Финансы, M12 Деньги",IMPLEMENTED,requirement UI-03.STATES,
 function,updateLoading#1,,,33588,M12 Деньги,DECIDED,ADR-0002 п. 89,
@@ -3429,7 +3429,7 @@ function,updatePwbMaterialField#1,,,35944,M02 Производство,NOT_START
 function,removePwbMaterialRow#1,,,35957,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
 function,postPwbMaterial#1,,,35965,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
 function,unpostPwbMaterial#1,,,35984,M02 Производство,NOT_STARTED,by its controls: ERP-041 (D-05/D-06),
-function,exportProdWorksheetExcel#1,,,36004,M02 Производство,NOT_STARTED,ERP-067,
+function,exportProdWorksheetExcel#1,,,36004,M02 Производство,IMPLEMENTED,named in resources/js/components/mrp/ProdWorksheetTab.vue,
 function,handleProdWorksheetImport#1,,,36032,M02 Производство,NOT_STARTED,ERP-041/ERP-067,
 function,initPurchasesExtra#1,,,36071,UI оболочка,IMPLEMENTED,requirement M04.REQUESTS,
 function,showPurchExtraTab#1,,,36096,M04 Закупки,IMPLEMENTED,requirement M04.REQUESTS,
