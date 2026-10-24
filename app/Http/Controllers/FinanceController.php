@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MoneyAccount;
 use App\Models\Order;
+use App\Services\Finance\FixedCosts;
 use App\Services\Finance\OsvReport;
 use App\Services\Finance\PlExpenses;
 use App\Services\Finance\PlReport;
@@ -73,6 +74,8 @@ class FinanceController extends Controller
             'osvAccount' => Inertia::optional(fn () => $this->osvAccount($request)),
             // «📈 Маржинальность» → «Маржинальность по категориям» of a year (legacy renderCategoryMargin)
             'catMargin' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'cm_year'), 'years' => $this->plYears(), 'rows' => app(PlRevenue::class)->categoryMargin($y)]),
+            // «Точка безубыточности» → постоянные затраты месяца (legacy loadFixedCostsPeriod; ADR-0055)
+            'fixedCosts' => Inertia::optional(fn () => app(FixedCosts::class)->period($this->month($request))),
             'plCost' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_cost_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->costEstimate($y)]),
             'plRevCategory' => Inertia::optional(fn () => ['year' => $y = $this->plYear($request, 'pl_rcat_year'), 'years' => $this->plYears(), ...app(PlRevenue::class)->byCategory($y)]),
             // Tab «Закупки» (legacy renderPurchasesDash, openSupplierReconciliation): incoming invoices, payments with a
@@ -86,6 +89,12 @@ class FinanceController extends Controller
     private function date(Request $request, string $key): ?string
     {
         return is_string($v = $request->query($key)) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null;
+    }
+
+    /** The month of the fixed costs (YYYY-MM), else the current one. */
+    private function month(Request $request): string
+    {
+        return is_string($v = $request->query('fc_period')) && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $v) ? $v : now(config('erp.business_timezone'))->format('Y-m');
     }
 
     /** Legacy ddOSVAccount: the entries of the period with the account on either side. @return array<string, mixed> */

@@ -13,6 +13,7 @@ use App\Http\Controllers\EsfLinkController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\FixedCostController;
 use App\Http\Controllers\HrController;
 use App\Http\Controllers\LeadCommunicationController;
 use App\Http\Controllers\MoneyAccountController;
@@ -167,6 +168,9 @@ Route::middleware('auth')->group(function () {
 
     // M11 «Финансы», часть 1: дебиторка и ДДС (просмотр)
     Route::get('/finance', [FinanceController::class, 'index'])->middleware('page:finance')->name('finance.index');
+    // «Точка безубыточности»: план постоянных затрат месяца (ADR-0055)
+    Route::put('/finance/fixed-costs/{period}', [FixedCostController::class, 'update'])->middleware('page:finance')
+        ->where('period', '[0-9]{4}-(0[1-9]|1[0-2])')->name('finance.fixed-costs.update');
 
     // M02 «Производство», часть 1: журнал производственных позиций (просмотр)
     Route::get('/mrp', [MrpController::class, 'index'])->middleware('page:mrp')->name('mrp.index');

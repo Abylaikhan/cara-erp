@@ -26,6 +26,7 @@ export interface PlData {
     prodTaxes: number;
     commercialCost: number;
     otherFixed: number;
+    fixedTotal: number;
     ebit: number;
     prodToMaterials: number;
     prodUnclassified: number;

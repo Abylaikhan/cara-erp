@@ -8,6 +8,8 @@
 № 45 Приход на склад: a draft keeps the stock; posted from its window it adds the quantity once, with a movement
      (ADR-0049). A line of an ESF is taken in once with «📦 Принять».
 № 65 Выписка Excel: a synthetic Kaspi statement adds its rows to «Сверка с банком», a second upload adds nothing (ADR-0050).
+ТБУ  Постоянные затраты: a new article of the month with its plan, «✓ Проведено» puts it in the structure; saved by itself
+     and kept after a reload (ADR-0055).
 """
 from __future__ import annotations
 
@@ -136,6 +138,31 @@ def statement_upload(page: Page, run: str) -> None:
     check('№ 65: повторная загрузка — «новых не найдено»', any('новых не найдено' in m for m in alerts), repr(alerts[-2:]))
 
 
+def fixed_costs(page: Page, run: str) -> None:
+    name = f'Е2Е Аренда {run}'
+    page.goto(BASE + '/finance', wait_until='networkidle')
+    page.get_by_text('Точка безубыточности', exact=False).first.click()
+    expect(page.locator('#fc-month-select')).to_be_visible()
+    page.wait_for_load_state('networkidle')
+    page.get_by_role('button', name='+ Статья').click()
+    row = page.locator('#fc-plan-tbody tr').last
+    row.locator('.fc-name-input').fill(name)
+    row.locator('.fc-name-input').press('Tab')
+    row.locator('input[type=number]').first.fill('1500')
+    row.locator('input[type=checkbox]').check()
+    holds('ТБУ: план сохраняется сам — «✅ Сохранено в …»', lambda: expect(page.locator('#fc-period-hint')).to_contain_text('Сохранено в', timeout=10000))
+    holds('ТБУ: проведённая статья — в «Структуре», ₸1 500 в месяц и ₸18 000 в год',
+          lambda: expect(page.locator('#fixed-costs-tbody tr', has_text=name)).to_contain_text('₸18 000'))
+    page.wait_for_timeout(2500)
+    page.reload(wait_until='networkidle')
+    page.get_by_text('Точка безубыточности', exact=False).first.click()
+    page.wait_for_load_state('networkidle')
+    holds('ТБУ: после перезагрузки статья на месте и проведена',
+          lambda: expect(page.locator('#fixed-costs-tbody tr', has_text=name)).to_contain_text('₸1 500'))
+    rows = sql(f"SELECT plan, approved FROM fixed_costs WHERE name = '{name}'")
+    check('ТБУ: в БД одна строка, план 1500.00, проведена', rows == [['1500.00', 't']], repr(rows))
+
+
 def main() -> int:
     run = dt.datetime.now().strftime('%H%M%S')
     SHOTS.mkdir(parents=True, exist_ok=True)
@@ -146,7 +173,8 @@ def main() -> int:
         errors: list[str] = []
         page.on('pageerror', lambda e: errors.append(str(e)))
         login(page)
-        for name, scenario in (('№ 37', opening_balance), ('№ 52', partial_payment), ('№ 45', stock_receipt), ('№ 45 ЭСФ', esf_to_stock), ('№ 65 выписка', statement_upload)):
+        for name, scenario in (('№ 37', opening_balance), ('№ 52', partial_payment), ('№ 45', stock_receipt), ('№ 45 ЭСФ', esf_to_stock), ('№ 65 выписка', statement_upload),
+                               ('ТБУ', fixed_costs)):
             try:
                 scenario(page, run)
             except Exception as e:  # a step that could not even be performed

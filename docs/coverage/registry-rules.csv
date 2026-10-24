@@ -75,7 +75,6 @@ control,page-finance|L5750,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по п
 control,page-finance|L5751,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
 control,page-finance|L5752,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
 control,page-finance|L5753,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа по позициям заказов — по техкартам (ADR-0054)
-area,finance-bep,NOT_STARTED,ERP-063 (D-11),Финансы → точка безубыточности
 area,finance-activity,NOT_STARTED,ERP-063 (D-11),Финансы → P&L по видам деятельности
 area,money-fab,NOT_STARTED,ERP-031 (D-03/D-11),Деньги → кнопка новой операции
 # Documented differences of the shell (ADR-0002),,,,
@@ -129,10 +128,7 @@ function,initDynamicPeriods,NOT_STARTED,ERP-053/054 (D-13),Сотрудники 
 function,loadStaffFromDB,NOT_STARTED,ERP-053/054 (D-13),Сотрудники и табель
 function,renderOSV,NOT_STARTED,ERP-061 (D-11),ОСВ
 function,ddOSVAccount,NOT_STARTED,ERP-061 (D-11),ОСВ
-function,fcToMonthly,NOT_STARTED,ERP-063 (D-11),Точка безубыточности: постоянные затраты
-function,initFCMonthSelect,NOT_STARTED,ERP-063 (D-11),Точка безубыточности: постоянные затраты
-function,fcAutoSave,NOT_STARTED,ERP-063 (D-11),Точка безубыточности: постоянные затраты
-function,saveAllFixedCosts,NOT_STARTED,ERP-063 (D-11),Точка безубыточности: постоянные затраты
+function,fcToMonthly,DECIDED,ADR-0002 п. 126,Только для примерного списка затрат legacy — не используется
 function,exportARtoExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
 function,exportCFSExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
 function,exportPLtoExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
@@ -188,7 +184,7 @@ function,updateLoading,DECIDED,ADR-0002 п. 89,Окна загрузки нет:
 function,buildChart,DECIDED,ADR-0029,"Рисует в элемент revenue-chart, которого нет в разметке: ничего не делает"
 function-re,sb(Insert|InsertMany|Post|Patch|Delete|Upsert),DECIDED,ADR-0029,Записи — через сервер (контроллеры Laravel); браузер не обращается к базе
 # Tables of legacy that are empty in the copy (0 rows): the parts come with their tasks,,,,
-table,fixed_costs,NOT_STARTED,ERP-063 (D-11),0 строк в копии legacy
+table,fixed_costs,IMPLEMENTED,M11.BEP,0 строк в копии legacy — переносить нечего; план вводится здесь (ADR-0055)
 table,goods_receipts,NOT_STARTED,ERP-046 (D-04),0 строк в копии legacy
 table,material_name_aliases,NOT_STARTED,ERP-046 (D-04),0 строк в копии legacy
 table,payment_history,NOT_STARTED,ERP-032 (D-03),0 строк в копии legacy

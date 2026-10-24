@@ -86,10 +86,10 @@ class RouteGuardTest extends TestCase
         $this->assertGreaterThan(60, $checked);
     }
 
-    /** A value of a route parameter that its constraint accepts (a number, a code, the first page of a list). */
+    /** A value of a route parameter that its constraint accepts (a number, a code, a month, the first page of a list). */
     private function sample(?string $pattern): string
     {
-        $candidates = ['1', 'a', ...($pattern !== null && preg_match('/^[\w|]+$/', $pattern) ? explode('|', $pattern) : [])];
+        $candidates = ['1', 'a', '2031-03', ...($pattern !== null && preg_match('/^[\w|]+$/', $pattern) ? explode('|', $pattern) : [])];
         foreach ($candidates as $value) {
             if ($pattern === null || preg_match('#^(?:'.$pattern.')$#u', $value)) {
                 return $value;

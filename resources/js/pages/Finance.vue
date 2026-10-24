@@ -1,10 +1,12 @@
 <script setup lang="ts">
 // M11 «Финансы», part 1 — legacy page-finance (L5447–5900): header with the order selection, the period filter
 // (setFinancePeriod/fillFinanceMonths/initFinancePeriod, L25925–26035; the current year by default), the tabs (showFinanceTab
-// L22610). «Дебиторка» (ArTab), «Закупки» (PurchasesTab), «ДДС» (CfsTab), «P&L» (PlTab, ADR-0052) and «ОСВ» (OsvTab, ADR-0053)
-// are migrated; margins, break-even and P&L by activity come next (ERP-061…063).
+// L22610). «Дебиторка» (ArTab), «Закупки» (PurchasesTab), «ДДС» (CfsTab), «P&L» (PlTab, ADR-0052), «ОСВ» (OsvTab, ADR-0053),
+// «Маржинальность» (MarginTab, ADR-0054) and «Точка безубыточности» (BepTab, ADR-0055) are migrated; P&L by activity comes
+// next (ERP-063).
 import { computed, ref } from 'vue';
 import ArTab, { type ArRecord } from '@/components/finance/ArTab.vue';
+import BepTab, { type FixedCostsData } from '@/components/finance/BepTab.vue';
 import CfsTab, { type CfsTx } from '@/components/finance/CfsTab.vue';
 import MarginTab, { type CatMargin } from '@/components/finance/MarginTab.vue';
 import OsvTab, { type OsvAccount, type OsvData } from '@/components/finance/OsvTab.vue';
@@ -44,12 +46,12 @@ const props = defineProps<{
     osv?: OsvData;
     osvAccount?: OsvAccount;
     catMargin?: CatMargin;
+    fixedCosts?: FixedCostsData;
 }>();
 
 type Tab = 'pl' | 'ar' | 'purchases' | 'margin' | 'bep' | 'cfs' | 'osv' | 'activity';
 const tab = ref<Tab>('pl');
 const LATER: Partial<Record<Tab, string>> = {
-    bep: 'Точка безубыточности строится по постоянным затратам и появится вместе с ними (ERP-063, решение D-11).',
     activity: 'P&L по видам деятельности появится вместе со сдельной оплатой и технологическими картами (ERP-063, решения D-11 и D-12).',
 };
 const excelLater = () => window.alert('Выгрузка P&L в Excel появится вместе с отчётом P&L (ERP-060, решения D-11 и D-12).');
@@ -209,6 +211,9 @@ const arRecords = computed<ArRecord[]>(() => {
             </div>
             <div id="finance-margin" :style="{ display: tab === 'margin' ? 'block' : 'none' }">
                 <MarginTab :data="props.catMargin" :active="tab === 'margin'" />
+            </div>
+            <div id="finance-bep" :style="{ display: tab === 'bep' ? 'block' : 'none' }">
+                <BepTab :data="props.fixedCosts" :pl="props.pl" :from="period.from" :to="period.to" :mode="period.mode" :today="props.today" :active="tab === 'bep'" />
             </div>
             <div id="finance-osv" :style="{ display: tab === 'osv' ? 'block' : 'none' }">
                 <OsvTab :data="props.osv" :account="props.osvAccount" :from="period.from" :to="period.to" :period-label="periodLabel" :active="tab === 'osv'" />

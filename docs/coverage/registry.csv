@@ -1376,21 +1376,21 @@ control,page-finance|L5750,th,page-finance,5750,M11 Финансы,NOT_STARTED,E
 control,page-finance|L5751,th,page-finance,5751,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа
 control,page-finance|L5752,th,page-finance,5752,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),Маржа %
 control,page-finance|L5753,th,page-finance,5753,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),
-control,page-finance|select|fc-month-select,select,page-finance,5768,M11 Финансы,NOT_STARTED,ERP-063 (D-11),
-control,page-finance|L5769,button,page-finance,5769,M11 Финансы,NOT_STARTED,ERP-063 (D-11),+ Статья
-control,page-finance|L5770,button,page-finance,5770,M11 Финансы,NOT_STARTED,ERP-063 (D-11),+ Категория
-control,page-finance|L5778,th,page-finance,5778,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Статья затрат
-control,page-finance|L5779,th,page-finance,5779,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Категория
-control,page-finance|L5780,th,page-finance,5780,M11 Финансы,NOT_STARTED,ERP-063 (D-11),План (₸)
-control,page-finance|L5781,th,page-finance,5781,M11 Финансы,NOT_STARTED,ERP-063 (D-11),День оплаты
-control,page-finance|L5782,th,page-finance,5782,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Факт (₸)
-control,page-finance|L5783,th,page-finance,5783,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Откл. (₸)
-control,page-finance|L5784,th,page-finance,5784,M11 Финансы,NOT_STARTED,ERP-063 (D-11),✓ Проведено
-control,page-finance|L5785,th,page-finance,5785,M11 Финансы,NOT_STARTED,ERP-063 (D-11),
-control,page-finance|L5801,th,page-finance,5801,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Статья затрат
-control,page-finance|L5802,th,page-finance,5802,M11 Финансы,NOT_STARTED,ERP-063 (D-11),Категория
-control,page-finance|L5803,th,page-finance,5803,M11 Финансы,NOT_STARTED,ERP-063 (D-11),В месяц
-control,page-finance|L5804,th,page-finance,5804,M11 Финансы,NOT_STARTED,ERP-063 (D-11),В год
+control,page-finance|select|fc-month-select,select,page-finance,5768,M11 Финансы,IMPLEMENTED,id,
+control,page-finance|L5769,button,page-finance,5769,M11 Финансы,IMPLEMENTED,label,+ Статья
+control,page-finance|L5770,button,page-finance,5770,M11 Финансы,IMPLEMENTED,label,+ Категория
+control,page-finance|L5778,th,page-finance,5778,M11 Финансы,IMPLEMENTED,label,Статья затрат
+control,page-finance|L5779,th,page-finance,5779,M11 Финансы,IMPLEMENTED,label,Категория
+control,page-finance|L5780,th,page-finance,5780,M11 Финансы,IMPLEMENTED,label,План (₸)
+control,page-finance|L5781,th,page-finance,5781,M11 Финансы,IMPLEMENTED,label,День оплаты
+control,page-finance|L5782,th,page-finance,5782,M11 Финансы,IMPLEMENTED,label,Факт (₸)
+control,page-finance|L5783,th,page-finance,5783,M11 Финансы,IMPLEMENTED,label,Откл. (₸)
+control,page-finance|L5784,th,page-finance,5784,M11 Финансы,IMPLEMENTED,label,✓ Проведено
+control,page-finance|L5785,th,page-finance,5785,M11 Финансы,IMPLEMENTED,an empty column header: its table is compared visually,
+control,page-finance|L5801,th,page-finance,5801,M11 Финансы,IMPLEMENTED,label,Статья затрат
+control,page-finance|L5802,th,page-finance,5802,M11 Финансы,IMPLEMENTED,label,Категория
+control,page-finance|L5803,th,page-finance,5803,M11 Финансы,IMPLEMENTED,label,В месяц
+control,page-finance|L5804,th,page-finance,5804,M11 Финансы,IMPLEMENTED,label,В год
 control,page-finance|L5840,button,page-finance,5840,M11 Финансы,NOT_STARTED,"present, its action comes later — exportCFSExcel: ERP-067 (Excel)",📥 Excel
 control,page-finance|L5870,button,page-finance,5870,M11 Финансы,IMPLEMENTED,label,📥 Excel
 control,page-finance|L5880,button,page-finance,5880,M11 Финансы,NOT_STARTED,ERP-063 (D-11),🔄 Пересчитать
@@ -2833,26 +2833,26 @@ function,marginChannelForOrder#1,,,20761,"M02 Производство, M11 Фи
 function,populateMarginFilters#1,,,20766,M11 Финансы,NOT_STARTED,ERP-028/ERP-060 (D-12),
 function,renderMarginReport#1,,,20782,M11 Финансы,NOT_STARTED,by its controls: ERP-028/ERP-060 (D-12),
 function,openMarginDetail#1,,,20845,"M09 Продажи, M11 Финансы",NOT_STARTED,ERP-060 (D-11/D-12),
-function,fcToMonthly#1,,,20973,M11 Финансы,NOT_STARTED,ERP-063 (D-11),
+function,fcToMonthly#1,,,20973,M11 Финансы,DECIDED,ADR-0002 п. 126,
 function,fcTotalMonthly#1,,,20980,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,openFixedCostModal#1,,,20988,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,updateFcMonthlyPreview#1,,,21013,M11 Финансы,PENDING_DECISION,by its controls: D-15,
 function,saveFixedCost#1,,,21023,M11 Финансы,PENDING_DECISION,by its controls: D-15,
 function,deleteFixedCost#1,,,21041,M11 Финансы,PENDING_DECISION,by its controls: D-15,
-function,initFCMonthSelect#1,,,21069,M11 Финансы,NOT_STARTED,ERP-063 (D-11),
-function,loadFixedCostsPeriod#1,,,21084,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,getFCFact#1,,,21144,M12 Деньги,NOT_STARTED,by its controls: ERP-031 (D-03/D-11),
-function,addFixedCostRow#1,,,21161,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,renderFCPlanTable#1,,,21178,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,fcAutoSave#1,,,21250,—,NOT_STARTED,ERP-063 (D-11),
-function,saveAllFixedCosts#1,,,21259,—,NOT_STARTED,ERP-063 (D-11),
-function,addFCCategory#1,,,21301,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,getApprovedFixedCosts#1,,,21307,M11 Финансы,NOT_STARTED,by its controls: D-15; ERP-063 (D-11),
-function,renderBEP#1,,,21312,M11 Финансы,PENDING_DECISION,by its controls: D-15,
-function,renderFixedCostsTable#1,,,21322,M11 Финансы,NOT_STARTED,by its controls: D-15; ERP-063 (D-11),
-function,renderFCBreakdown#1,,,21351,M11 Финансы,NOT_STARTED,by its controls: D-15; ERP-063 (D-11),
-function,renderBEPKpi#1,,,21378,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
-function,renderBEPChart#1,,,21408,M11 Финансы,NOT_STARTED,by its controls: ERP-063 (D-11),
+function,initFCMonthSelect#1,,,21069,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,loadFixedCostsPeriod#1,,,21084,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,getFCFact#1,,,21144,M12 Деньги,IMPLEMENTED,requirement M11.BEP,
+function,addFixedCostRow#1,,,21161,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,renderFCPlanTable#1,,,21178,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,fcAutoSave#1,,,21250,—,IMPLEMENTED,requirement M11.BEP,
+function,saveAllFixedCosts#1,,,21259,—,IMPLEMENTED,requirement M11.BEP,
+function,addFCCategory#1,,,21301,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,getApprovedFixedCosts#1,,,21307,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,renderBEP#1,,,21312,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,renderFixedCostsTable#1,,,21322,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,renderFCBreakdown#1,,,21351,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,renderBEPKpi#1,,,21378,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
+function,renderBEPChart#1,,,21408,M11 Финансы,IMPLEMENTED,requirement M11.BEP,
 function,tsKey#1,,,21571,M17 Сотрудники,NOT_STARTED,by its controls: ERP-054 (D-06),
 function,tsEntry#1,,,21572,M17 Сотрудники,NOT_STARTED,by its controls: ERP-054 (D-06),
 function,tsMark#1,,,21573,M20 Начисления ЗП,NOT_STARTED,by its controls: ERP-056 (D-06),
@@ -3582,7 +3582,7 @@ table,bank_statement_raw,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importe
 table,customers,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/CustomerImporter.php,
 table,esf_payment_links,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/IncomingInvoiceImporter.php,
 table,expense_categories,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/ExpenseCategoryImporter.php,
-table,fixed_costs,,,,—,NOT_STARTED,ERP-063 (D-11),
+table,fixed_costs,,,,—,IMPLEMENTED,M11.BEP,
 table,goods_receipts,,,,—,NOT_STARTED,ERP-046 (D-04),
 table,incoming_invoice_items,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/IncomingInvoiceImporter.php,
 table,incoming_invoices,,,,—,IMPLEMENTED,legacy:import — app/Legacy/Importers/IncomingInvoiceImporter.php,
@@ -3641,8 +3641,8 @@ network,fetch@attempt,,,14493,—,NOT_STARTED,ERP-031 (D-03/D-11),
 network,fetch@attempt,,,14513,—,NOT_STARTED,ERP-031 (D-03/D-11),
 network,fetch@_deleteMoneyTxRow,,,15102,—,NOT_STARTED,as its function _deleteMoneyTxRow: by its controls: ERP-031 (D-03/D-11),
 network,fetch@sendAI,,,18216,—,NOT_STARTED,as its function sendAI: by its controls: ERP-065 (D-09),
-network,fetch@saveAllFixedCosts,,,21264,—,NOT_STARTED,as its function saveAllFixedCosts: ERP-063 (D-11),
-network,fetch@saveAllFixedCosts,,,21279,—,NOT_STARTED,as its function saveAllFixedCosts: ERP-063 (D-11),
+network,fetch@saveAllFixedCosts,,,21264,—,IMPLEMENTED,as its function saveAllFixedCosts: requirement M11.BEP,
+network,fetch@saveAllFixedCosts,,,21279,—,IMPLEMENTED,as its function saveAllFixedCosts: requirement M11.BEP,
 network,fetch@prjUploadFiles,,,32092,—,IMPLEMENTED,as its function prjUploadFiles: requirement M10.PROJECTS,
 network,fetch@prjStorageDelete,,,32101,—,IMPLEMENTED,as its function prjStorageDelete: requirement M10.PROJECTS,
 network,fetch@rsUploadFiles,,,32418,—,NOT_STARTED,as its function rsUploadFiles: requirement M09.RESTORATIONS (DEC-08),
