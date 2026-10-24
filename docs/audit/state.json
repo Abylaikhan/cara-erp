@@ -1,28 +1,28 @@
 {
   "schema": "promtech.audit-state/1",
   "last_attempt": {
-    "run_id": "20261024T002043Z-99b5",
-    "started_at": "2026-10-24T00:20:43Z",
+    "run_id": "20261024T070649Z-cd05",
+    "started_at": "2026-10-24T07:06:49Z",
     "status": "COMPLETED",
     "stage": "done",
-    "finished_at": "2026-10-24T00:22:13Z",
+    "finished_at": "2026-10-24T07:08:28Z",
     "exit_code": 0
   },
   "last_observed": {
-    "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "55820157482e8e9dc450116296cea3f333b6ce6c",
-    "at": "2026-10-24T00:20:43Z"
+    "source_ref": "d7d448fbdd4d2fc3f38fc7b27d300b8efff43bb1",
+    "target_ref": "dce7bb4b80c5eb13feb2f586cc4c5422b8c78625",
+    "at": "2026-10-24T07:06:49Z"
   },
   "last_reported": {
-    "run_id": "20261024T002043Z-99b5",
-    "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "source_blob": "8777f7bbfbf1e409ab285f4b3c0968056418d78a",
-    "target_ref": "55820157482e8e9dc450116296cea3f333b6ce6c",
-    "logical_key": "70284702e4e0f913",
+    "run_id": "20261024T070649Z-cd05",
+    "source_ref": "d7d448fbdd4d2fc3f38fc7b27d300b8efff43bb1",
+    "source_blob": "7d1b27c55d687f4336180137b805c150f67324cb",
+    "target_ref": "dce7bb4b80c5eb13feb2f586cc4c5422b8c78625",
+    "logical_key": "5abc81fa984cca46",
     "local_date": "2026-10-24",
-    "completed_at": "2026-10-24T00:22:13Z",
-    "report": "daily/2026-10-24/20261024T002043Z-99b5.md",
-    "artifact_sha256": "b081974403e45fb68c192c2b4c184717559c0b9fb2bdca8d07b737b2fe665be1",
+    "completed_at": "2026-10-24T07:08:28Z",
+    "report": "daily/2026-10-24/20261024T070649Z-cd05.md",
+    "artifact_sha256": "4073e4f257f8654c21c6eb558177ea441912a6488619b6051ec44aac6bbbd862",
     "check_ids": [
       "HAR-COVERAGE",
       "HAR-JOURNAL",
@@ -411,16 +411,16 @@
     ]
   },
   "last_verified": {
-    "source_ref": "c54cf25639e3398139fa5a07003b035bf5e7090c",
-    "target_ref": "55820157482e8e9dc450116296cea3f333b6ce6c",
+    "source_ref": "d7d448fbdd4d2fc3f38fc7b27d300b8efff43bb1",
+    "target_ref": "dce7bb4b80c5eb13feb2f586cc4c5422b8c78625",
     "required_suite_version": "suite-1+364b9b",
-    "completed_at": "2026-10-24T00:22:13Z",
-    "run_id": "20261024T002043Z-99b5"
+    "completed_at": "2026-10-24T07:08:28Z",
+    "run_id": "20261024T070649Z-cd05"
   },
   "changelog": {
-    "entries": 75,
-    "last_header": "## 2026-10-24 · 20261024T002043Z-99b5",
-    "sha256": "d0e91375f4e81f40b49361f90204721da4295835b89cdcf7fd0b18b268a94d19"
+    "entries": 76,
+    "last_header": "## 2026-10-24 · 20261024T070649Z-cd05",
+    "sha256": "fe9988eb162b124f2d83b05f097f255da19fd5a49b808d803c6c2bf1ae238acf"
   },
   "accepted_source_ref": {
     "commit": "c54cf25639e3398139fa5a07003b035bf5e7090c",
