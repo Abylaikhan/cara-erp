@@ -214,8 +214,8 @@ function,buildPayrollRow,NOT_STARTED,ERP-057 (D-06),Расчётная ведо�
 function,calcIPN,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
 function,curMonthFirst,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
 function,curMonthLast,NOT_STARTED,ERP-057 (D-06),Расчётная ведомость вкладки «Сотрудники» (ставки и налоги в коде legacy)
-function,exportPayrollToExcel,NOT_STARTED,ERP-067,Выгрузка в Excel
-function,loadAsync,NOT_STARTED,ERP-067,Выгрузка в Excel
+function,exportPayrollToExcel,DECIDED,ADR-0002 п. 120,Выгрузка вкладки «Зарплатная ведомость» «Сотрудников» — вкладка не переносится (№ 77); ведомость выгружает страница «Зарплатная ведомость»
+function,loadAsync,DECIDED,ADR-0044,Загрузка библиотек Excel с CDN в браузер — файлы собирает сервер (PhpSpreadsheet)
 function,addTariffRow,NOT_STARTED,ERP-055 (D-06),Изменение тарифов (ADR-0038)
 function,handleProdWorksheetImport,NOT_STARTED,ERP-041/ERP-067,Загрузка рабочего листа производства из Excel
 control,page-mrp|input|pwb-import-file,NOT_STARTED,ERP-041/ERP-067,Файл для загрузки рабочего листа производства из Excel

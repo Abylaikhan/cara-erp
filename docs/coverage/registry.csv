@@ -2337,7 +2337,7 @@ control,global|L8662,button,global,8662,UI оболочка,IMPLEMENTED,label,О
 control,global|L8663,button,global,8663,UI оболочка,IMPLEMENTED,label,Сохранить
 control,global|L8671,button,global,8671,UI оболочка,IMPLEMENTED,label,✏️ Редактировать
 control,global|L8672,button,global,8672,UI оболочка,IMPLEMENTED,label,→ Следующий этап
-function,loadAsync#1,,,595,"M05 Входящие ЭСФ, M19 Зарплатная ведомость",NOT_STARTED,ERP-067,
+function,loadAsync#1,,,595,"M05 Входящие ЭСФ, M19 Зарплатная ведомость",DECIDED,ADR-0044,
 function,sbFetch#1,,,621,"M01 Дашборд, M05 Входящие ЭСФ, M06 Поставщики …",IMPLEMENTED,"requirement MIG-01.COPY, OPS-01.LIMITS",
 function,sbFetchAllPages#1,,,635,"M06 Поставщики, M09 Продажи, M11 Финансы …",IMPLEMENTED,"requirement MIG-01.COPY, OPS-01.LIMITS",
 function,sbInsert#1,,,646,"M02 Производство, M03 Склад, M04 Закупки …",DECIDED,ADR-0029,
@@ -2941,7 +2941,7 @@ function,openWagePaymentModal#1,,,24821,M19 Зарплатная ведомос�
 function,saveWagePayment#1,,,24877,M19 Зарплатная ведомость,NOT_STARTED,by its controls: ERP-057 (D-06),
 function,openAddPayrollEmployeeModal#1,,,24908,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,savePayrollEmployee#1,,,24916,M19 Зарплатная ведомость,PENDING_DECISION,by its controls: D-15,
-function,exportPayrollToExcel#1,,,24929,M19 Зарплатная ведомость,NOT_STARTED,ERP-067,
+function,exportPayrollToExcel#1,,,24929,M19 Зарплатная ведомость,DECIDED,ADR-0002 п. 120,
 function,setDashPeriod#1,,,24960,M01 Дашборд,IMPLEMENTED,requirement M01,
 function,renderDashboard#1,,,24983,M01 Дашборд,IMPLEMENTED,"requirement M01, M01.FOT-CHART",
 function,onPurPeriodChange#1,,,25185,M11 Финансы,IMPLEMENTED,requirement M11.PURCHASES,
