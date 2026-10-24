@@ -9,3 +9,4 @@ cb377837061e51a8a2c5bbf5a4df59256f6901ca120dad7e718c0d23ea5f70cc  # a date of th
 5596a3f0868988597f892c4b1019d3eaf03be89337d8e1b913933ce92ba1f684  # a release date of a package in composer.lock (PhpSpreadsheet, ADR-0044), also a bank statement date
 5bc56dcf4ed57f743dda41d3834e4c29d6468386b9dfecbe890b9ea862bbf66b  # a release date of a package in composer.lock (PhpSpreadsheet, ADR-0044), also a bank statement date
 4b0098d8cc1ad2943f774f7a18483972e7c432bcea5e06ecf2c077bdae0bba4e  # a release date of a package in composer.lock (PhpSpreadsheet, ADR-0044), also a salon payment date
+7f502a6dd8e5ef62bfee650692f3369ed43007e459cb0ec0fd4a8adc26433491  # six digits inside a SHA-256 hash of the harness's audit state (docs/audit/state.json), also an advance amount

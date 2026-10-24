@@ -85,6 +85,10 @@ class MoneyController extends Controller
                 ->get(['t.tx_date', 't.account_id', 't.flow', 't.category', 't.counterparty', 't.description', DB::raw("{$kzt} AS kzt")])
                 ->map(fn ($t) => ['date' => $t->tx_date, 'account' => $t->account_id, 'flow' => $t->flow, 'category' => $t->category ?? '', 'ctr' => $t->counterparty ?? '',
                     'desc' => $t->description ?? '', 'amount' => (string) $t->kzt]),
+            // «📋 Плановые расходы»: the rows of the plan of fixed costs of this month marked «✓ Проведено» (ADR-0055)
+            'fixed' => DB::table('fixed_costs')->where('period', substr($today, 0, 7))->where('approved', true)->where('plan', '>', 0)
+                ->orderByRaw('name COLLATE "en-US-x-icu"')->orderBy('id')->get(['name', 'category', 'plan', 'pay_day'])
+                ->map(fn ($r) => ['name' => $r->name, 'category' => $r->category, 'plan' => (string) $r->plan, 'pay_day' => $r->pay_day === null ? null : (int) $r->pay_day]),
         ];
     }
 

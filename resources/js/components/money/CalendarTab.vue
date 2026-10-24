@@ -3,8 +3,9 @@
 // day for 2 weeks…90 days: expected payments of the unpaid orders (the whole rest for the office and salons, half of it for a
 // dealer, on the delivery date or today), planned expenses, operations already dated ahead, the running balance, gaps. Days
 // are calendar days of the business time zone (legacy counted them through UTC and started a day early); amounts are in tenge
-// and the balance includes the opening balances. Planned fixed costs come from the plan of fixed costs, which is not migrated
-// and is empty in legacy (ERP-060, D-11). The chart is drawn without Chart.js (no new dependency) in the same layout.
+// and the balance includes the opening balances. Planned fixed costs are the rows of this month's plan of fixed costs marked
+// «✓ Проведено» (legacy took the plan of the month last opened in «Точка безубыточности», if it had been opened; ADR-0055). The
+// chart is drawn without Chart.js (no new dependency) in the same layout.
 import { router } from '@inertiajs/vue3';
 import { computed, reactive, watch } from 'vue';
 import { catLabel, type Categories, type MoneyAccount } from '@/lib/money';
@@ -14,6 +15,7 @@ export interface CalendarData {
     balances: Record<string, string>;
     orders: { num: string; channel: string; customer: string | null; status: string; payment: number; delivery: string | null; date: string | null; total: string }[];
     future: { date: string; account: number; flow: 'income' | 'expense'; category: string; ctr: string; desc: string; amount: string }[];
+    fixed: { name: string; category: string; plan: string; pay_day: number | null }[];
 }
 const props = defineProps<{ data: CalendarData | undefined; accounts: MoneyAccount[]; categories: Categories; active: boolean }>();
 watch(
@@ -65,6 +67,35 @@ const cal = computed(() => {
             });
         });
     if (f.fixed) {
+        // Legacy: the payroll of the plan — its debt on the next Friday, a quarter of it every Friday; the articles with a day of
+        // payment — on that day of each month; rent, utilities, telecom, bank, insurance — on the 1st; the rest — spread over
+        // the working days of the horizon.
+        const plan = (r: { plan: string }) => Number(r.plan);
+        const monthlyPayroll = d.fixed.filter((r) => r.category === 'payroll').reduce((s, r) => s + plan(r), 0);
+        const weeklyPayroll = monthlyPayroll / 4;
+        const other = d.fixed.filter((r) => r.category !== 'payroll');
+        const withPayDay = other.filter((r) => r.pay_day);
+        const FIXED_ON_FIRST = ['rent', 'utility', 'telecom', 'bank', 'insurance'];
+        const onFirst = other.filter((r) => !r.pay_day && FIXED_ON_FIRST.includes(r.category));
+        const evenly = other.filter((r) => !r.pay_day && !FIXED_ON_FIRST.includes(r.category));
+        const wd = (iso: string) => new Date(Date.parse(iso)).getUTCDay();
+        let workDays = 0;
+        for (let i = 0; i < days; i++) if (wd(addDays(today, i)) !== 0 && wd(addDays(today, i)) !== 6) workDays++;
+        const dailyAmt = workDays > 0 ? evenly.reduce((s, r) => s + plan(r), 0) / workDays : 0;
+        if (monthlyPayroll > 0) {
+            let fri = today;
+            while (wd(fri) !== 5) fri = addDays(fri, 1);
+            add(fri, { emoji: '⚠️', label: 'ЗП долг за прошлый месяц', amount: -monthlyPayroll, urgent: true });
+        }
+        for (let i = 0; i < days; i++) {
+            const iso = addDays(today, i);
+            const w = wd(iso);
+            const dom = +iso.slice(8, 10);
+            if (w === 5 && weeklyPayroll > 0) add(iso, { emoji: '👷', label: 'ЗП еженедельная', amount: -weeklyPayroll });
+            if (dom === 1) onFirst.forEach((r) => add(iso, { emoji: '📋', label: r.name, amount: -plan(r) }));
+            withPayDay.filter((r) => r.pay_day === dom).forEach((r) => add(iso, { emoji: '📅', label: r.name, amount: -plan(r) }));
+            if (w !== 0 && w !== 6 && dailyAmt > 100) add(iso, { emoji: '📊', label: 'Текущие расходы', amount: -dailyAmt });
+        }
         // Materials for the orders in the queue and in work (legacy looked for the status «production», which orders do not have).
         const inProd = d.orders.filter((o) => o.status === 'queue' || o.status === 'progress');
         if (inProd.length) {

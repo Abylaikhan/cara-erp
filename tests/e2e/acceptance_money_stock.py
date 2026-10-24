@@ -9,7 +9,7 @@
      (ADR-0049). A line of an ESF is taken in once with «📦 Принять».
 № 65 Выписка Excel: a synthetic Kaspi statement adds its rows to «Сверка с банком», a second upload adds nothing (ADR-0050).
 ТБУ  Постоянные затраты: a new article of the month with its plan, «✓ Проведено» puts it in the structure; saved by itself
-     and kept after a reload (ADR-0055).
+     and kept after a reload; with its day of payment it is in «Платёжный календарь» on that day (ADR-0055).
 """
 from __future__ import annotations
 
@@ -149,6 +149,9 @@ def fixed_costs(page: Page, run: str) -> None:
     row.locator('.fc-name-input').fill(name)
     row.locator('.fc-name-input').press('Tab')
     row.locator('input[type=number]').first.fill('1500')
+    pay_day = (dt.date.today() + dt.timedelta(days=2)).day
+    row.locator('input[type=number]').nth(1).fill(str(pay_day))
+    row.locator('input[type=number]').nth(1).press('Tab')
     row.locator('input[type=checkbox]').check()
     holds('ТБУ: план сохраняется сам — «✅ Сохранено в …»', lambda: expect(page.locator('#fc-period-hint')).to_contain_text('Сохранено в', timeout=10000))
     holds('ТБУ: проведённая статья — в «Структуре», ₸1 500 в месяц и ₸18 000 в год',
@@ -161,6 +164,10 @@ def fixed_costs(page: Page, run: str) -> None:
           lambda: expect(page.locator('#fixed-costs-tbody tr', has_text=name)).to_contain_text('₸1 500'))
     rows = sql(f"SELECT plan, approved FROM fixed_costs WHERE name = '{name}'")
     check('ТБУ: в БД одна строка, план 1500.00, проведена', rows == [['1500.00', 't']], repr(rows))
+    page.goto(BASE + '/money', wait_until='networkidle')
+    page.locator('#page-money > .tabs .tab', has_text='Платёжный календарь').click()
+    holds(f'ТБУ: в платёжном календаре — «📅 {name}» на {pay_day}-е число',
+          lambda: expect(page.locator('#pc-tbody tr', has_text=name).first).to_contain_text(f'{pay_day} '))
 
 
 def main() -> int:

@@ -71,6 +71,7 @@ class MoneyJournalTest extends TestCase
                 ->where('advances.1.issue_doc', ['date' => '2026-10-01', 'amount' => 5000])));
     }
 
+    /** The planned fixed costs: this month's rows marked «✓ Проведено» with a plan (ADR-0055). */
     public function test_payment_calendar_loads_with_its_tab_in_tenge(): void
     {
         $kzt = DB::table('money_accounts')->insertGetId(['name' => 'Касса Демо', 'type' => 'cash', 'currency' => 'KZT', 'opening_balance' => '100.50', 'sort_order' => 0]);
@@ -86,6 +87,11 @@ class MoneyJournalTest extends TestCase
             $o->save();
             $o->items()->create(['line_no' => 0, 'name' => 'Демо', 'qty' => '2', 'price' => '5000', 'progress' => 0, 'status' => $status, 'attrs' => []]);
         }
+        $month = now(config('erp.business_timezone'))->format('Y-m');
+        $prev = now(config('erp.business_timezone'))->startOfMonth()->subMonth()->format('Y-m');
+        foreach ([[$month, 'Охрана', '700', true, 5], [$month, 'Не проведено', '50', false, null], [$month, 'Без плана', '0', true, null], [$prev, 'Другой месяц', '9', true, null]] as [$period, $name, $plan, $ok, $day]) {
+            DB::table('fixed_costs')->insert(['period' => $period, 'name' => $name, 'category' => 'demo_guard', 'plan' => $plan, 'approved' => $ok, 'pay_day' => $day]);
+        }
 
         $this->actingAs(User::factory()->role('director')->create())->get('/money')->assertInertia(fn (Assert $page) => $page
             ->missing('calendar')
@@ -93,6 +99,7 @@ class MoneyJournalTest extends TestCase
                 ->where('calendar.balances', [(string) $kzt => '800.50', (string) $usd => '-500.25'])
                 ->where('calendar.orders', [['num' => 'МО-1', 'channel' => 'dealer_astana', 'customer' => 'Демо', 'status' => 'progress', 'payment' => 20, 'delivery' => '2026-12-01', 'date' => null, 'total' => '10000.000000']])
                 ->where('calendar.future', [['date' => $future, 'account' => $kzt, 'flow' => 'expense', 'category' => 'rent', 'ctr' => 'Демо', 'desc' => '', 'amount' => '300.00']])
+                ->where('calendar.fixed', [['name' => 'Охрана', 'category' => 'demo_guard', 'plan' => '700.00', 'pay_day' => 5]])
                 ->has('calendar.today')));
     }
 }
