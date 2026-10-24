@@ -11,7 +11,9 @@ the dev app with the year as the period: the KPI and the statement of «📊 P&L
 категориям», the KPI of «Точка безубыточности», the ОСВ (ADR-0052…0055). PL_SHAPES=1 prints the shape of differing lines
 (digits → #, letters → a). The table of «Маржинальность по категориям», the KPI and the chart of «Точка безубыточности» are
 also compared as pictures of the blocks (dark theme, 1440×900; at most 0.5 % of the pixels may differ, as make visual-compare);
-the pictures stay in .local-audit/pl-compare.
+the pictures stay in .local-audit/pl-compare. The Excel files of the statement's tables, «Маржинальность» and the ОСВ are
+compared with the files legacy writes from the same rows (a stand-in records what its SheetJS would write; the target's request
+to /export/xlsx is recorded): name, sheets, widths and every cell, sums within 1 tenge.
 
 Output: per table «совпадает» or the number of differing cells and the first row numbers — never a value or a name (the data
 are real). The dump stays in .local-audit. Usage: PL_YEAR=2026 python3 tests/visual/pl_compare.py
@@ -138,6 +140,46 @@ LEGACY_BEP_JS = r"""() => {
 }"""
 
 
+# The exports compared: the year select (or the block) of the target's button → the legacy function.
+EXPORTS = [('pl-monthly-year', 'exportMonthlyPLExcel()', 'помесячно'), ('pl-rev-channel-year', 'exportRevenueByChannelToExcel()', 'выручка по направлениям'),
+           ('pl-rev-category-year', 'exportRevenueByCategoryToExcel()', 'выручка по категориям'), ('pl-exp-year', 'exportExpensesByMonthToExcel()', 'расходы по статьям'),
+           ('pl-rev-tree-year', 'exportRevenueTreeToExcel()', 'дерево выручки'), ('pl-matcost-year', 'exportMatCostExcel()', 'оценка себестоимости'),
+           ('margin-category-year', 'exportCategoryMarginExcel()', 'маржинальность по категориям'), ('finance-osv', 'exportOSVExcel()', 'ОСВ')]
+XLSX_SHIM = """() => { window.__xlsx = null; window.XLSX = {utils: {aoa_to_sheet: aoa => ({__aoa: aoa}), book_new: () => ({sheets: []}),
+    book_append_sheet: (wb, ws, name) => wb.sheets.push({name, rows: ws.__aoa, cols: (ws['!cols'] || []).map(c => c ? c.wch : null)})},
+    writeFile: (wb, filename) => { window.__xlsx = {filename, sheets: wb.sheets}; }}; }"""
+
+
+def export_report(name: str, target, legacy) -> bool:
+    """The same file name, sheets, widths and cells (sums within 1 tenge); where they part — positions only, never values."""
+    if not target or not legacy:
+        print(f'Excel {name}: выгрузка — цель {bool(target)}, legacy {bool(legacy)} — РАСХОЖДЕНИЕ'); return False
+    out = [] if target['filename'] == legacy['filename'] else ['имя файла']
+    if len(target['sheets']) != len(legacy['sheets']):
+        out.append(f"листов {len(target['sheets'])} / {len(legacy['sheets'])}")
+    for si, (t, l) in enumerate(zip(target['sheets'], legacy['sheets'])):
+        if t['name'] != l['name']:
+            out.append(f'лист {si + 1}: имя')
+        if [c for c in (t.get('cols') or [])] != [c for c in (l.get('cols') or [])]:
+            out.append(f'лист {si + 1}: ширины')
+        trim = lambda rows: [[None if v == '' else v for v in r] for r in rows]
+        tr, lr = trim(t['rows']), trim(l['rows'])
+        while tr and not tr[-1]: tr.pop()
+        while lr and not lr[-1]: lr.pop()
+        if len(tr) != len(lr):
+            out.append(f'лист {si + 1}: строк {len(tr)} / {len(lr)}')
+        num = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)
+        cells = [(r, c) for r in range(min(len(tr), len(lr))) for c in range(max(len(tr[r]), len(lr[r])))
+                 for a, b in [((tr[r] + [None] * 99)[c], (lr[r] + [None] * 99)[c])]
+                 if not (a == b or (num(a) and num(b) and abs(a - b) <= 1))]
+        if cells:
+            out.append(f'лист {si + 1}: ячеек {len(cells)}, первые ' + ', '.join(f'R{r + 1}C{c + 1}' for r, c in cells[:6]))
+    print(f'Excel {name}: ' + ('совпадает' if not out else 'РАСХОЖДЕНИЕ (' + '; '.join(out) + ')'))
+    if out:
+        (OUT / f'export-{name.replace(" ", "-")}.json').write_text(json.dumps({'target': target, 'legacy': legacy}, ensure_ascii=False))
+    return not out
+
+
 def shot_diff(name: str) -> float:
     a, b = Image.open(OUT / f'legacy-{name}.png').convert('RGB'), Image.open(OUT / f'target-{name}.png').convert('RGB')
     w, h = min(a.width, b.width), min(a.height, b.height)
@@ -146,8 +188,20 @@ def shot_diff(name: str) -> float:
     return round(100 * sum(1 for v in d.getdata() if v) / max(1, w * h) + size, 2)
 
 
+def target_export(page, sent: list, scope: str):
+    """Click the «Excel» of the card of a year select (or of a block) and return what the target sent to /export/xlsx."""
+    before = len(sent)
+    el = page.locator(f'#{scope}')
+    card = el if scope.startswith('finance-') else el.locator('xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " card ")][1]')
+    card.locator('button', has_text='Excel').first.click(); page.wait_for_timeout(1000)
+    return sent[-1] if len(sent) > before else None
+
+
 def target_shown(page) -> dict:
     """The target as the director sees it: the year as the period, «Маржинальность» of the year, the KPI of «Точка безубыточности»."""
+    sent: list = []
+    page.route('**/export/xlsx', lambda route: (sent.append(route.request.post_data_json), route.fulfill(status=200, body=b'')))
+    exports = {}
     page.goto(TARGET + '/login', wait_until='networkidle')
     page.fill('#login-username', 'director'); page.fill('#login-password', DEV_PASSWORD); page.click('#login-btn')
     page.wait_for_url(lambda u: '/login' not in u)
@@ -158,15 +212,18 @@ def target_shown(page) -> dict:
             page.fill('#fp-date-from', f'{YEAR}-01-01'); page.locator('#fp-date-from').dispatch_event('change')
             page.fill('#fp-date-to', f'{YEAR}-12-31'); page.locator('#fp-date-to').dispatch_event('change')
         page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
-    for sel in ('pl-monthly-year', 'pl-rev-channel-year', 'pl-rev-category-year', 'pl-exp-year', 'pl-matcost-year'):
+    for sel in ('pl-monthly-year', 'pl-rev-channel-year', 'pl-rev-category-year', 'pl-exp-year', 'pl-rev-tree-year', 'pl-matcost-year'):
         page.wait_for_selector(f'#{sel} option[value="{YEAR}"]', state='attached', timeout=120000)
         page.select_option(f'#{sel}', YEAR); page.wait_for_load_state('networkidle')
     page.wait_for_timeout(1500)
     shown = {id: page.evaluate(SHOWN_JS, id) for id in list(SHOWN)[:7]}
+    for scope, _, _ in EXPORTS[:6]:
+        exports[scope] = target_export(page, sent, scope)
     page.locator('#finance-tabs .tab').nth(3).click()
     page.wait_for_selector('#margin-category-table table', timeout=120000)
     page.select_option('#margin-category-year', YEAR); page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
     shown['margin-category-table'] = page.evaluate(SHOWN_JS, 'margin-category-table')
+    exports['margin-category-year'] = target_export(page, sent, 'margin-category-year')
     page.locator('#margin-category-table').screenshot(path=str(OUT / 'target-margin-category-table.png'))
     page.locator('#finance-tabs .tab').nth(4).click()
     page.wait_for_selector('#bep-kpi .bep-kpi-card', timeout=120000); page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
@@ -176,6 +233,8 @@ def target_shown(page) -> dict:
     page.locator('#finance-tabs .tab').nth(6).click()
     page.wait_for_selector('#osv-body table', timeout=120000); page.wait_for_load_state('networkidle'); page.wait_for_timeout(800)
     shown['osv-body'] = page.evaluate(SHOWN_JS, 'osv-body')
+    exports['finance-osv'] = target_export(page, sent, 'finance-osv')
+    shown['exports'] = exports
     return shown
 
 
@@ -213,6 +272,11 @@ def main() -> int:
         page.goto(BLOB.as_uri(), wait_until='load', timeout=60000); page.wait_for_timeout(1500)
         page.evaluate(LEGACY_JS, data['legacy'])
         legacy = page.evaluate(YEAR_JS, [YEAR])
+        legacy_exports = {}
+        for scope, call, _ in EXPORTS:
+            page.evaluate(XLSX_SHIM)
+            page.evaluate("(c) => { const a = window.alert; window.alert = () => {}; try { (0, eval)(c); } finally { window.alert = a; } }", call)
+            legacy_exports[scope] = page.evaluate('window.__xlsx')
         page.evaluate(LEGACY_SHOTS_JS, [YEAR]); page.wait_for_timeout(500)
         page.locator('#margin-category-table').screenshot(path=str(OUT / 'legacy-margin-category-table.png'))
         page.evaluate(LEGACY_BEP_JS); page.wait_for_timeout(500)
@@ -246,6 +310,8 @@ def main() -> int:
     ok &= jl == jt
     for key, name in SHOWN.items():
         ok &= text_report(name + ' на экране', legacy['shown'][key], shown[key])
+    for scope, _, name in EXPORTS:
+        ok &= export_report(name, shown['exports'].get(scope), legacy_exports.get(scope))
     for key, name in SHOTS.items():
         pct = shot_diff(key)
         print(f'{name}, картинка: отличается {pct} % пикселей — ' + ('совпадает' if pct <= 0.5 else 'РАСХОЖДЕНИЕ'))
