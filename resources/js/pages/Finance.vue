@@ -4,6 +4,7 @@
 // L22610). «Дебиторка» (ArTab), «Закупки» (PurchasesTab), «ДДС» (CfsTab), «P&L» (PlTab, ADR-0052), «ОСВ» (OsvTab, ADR-0053),
 // «Маржинальность» (MarginTab, ADR-0054) and «Точка безубыточности» (BepTab, ADR-0055) are migrated; P&L by activity comes
 // next (ERP-063).
+import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ArTab, { type ArRecord } from '@/components/finance/ArTab.vue';
 import BepTab, { type FixedCostsData } from '@/components/finance/BepTab.vue';
@@ -13,6 +14,7 @@ import OsvTab, { type OsvAccount, type OsvData } from '@/components/finance/OsvT
 import PlTab, { type PlData, type PlExpenses, type PlMonthly, type PlRevenue, type PlTree, type PlCost } from '@/components/finance/PlTab.vue';
 import PurchasesTab, { type PurchasesData } from '@/components/finance/PurchasesTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
+import { downloadXlsx } from '@/lib/xlsx';
 
 export interface FinanceOrder {
     num: string;
@@ -54,7 +56,6 @@ const tab = ref<Tab>('pl');
 const LATER: Partial<Record<Tab, string>> = {
     activity: 'P&L по видам деятельности в старой системе считался по примерным данным; как его считать — вопрос № 81 (ERP-063, решения D-06 и D-12).',
 };
-const excelLater = () => window.alert('Выгрузка P&L в Excel появится вместе с отчётом P&L (ERP-060, решения D-11 и D-12).');
 
 // ── Period (legacy setFinancePeriod; dates are calendar dates, no time zone shift) ──
 const MN = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
@@ -113,7 +114,8 @@ const btnStyle = (m: Mode) => (period.value.mode === m ? { background: 'var(--ac
 const plPeriod = ref<'all' | 'done' | 'progress'>('all');
 const customerName = (o: FinanceOrder) => (o.channel !== 'office' && props.channels[o.channel]) || o.customer || '—';
 const dayMs = 86400000;
-const arRecords = computed<ArRecord[]>(() => {
+// Legacy plFilteredOrders: the orders of the header selection and of the period.
+const plOrders = computed(() => {
     let list = props.orders;
     if (plPeriod.value === 'done') list = list.filter((o) => o.status === 'done');
     // «В работе + завершённые»: legacy took every order but the queue, cancelled ones too.
@@ -123,8 +125,11 @@ const arRecords = computed<ArRecord[]>(() => {
         const d = o.date || o.created;
         return !d || ((!from || d >= from) && (!to || d <= to));
     });
+    return list;
+});
+const arRecords = computed<ArRecord[]>(() => {
     const today = Date.parse(props.today);
-    return list
+    return plOrders.value
         .map((o) => {
             const total = Number(o.total);
             const paid = total * (Math.min(o.payment || 0, 100) / 100);
@@ -134,6 +139,52 @@ const arRecords = computed<ArRecord[]>(() => {
         })
         .filter((r) => r.debt > 1);
 });
+
+// ── «📥 Excel» of the header (legacy exportPLtoExcel, L27739): the statement of the period of the page and the receivables. Legacy
+// never made the file — it read the debtors from a field its P&L did not return — and listed its sample fixed costs; here the
+// lines are those of the statement and the debtors those of «Дебиторка» (ADR-0002, item 128). ──
+function writePl(p: PlData): void {
+    const r2 = (n: number) => Math.round(n * 100) / 100;
+    const pct = (n: number) => (p.revenue > 0 ? Math.round((n / p.revenue) * 100) : 0) + '%';
+    const paid = plOrders.value.reduce((s, o) => s + Number(o.total) * (o.payment / 100), 0);
+    const ar = arRecords.value.reduce((s, r) => s + r.debt, 0);
+    const rows: (string | number)[][] = [
+        ['ОТЧЁТ О ПРИБЫЛЯХ И УБЫТКАХ — PromTech'],
+        [periodLabel.value],
+        ['ВЫРУЧКА'],
+        ['Выручка от реализации', r2(p.revenue)],
+        ['  Оплачено клиентами', r2(paid)],
+        ['  Дебиторка (к получению)', r2(ar)],
+        [],
+        ['ПЕРЕМЕННЫЕ ЗАТРАТЫ'],
+        ['Прямые материалы', r2(-p.materialCost)],
+        ['Зарплата сдельная', r2(-p.wageCost)],
+        ['ОПР (Производственные расходы)', r2(-p.oprCost)],
+        ['Итого переменных затрат', r2(-(p.materialCost + p.wageCost + p.oprCost))],
+        [],
+        ['МАРЖИНАЛЬНАЯ ПРИБЫЛЬ', r2(p.grossMargin), pct(p.grossMargin)],
+        [],
+        ['ПОСТОЯННЫЕ ЗАТРАТЫ'],
+        ['Оклады АУП (с налогами)', r2(-p.aupSalary)],
+        ['Налоги на сдельщиков (СО+СН)', r2(-p.prodTaxes)],
+        ['Коммерческие расходы', r2(-p.commercialCost)],
+        ['Аренда, ком. услуги, прочее', r2(-p.otherFixed)],
+        ['Итого постоянных затрат', r2(-p.fixedTotal)],
+        [],
+        ['ОПЕРАЦИОННАЯ ПРИБЫЛЬ (EBIT)', r2(p.ebit), pct(p.ebit)],
+        [],
+        ['ДЕБИТОРСКАЯ ЗАДОЛЖЕННОСТЬ'],
+        ['Клиент', 'Заказ', 'Оплачено %', 'Долг (₸)'],
+        ...arRecords.value.map((r) => [r.customer, r.order.num, r.order.payment + '%', r2(r.debt)]),
+        ['Итого дебиторка', '', '', r2(ar)],
+    ];
+    void downloadXlsx('finance', `PromTech_PL_${props.today}.xlsx`, [{ name: 'P&L', rows, cols: [40, 18, 14] }]);
+}
+function exportPLtoExcel(): void {
+    const { from, to } = period.value;
+    if (props.pl && props.pl.from === from && props.pl.to === to) return writePl(props.pl);
+    router.reload({ only: ['pl'], data: { pl_from: from ?? '', pl_to: to ?? '' }, onSuccess: (page) => writePl(page.props.pl as PlData) });
+}
 </script>
 
 <template>
@@ -150,7 +201,7 @@ const arRecords = computed<ArRecord[]>(() => {
                         <option value="done">Только завершённые</option>
                         <option value="progress">В работе + завершённые</option>
                     </select>
-                    <button class="btn btn-ghost btn-sm" @click="excelLater">📥 Excel</button>
+                    <button class="btn btn-ghost btn-sm" @click="exportPLtoExcel">📥 Excel</button>
                 </div>
             </div>
 

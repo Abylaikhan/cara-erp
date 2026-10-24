@@ -1293,7 +1293,7 @@ control,page-finance|select|pl-period,select,page-finance,5455,M11 Финанс�
 control,page-finance|L5456,option,page-finance,5456,M11 Финансы,IMPLEMENTED,label,Все заказы
 control,page-finance|L5457,option,page-finance,5457,M11 Финансы,IMPLEMENTED,label,Только завершённые
 control,page-finance|L5458,option,page-finance,5458,M11 Финансы,IMPLEMENTED,label,В работе + завершённые
-control,page-finance|L5460,button,page-finance,5460,M11 Финансы,NOT_STARTED,"present, its action comes later — exportPLtoExcel: ERP-067 (Excel)",📥 Excel
+control,page-finance|L5460,button,page-finance,5460,M11 Финансы,IMPLEMENTED,label,📥 Excel
 control,page-finance|select|fp-btn-month,select,page-finance,5468,M11 Финансы,IMPLEMENTED,id,
 control,page-finance|button|fp-btn-quarter,button,page-finance,5470,M11 Финансы,IMPLEMENTED,id,Квартал
 control,page-finance|button|fp-btn-year,button,page-finance,5471,M11 Финансы,IMPLEMENTED,id,Год
@@ -3036,7 +3036,7 @@ function,plRow#1,,,27607,—,IMPLEMENTED,requirement M11.PL,
 function,renderPLStatement#1,,,27624,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,renderPLAR#1,,,27687,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,renderPLFixedSummary#1,,,27713,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,exportPLtoExcel#1,,,27739,M11 Финансы,NOT_STARTED,ERP-067 (Excel),
+function,exportPLtoExcel#1,,,27739,M11 Финансы,IMPLEMENTED,requirement M11.PL,
 function,openOrderMarginModal#1,,,27776,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
 function,getWhIdByCategory#1,,,27877,M03 Склад,IMPLEMENTED,requirement M03.ADD,
 function,getStockByWh#1,,,27881,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,

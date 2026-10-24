@@ -3,8 +3,9 @@
 
 The repository is public, the dev database holds the copy of the real legacy data (schema `legacy`). Every distinct value
 of that copy (5…300 characters) is looked for in the files changed against HEAD (and the untracked ones). Values that are
-UI texts of the accepted legacy reference, bare identifiers and short numbers are skipped. A value counts as new when the
-file had no such value at HEAD: the exit code is 1 if there is any.
+UI texts of the accepted legacy reference, bare identifiers and short numbers are skipped. Hexadecimal runs of 32 characters
+or more (SHA hashes of commits, artifacts and audit runs, new on every run) are blanked before the search: digits inside a hash
+are not data. A value counts as new when the file had no such value at HEAD: the exit code is 1 if there is any.
 
 Nothing of the data is printed: a hit shows the table and column it comes from, its first two characters, its length
 and its SHA-256. A hit that is reviewed and harmless (a word of the code or a probe that happens to be a value of the data
@@ -22,6 +23,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+HASH = re.compile(r'\b[0-9a-f]{32,}\b')
 QUERY = ("select distinct r.table_name, e.key, e.value from legacy.rows r, jsonb_each_text(r.data) e "
          "where e.value is not null and length(e.value) between 5 and 300")
 
@@ -80,9 +82,9 @@ def main() -> int:
         path = ROOT / rel
         if not path.is_file() or path.stat().st_size > 2_000_000:
             continue
-        text = path.read_text(encoding='utf-8', errors='ignore')
+        text = HASH.sub(' ', path.read_text(encoding='utf-8', errors='ignore'))
         try:
-            before = git('show', f'HEAD:{rel}')
+            before = HASH.sub(' ', git('show', f'HEAD:{rel}'))
         except subprocess.CalledProcessError:
             before = ''
         for value, source in values.items():

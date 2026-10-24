@@ -131,7 +131,6 @@ function,ddOSVAccount,NOT_STARTED,ERP-061 (D-11),ОСВ
 function,fcToMonthly,DECIDED,ADR-0002 п. 126,Только для примерного списка затрат legacy — не используется
 function,exportARtoExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
 function,exportCFSExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
-function,exportPLtoExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
 function,exportCashCp,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
 function,exportOrderReport,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
 function,exportSalesJournalExcel,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
