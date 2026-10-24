@@ -4,9 +4,9 @@
 // tenge; the opening balance counts the opening balances of the accounts; «Всё время» is all the operations (legacy fell back
 // to 2026). Transfers between own accounts are not movement of money.
 import { router } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 import { downloadXlsx } from '@/lib/xlsx';
-import DrilldownModal from '@/components/DrilldownModal.vue';
+import { DRILLDOWN } from '@/lib/drilldown';
 
 export interface CfsTx {
     id: number;
@@ -107,7 +107,7 @@ const cfs = computed(() => {
 });
 const fmt = (n: number) => '₸' + Math.round(n).toLocaleString('ru-RU');
 
-const dd = ref<InstanceType<typeof DrilldownModal> | null>(null);
+const dd = inject(DRILLDOWN, ref(null)); // the window of the page (Finance.vue)
 function ddCFSSection(inCats: string[], outCats: string[], label: string): void {
     const txs = (props.transactions ?? []).filter((t) => inPeriod(t) && (inCats.includes(t.category) || outCats.includes(t.category)));
     dd.value?.openDrilldown(
@@ -247,5 +247,4 @@ const td = 'padding:7px 16px;text-align:right;font-family:monospace';
             </div>
         </template>
     </div>
-    <DrilldownModal ref="dd" />
 </template>

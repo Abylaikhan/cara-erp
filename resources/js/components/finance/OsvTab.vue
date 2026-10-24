@@ -3,8 +3,8 @@
 // management trial balance of the period of the page, counted by the server from the same entries as legacy (ADR-0053); the
 // balance check, the table by account, a click opens the entries of the account. «Всё время» — all the operations (legacy fell
 // back to 2026, as «ДДС» did).
-import { computed, ref, watch } from 'vue';
-import DrilldownModal from '@/components/DrilldownModal.vue';
+import { computed, inject, ref, watch } from 'vue';
+import { DRILLDOWN } from '@/lib/drilldown';
 import { downloadXlsx } from '@/lib/xlsx';
 import { reloadLatest } from '@/lib/reload';
 
@@ -50,7 +50,7 @@ const chk = (a: number, b: number) => (Math.abs(a - b) < 1 ? '' : 'color:var(--r
 const hs = 'padding:8px 12px;text-align:right;font-size:11px;color:var(--text3);border-bottom:2px solid var(--border)';
 
 // ── Детализация счёта (legacy ddOSVAccount): the entries of the period with the account on either side ──
-const dd = ref<InstanceType<typeof DrilldownModal> | null>(null);
+const dd = inject(DRILLDOWN, ref(null)); // the window of the page (Finance.vue)
 function ddOSVAccount(r: OsvRow): void {
     reloadLatest('osvAccount', { osv_account: r.code, osv_from: props.from ?? '', osv_to: props.to ?? '' }, {
         onSuccess: () => {
@@ -159,5 +159,4 @@ const td = 'padding:7px 10px;text-align:right;font-family:monospace';
             </div>
         </template>
     </div>
-    <DrilldownModal ref="dd" />
 </template>

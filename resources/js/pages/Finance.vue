@@ -4,7 +4,8 @@
 // L22610). «Дебиторка» (ArTab), «Закупки» (PurchasesTab), «ДДС» (CfsTab), «P&L» (PlTab, ADR-0052), «ОСВ» (OsvTab, ADR-0053),
 // «Маржинальность» (MarginTab, ADR-0054) and «Точка безубыточности» (BepTab, ADR-0055) are migrated; P&L by activity comes
 // next (ERP-063).
-import { computed, ref } from 'vue';
+import { computed, provide, ref } from 'vue';
+import DrilldownModal from '@/components/DrilldownModal.vue';
 import ArTab, { type ArRecord } from '@/components/finance/ArTab.vue';
 import BepTab, { type FixedCostsData } from '@/components/finance/BepTab.vue';
 import CfsTab, { type CfsTx } from '@/components/finance/CfsTab.vue';
@@ -13,6 +14,7 @@ import OsvTab, { type OsvAccount, type OsvData } from '@/components/finance/OsvT
 import PlTab, { type PlData, type PlExpenses, type PlMonthly, type PlRevenue, type PlTree, type PlCost } from '@/components/finance/PlTab.vue';
 import PurchasesTab, { type PurchasesData } from '@/components/finance/PurchasesTab.vue';
 import ErpLayout from '@/layouts/ErpLayout.vue';
+import { DRILLDOWN } from '@/lib/drilldown';
 import { downloadXlsx } from '@/lib/xlsx';
 import { reloadLatest } from '@/lib/reload';
 
@@ -50,6 +52,10 @@ const props = defineProps<{
     catMargin?: CatMargin;
     fixedCosts?: FixedCostsData;
 }>();
+
+// One window «Детализация» for «ДДС» and «ОСВ», as legacy has one #drilldownModal.
+const drilldown = ref<InstanceType<typeof DrilldownModal> | null>(null);
+provide(DRILLDOWN, drilldown);
 
 type Tab = 'pl' | 'ar' | 'purchases' | 'margin' | 'bep' | 'cfs' | 'osv' | 'activity';
 const tab = ref<Tab>('pl');
@@ -287,5 +293,6 @@ function exportPLtoExcel(): void {
                 </div>
             </div>
         </div>
+        <DrilldownModal ref="drilldown" />
     </ErpLayout>
 </template>
