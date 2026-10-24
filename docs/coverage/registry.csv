@@ -48,7 +48,7 @@ modal,addMaterialModal,,addMaterialModal,4652,M03 Склад,IMPLEMENTED,resourc
 modal,marginDetailModal,,marginDetailModal,4735,M11 Финансы,NOT_STARTED,ERP-060 (D-12),
 modal,contractPreviewModal,,contractPreviewModal,4746,M09 Продажи,NOT_STARTED,ERP-066 (D-07),
 modal,importResultModal,,importResultModal,4764,M02 Производство,NOT_STARTED,ERP-041/ERP-067,
-modal,orderReportModal,,orderReportModal,4778,M09 Продажи,NOT_STARTED,ERP-067,
+modal,orderReportModal,,orderReportModal,4778,M09 Продажи,PENDING_DECISION,D-15,
 modal,taskModal,,taskModal,4846,M10 CRM,IMPLEMENTED,resources/js/components/ErpModal.vue,
 modal,crmLeadModal,,crmLeadModal,4898,M10 CRM,IMPLEMENTED,resources/js/components/ErpModal.vue,
 modal,crmConvertModal,,crmConvertModal,4971,M10 CRM,IMPLEMENTED,resources/js/components/ErpModal.vue,
@@ -764,7 +764,7 @@ control,page-sales|L3989,option,page-sales,3989,M09 Продажи,IMPLEMENTED,l
 control,page-sales|L3990,option,page-sales,3990,M09 Продажи,IMPLEMENTED,label,В очереди
 control,page-sales|L3991,option,page-sales,3991,M09 Продажи,IMPLEMENTED,label,В работе
 control,page-sales|L3992,option,page-sales,3992,M09 Продажи,IMPLEMENTED,label,Завершённые
-control,page-sales|L3997,button,page-sales,3997,M09 Продажи,NOT_STARTED,"present, its action comes later — exportOrderReport: ERP-067 (Excel)",📥 Выгрузить в Excel
+control,page-sales|L3997,button,page-sales,3997,M09 Продажи,IMPLEMENTED,label,📥 Выгрузить в Excel
 control,page-sales|L4006,th,page-sales,4006,M09 Продажи,IMPLEMENTED,label,№ заказа
 control,page-sales|L4007,th,page-sales,4007,M09 Продажи,IMPLEMENTED,label,Дата заказа
 control,page-sales|L4008,th,page-sales,4008,M09 Продажи,IMPLEMENTED,label,Заказчик
@@ -1101,24 +1101,24 @@ control,contractPreviewModal|L4754,button,contractPreviewModal,4754,M09 Прод
 control,contractPreviewModal|L4755,button,contractPreviewModal,4755,M09 Продажи,NOT_STARTED,ERP-066 (D-07),✕ Закрыть
 control,importResultModal|L4768,button,importResultModal,4768,M02 Производство,NOT_STARTED,ERP-041/ERP-067,✕
 control,importResultModal|L4772,button,importResultModal,4772,M02 Производство,NOT_STARTED,ERP-041/ERP-067,Закрыть
-control,orderReportModal|L4782,button,orderReportModal,4782,M09 Продажи,NOT_STARTED,ERP-067,✕
-control,orderReportModal|L4794,input,orderReportModal,4794,M09 Продажи,NOT_STARTED,ERP-067,
-control,orderReportModal|L4797,input,orderReportModal,4797,M09 Продажи,NOT_STARTED,ERP-067,
-control,orderReportModal|L4800,input,orderReportModal,4800,M09 Продажи,NOT_STARTED,ERP-067,
-control,orderReportModal|input|rep-date-from,input,orderReportModal,4807,M09 Продажи,NOT_STARTED,ERP-067,
-control,orderReportModal|input|rep-date-to,input,orderReportModal,4808,M09 Продажи,NOT_STARTED,ERP-067,
-control,orderReportModal|select|rep-month-select,select,orderReportModal,4814,M09 Продажи,NOT_STARTED,ERP-067,Июнь 2026 Май 2026 Апрель 2026 Март 2026
-control,orderReportModal|L4815,option,orderReportModal,4815,M09 Продажи,NOT_STARTED,ERP-067,Июнь 2026
-control,orderReportModal|L4816,option,orderReportModal,4816,M09 Продажи,NOT_STARTED,ERP-067,Май 2026
-control,orderReportModal|L4817,option,orderReportModal,4817,M09 Продажи,NOT_STARTED,ERP-067,Апрель 2026
-control,orderReportModal|L4818,option,orderReportModal,4818,M09 Продажи,NOT_STARTED,ERP-067,Март 2026
-control,orderReportModal|select|rep-status-filter,select,orderReportModal,4825,M09 Продажи,NOT_STARTED,ERP-067,Все статусы В очереди В работе Завершённые
-control,orderReportModal|L4826,option,orderReportModal,4826,M09 Продажи,NOT_STARTED,ERP-067,Все статусы
-control,orderReportModal|L4827,option,orderReportModal,4827,M09 Продажи,NOT_STARTED,ERP-067,В очереди
-control,orderReportModal|L4828,option,orderReportModal,4828,M09 Продажи,NOT_STARTED,ERP-067,В работе
-control,orderReportModal|L4829,option,orderReportModal,4829,M09 Продажи,NOT_STARTED,ERP-067,Завершённые
-control,orderReportModal|L4839,button,orderReportModal,4839,M09 Продажи,NOT_STARTED,ERP-067,Отмена
-control,orderReportModal|L4840,button,orderReportModal,4840,M09 Продажи,NOT_STARTED,ERP-067,📥 Выгрузить в Excel
+control,orderReportModal|L4782,button,orderReportModal,4782,M09 Продажи,PENDING_DECISION,D-15,✕
+control,orderReportModal|L4794,input,orderReportModal,4794,M09 Продажи,PENDING_DECISION,D-15,
+control,orderReportModal|L4797,input,orderReportModal,4797,M09 Продажи,PENDING_DECISION,D-15,
+control,orderReportModal|L4800,input,orderReportModal,4800,M09 Продажи,PENDING_DECISION,D-15,
+control,orderReportModal|input|rep-date-from,input,orderReportModal,4807,M09 Продажи,PENDING_DECISION,D-15,
+control,orderReportModal|input|rep-date-to,input,orderReportModal,4808,M09 Продажи,PENDING_DECISION,D-15,
+control,orderReportModal|select|rep-month-select,select,orderReportModal,4814,M09 Продажи,PENDING_DECISION,D-15,Июнь 2026 Май 2026 Апрель 2026 Март 2026
+control,orderReportModal|L4815,option,orderReportModal,4815,M09 Продажи,PENDING_DECISION,D-15,Июнь 2026
+control,orderReportModal|L4816,option,orderReportModal,4816,M09 Продажи,PENDING_DECISION,D-15,Май 2026
+control,orderReportModal|L4817,option,orderReportModal,4817,M09 Продажи,PENDING_DECISION,D-15,Апрель 2026
+control,orderReportModal|L4818,option,orderReportModal,4818,M09 Продажи,PENDING_DECISION,D-15,Март 2026
+control,orderReportModal|select|rep-status-filter,select,orderReportModal,4825,M09 Продажи,PENDING_DECISION,D-15,Все статусы В очереди В работе Завершённые
+control,orderReportModal|L4826,option,orderReportModal,4826,M09 Продажи,PENDING_DECISION,D-15,Все статусы
+control,orderReportModal|L4827,option,orderReportModal,4827,M09 Продажи,PENDING_DECISION,D-15,В очереди
+control,orderReportModal|L4828,option,orderReportModal,4828,M09 Продажи,PENDING_DECISION,D-15,В работе
+control,orderReportModal|L4829,option,orderReportModal,4829,M09 Продажи,PENDING_DECISION,D-15,Завершённые
+control,orderReportModal|L4839,button,orderReportModal,4839,M09 Продажи,PENDING_DECISION,D-15,Отмена
+control,orderReportModal|L4840,button,orderReportModal,4840,M09 Продажи,PENDING_DECISION,D-15,📥 Выгрузить в Excel
 control,taskModal|L4850,button,taskModal,4850,M10 CRM,IMPLEMENTED,label,✕
 control,taskModal|textarea|task-title,textarea,taskModal,4856,M10 CRM,IMPLEMENTED,id,
 control,taskModal|input|task-date,input,taskModal,4859,M10 CRM,IMPLEMENTED,id,
@@ -3464,7 +3464,7 @@ function,importDailyFact#1,,,36525,M02 Производство,NOT_STARTED,requ
 function,showImportResult#1,,,36632,M02 Производство,NOT_STARTED,by its controls: ERP-041/ERP-067,
 function,showImportError#1,,,36669,M02 Производство,NOT_STARTED,by its controls: ERP-041/ERP-067,
 function,parseRuDate#1,,,36681,—,OBSOLETE,ADR-0029: dead code — called from nowhere in legacy,
-function,exportOrderReport#1,,,36689,M09 Продажи,NOT_STARTED,ERP-067 (Excel),
+function,exportOrderReport#1,,,36689,M09 Продажи,IMPLEMENTED,requirement M09.REPORT,
 function,_buildInvoiceData#1,,,36782,M09 Продажи,NOT_STARTED,by its controls: ERP-030 (D-02/D-12); ERP-066 (D-07),
 function,generateInvoice#1,,,36818,M09 Продажи,NOT_STARTED,by its controls: ERP-030 (D-02/D-12),
 function,downloadInvoiceExcel#1,,,37045,M09 Продажи,NOT_STARTED,by its controls: ERP-066 (D-07),

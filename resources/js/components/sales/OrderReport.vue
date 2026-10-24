@@ -7,6 +7,7 @@
 import { router } from '@inertiajs/vue3';
 import { computed, reactive, watch } from 'vue';
 import { localISODate, type OrderRow } from '@/lib/sales';
+import { downloadXlsx } from '@/lib/xlsx';
 
 interface ReportLine {
     order_id: number;
@@ -140,7 +141,34 @@ const rows = computed(() =>
     }),
 );
 
-const exportLater = () => window.alert('Выгрузка отчёта в Excel появится вместе с остальными выгрузками (ERP-067): для .xlsx нужна библиотека, новые зависимости ставятся отдельной задачей.');
+// «📥 Выгрузить в Excel» (legacy exportOrderReport, L36689; ADR-0044): the orders of the filters and the sort of the page, a line
+// per order line, the order's number, date, customer, comment and delivery on its first line, an empty line after an order of
+// several lines. Legacy titled the file with the period of a window nobody opens — always «Все заказы»; here it is the period
+// of the page (ADR-0002, item 129). The unit is «шт»: the lines of legacy have none.
+function exportOrderReport(): void {
+    if (!orders.value.length) return void window.alert('Нет заказов за выбранный период.');
+    const header = ['№ заказа', 'Дата заказа', 'Заказчик', '№ строки', 'Номенклатура', 'Кол-во', 'Ед.', ...ATTRS, 'Прочее', 'Комментарий', 'Дата доставки'];
+    const byOrder = new Map<string, typeof rows.value>();
+    rows.value.forEach((r) => {
+        const id = r.key.split('-')[0];
+        byOrder.set(id, [...(byOrder.get(id) ?? []), r]);
+    });
+    const lines: (string | number)[][] = [];
+    orders.value.forEach((o) => {
+        const own = byOrder.get(String(o.id)) ?? [];
+        // the file, unlike the page, falls back to the due date when there is no delivery date (legacy deliveryDate || date)
+        own.forEach((r) => lines.push([r.orderNum, r.orderDate, r.customer, r.lineNo, r.name, r.qty, 'шт', r.osnova, r.color, r.patina, r.blesk, r.tkan, r.prochee, r.comment, r.first ? r.delivery || o.date || '' : '']));
+        if (own.length > 1) lines.push(Array(header.length).fill(''));
+    });
+    const label = f.period === 'range' ? `${f.from} — ${f.to}` : f.period === 'month' ? `${MN[+month.value.split('-')[1] - 1]} ${month.value.split('-')[0]}` : 'Все заказы';
+    void downloadXlsx('sales', `PromTech_Zakazy_${label.replace(/[^а-яёА-ЯЁa-zA-Z0-9\-_]/g, '_')}.xlsx`, [
+        {
+            name: 'Заказы',
+            rows: [[`ОТЧЁТ ПО ЗАКАЗАМ — PromTech · ${label} · Заказов: ${orders.value.length}`], [], header, ...lines],
+            cols: [12, 12, 26, 8, 28, 8, 6, 14, 16, 12, 12, 16, 20, 28, 14],
+        },
+    ]);
+}
 </script>
 
 <template>
@@ -175,7 +203,7 @@ const exportLater = () => window.alert('Выгрузка отчёта в Excel �
         </div>
         <div style="margin-left: auto; display: flex; gap: 8px; align-items: flex-end">
             <div id="rep-count" style="font-size: 12px; color: var(--text3); padding-bottom: 6px">{{ props.report ? `${orders.length} заказов · ${rows.length} позиций` : '' }}</div>
-            <button class="btn btn-primary btn-sm" @click="exportLater">📥 Выгрузить в Excel</button>
+            <button class="btn btn-primary btn-sm" @click="exportOrderReport">📥 Выгрузить в Excel</button>
         </div>
     </div>
 

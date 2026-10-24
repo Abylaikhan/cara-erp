@@ -15,7 +15,7 @@ group,orderMarginModal,PENDING_DECISION,D-15,«Маржинальность за
 group,marginDetailModal,NOT_STARTED,ERP-060 (D-12),Детализация себестоимости
 group,contractPreviewModal,NOT_STARTED,ERP-066 (D-07),Печать договора
 group,importResultModal,NOT_STARTED,ERP-041/ERP-067,Результат загрузки факта выполнения
-group,orderReportModal,NOT_STARTED,ERP-067,Отчёт по заказам — выгрузка в Excel
+group,orderReportModal,PENDING_DECISION,D-15,«Отчёт по заказам — выгрузка в Excel»: окно ничем не открывается (только закрывается); выгрузка — кнопкой страницы «Отчёт»
 group,newCustOrderModal,NOT_STARTED,ERP-029 (D-02/D-12),Новый заказ покупателя
 group,attrCatalogModal,NOT_STARTED,ERP-027 (D-12),Справочник характеристик — вместе с заказами
 group,techCardModal,NOT_STARTED,ERP-028 (D-12),Технологическая карта
@@ -120,7 +120,6 @@ function,calcOrderMargin,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинал
 function,openMarginDetail,NOT_STARTED,ERP-060 (D-11/D-12),P&L и маржинальность по техкартам
 function,txPayoutsHtml,NOT_STARTED,ERP-057 (D-06),Зарплатная ведомость и выплаты по операции
 function,fcToMonthly,DECIDED,ADR-0002 п. 126,Только для примерного списка затрат legacy — не используется
-function,exportOrderReport,NOT_STARTED,ERP-067 (Excel),Выгрузки в Excel
 function,openPaymentModal,NOT_STARTED,ERP-032 (D-03),Оплата заказа
 function,renderPaymentHistory,NOT_STARTED,ERP-032 (D-03),Оплата заказа
 function,guessSalonExpenseCategory,NOT_STARTED,ERP-051 (D-03),Перенос строк рабочего листа салона в кассу

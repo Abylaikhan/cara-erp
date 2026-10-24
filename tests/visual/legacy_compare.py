@@ -464,6 +464,7 @@ with sync_playwright() as p:
         }""")
         page.locator('#sales-tabs .tab').nth(7).click(); page.wait_for_timeout(2000)
         target_shot(page, str(OUT / f'target-sales-report-{theme}.png'))
+        orep_export = target_export(page, exports, text='Выгрузить в Excel', scope='#orders-report')
         run_filters(page, 'target', theme, 'orders-report')
         report = page.evaluate("""async () => {
             const initial = JSON.parse(document.querySelector('script[data-page]')?.textContent || document.getElementById('app').dataset.page);
@@ -1128,6 +1129,8 @@ with sync_playwright() as p:
         }""", [sales, report])
         page.wait_for_timeout(1500)
         unscroll(page); page.screenshot(path=str(OUT / f'legacy-sales-report-{theme}.png'))
+        # the title row and the file name carry the period: legacy took it from a window nobody opens (ADR-0002, item 129)
+        export_note('order report', theme, orep_export, legacy_export(page, 'exportOrderReport()'), skip_rows=(0,), skip_name=True)
         run_filters(page, 'legacy', theme, 'orders-report')
         # «Рабочий лист реализации»: the same lines (with the product numbers the target found), the same period; legacy asks
         # its server for a period, here it filters the lines it holds.
